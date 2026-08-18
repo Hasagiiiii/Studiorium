@@ -42,9 +42,14 @@ async function register(req, res) {
   fail(existingError);
   if (existing) throw Object.assign(new Error('Este e-mail já está cadastrado.'), { statusCode: 409 });
 
+  if (config().adminEmail && email === config().adminEmail) {
+    await logSecurityEvent(req, 'admin.registration_blocked', { email });
+    throw Object.assign(new Error('A conta administradora principal já é provisionada pelo sistema.'), { statusCode: 403 });
+  }
+
   const userId = id('usr');
   const isMinor = year - birthYear < 18;
-  const role = config().adminEmail && email === config().adminEmail ? 'admin' : 'user';
+  const role = 'user';
   const username = await uniqueUsername(displayName);
   const { error: userError } = await db().from('users').insert({
     id: userId, email, password_hash: hashPassword(password), role,
@@ -82,11 +87,6 @@ async function login(req, res) {
   if ((user.status || 'active') === 'suspended') {
     await logSecurityEvent(req, 'auth.login_suspended', { userId: user.id, email });
     throw Object.assign(new Error('Esta conta está suspensa. Entre em contato com a administração.'), { statusCode: 403 });
-  }
-  if (config().adminEmail && user.email === config().adminEmail && user.role !== 'admin') {
-    await db().from('users').update({ role: 'admin' }).eq('id', user.id);
-    user.role = 'admin';
-    await logSecurityEvent(req, 'admin.role_restored', { userId: user.id, email });
   }
   await clearAuthFailures(req, 'login', email);
   await createSession(user.id, res);
