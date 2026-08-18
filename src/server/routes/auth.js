@@ -2,7 +2,7 @@ const { db, fail } = require('../db');
 const { config } = require('../config');
 const { readJson, setSessionCookie, parseCookies } = require('../http');
 const { id, now, slugify, hashPassword, verifyPassword, token, tokenHash } = require('../security');
-const { publicUser } = require('../auth');
+const { publicUser, requireUser } = require('../auth');
 const { assertAuthAllowed, recordAuthFailure, clearAuthFailures, logSecurityEvent } = require('../security-events');
 
 async function uniqueUsername(displayName) {
@@ -42,9 +42,14 @@ async function register(req, res) {
   fail(existingError);
   if (existing) throw Object.assign(new Error('Este e-mail já está cadastrado.'), { statusCode: 409 });
 
+  if (config().adminEmail && email === config().adminEmail) {
+    await logSecurityEvent(req, 'admin.registration_blocked', { email });
+    throw Object.assign(new Error('A conta administradora principal já é provisionada pelo sistema.'), { statusCode: 403 });
+  }
+
   const userId = id('usr');
   const isMinor = year - birthYear < 18;
-  const role = config().adminEmail && email === config().adminEmail ? 'admin' : 'user';
+  const role = 'user';
   const username = await uniqueUsername(displayName);
   const { error: userError } = await db().from('users').insert({
     id: userId, email, password_hash: hashPassword(password), role,
@@ -83,15 +88,35 @@ async function login(req, res) {
     await logSecurityEvent(req, 'auth.login_suspended', { userId: user.id, email });
     throw Object.assign(new Error('Esta conta está suspensa. Entre em contato com a administração.'), { statusCode: 403 });
   }
-  if (config().adminEmail && user.email === config().adminEmail && user.role !== 'admin') {
-    await db().from('users').update({ role: 'admin' }).eq('id', user.id);
-    user.role = 'admin';
-    await logSecurityEvent(req, 'admin.role_restored', { userId: user.id, email });
-  }
   await clearAuthFailures(req, 'login', email);
   await createSession(user.id, res);
   await logSecurityEvent(req, 'auth.login_success', { userId: user.id, email, details: { role: user.role } });
   return { status: 200, body: { user: await publicUser(user) } };
+}
+
+async function changePassword(req, res) {
+  const user = await requireUser(req);
+  const body = await readJson(req);
+  const currentPassword = String(body.currentPassword || '');
+  const newPassword = String(body.newPassword || '');
+  if (newPassword.length < 12 || newPassword.length > 128) {
+    throw Object.assign(new Error('A nova senha precisa ter entre 12 e 128 caracteres.'), { statusCode: 400 });
+  }
+  const { data: account, error } = await db().from('users').select('password_hash,email').eq('id', user.id).maybeSingle();
+  fail(error);
+  if (!account || !verifyPassword(currentPassword, account.password_hash)) {
+    await logSecurityEvent(req, 'auth.password_change_failed', { userId: user.id, email: user.email });
+    throw Object.assign(new Error('A senha atual está incorreta.'), { statusCode: 401 });
+  }
+  if (verifyPassword(newPassword, account.password_hash)) {
+    throw Object.assign(new Error('Escolha uma senha diferente da atual.'), { statusCode: 400 });
+  }
+  const { error: updateError } = await db().from('users').update({ password_hash: hashPassword(newPassword) }).eq('id', user.id);
+  fail(updateError);
+  await db().from('sessions').delete().eq('user_id', user.id);
+  await createSession(user.id, res);
+  await logSecurityEvent(req, 'auth.password_changed', { userId: user.id, email: user.email });
+  return { status: 200, body: { ok: true } };
 }
 
 async function logout(req, res) {
@@ -101,4 +126,4 @@ async function logout(req, res) {
   return { status: 200, body: { ok: true } };
 }
 
-module.exports = { register, login, logout };
+module.exports = { register, login, changePassword, logout };
