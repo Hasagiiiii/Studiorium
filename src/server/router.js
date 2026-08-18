@@ -9,6 +9,8 @@ const reportRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
 const techRoutes = require('./routes/tech');
 const codeRoutes = require('./routes/code-projects');
+const systemRoutes = require('./routes/system');
+const securityRoutes = require('./routes/security');
 
 const { apiPath } = require('./route-utils');
 
@@ -18,7 +20,10 @@ async function handle(req, res) {
   if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) assertSameOrigin(req);
   if (method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
 
-  if (method === 'GET' && pathname === '/health') return send(res, 200, { ok: true, name: 'Studiorium', mode: 'online' });
+  if (method === 'GET' && pathname === '/health') {
+    const r = await systemRoutes.health();
+    return send(res, r.status, r.body);
+  }
   if (method === 'GET' && pathname === '/bootstrap') return send(res, 200, await bootstrapRoutes.bootstrap(req));
   if (method === 'GET' && pathname === '/me') return send(res, 200, await bootstrapRoutes.me(req));
 
@@ -53,6 +58,7 @@ async function handle(req, res) {
   if (method === 'POST' && pathname === '/reports') return send(res, 201, await reportRoutes.createReport(req));
   if (method === 'GET' && pathname === '/admin/dashboard') return send(res, 200, await adminRoutes.dashboard(req));
   if (method === 'GET' && pathname === '/admin/queue') return send(res, 200, await adminRoutes.queue(req));
+  if (method === 'GET' && pathname === '/admin/security-events') return send(res, 200, await securityRoutes.recentEvents(req));
   const report = pathname.match(/^\/admin\/reports\/([^/]+)$/);
   if (report && method === 'PATCH') return send(res, 200, await adminRoutes.updateReport(req, decodeURIComponent(report[1])));
   const pubAdmin = pathname.match(/^\/admin\/publications\/([^/]+)$/);
