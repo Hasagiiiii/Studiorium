@@ -15,7 +15,7 @@ function newsCard(article) {
     <div class="meta">
       <span>por ${E(article.authorName)}</span>
       <span>${date(article.publishedAt)}</span>
-      <span>${article.sources.length} fontes</span>
+      <span>${article.sources.length} fonte${article.sources.length === 1 ? '' : 's'}</span>
     </div>
   </article>`;
 }
@@ -94,7 +94,10 @@ async function newsDetail(slug) {
           <div class="meta article-meta">
             <span>Por ${E(article.authorName)}</span>
             <span>Publicada em ${date(article.publishedAt)}</span>
-            <span>${article.sources.length} fontes declaradas</span>
+            <span>
+              ${article.sources.length} fonte${article.sources.length === 1 ? '' : 's'}
+              declarada${article.sources.length === 1 ? '' : 's'}
+            </span>
           </div>
         </div>
       </section>

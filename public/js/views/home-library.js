@@ -91,7 +91,7 @@ function home() {
             </div>
             ${link('/noticias', 'Abrir redação →', 'linkbtn')}
           </div>
-          <div class="grid grid3">
+          <div class="grid news-home-grid">
             ${news
               .map(
                 (article) =>

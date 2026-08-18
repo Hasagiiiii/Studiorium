@@ -11,9 +11,9 @@ function nav() {
   const items = [
     ['/biblioteca', 'Biblioteca'],
     ['/noticias', 'Notícias'],
-    ['/oficina', 'Tech & Oficina'],
+    ['/oficina', 'Oficina'],
     ['/acervo', 'Acervo'],
-    ['/atelie', 'Ateliê Científico'],
+    ['/atelie', 'Ateliê'],
     ['/coloquio', 'Colóquio'],
     ['/escrivaninha', 'Escrivaninha'],
   ];

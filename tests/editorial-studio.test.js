@@ -69,3 +69,12 @@ test('animações respeitam a preferência de reduzir movimento', () => {
   assert.ok(css.includes('overflow-wrap: anywhere'));
   assert.ok(css.includes('min-width: 0'));
 });
+
+test('saúde online informa disponibilidade das integrações sem expor segredos', () => {
+  const system = read('src/server/routes/system.js');
+
+  assert.ok(system.includes('aiModeration'));
+  assert.ok(system.includes('emailDelivery'));
+  assert.equal(system.includes('RESEND_API_KEY:'), false);
+  assert.equal(system.includes('OPENAI_API_KEY:'), false);
+});
