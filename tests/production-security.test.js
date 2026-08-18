@@ -70,6 +70,7 @@ test('deploy oficial permanece Vercel + Supabase e dependência está fixada', (
   assert.ok(Array.isArray(vercel.rewrites) && vercel.rewrites.length >= 2);
   assert.ok(vercel.functions && vercel.functions['api/index.js']);
   assert.equal(pkg.dependencies['@supabase/supabase-js'], '2.57.0');
+  assert.equal(pkg.engines.node, '20.x');
   assert.equal(fs.existsSync(path.join(root, '.github/workflows/deploy-pages.yml')), false);
   assert.equal(fs.existsSync(path.join(root, 'scripts/build-pages.js')), false);
 });
