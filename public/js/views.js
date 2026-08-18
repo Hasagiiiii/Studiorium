@@ -1,4 +1,13 @@
-export { link, nav, footer, layout, empty, templateCard, publicationCard, discussionRow } from './views/core.js';
+export {
+  link,
+  nav,
+  footer,
+  layout,
+  empty,
+  templateCard,
+  publicationCard,
+  discussionRow,
+} from './views/core.js';
 export { home, biblioteca, acervo, templateDetail } from './views/home-library.js';
 export { pesquisas, researchDetail, autores, authorDetail } from './views/research.js';
 export { coloquio, thread, login, cadastro } from './views/community.js';

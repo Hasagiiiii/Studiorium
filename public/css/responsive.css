@@ -1,4 +1,195 @@
-@media print{body{background:#fff}.nav,.footer,.no-print,.toast{display:none!important}.poster-shell{border:0;padding:0;background:white;overflow:visible}.poster{box-shadow:none;margin:0;width:100%;min-height:auto}.atelier{display:block}.atelier>.card{display:none}main{padding:0}.shell{width:100%}}
+@media print {
+  body {
+    background: #fff;
+  }
+  .nav,
+  .footer,
+  .no-print,
+  .toast {
+    display: none !important;
+  }
+  .poster-shell {
+    border: 0;
+    padding: 0;
+    background: white;
+    overflow: visible;
+  }
+  .poster {
+    box-shadow: none;
+    margin: 0;
+    width: 100%;
+    min-height: auto;
+  }
+  .atelier {
+    display: block;
+  }
+  .atelier > .card {
+    display: none;
+  }
+  main {
+    padding: 0;
+  }
+  .shell {
+    width: 100%;
+  }
+}
 
 /* Painel administrativo v2.2 */
-.site-alert{border-bottom:1px solid var(--line);background:#211a14;color:#d7c8ad;padding:10px 0;font-size:12px}.site-alert.danger{border-color:rgba(183,103,96,.55);background:#2a1715;color:#e8b7b2}.admin-page{padding-top:38px}.admin-tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid var(--line);margin:28px 0 24px;padding-bottom:0}.admin-tab{white-space:nowrap;padding:12px 13px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;border-bottom:2px solid transparent}.admin-tab.active{color:var(--brass2);border-color:var(--brass);background:rgba(184,144,89,.045)}.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:rgba(19,16,13,.65)}.admin-stat{padding:22px}.admin-stat+.admin-stat{border-left:1px solid var(--line)}.admin-stat strong{display:block;font:500 32px var(--serif);color:var(--brass2)}.admin-stat span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#d0c4b0;margin:4px 0}.admin-stat small{color:var(--muted)}.admin-gap{margin-top:22px}.admin-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 0;border-bottom:1px solid var(--line)}.admin-row strong{display:block;font:500 17px var(--serif)}.admin-row small{display:block;color:var(--muted);margin-top:5px}.admin-list{display:grid;gap:14px}.admin-search{display:flex;gap:10px;align-items:center;margin:0 0 20px}.admin-search .field{max-width:500px}.admin-report{margin-bottom:14px}.admin-report h3{font:500 21px var(--serif);margin:9px 0 4px}.admin-actions{margin-top:16px}.admin-settings{max-width:900px}.admin-toggles{display:flex;gap:22px;flex-wrap:wrap;margin:16px 0 20px;padding:14px;border:1px solid var(--line);background:#17130f}.admin-toggles label{color:#c9bda9;font-size:13px}.status-active,.status-published,.status-resolved{border-color:rgba(131,150,122,.65);color:#b9d0ae}.status-suspended,.status-rejected,.status-hidden{border-color:rgba(183,103,96,.65);color:#e2a39d}.status-pending_review,.status-reviewing,.status-open{border-color:rgba(184,144,89,.65);color:var(--brass2)}.status-admin{border-color:#8a6b43;color:#e4c590}.status-user{color:var(--muted)}.tablewrap code{font-size:10px;color:#bdb19e;white-space:pre-wrap}.admin-page table strong{color:var(--ink);font-weight:600}
+.site-alert {
+  border-bottom: 1px solid var(--line);
+  background: #211a14;
+  color: #d7c8ad;
+  padding: 10px 0;
+  font-size: 12px;
+}
+.site-alert.danger {
+  border-color: rgba(183, 103, 96, 0.55);
+  background: #2a1715;
+  color: #e8b7b2;
+}
+.admin-page {
+  padding-top: 38px;
+}
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  overflow: auto;
+  border-bottom: 1px solid var(--line);
+  margin: 28px 0 24px;
+  padding-bottom: 0;
+}
+.admin-tab {
+  white-space: nowrap;
+  padding: 12px 13px;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid transparent;
+}
+.admin-tab.active {
+  color: var(--brass2);
+  border-color: var(--brass);
+  background: rgba(184, 144, 89, 0.045);
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+  background: rgba(19, 16, 13, 0.65);
+}
+.admin-stat {
+  padding: 22px;
+}
+.admin-stat + .admin-stat {
+  border-left: 1px solid var(--line);
+}
+.admin-stat strong {
+  display: block;
+  font: 500 32px var(--serif);
+  color: var(--brass2);
+}
+.admin-stat span {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #d0c4b0;
+  margin: 4px 0;
+}
+.admin-stat small {
+  color: var(--muted);
+}
+.admin-gap {
+  margin-top: 22px;
+}
+.admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+}
+.admin-row strong {
+  display: block;
+  font: 500 17px var(--serif);
+}
+.admin-row small {
+  display: block;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.admin-list {
+  display: grid;
+  gap: 14px;
+}
+.admin-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 20px;
+}
+.admin-search .field {
+  max-width: 500px;
+}
+.admin-report {
+  margin-bottom: 14px;
+}
+.admin-report h3 {
+  font: 500 21px var(--serif);
+  margin: 9px 0 4px;
+}
+.admin-actions {
+  margin-top: 16px;
+}
+.admin-settings {
+  max-width: 900px;
+}
+.admin-toggles {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin: 16px 0 20px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: #17130f;
+}
+.admin-toggles label {
+  color: #c9bda9;
+  font-size: 13px;
+}
+.status-active,
+.status-published,
+.status-resolved {
+  border-color: rgba(131, 150, 122, 0.65);
+  color: #b9d0ae;
+}
+.status-suspended,
+.status-rejected,
+.status-hidden {
+  border-color: rgba(183, 103, 96, 0.65);
+  color: #e2a39d;
+}
+.status-pending_review,
+.status-reviewing,
+.status-open {
+  border-color: rgba(184, 144, 89, 0.65);
+  color: var(--brass2);
+}
+.status-admin {
+  border-color: #8a6b43;
+  color: #e4c590;
+}
+.status-user {
+  color: var(--muted);
+}
+.tablewrap code {
+  font-size: 10px;
+  color: #bdb19e;
+  white-space: pre-wrap;
+}
+.admin-page table strong {
+  color: var(--ink);
+  font-weight: 600;
+}

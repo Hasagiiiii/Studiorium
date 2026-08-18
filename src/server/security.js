@@ -1,12 +1,22 @@
 const crypto = require('crypto');
 
-function now() { return new Date().toISOString(); }
-function id(prefix) { return `${prefix}_${crypto.randomUUID()}`; }
+function now() {
+  return new Date().toISOString();
+}
+function id(prefix) {
+  return `${prefix}_${crypto.randomUUID()}`;
+}
 function slugify(value) {
-  return String(value || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-    .slice(0, 80) || 'sem-titulo';
+  return (
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'sem-titulo'
+  );
 }
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');
@@ -23,8 +33,16 @@ function verifyPassword(password, stored) {
     return false;
   }
 }
-function token() { return crypto.randomBytes(32).toString('hex'); }
-function tokenHash(value) { return crypto.createHash('sha256').update(String(value)).digest('hex'); }
-function safeText(value, max = 500) { return String(value || '').trim().slice(0, max); }
+function token() {
+  return crypto.randomBytes(32).toString('hex');
+}
+function tokenHash(value) {
+  return crypto.createHash('sha256').update(String(value)).digest('hex');
+}
+function safeText(value, max = 500) {
+  return String(value || '')
+    .trim()
+    .slice(0, max);
+}
 
 module.exports = { now, id, slugify, hashPassword, verifyPassword, token, tokenHash, safeText };

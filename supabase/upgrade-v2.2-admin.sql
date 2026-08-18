@@ -35,8 +35,21 @@ alter table public.admin_audit_log enable row level security;
 grant all on table public.site_settings, public.admin_audit_log to service_role;
 
 insert into public.site_settings (key,value) values ('site_title','"Studiorium"'::jsonb) on conflict (key) do nothing;
-insert into public.site_settings (key,value) values ('hero_title','"Conhecimento que deixa vestígios."'::jsonb) on conflict (key) do nothing;
-insert into public.site_settings (key,value) values ('hero_text','"Crie trabalhos, encontre modelos, publique descobertas e participe de conversas acadêmicas em um espaço que valoriza autoria, rigor e repertório."'::jsonb) on conflict (key) do nothing;
+insert into public.site_settings (key,value)
+values ('hero_title','"Conhecimento que deixa vestígios."'::jsonb)
+on conflict (key) do nothing;
+
+insert into public.site_settings (key,value)
+values (
+  'hero_text',
+  to_jsonb(
+    (
+      'Crie trabalhos, encontre modelos, publique descobertas e participe de ' ||
+      'conversas acadêmicas em um espaço que valoriza autoria, rigor e repertório.'
+    )::text
+  )
+)
+on conflict (key) do nothing;
 insert into public.site_settings (key,value) values ('site_notice','""'::jsonb) on conflict (key) do nothing;
 insert into public.site_settings (key,value) values ('registrations_open','true'::jsonb) on conflict (key) do nothing;
 insert into public.site_settings (key,value) values ('maintenance_mode','false'::jsonb) on conflict (key) do nothing;
