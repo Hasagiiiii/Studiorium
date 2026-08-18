@@ -1,13 +1,22 @@
 # Infraestrutura Supabase do Studiorium
 
-Este diretório reúne os arquivos de banco de dados e funções de backend usados pelo Studiorium.
+Este diretório reúne os arquivos de banco de dados usados pelo Studiorium.
 
 ## Conteúdo
 
 - `schema.sql` — estrutura principal do banco;
 - `seed.sql` — conteúdo inicial de demonstração;
-- `upgrade-*.sql` — migrações incrementais do projeto;
-- `functions/` — funções Edge utilizadas pela aplicação web.
+- `upgrade-*.sql` — migrações incrementais do projeto.
+
+## Arquitetura oficial
+
+O Studiorium usa:
+
+- Vercel para servir o frontend e a API Node em `api/` + `src/server/`;
+- Supabase para PostgreSQL e Storage privado;
+- variáveis de ambiente na hospedagem para conectar a API ao Supabase.
+
+O frontend não acessa o banco diretamente e não recebe a chave secreta do Supabase.
 
 ## Princípios
 
