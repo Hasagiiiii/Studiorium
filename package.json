@@ -1,8 +1,8 @@
 {
   "name": "studiorium-online",
-  "version": "2.2.0",
+  "version": "2.6.0",
   "private": true,
-  "description": "Studiorium — plataforma acadêmica dark academia com Biblioteca, Acervo, autoria, pesquisa, colóquio e painel administrativo, preparada para Vercel + Supabase.",
+  "description": "Studiorium — plataforma acadêmica dark academia com Biblioteca, Acervo, comunidade, tecnologia, laboratório de código e painel administrativo, preparada para Supabase Edge/GitHub Pages ou Vercel + Supabase.",
   "type": "commonjs",
   "scripts": {
     "check": "node scripts/check-project.js",
