@@ -1,4 +1,4 @@
-# Studiorium Online 2.6
+# Studiorium Online 2.6.1
 
 Plataforma acadêmica online em estética dark academia, com Biblioteca, Acervo de modelos, pesquisas/autoria, Colóquio, Oficina de Tecnologia, Studiorium Lab e painel administrativo.
 
@@ -34,6 +34,7 @@ O e-mail administrativo padrão desta instalação é `umaduplagamer@gmail.com`.
 ## Segurança
 
 - RLS habilitado nas tabelas de aplicação; o navegador não recebe a secret key.
+- Desde a v2.6.1, `anon` e `authenticated` também não têm grants diretos nas tabelas, sequências e RPCs internos.
 - Bucket `publications` privado, com limite de 5 MB.
 - Arquivos aceitos: PDF, DOCX, PPTX, ODT e TXT.
 - Sessões com expiração e invalidação ao suspender usuário/trocar senha.
@@ -44,7 +45,7 @@ O e-mail administrativo padrão desta instalação é `umaduplagamer@gmail.com`.
 
 ## Banco — ordem de instalação
 
-Consulte `supabase/README.md`. Para uma instalação já existente, aplique as migrações em ordem até a v2.6.
+Consulte `supabase/README.md`. Para uma instalação já existente, aplique as migrações em ordem até a v2.6.1.
 
 ## Publicação
 
