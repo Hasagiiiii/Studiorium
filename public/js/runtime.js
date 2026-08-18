@@ -44,15 +44,58 @@ export function toast(msg, error = false) {
   clearTimeout(toast._t);
   toast._t = setTimeout(() => (toastEl.className = 'toast'), 3300);
 }
+
+const RETRYABLE_GET_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+
+function wait(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+function canRetry(method, status, attempt, maxAttempts) {
+  if (method !== 'GET' || attempt >= maxAttempts) return false;
+  return status === 0 || RETRYABLE_GET_STATUSES.has(status);
+}
+
 export async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
-  if (options.body !== undefined && !headers['Content-Type'])
+  const method = String(options.method || 'GET').toUpperCase();
+  const maxAttempts = method === 'GET' ? 3 : 1;
+  let lastError;
+
+  if (options.body !== undefined && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
-  const res = await fetch(path, { ...options, headers, credentials: 'same-origin' });
-  if (res.status === 204) return {};
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Não foi possível concluir a ação.');
-  return data;
+  }
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let response;
+
+    try {
+      response = await fetch(path, {
+        ...options,
+        headers,
+        credentials: 'same-origin',
+      });
+    } catch (error) {
+      lastError = error;
+      if (!canRetry(method, 0, attempt, maxAttempts)) throw error;
+      await wait(400 * attempt);
+      continue;
+    }
+
+    if (response.status === 204) return {};
+    const data = await response.json().catch(() => ({}));
+
+    if (response.ok) return data;
+
+    const error = new Error(data.error || 'Não foi possível concluir a ação.');
+    error.status = response.status;
+    lastError = error;
+
+    if (!canRetry(method, response.status, attempt, maxAttempts)) throw error;
+    await wait(400 * attempt);
+  }
+
+  throw lastError || new Error('Não foi possível concluir a ação.');
 }
 export async function bootstrap() {
   state.boot = await api('/api/bootstrap');

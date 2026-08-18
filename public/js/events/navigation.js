@@ -1,7 +1,16 @@
 import { api, state, toast } from '../runtime.js';
-import { goto } from '../router.js';
+import { goto, render } from '../router.js';
 
 export async function handleNavigationClick(event) {
+  const retryButton = event.target.closest('[data-retry-bootstrap]');
+
+  if (retryButton) {
+    retryButton.disabled = true;
+    state.boot = null;
+    await render();
+    return true;
+  }
+
   const link = event.target.closest('a[data-link]');
 
   if (link && link.origin === location.origin) {

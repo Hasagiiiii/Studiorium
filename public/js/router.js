@@ -36,7 +36,8 @@ function showRenderError(error) {
   app.innerHTML = html`<div class="errorpage">
     <h1>Studiorium</h1>
     <p>${E(error?.message || 'Falha ao carregar.')}</p>
-    <p>O serviço online não respondeu. Tente novamente.</p>
+    <p>O serviço online não respondeu após novas tentativas.</p>
+    <button class="solid" type="button" data-retry-bootstrap>Tentar novamente</button>
   </div>`;
 }
 
