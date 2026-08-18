@@ -16,7 +16,12 @@ test('autenticação reserva o ADM sem promoção automática por e-mail', () =>
 
 test('rotas críticas de segurança estão ligadas', () => {
   const router = read('src/server/router.js');
-  for (const route of ['/health', '/auth/change-password', '/admin/security-events']) {
+  for (const route of [
+    '/health',
+    '/auth/change-password',
+    '/auth/password-reset',
+    '/admin/security-events',
+  ]) {
     assert.ok(router.includes(route), `rota ausente: ${route}`);
   }
 });
@@ -29,9 +34,32 @@ test('migrações de segurança e produção estão versionadas', () => {
     'supabase/upgrade-v2.6-performance.sql',
     'supabase/upgrade-v2.6.1-revoke-client-grants.sql',
     'supabase/upgrade-v2.7-security-events.sql',
+    'supabase/upgrade-v2.8-password-reset.sql',
   ];
   for (const rel of required)
     assert.ok(fs.existsSync(path.join(root, rel)), `migração ausente: ${rel}`);
+});
+
+test('redefinição de senha usa token com hash, validade e uso único', () => {
+  const migration = read('supabase/upgrade-v2.8-password-reset.sql');
+  const authRoutes = read('src/server/routes/auth.js');
+  const accountEvents = read('public/js/events/account.js');
+
+  for (const marker of [
+    'token_hash text primary key',
+    'expires_at > now()',
+    'used_at is null',
+    'security definer',
+    'from public, anon, authenticated',
+    'to service_role',
+    'delete from public.sessions',
+  ]) {
+    assert.ok(migration.includes(marker), `proteção ausente: ${marker}`);
+  }
+  assert.ok(authRoutes.includes('tokenHash(rawToken)'));
+  assert.ok(authRoutes.includes("db().rpc('complete_password_reset'"));
+  assert.ok(accountEvents.includes('location.hash.slice(1)'));
+  assert.ok(accountEvents.includes("history.replaceState({}, '', '/login')"));
 });
 
 test('migração v2.7 remove o bloqueio legado de eventos de segurança', () => {

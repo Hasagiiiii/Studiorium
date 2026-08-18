@@ -43,6 +43,10 @@ async function handle(req, res) {
     const r = await authRoutes.changePassword(req, res);
     return send(res, r.status, r.body);
   }
+  if (method === 'POST' && pathname === '/auth/password-reset') {
+    const r = await authRoutes.resetPassword(req);
+    return send(res, r.status, r.body);
+  }
   if (method === 'POST' && pathname === '/auth/logout') {
     const r = await authRoutes.logout(req, res);
     return send(res, r.status, r.body);
