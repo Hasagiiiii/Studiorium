@@ -3,6 +3,7 @@ const { config } = require('../config');
 const { readJson, setSessionCookie, parseCookies } = require('../http');
 const { id, now, slugify, hashPassword, verifyPassword, token, tokenHash } = require('../security');
 const { publicUser } = require('../auth');
+const { assertAuthAllowed, recordAuthFailure, clearAuthFailures, logSecurityEvent } = require('../security-events');
 
 async function uniqueUsername(displayName) {
   const base = slugify(displayName).replace(/-/g, '').slice(0, 24) || 'estudante';
@@ -59,25 +60,37 @@ async function register(req, res) {
     fail(profileError);
   }
   await createSession(userId, res);
+  await logSecurityEvent(req, 'account.registered', { userId, email, details: { role, isMinor } });
   return { status: 201, body: { user: await publicUser({ id: userId, email, role, is_minor: isMinor, created_at: now() }) } };
 }
 
 async function login(req, res) {
   const body = await readJson(req);
   const email = String(body.email || '').trim().toLowerCase();
+  await assertAuthAllowed(req, 'login', email);
+
   const { data: user, error } = await db().from('users').select('*').eq('email', email).maybeSingle();
   fail(error);
   if (!user || !verifyPassword(String(body.password || ''), user.password_hash)) {
+    const limit = await recordAuthFailure(req, 'login', email, { maxAttempts: 8, windowMs: 15 * 60 * 1000, blockMs: 15 * 60 * 1000 });
+    await logSecurityEvent(req, 'auth.login_failed', { email, details: { attempts: limit.attempts, blocked: limit.blocked } });
+    if (limit.blocked) {
+      throw Object.assign(new Error('Muitas tentativas. Aguarde alguns minutos e tente novamente.'), { statusCode: 429 });
+    }
     throw Object.assign(new Error('E-mail ou senha incorretos.'), { statusCode: 401 });
   }
   if ((user.status || 'active') === 'suspended') {
+    await logSecurityEvent(req, 'auth.login_suspended', { userId: user.id, email });
     throw Object.assign(new Error('Esta conta está suspensa. Entre em contato com a administração.'), { statusCode: 403 });
   }
   if (config().adminEmail && user.email === config().adminEmail && user.role !== 'admin') {
     await db().from('users').update({ role: 'admin' }).eq('id', user.id);
     user.role = 'admin';
+    await logSecurityEvent(req, 'admin.role_restored', { userId: user.id, email });
   }
+  await clearAuthFailures(req, 'login', email);
   await createSession(user.id, res);
+  await logSecurityEvent(req, 'auth.login_success', { userId: user.id, email, details: { role: user.role } });
   return { status: 200, body: { user: await publicUser(user) } };
 }
 
