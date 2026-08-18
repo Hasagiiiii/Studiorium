@@ -3,6 +3,7 @@ const { config } = require('../config');
 const { readJson, setSessionCookie, parseCookies } = require('../http');
 const { id, now, slugify, hashPassword, verifyPassword, token, tokenHash } = require('../security');
 const { publicUser, requireUser } = require('../auth');
+const { sendPasswordResetEmail } = require('../email');
 const {
   assertAuthAllowed,
   recordAuthFailure,
@@ -258,6 +259,69 @@ async function resetPassword(req) {
   return { status: 200, body: { ok: true } };
 }
 
+async function requestPasswordReset(req) {
+  const body = await readJson(req);
+  const email = String(body.email || '')
+    .trim()
+    .toLowerCase();
+  const generic = {
+    status: 200,
+    body: {
+      ok: true,
+      message: 'Se a conta existir, enviaremos um link de redefinição para o e-mail informado.',
+    },
+  };
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) return generic;
+  await assertAuthAllowed(req, 'password-reset-request', email);
+  await recordAuthFailure(req, 'password-reset-request', email, {
+    maxAttempts: 4,
+    windowMs: 60 * 60 * 1000,
+    blockMs: 60 * 60 * 1000,
+  });
+
+  const { data: user, error } = await db()
+    .from('users')
+    .select('id,email,status')
+    .eq('email', email)
+    .maybeSingle();
+  fail(error);
+  if (!user || (user.status || 'active') === 'suspended') return generic;
+
+  await db().from('password_reset_tokens').delete().eq('user_id', user.id).is('used_at', null);
+  await db().from('password_reset_tokens').delete().lt('expires_at', now());
+
+  const rawToken = token();
+  const hash = tokenHash(rawToken);
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  const { error: insertError } = await db().from('password_reset_tokens').insert({
+    token_hash: hash,
+    user_id: user.id,
+    expires_at: expiresAt,
+    created_at: now(),
+  });
+  fail(insertError);
+
+  try {
+    const resetUrl = `${config().siteUrl}/redefinir-senha#token=${rawToken}`;
+    await sendPasswordResetEmail({ to: user.email, resetUrl });
+    await logSecurityEvent(req, 'auth.password_reset_requested', {
+      userId: user.id,
+      email: user.email,
+    });
+  } catch (sendError) {
+    await db().from('password_reset_tokens').delete().eq('token_hash', hash);
+    await logSecurityEvent(req, 'auth.password_reset_delivery_failed', {
+      userId: user.id,
+      email: user.email,
+      details: { code: sendError.code || 'EMAIL_ERROR' },
+    });
+    console.error('[Studiorium password reset email]', sendError.message || sendError);
+  }
+
+  return generic;
+}
+
 async function logout(req, res) {
   const raw = parseCookies(req).studiorium_session;
   if (raw) await db().from('sessions').delete().eq('token_hash', tokenHash(raw));
@@ -265,4 +329,11 @@ async function logout(req, res) {
   return { status: 200, body: { ok: true } };
 }
 
-module.exports = { register, login, changePassword, resetPassword, logout };
+module.exports = {
+  register,
+  login,
+  changePassword,
+  requestPasswordReset,
+  resetPassword,
+  logout,
+};

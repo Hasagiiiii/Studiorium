@@ -58,6 +58,17 @@ export async function handleAccountSubmit(event) {
     return true;
   }
 
+  if (form.matches('[data-password-reset-request]')) {
+    event.preventDefault();
+    const result = await api('/api/auth/password-reset/request', {
+      method: 'POST',
+      body: JSON.stringify(formObj(form)),
+    });
+    form.reset();
+    toast(result.message);
+    return true;
+  }
+
   if (form.matches('[data-profile]')) {
     event.preventDefault();
     const values = formObj(form);

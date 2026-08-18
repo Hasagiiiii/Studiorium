@@ -24,7 +24,12 @@ async function create(req) {
 }
 async function get(req, pid) {
   const u = await requireUser(req);
-  const q = await db().from('code_projects').select('*').eq('id', pid).maybeSingle();
+  const q = await db()
+    .from('code_projects')
+    .select('*')
+    .eq('id', pid)
+    .is('deleted_at', null)
+    .maybeSingle();
   fail(q.error);
   if (!q.data || (q.data.owner_id !== u.id && q.data.visibility !== 'public'))
     throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
@@ -48,10 +53,59 @@ async function update(req, pid) {
     .update(patch)
     .eq('id', pid)
     .eq('owner_id', u.id)
+    .is('deleted_at', null)
     .select('*')
     .maybeSingle();
   fail(q.error);
   if (!q.data) throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
   return { project: S.codeProject(q.data) };
 }
-module.exports = { create, get, update };
+
+async function trash(req, pid) {
+  const u = await requireUser(req);
+  const q = await db()
+    .from('code_projects')
+    .update({ deleted_at: now(), updated_at: now(), visibility: 'private' })
+    .eq('id', pid)
+    .eq('owner_id', u.id)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle();
+  fail(q.error);
+  if (!q.data) throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
+  return { ok: true };
+}
+
+async function restore(req, pid) {
+  const u = await requireUser(req);
+  const q = await db()
+    .from('code_projects')
+    .update({ deleted_at: null, updated_at: now() })
+    .eq('id', pid)
+    .eq('owner_id', u.id)
+    .not('deleted_at', 'is', null)
+    .select('id')
+    .maybeSingle();
+  fail(q.error);
+  if (!q.data)
+    throw Object.assign(new Error('Projeto não encontrado na lixeira.'), { statusCode: 404 });
+  return { ok: true };
+}
+
+async function purge(req, pid) {
+  const u = await requireUser(req);
+  const q = await db()
+    .from('code_projects')
+    .delete()
+    .eq('id', pid)
+    .eq('owner_id', u.id)
+    .not('deleted_at', 'is', null)
+    .select('id')
+    .maybeSingle();
+  fail(q.error);
+  if (!q.data)
+    throw Object.assign(new Error('Projeto não encontrado na lixeira.'), { statusCode: 404 });
+  return { ok: true };
+}
+
+module.exports = { create, get, update, trash, restore, purge };

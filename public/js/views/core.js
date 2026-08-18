@@ -10,6 +10,7 @@ function nav() {
   const title = String(settings.site_title || 'Studiorium');
   const items = [
     ['/biblioteca', 'Biblioteca'],
+    ['/noticias', 'Notícias'],
     ['/oficina', 'Tech & Oficina'],
     ['/acervo', 'Acervo'],
     ['/atelie', 'Ateliê Científico'],
@@ -87,9 +88,12 @@ function footer() {
       <div>
         <h4>Criar</h4>
         ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link(
-          '/coloquio',
-          'Abrir discussão',
-        )}${link('/sobre', 'Sobre o projeto')}
+          '/estudio-templates',
+          'Estúdio de templates',
+        )}${link('/redacao', 'Redação colaborativa')}${link('/coloquio', 'Abrir discussão')}${link(
+          '/sobre',
+          'Sobre o projeto',
+        )}
       </div>
     </div>
   </footer>`;

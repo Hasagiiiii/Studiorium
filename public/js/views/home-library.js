@@ -17,6 +17,7 @@ function home() {
   const templates = b.templates.filter((t) => t.featured).slice(0, 3);
   const discussions = b.discussions.slice(0, 3);
   const pubs = b.publications.slice(0, 3);
+  const news = (b.news || []).slice(0, 3);
   layout(
     html` <section class="hero">
         <div class="shell">
@@ -62,6 +63,13 @@ function home() {
                 Templates para escola, faculdade, pesquisa, banners e documentos acadêmicos,
                 organizados para adaptação e estudo.
               </p></a
+            ><a href="/noticias" data-link class="feature featurelink"
+              ><div class="glyph">✦</div>
+              <h3>Notícias</h3>
+              <p>
+                Matérias de estudantes e novos autores, com fontes declaradas, triagem por IA e
+                certificação editorial humana.
+              </p></a
             ><a href="/coloquio" data-link class="feature featurelink"
               ><div class="glyph">⌂</div>
               <h3>Colóquio</h3>
@@ -70,6 +78,42 @@ function home() {
                 violem as diretrizes.
               </p></a
             >
+          </div>
+        </div>
+      </section>
+      <section class="section compact editorial-home">
+        <div class="shell">
+          <div class="sectionhead">
+            <div>
+              <div class="eyebrow">Nuntii certificati</div>
+              <h2>Notícias da comunidade</h2>
+              <p>Informação com fontes visíveis e decisão editorial humana.</p>
+            </div>
+            ${link('/noticias', 'Abrir redação →', 'linkbtn')}
+          </div>
+          <div class="grid grid3">
+            ${news
+              .map(
+                (article) =>
+                  html`<article class="card news-card">
+                    <div class="news-card-top">
+                      <span class="eyebrow">${E(article.category)}</span>
+                      <span class="badge certified">✓ Certificada</span>
+                    </div>
+                    <h3>
+                      ${link(
+                        `/noticias/${encodeURIComponent(article.slug)}`,
+                        E(article.title),
+                        'library-title',
+                      )}
+                    </h3>
+                    <p>${E(article.summary)}</p>
+                    <div class="meta">
+                      <span>${E(article.authorName)}</span><span>${date(article.publishedAt)}</span>
+                    </div>
+                  </article>`,
+              )
+              .join('') || empty('A redação está preparando as primeiras notícias.')}
           </div>
         </div>
       </section>
@@ -377,15 +421,21 @@ function acervo() {
       (!q || JSON.stringify(t).toLowerCase().includes(q.toLowerCase())) &&
       (!cat || t.category === cat),
   );
+  const communityTemplates = (state.boot.customTemplates || []).filter(
+    (template) => !q || JSON.stringify(template).toLowerCase().includes(q.toLowerCase()),
+  );
   layout(
     html`<section class="pagehero">
       <div class="shell">
         <div class="eyebrow">Catalogus</div>
         <h1 class="pagetitle">Acervo de modelos</h1>
         <p>
-          Documentos, trabalhos, banners e estruturas acadêmicas prontos para você adaptar sem
-          começar de uma página vazia.
+          Use modelos prontos ou crie livremente com blocos, fotos, cores e arquivos importados.
         </p>
+        <div class="actions space-top space-bottom">
+          ${link('/estudio-templates', 'Criar template livre', 'solid')}
+          <span class="small muted">Importe JSON, PNG, JPG, WebP ou PDF como referência.</span>
+        </div>
         <form class="toolbar" data-acervo-filter>
           <input class="field" name="q" value="${E(q)}" placeholder="Pesquisar no acervo" /><select
             class="select"
@@ -400,6 +450,31 @@ function acervo() {
         <div class="grid grid3">
           ${list.map(templateCard).join('') || empty('Nenhum modelo encontrado com esses filtros.')}
         </div>
+        ${communityTemplates.length
+          ? html`<div class="sectionhead section-gap">
+                <div>
+                  <div class="eyebrow">Modelos da comunidade</div>
+                  <h2>Templates livres publicados</h2>
+                </div>
+              </div>
+              <div class="grid grid3">
+                ${communityTemplates
+                  .map(
+                    (template) =>
+                      html`<article class="card studio-card">
+                        <span class="badge">Modelo editável</span>
+                        <h3>${E(template.title)}</h3>
+                        <p>${E(template.description || 'Template publicado pela comunidade.')}</p>
+                        ${link(
+                          `/modelos-livres/${encodeURIComponent(template.id)}`,
+                          'Visualizar modelo',
+                          'outline',
+                        )}
+                      </article>`,
+                  )
+                  .join('')}
+              </div>`
+          : ''}
       </div>
     </section>`,
   );

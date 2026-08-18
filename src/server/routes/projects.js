@@ -50,6 +50,7 @@ async function getProject(req, projectId) {
     .select('*')
     .eq('id', projectId)
     .eq('user_id', user.id)
+    .is('deleted_at', null)
     .maybeSingle();
   fail(error);
   if (!data) throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
@@ -73,6 +74,7 @@ async function updateProject(req, projectId) {
     .update(patch)
     .eq('id', projectId)
     .eq('user_id', user.id)
+    .is('deleted_at', null)
     .select('*')
     .maybeSingle();
   fail(error);
@@ -84,7 +86,7 @@ async function deleteProject(req, projectId) {
   const user = await requireUser(req);
   const { data, error } = await db()
     .from('projects')
-    .delete()
+    .update({ deleted_at: now(), updated_at: now() })
     .eq('id', projectId)
     .eq('user_id', user.id)
     .select('id')
@@ -93,4 +95,44 @@ async function deleteProject(req, projectId) {
   if (!data) throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
   return { ok: true };
 }
-module.exports = { createProject, getProject, updateProject, deleteProject };
+
+async function restoreProject(req, projectId) {
+  const user = await requireUser(req);
+  const { data, error } = await db()
+    .from('projects')
+    .update({ deleted_at: null, updated_at: now() })
+    .eq('id', projectId)
+    .eq('user_id', user.id)
+    .not('deleted_at', 'is', null)
+    .select('id')
+    .maybeSingle();
+  fail(error);
+  if (!data)
+    throw Object.assign(new Error('Projeto não encontrado na lixeira.'), { statusCode: 404 });
+  return { ok: true };
+}
+
+async function purgeProject(req, projectId) {
+  const user = await requireUser(req);
+  const { data, error } = await db()
+    .from('projects')
+    .delete()
+    .eq('id', projectId)
+    .eq('user_id', user.id)
+    .not('deleted_at', 'is', null)
+    .select('id')
+    .maybeSingle();
+  fail(error);
+  if (!data)
+    throw Object.assign(new Error('Projeto não encontrado na lixeira.'), { statusCode: 404 });
+  return { ok: true };
+}
+
+module.exports = {
+  createProject,
+  getProject,
+  updateProject,
+  deleteProject,
+  restoreProject,
+  purgeProject,
+};

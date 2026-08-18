@@ -26,3 +26,26 @@ insert into public.site_settings (key,value) values ('hero_text','"Crie trabalho
 insert into public.site_settings (key,value) values ('site_notice','""'::jsonb) on conflict (key) do nothing;
 insert into public.site_settings (key,value) values ('registrations_open','true'::jsonb) on conflict (key) do nothing;
 insert into public.site_settings (key,value) values ('maintenance_mode','false'::jsonb) on conflict (key) do nothing;
+
+-- Notícias institucionais iniciais. Matérias colaborativas são criadas pela aplicação.
+insert into public.news_articles (
+  id, author_name, title, slug, summary, body, category, sources, status,
+  ai_review_status, ai_review, editorial_note, featured, certified_by,
+  certified_at, published_at, created_at, updated_at
+) values (
+  'news-redacao-studiorium',
+  'Redação Studiorium',
+  'Studiorium abre espaço para novos autores e estudantes de Jornalismo',
+  'studiorium-abre-espaco-para-estudantes-de-jornalismo',
+  'A nova redação colaborativa combina fontes declaradas, triagem por IA e revisão editorial humana.',
+  'O Studiorium passa a receber propostas de matérias de estudantes de Jornalismo, Comunicação e áreas relacionadas. O credenciamento do colaborador é analisado pela administração. Cada texto precisa indicar suas fontes, passa por uma triagem automatizada e só recebe o selo editorial depois da revisão humana. A IA auxilia na identificação de riscos, mas não substitui a conferência das informações.',
+  'Plataforma',
+  '[{"title":"Sobre o Studiorium","url":"https://studiorium.vercel.app/sobre"}]'::jsonb,
+  'published',
+  'approved',
+  '{"decision":"approved","origin":"initial-editorial-content"}'::jsonb,
+  'Conteúdo institucional verificado.',
+  true,
+  'system',
+  now(), now(), now(), now()
+) on conflict (id) do nothing;

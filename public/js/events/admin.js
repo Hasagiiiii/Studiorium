@@ -115,6 +115,54 @@ export async function handleAdminClick(event) {
     return true;
   }
 
+  const contributor = event.target.closest('[data-admin-contributor]');
+  if (contributor) {
+    const [id, status] = contributor.dataset.adminContributor.split(':');
+    const note =
+      status === 'rejected' ? prompt('Explique o que precisa ser revisto:', '') || '' : '';
+    await api(`/api/admin/news/contributors/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, note }),
+    });
+    toast('Credenciamento atualizado.');
+    await render();
+    return true;
+  }
+
+  const news = event.target.closest('[data-admin-news]');
+  if (news) {
+    const [id, status] = news.dataset.adminNews.split(':');
+    const promptText =
+      status === 'published'
+        ? 'Nota da decisão editorial (obrigatória se a IA sinalizou):'
+        : 'Retorno editorial:';
+    const note = prompt(promptText, '') || '';
+    if (status !== 'published' && !note.trim()) return true;
+    if (status === 'published' && !confirm('Certificar e publicar esta notícia em seu nome?'))
+      return true;
+    await api(`/api/admin/news/articles/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, note }),
+    });
+    toast(
+      status === 'published' ? 'Notícia certificada e publicada.' : 'Decisão editorial registrada.',
+    );
+    await refreshBootstrapAndRender();
+    return true;
+  }
+
+  const customTemplate = event.target.closest('[data-admin-custom-template]');
+  if (customTemplate) {
+    const [id, status] = customTemplate.dataset.adminCustomTemplate.split(':');
+    await api(`/api/admin/custom-templates/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+    toast('Template atualizado.');
+    await refreshBootstrapAndRender();
+    return true;
+  }
+
   return false;
 }
 

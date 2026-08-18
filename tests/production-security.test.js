@@ -20,7 +20,9 @@ test('rotas críticas de segurança estão ligadas', () => {
     '/health',
     '/auth/change-password',
     '/auth/password-reset',
+    '/auth/password-reset/request',
     '/admin/security-events',
+    '/admin/news',
   ]) {
     assert.ok(router.includes(route), `rota ausente: ${route}`);
   }
@@ -35,6 +37,7 @@ test('migrações de segurança e produção estão versionadas', () => {
     'supabase/upgrade-v2.6.1-revoke-client-grants.sql',
     'supabase/upgrade-v2.7-security-events.sql',
     'supabase/upgrade-v2.8-password-reset.sql',
+    'supabase/upgrade-v2.9-editorial-studio.sql',
   ];
   for (const rel of required)
     assert.ok(fs.existsSync(path.join(root, rel)), `migração ausente: ${rel}`);

@@ -11,6 +11,9 @@ const techRoutes = require('./routes/tech');
 const codeRoutes = require('./routes/code-projects');
 const systemRoutes = require('./routes/system');
 const securityRoutes = require('./routes/security');
+const newsRoutes = require('./routes/news');
+const adminNewsRoutes = require('./routes/admin-news');
+const customTemplateRoutes = require('./routes/custom-templates');
 
 const { apiPath } = require('./route-utils');
 
@@ -43,6 +46,10 @@ async function handle(req, res) {
     const r = await authRoutes.changePassword(req, res);
     return send(res, r.status, r.body);
   }
+  if (method === 'POST' && pathname === '/auth/password-reset/request') {
+    const r = await authRoutes.requestPasswordReset(req);
+    return send(res, r.status, r.body);
+  }
   if (method === 'POST' && pathname === '/auth/password-reset') {
     const r = await authRoutes.resetPassword(req);
     return send(res, r.status, r.body);
@@ -63,6 +70,14 @@ async function handle(req, res) {
     return send(res, 200, await codeRoutes.get(req, decodeURIComponent(codeProject[1])));
   if (codeProject && method === 'PATCH')
     return send(res, 200, await codeRoutes.update(req, decodeURIComponent(codeProject[1])));
+  if (codeProject && method === 'DELETE')
+    return send(res, 200, await codeRoutes.trash(req, decodeURIComponent(codeProject[1])));
+  const codeRestore = pathname.match(/^\/code-projects\/([^/]+)\/restore$/);
+  if (codeRestore && method === 'POST')
+    return send(res, 200, await codeRoutes.restore(req, decodeURIComponent(codeRestore[1])));
+  const codePurge = pathname.match(/^\/code-projects\/([^/]+)\/purge$/);
+  if (codePurge && method === 'DELETE')
+    return send(res, 200, await codeRoutes.purge(req, decodeURIComponent(codePurge[1])));
 
   if (method === 'POST' && pathname === '/projects')
     return send(res, 201, await projectRoutes.createProject(req));
@@ -73,6 +88,91 @@ async function handle(req, res) {
     return send(res, 200, await projectRoutes.updateProject(req, decodeURIComponent(project[1])));
   if (project && method === 'DELETE')
     return send(res, 200, await projectRoutes.deleteProject(req, decodeURIComponent(project[1])));
+  const projectRestore = pathname.match(/^\/projects\/([^/]+)\/restore$/);
+  if (projectRestore && method === 'POST')
+    return send(
+      res,
+      200,
+      await projectRoutes.restoreProject(req, decodeURIComponent(projectRestore[1])),
+    );
+  const projectPurge = pathname.match(/^\/projects\/([^/]+)\/purge$/);
+  if (projectPurge && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await projectRoutes.purgeProject(req, decodeURIComponent(projectPurge[1])),
+    );
+
+  if (method === 'GET' && pathname === '/news/contributor')
+    return send(res, 200, await newsRoutes.contributor(req));
+  if (method === 'POST' && pathname === '/news/contributor')
+    return send(res, 200, await newsRoutes.applyContributor(req));
+  if (method === 'GET' && pathname === '/news/mine')
+    return send(res, 200, await newsRoutes.mine(req));
+  if (method === 'POST' && pathname === '/news')
+    return send(res, 201, await newsRoutes.create(req));
+  const newsDetail = pathname.match(/^\/news\/public\/([^/]+)$/);
+  if (newsDetail && method === 'GET')
+    return send(res, 200, await newsRoutes.detail(decodeURIComponent(newsDetail[1])));
+  const newsArticle = pathname.match(/^\/news\/([^/]+)$/);
+  if (newsArticle && method === 'PATCH')
+    return send(res, 200, await newsRoutes.update(req, decodeURIComponent(newsArticle[1])));
+  if (newsArticle && method === 'DELETE')
+    return send(res, 200, await newsRoutes.trash(req, decodeURIComponent(newsArticle[1])));
+  const newsSubmit = pathname.match(/^\/news\/([^/]+)\/submit$/);
+  if (newsSubmit && method === 'POST')
+    return send(res, 200, await newsRoutes.submit(req, decodeURIComponent(newsSubmit[1])));
+  const newsRestore = pathname.match(/^\/news\/([^/]+)\/restore$/);
+  if (newsRestore && method === 'POST')
+    return send(res, 200, await newsRoutes.restore(req, decodeURIComponent(newsRestore[1])));
+  const newsPurge = pathname.match(/^\/news\/([^/]+)\/purge$/);
+  if (newsPurge && method === 'DELETE')
+    return send(res, 200, await newsRoutes.purge(req, decodeURIComponent(newsPurge[1])));
+
+  if (method === 'GET' && pathname === '/custom-templates/mine')
+    return send(res, 200, await customTemplateRoutes.mine(req));
+  if (method === 'POST' && pathname === '/custom-templates')
+    return send(res, 201, await customTemplateRoutes.create(req));
+  const customTemplate = pathname.match(/^\/custom-templates\/([^/]+)$/);
+  if (customTemplate && method === 'GET')
+    return send(
+      res,
+      200,
+      await customTemplateRoutes.get(req, decodeURIComponent(customTemplate[1])),
+    );
+  if (customTemplate && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await customTemplateRoutes.update(req, decodeURIComponent(customTemplate[1])),
+    );
+  if (customTemplate && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await customTemplateRoutes.trash(req, decodeURIComponent(customTemplate[1])),
+    );
+  const customAsset = pathname.match(/^\/custom-templates\/([^/]+)\/assets$/);
+  if (customAsset && method === 'POST')
+    return send(
+      res,
+      201,
+      await customTemplateRoutes.uploadAsset(req, decodeURIComponent(customAsset[1])),
+    );
+  const customRestore = pathname.match(/^\/custom-templates\/([^/]+)\/restore$/);
+  if (customRestore && method === 'POST')
+    return send(
+      res,
+      200,
+      await customTemplateRoutes.restore(req, decodeURIComponent(customRestore[1])),
+    );
+  const customPurge = pathname.match(/^\/custom-templates\/([^/]+)\/purge$/);
+  if (customPurge && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await customTemplateRoutes.purge(req, decodeURIComponent(customPurge[1])),
+    );
 
   if (method === 'POST' && pathname === '/publications')
     return send(res, 201, await publicationRoutes.createPublication(req));
@@ -99,6 +199,29 @@ async function handle(req, res) {
     return send(res, 200, await adminRoutes.queue(req));
   if (method === 'GET' && pathname === '/admin/security-events')
     return send(res, 200, await securityRoutes.recentEvents(req));
+  if (method === 'GET' && pathname === '/admin/news')
+    return send(res, 200, await adminNewsRoutes.dashboard(req));
+  const contributorAdmin = pathname.match(/^\/admin\/news\/contributors\/([^/]+)$/);
+  if (contributorAdmin && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await adminNewsRoutes.updateContributor(req, decodeURIComponent(contributorAdmin[1])),
+    );
+  const newsAdmin = pathname.match(/^\/admin\/news\/articles\/([^/]+)$/);
+  if (newsAdmin && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await adminNewsRoutes.updateArticle(req, decodeURIComponent(newsAdmin[1])),
+    );
+  const customTemplateAdmin = pathname.match(/^\/admin\/custom-templates\/([^/]+)$/);
+  if (customTemplateAdmin && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await adminNewsRoutes.updateTemplate(req, decodeURIComponent(customTemplateAdmin[1])),
+    );
   const report = pathname.match(/^\/admin\/reports\/([^/]+)$/);
   if (report && method === 'PATCH')
     return send(res, 200, await adminRoutes.updateReport(req, decodeURIComponent(report[1])));

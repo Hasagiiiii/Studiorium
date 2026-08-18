@@ -19,6 +19,10 @@ async function escrivaninha() {
   } catch (e) {
     return requireLogin();
   }
+  const projects = me.projects.filter((project) => !project.deletedAt);
+  const projectTrash = me.projects.filter((project) => project.deletedAt);
+  const codeProjects = (me.codeProjects || []).filter((project) => !project.deletedAt);
+  const codeTrash = (me.codeProjects || []).filter((project) => project.deletedAt);
   const pending = me.publications.filter((p) => p.status === 'pending_review').length;
   layout(
     html`<section class="pagehero">
@@ -31,7 +35,7 @@ async function escrivaninha() {
           <div class="actions"><button class="outline" data-logout>Sair</button></div>
         </div>
         <div class="stats">
-          <div class="stat"><strong>${me.projects.length}</strong><span>Projetos</span></div>
+          <div class="stat"><strong>${projects.length}</strong><span>Projetos</span></div>
           <div class="stat"><strong>${me.publications.length}</strong><span>Publicações</span></div>
           <div class="stat"><strong>${pending}</strong><span>Em revisão</span></div>
           <div class="stat">
@@ -47,7 +51,12 @@ async function escrivaninha() {
             '/laboratorio',
             'Laboratório de Código',
             'outline',
-          )}${link('/oficina', 'Tech & Oficina', 'outline')}${state.me.role === 'admin'
+          )}${link('/oficina', 'Tech & Oficina', 'outline')}${link(
+            '/redacao',
+            'Redação',
+            'outline',
+          )}${link('/estudio-templates', 'Estúdio de templates', 'outline')}${state.me.role ===
+          'admin'
             ? link('/admin', 'Painel ADM', 'dangerbtn')
             : ''}
         </div>
@@ -55,7 +64,7 @@ async function escrivaninha() {
           <div class="card">
             <div class="eyebrow">Projetos</div>
             <h3>Em sua mesa</h3>
-            ${me.projects
+            ${projects
               .map(
                 (p) =>
                   html`<div class="project">
@@ -97,7 +106,7 @@ async function escrivaninha() {
         <div class="card" style="margin-top:18px">
           <div class="eyebrow">Projetos de código</div>
           <h3>Studiorium Lab</h3>
-          ${(me.codeProjects || [])
+          ${codeProjects
             .map(
               (p) =>
                 html`<div class="project">
@@ -105,7 +114,10 @@ async function escrivaninha() {
                     <h3>${E(p.title)}</h3>
                     <p>${E(p.visibility)} · atualizado ${date(p.updatedAt)}</p>
                   </div>
-                  ${link('/laboratorio/' + encodeURIComponent(p.id), 'Codar', 'outline')}
+                  <div class="actions">
+                    ${link('/laboratorio/' + encodeURIComponent(p.id), 'Codar', 'outline')}
+                    <button class="dangerbtn" data-delete-code-project="${E(p.id)}">Excluir</button>
+                  </div>
                 </div>`,
             )
             .join('') || empty('Você ainda não criou projetos de código.')}
@@ -113,6 +125,52 @@ async function escrivaninha() {
             ${link('/laboratorio', 'Criar projeto de código', 'solid')}
           </div>
         </div>
+        ${projectTrash.length || codeTrash.length
+          ? html`<details class="card trash-panel space-top">
+              <summary>Lixeira (${projectTrash.length + codeTrash.length})</summary>
+              <p class="muted small">
+                Restaure itens ou exclua definitivamente para liberar a lista.
+              </p>
+              ${projectTrash
+                .map(
+                  (project) =>
+                    html`<div class="project">
+                      <div>
+                        <h3>${E(project.title)}</h3>
+                        <p>Documento · ${date(project.deletedAt)}</p>
+                      </div>
+                      <div class="actions">
+                        <button class="outline" data-restore-project="${E(project.id)}">
+                          Restaurar
+                        </button>
+                        <button class="dangerbtn" data-purge-project="${E(project.id)}">
+                          Excluir definitivamente
+                        </button>
+                      </div>
+                    </div>`,
+                )
+                .join('')}
+              ${codeTrash
+                .map(
+                  (project) =>
+                    html`<div class="project">
+                      <div>
+                        <h3>${E(project.title)}</h3>
+                        <p>Código · ${date(project.deletedAt)}</p>
+                      </div>
+                      <div class="actions">
+                        <button class="outline" data-restore-code-project="${E(project.id)}">
+                          Restaurar
+                        </button>
+                        <button class="dangerbtn" data-purge-code-project="${E(project.id)}">
+                          Excluir definitivamente
+                        </button>
+                      </div>
+                    </div>`,
+                )
+                .join('')}
+            </details>`
+          : ''}
         <div class="card" style="margin-top:18px">
           <div class="eyebrow">Perfil</div>
           <h3>Identidade acadêmica</h3>
@@ -133,6 +191,8 @@ async function escrivaninha() {
                     'designer',
                     'instituicao',
                     'criador',
+                    'jornalista',
+                    'comunicador',
                   ]
                     .map(
                       (x) =>
