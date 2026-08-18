@@ -11,7 +11,7 @@ function config() {
   return {
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseSecretKey: supabaseKey,
-    adminEmail: String(process.env.STUDIORIUM_ADMIN_EMAIL || '').trim().toLowerCase(),
+    adminEmail: String(process.env.STUDIORIUM_ADMIN_EMAIL || 'umaduplagamer@gmail.com').trim().toLowerCase(),
     sessionDays: 14,
     maxBodyBytes: 8_000_000,
     maxUploadBytes: 5 * 1024 * 1024,
