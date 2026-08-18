@@ -33,6 +33,19 @@ create table if not exists public.sessions (
 create index if not exists sessions_user_id_idx on public.sessions(user_id);
 create index if not exists sessions_expires_at_idx on public.sessions(expires_at);
 
+create table if not exists public.password_reset_tokens (
+  token_hash text primary key,
+  user_id text not null references public.users(id) on delete cascade,
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  created_at timestamptz not null default now(),
+  constraint password_reset_token_hash_length check (length(token_hash) = 64)
+);
+create index if not exists password_reset_tokens_user_idx
+  on public.password_reset_tokens(user_id);
+create index if not exists password_reset_tokens_expires_idx
+  on public.password_reset_tokens(expires_at);
+
 create table if not exists public.templates (
   id text primary key,
   title text not null,
@@ -201,6 +214,7 @@ alter table public.site_settings enable row level security;
 alter table public.admin_audit_log enable row level security;
 alter table public.auth_rate_limits enable row level security;
 alter table public.security_events enable row level security;
+alter table public.password_reset_tokens enable row level security;
 
 insert into storage.buckets (id, name, public, file_size_limit)
 values ('publications', 'publications', false, 5242880)
@@ -231,12 +245,52 @@ $$;
 revoke all on function public.increment_publication_views(text) from public, anon, authenticated;
 revoke all on function public.increment_publication_downloads(text) from public, anon, authenticated;
 
+create or replace function public.complete_password_reset(
+  p_token_hash text,
+  p_password_hash text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  reset_user_id text;
+begin
+  update public.password_reset_tokens
+  set used_at = now()
+  where token_hash = p_token_hash
+    and used_at is null
+    and expires_at > now()
+  returning user_id into reset_user_id;
+
+  if reset_user_id is null then
+    return false;
+  end if;
+
+  update public.users
+  set password_hash = p_password_hash
+  where id = reset_user_id;
+
+  delete from public.sessions
+  where user_id = reset_user_id;
+
+  return true;
+end;
+$$;
+
+revoke all on table public.password_reset_tokens from public, anon, authenticated;
+revoke all on function public.complete_password_reset(text, text)
+  from public, anon, authenticated;
+
 grant all on table public.users, public.profiles, public.sessions, public.templates, public.projects,
   public.publications, public.discussions, public.replies, public.reports, public.site_settings,
   public.admin_audit_log, public.auth_rate_limits, public.security_events to service_role;
+grant select, insert, update, delete on table public.password_reset_tokens to service_role;
 grant usage, select on all sequences in schema public to service_role;
 grant execute on function public.increment_publication_views(text) to service_role;
 grant execute on function public.increment_publication_downloads(text) to service_role;
+grant execute on function public.complete_password_reset(text, text) to service_role;
 
 -- Studiorium v2.3 — Tecnologia, Oficina e Laboratório de Código
 create table if not exists public.tech_resources (

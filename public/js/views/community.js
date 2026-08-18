@@ -148,6 +148,52 @@ function login() {
   );
 }
 
+function resetPassword() {
+  const rawToken = new URLSearchParams(location.hash.slice(1)).get('token') || '';
+  const hasValidToken = /^[a-f0-9]{64}$/.test(rawToken);
+
+  layout(
+    html`<div class="authwrap">
+      <div class="authcard">
+        <div class="eyebrow">Securitas</div>
+        <h1>Redefinir senha</h1>
+        ${hasValidToken
+          ? html`<p>Crie uma nova senha para a conta administradora.</p>
+              <form data-password-reset>
+                <div class="formrow">
+                  <label class="label">Nova senha</label>
+                  <input
+                    class="field"
+                    type="password"
+                    name="newPassword"
+                    minlength="12"
+                    maxlength="128"
+                    required
+                    autocomplete="new-password"
+                  />
+                </div>
+                <div class="formrow">
+                  <label class="label">Confirmar nova senha</label>
+                  <input
+                    class="field"
+                    type="password"
+                    name="confirmPassword"
+                    minlength="12"
+                    maxlength="128"
+                    required
+                    autocomplete="new-password"
+                  />
+                </div>
+                <button class="solid" style="width:100%">Salvar nova senha</button>
+              </form>`
+          : html`<p>Este link é inválido ou está incompleto.</p>
+              ${link('/login', 'Voltar ao login', 'outline')}`}
+      </div>
+    </div>`,
+    { noFooter: true },
+  );
+}
+
 function cadastro() {
   const open = state.boot?.settings?.registrations_open !== false;
   if (!open) {
@@ -217,4 +263,4 @@ function cadastro() {
   );
 }
 
-export { coloquio, thread, login, cadastro };
+export { coloquio, thread, login, resetPassword, cadastro };

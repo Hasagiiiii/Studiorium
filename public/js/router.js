@@ -11,6 +11,7 @@ import {
   coloquio,
   thread,
   login,
+  resetPassword,
   cadastro,
   escrivaninha,
   editor,
@@ -69,6 +70,7 @@ async function renderRoute() {
   if (p.startsWith('/coloquio/') || p.startsWith('/comunidade/'))
     return await thread(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/login') return login();
+  if (p === '/redefinir-senha') return resetPassword();
   if (p === '/cadastro') return cadastro();
   if (['/escrivaninha', '/dashboard'].includes(p)) return await escrivaninha();
   if (p === '/editor/novo') {

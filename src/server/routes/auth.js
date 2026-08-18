@@ -212,6 +212,52 @@ async function changePassword(req, res) {
   return { status: 200, body: { ok: true } };
 }
 
+async function resetPassword(req) {
+  const body = await readJson(req);
+  const rawToken = String(body.token || '').trim();
+  const newPassword = String(body.newPassword || '');
+  const limiterIdentity = tokenHash(rawToken);
+
+  await assertAuthAllowed(req, 'password-reset', limiterIdentity);
+
+  if (!/^[a-f0-9]{64}$/.test(rawToken)) {
+    throw Object.assign(new Error('Link inválido, expirado ou já utilizado.'), {
+      statusCode: 410,
+    });
+  }
+  if (newPassword.length < 12 || newPassword.length > 128) {
+    throw Object.assign(new Error('A nova senha precisa ter entre 12 e 128 caracteres.'), {
+      statusCode: 400,
+    });
+  }
+
+  const { data: completed, error } = await db().rpc('complete_password_reset', {
+    p_token_hash: limiterIdentity,
+    p_password_hash: hashPassword(newPassword),
+  });
+  fail(error);
+
+  if (completed !== true) {
+    const limit = await recordAuthFailure(req, 'password-reset', limiterIdentity, {
+      maxAttempts: 8,
+      windowMs: 15 * 60 * 1000,
+      blockMs: 15 * 60 * 1000,
+    });
+    await logSecurityEvent(req, 'auth.password_reset_failed', {
+      details: { attempts: limit.attempts, blocked: limit.blocked },
+    });
+    throw Object.assign(new Error('Link inválido, expirado ou já utilizado.'), {
+      statusCode: limit.blocked ? 429 : 410,
+    });
+  }
+
+  await clearAuthFailures(req, 'password-reset', limiterIdentity);
+  await logSecurityEvent(req, 'auth.password_reset_completed', {
+    details: { sessionsRevoked: true },
+  });
+  return { status: 200, body: { ok: true } };
+}
+
 async function logout(req, res) {
   const raw = parseCookies(req).studiorium_session;
   if (raw) await db().from('sessions').delete().eq('token_hash', tokenHash(raw));
@@ -219,4 +265,4 @@ async function logout(req, res) {
   return { status: 200, body: { ok: true } };
 }
 
-module.exports = { register, login, changePassword, logout };
+module.exports = { register, login, changePassword, resetPassword, logout };

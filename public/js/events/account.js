@@ -32,6 +32,32 @@ export async function handleAccountSubmit(event) {
     return true;
   }
 
+  if (form.matches('[data-password-reset]')) {
+    event.preventDefault();
+    const values = formObj(form);
+    const rawToken = new URLSearchParams(location.hash.slice(1)).get('token') || '';
+
+    if (!/^[a-f0-9]{64}$/.test(rawToken)) {
+      toast('O link de redefinição é inválido.', true);
+      return true;
+    }
+    if (values.newPassword !== values.confirmPassword) {
+      toast('As senhas informadas não coincidem.', true);
+      return true;
+    }
+
+    await api('/api/auth/password-reset', {
+      method: 'POST',
+      body: JSON.stringify({ token: rawToken, newPassword: values.newPassword }),
+    });
+    history.replaceState({}, '', '/login');
+    state.me = null;
+    if (state.boot) state.boot.user = null;
+    await render();
+    toast('Senha redefinida. Entre com a nova senha.');
+    return true;
+  }
+
   if (form.matches('[data-profile]')) {
     event.preventDefault();
     const values = formObj(form);
