@@ -1,7 +1,6 @@
 const { db } = require('./db');
 const { parseCookies } = require('./http');
 const { tokenHash } = require('./security');
-const { config } = require('./config');
 
 async function currentUser(req) {
   const rawToken = parseCookies(req).studiorium_session;
@@ -12,10 +11,6 @@ async function currentUser(req) {
   const { data: user, error: userError } = await db().from('users').select('*').eq('id', session.user_id).maybeSingle();
   if (userError || !user) return null;
   if ((user.status || 'active') === 'suspended') return null;
-  if (config().adminEmail && user.email === config().adminEmail && user.role !== 'admin') {
-    await db().from('users').update({ role: 'admin' }).eq('id', user.id);
-    user.role = 'admin';
-  }
   return user;
 }
 
