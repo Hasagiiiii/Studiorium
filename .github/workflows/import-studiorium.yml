@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .studiorium.part00 .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04 > studiorium.b64
+          cat .studiorium.part00a .studiorium.part00b .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04 > studiorium.b64
           base64 --decode studiorium.b64 > studiorium-source.tgz
           echo '479902c72dfe6056f53789329b74d3ac4601fdd7aba840202f0a5d41edd99ee5  studiorium-source.tgz' | sha256sum -c -
 
@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           tar -xzf studiorium-source.tgz --strip-components=1
-          rm -f studiorium.b64 studiorium-source.tgz .studiorium.part00 .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04
+          rm -f studiorium.b64 studiorium-source.tgz .studiorium.part00 .studiorium.part00a .studiorium.part00b .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04
           rm -f .github/workflows/import-studiorium.yml
           rmdir .github/workflows 2>/dev/null || true
           rmdir .github 2>/dev/null || true
