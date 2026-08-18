@@ -1,0 +1,220 @@
+-- Studiorium Online — Supabase schema
+create extension if not exists pgcrypto;
+
+create table if not exists public.users (
+  id text primary key,
+  email text not null unique,
+  password_hash text not null,
+  role text not null default 'user' check (role in ('user','admin')),
+  status text not null default 'active' check (status in ('active','suspended')),
+  suspension_reason text not null default '',
+  suspended_at timestamptz,
+  is_minor boolean not null default false,
+  birth_year integer not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.profiles (
+  user_id text primary key,
+  username text not null unique,
+  display_name text not null,
+  bio text not null default '',
+  profile_type text not null default 'estudante',
+  is_public boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.sessions (
+  token_hash text primary key,
+  user_id text not null references public.users(id) on delete cascade,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists sessions_user_id_idx on public.sessions(user_id);
+create index if not exists sessions_expires_at_idx on public.sessions(expires_at);
+
+create table if not exists public.templates (
+  id text primary key,
+  title text not null,
+  slug text not null unique,
+  category text not null,
+  doc_type text not null,
+  style text not null default 'Clássico',
+  description text not null default '',
+  downloads integer not null default 0,
+  featured boolean not null default false,
+  sections jsonb not null default '[]'::jsonb
+);
+
+create table if not exists public.projects (
+  id text primary key,
+  user_id text not null references public.users(id) on delete cascade,
+  title text not null,
+  template_id text references public.templates(id) on delete set null,
+  type text not null,
+  sections jsonb not null default '[]'::jsonb,
+  notes text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists projects_user_id_idx on public.projects(user_id);
+
+create table if not exists public.publications (
+  id text primary key,
+  owner_id text not null,
+  author_name text not null,
+  title text not null,
+  slug text not null unique,
+  abstract text not null,
+  content text not null default '',
+  area text not null default 'Geral',
+  level text not null default 'Não informado',
+  keywords text[] not null default '{}',
+  license text not null default 'Todos os direitos reservados',
+  status text not null default 'pending_review' check (status in ('pending_review','published','rejected')),
+  views integer not null default 0,
+  downloads integer not null default 0,
+  featured boolean not null default false,
+  file_path text,
+  file_name text,
+  file_mime text,
+  moderation_note text not null default '',
+  created_at timestamptz not null default now(),
+  published_at timestamptz
+);
+create index if not exists publications_owner_idx on public.publications(owner_id);
+create index if not exists publications_status_created_idx on public.publications(status, created_at desc);
+
+create table if not exists public.discussions (
+  id text primary key,
+  author_id text not null,
+  author_name text not null,
+  title text not null,
+  body text not null,
+  category text not null default 'Geral',
+  status text not null default 'published' check (status in ('published','hidden','pending_review')),
+  created_at timestamptz not null default now()
+);
+create index if not exists discussions_status_created_idx on public.discussions(status, created_at desc);
+
+create table if not exists public.replies (
+  id text primary key,
+  discussion_id text not null references public.discussions(id) on delete cascade,
+  author_id text not null,
+  author_name text not null,
+  body text not null,
+  status text not null default 'published' check (status in ('published','hidden','pending_review')),
+  created_at timestamptz not null default now()
+);
+create index if not exists replies_discussion_idx on public.replies(discussion_id, created_at);
+
+create table if not exists public.reports (
+  id text primary key,
+  reporter_id text not null references public.users(id) on delete cascade,
+  target_type text not null check (target_type in ('publication','discussion','reply')),
+  target_id text not null,
+  category text not null,
+  description text not null default '',
+  status text not null default 'open' check (status in ('open','reviewing','resolved','dismissed')),
+  priority text not null default 'normal' check (priority in ('normal','urgent')),
+  moderator_note text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists reports_queue_idx on public.reports(status, priority, created_at desc);
+
+-- Atualizações idempotentes para projetos que já executaram uma versão anterior do schema.
+alter table public.users add column if not exists status text not null default 'active';
+alter table public.users add column if not exists suspension_reason text not null default '';
+alter table public.users add column if not exists suspended_at timestamptz;
+alter table public.publications add column if not exists featured boolean not null default false;
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'users_status_check') then
+    alter table public.users add constraint users_status_check check (status in ('active','suspended'));
+  end if;
+end $$;
+
+create table if not exists public.site_settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_audit_log (
+  id bigint generated by default as identity primary key,
+  admin_id text not null,
+  action text not null,
+  target_type text not null default 'system',
+  target_id text not null default '',
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists admin_audit_created_idx on public.admin_audit_log(created_at desc);
+
+-- O navegador nunca acessa estas tabelas diretamente. A API usa service role.
+alter table public.users enable row level security;
+alter table public.profiles enable row level security;
+alter table public.sessions enable row level security;
+alter table public.templates enable row level security;
+alter table public.projects enable row level security;
+alter table public.publications enable row level security;
+alter table public.discussions enable row level security;
+alter table public.replies enable row level security;
+alter table public.reports enable row level security;
+alter table public.site_settings enable row level security;
+alter table public.admin_audit_log enable row level security;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('publications', 'publications', false, 5242880)
+on conflict (id) do update set public = false, file_size_limit = 5242880;
+
+create or replace function public.increment_publication_views(p_id text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.publications
+  set views = views + 1
+  where id = p_id and status = 'published';
+$$;
+
+create or replace function public.increment_publication_downloads(p_id text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.publications
+  set downloads = downloads + 1
+  where id = p_id;
+$$;
+
+revoke all on function public.increment_publication_views(text) from public, anon, authenticated;
+revoke all on function public.increment_publication_downloads(text) from public, anon, authenticated;
+
+grant all on table public.users, public.profiles, public.sessions, public.templates, public.projects,
+  public.publications, public.discussions, public.replies, public.reports, public.site_settings, public.admin_audit_log to service_role;
+grant execute on function public.increment_publication_views(text) to service_role;
+grant execute on function public.increment_publication_downloads(text) to service_role;
+
+-- Studiorium v2.3 — Tecnologia, Oficina e Laboratório de Código
+create table if not exists public.tech_resources (
+ id text primary key, owner_id text not null references public.users(id) on delete cascade, author_name text not null,
+ title text not null, slug text not null unique, summary text not null default '', body text not null default '',
+ hub text not null default 'Tecnologia', category text not null default 'Tutorial', tags text[] not null default '{}',
+ status text not null default 'pending_review' check(status in ('pending_review','published','rejected','hidden')),
+ featured boolean not null default false, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create index if not exists tech_resources_hub_idx on public.tech_resources(hub,status,created_at desc);
+create table if not exists public.code_projects (
+ id text primary key, owner_id text not null references public.users(id) on delete cascade, title text not null, description text not null default '',
+ html text not null default '', css text not null default '', javascript text not null default '', visibility text not null default 'private' check(visibility in ('private','public')),
+ created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create index if not exists code_projects_owner_idx on public.code_projects(owner_id,updated_at desc);
+alter table public.tech_resources enable row level security;
+alter table public.code_projects enable row level security;
+grant all on table public.tech_resources, public.code_projects to service_role;

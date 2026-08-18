@@ -1,0 +1,8 @@
+export { link, nav, footer, layout, empty, templateCard, publicationCard, discussionRow } from './views/core.js';
+export { home, biblioteca, acervo, templateDetail } from './views/home-library.js';
+export { pesquisas, researchDetail, autores, authorDetail } from './views/research.js';
+export { coloquio, thread, login, cadastro } from './views/community.js';
+export { escrivaninha, editor, publicar } from './views/workspace.js';
+export { atelie, syncPoster, diretrizes, sobre } from './views/atelier-about.js';
+export { adminPanel, moderacao } from './views/admin.js';
+export { oficina, laboratorio, runCodePreview, requireLogin, notFound } from './views/tech.js';
