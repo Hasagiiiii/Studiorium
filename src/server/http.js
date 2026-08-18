@@ -39,15 +39,24 @@ async function readJson(req) {
   });
 }
 
+function applyApiSecurityHeaders(res) {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('X-Frame-Options', 'DENY');
+}
+
 function send(res, status, body) {
   res.statusCode = status;
+  applyApiSecurityHeaders(res);
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(body));
 }
 
 function setSessionCookie(res, value, maxAge) {
   const secure = process.env.VERCEL || process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `studiorium_session=${encodeURIComponent(value)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}${secure}`);
+  res.setHeader('Set-Cookie', `studiorium_session=${encodeURIComponent(value)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}; Priority=High${secure}`);
 }
 
 function assertSameOrigin(req) {
@@ -68,4 +77,4 @@ function assertSameOrigin(req) {
   }
 }
 
-module.exports = { parseCookies, readJson, send, setSessionCookie, assertSameOrigin };
+module.exports = { parseCookies, readJson, send, setSessionCookie, assertSameOrigin, applyApiSecurityHeaders };
