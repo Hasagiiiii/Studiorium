@@ -1,10 +1,8 @@
 name: Importar Studiorium
 
 on:
-  push:
+  pull_request:
     branches: [main]
-    paths:
-      - '.github/workflows/import-studiorium.yml'
 
 permissions:
   contents: write
@@ -13,9 +11,10 @@ jobs:
   importar:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar repositório
+      - name: Baixar branch da importação
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Montar e validar pacote
@@ -31,12 +30,12 @@ jobs:
         run: |
           set -euo pipefail
           tar -xzf studiorium-source.tgz --strip-components=1
-          rm -f studiorium.b64 studiorium-source.tgz .studiorium.part00 .studiorium.part00a .studiorium.part00b .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04
+          rm -f studiorium.b64 studiorium-source.tgz .studiorium.part00 .studiorium.part00a .studiorium.part00b .studiorium.part01 .studiorium.part02 .studiorium.part03 .studiorium.part04 .trigger-import
           rm -f .github/workflows/import-studiorium.yml
           rmdir .github/workflows 2>/dev/null || true
           rmdir .github 2>/dev/null || true
 
-      - name: Publicar versão final
+      - name: Publicar versão final na branch
         shell: bash
         run: |
           set -euo pipefail
@@ -44,4 +43,4 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           git commit -m 'Publica Studiorium v2.3'
-          git push origin main
+          git push origin HEAD:${{ github.head_ref }}
