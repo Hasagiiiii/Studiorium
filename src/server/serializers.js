@@ -33,6 +33,7 @@ function project(row) {
     notes: row.notes || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deletedAt: row.deleted_at || null,
   };
 }
 function publication(row) {
@@ -144,6 +145,64 @@ function codeProject(row) {
     visibility: row.visibility || 'private',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deletedAt: row.deleted_at || null,
+  };
+}
+
+function newsContributor(row) {
+  if (!row) return null;
+  return {
+    userId: row.user_id,
+    status: row.status,
+    area: row.area || '',
+    institution: row.institution || '',
+    portfolioUrl: row.portfolio_url || '',
+    statement: row.statement || '',
+    reviewerId: row.reviewer_id || null,
+    reviewNote: row.review_note || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function newsArticle(row) {
+  return {
+    id: row.id,
+    contributorId: row.contributor_id,
+    authorName: row.author_name,
+    title: row.title,
+    slug: row.slug,
+    summary: row.summary,
+    body: row.body,
+    category: row.category,
+    sources: row.sources || [],
+    status: row.status,
+    aiReviewStatus: row.ai_review_status,
+    aiReview: row.ai_review || {},
+    editorialNote: row.editorial_note || '',
+    featured: row.featured === true,
+    certifiedBy: row.certified_by || null,
+    certifiedAt: row.certified_at || null,
+    publishedAt: row.published_at || null,
+    deletedAt: row.deleted_at || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function customTemplate(row) {
+  return {
+    id: row.id,
+    ownerId: row.owner_id,
+    title: row.title,
+    description: row.description || '',
+    document: row.document || { settings: {}, blocks: [] },
+    sourceType: row.source_type || 'editor',
+    status: row.status || 'private',
+    featured: row.featured === true,
+    deletedAt: row.deleted_at || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 module.exports = {
@@ -157,4 +216,7 @@ module.exports = {
   adminUser,
   techResource,
   codeProject,
+  newsContributor,
+  newsArticle,
+  customTemplate,
 };

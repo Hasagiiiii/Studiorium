@@ -141,7 +141,30 @@ function login() {
           />
         </div>
         <button class="solid" style="width:100%">Entrar</button>
+        <p class="small">${link('/recuperar-senha', 'Esqueci minha senha')}</p>
         <p class="small">Ainda não tem conta? ${link('/cadastro', 'Criar conta.')}</p>
+      </form>
+    </div>`,
+    { noFooter: true },
+  );
+}
+
+function requestPasswordReset() {
+  layout(
+    html`<div class="authwrap">
+      <form class="authcard" data-password-reset-request>
+        <div class="eyebrow">Recuperatio</div>
+        <h1>Recuperar acesso</h1>
+        <p>
+          Informe o e-mail da conta. Se ele estiver cadastrado, enviaremos um link válido por 30
+          minutos.
+        </p>
+        <div class="formrow">
+          <label class="label">E-mail</label>
+          <input class="field" type="email" name="email" required autocomplete="email" />
+        </div>
+        <button class="solid full-button">Enviar link seguro</button>
+        <p class="small">${link('/login', 'Voltar ao login')}</p>
       </form>
     </div>`,
     { noFooter: true },
@@ -263,4 +286,4 @@ function cadastro() {
   );
 }
 
-export { coloquio, thread, login, resetPassword, cadastro };
+export { coloquio, thread, login, requestPasswordReset, resetPassword, cadastro };

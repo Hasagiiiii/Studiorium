@@ -19,6 +19,7 @@ function adminTabs(active) {
     ['publicacoes', '/admin/publicacoes', 'Publicações'],
     ['coloquio', '/admin/coloquio', 'Colóquio'],
     ['acervo', '/admin/acervo', 'Acervo'],
+    ['noticias', '/admin/noticias', 'Notícias'],
     ['configuracoes', '/admin/configuracoes', 'Configurações'],
     ['registro', '/admin/registro', 'Registro'],
   ];
@@ -491,6 +492,130 @@ async function adminPanel(tab = 'overview') {
           )
           .join('')}
       </div>`,
+    );
+  }
+  if (tab === 'noticias') {
+    const editorial = await api('/api/admin/news');
+    const pendingContributors = editorial.contributors.filter((item) => item.status === 'pending');
+    const reviewArticles = editorial.articles.filter((item) =>
+      ['editorial_review', 'changes_requested'].includes(item.status),
+    );
+    const pendingTemplates = editorial.templates.filter((item) => item.status === 'pending_review');
+    return adminShell(
+      'noticias',
+      'Redação e templates livres',
+      'Aprovação humana obrigatória para colaboradores, matérias e modelos da comunidade.',
+      html`<div class="grid grid2">
+          <section class="card">
+            <div class="eyebrow">Credenciamento</div>
+            <h2>Novos colaboradores</h2>
+            ${pendingContributors
+              .map(
+                (item) =>
+                  html`<div class="admin-row">
+                    <div>
+                      <strong>${E(item.area)}</strong>
+                      <small
+                        >${E(item.institution || 'Sem instituição')} ·
+                        ${E(item.statement.slice(0, 180))}</small
+                      >
+                    </div>
+                    <div class="actions">
+                      <button class="solid" data-admin-contributor="${E(item.userId)}:approved">
+                        Aprovar
+                      </button>
+                      <button class="dangerbtn" data-admin-contributor="${E(item.userId)}:rejected">
+                        Rejeitar
+                      </button>
+                    </div>
+                  </div>`,
+              )
+              .join('') || empty('Nenhum credenciamento aguardando.')}
+          </section>
+          <section class="card">
+            <div class="eyebrow">Templates livres</div>
+            <h2>Modelos aguardando</h2>
+            ${pendingTemplates
+              .map(
+                (template) =>
+                  html`<div class="admin-row">
+                    <div>
+                      <strong>${E(template.title)}</strong><small>${E(template.description)}</small>
+                    </div>
+                    <div class="actions">
+                      <button
+                        class="solid"
+                        data-admin-custom-template="${E(template.id)}:published"
+                      >
+                        Publicar
+                      </button>
+                      <button
+                        class="dangerbtn"
+                        data-admin-custom-template="${E(template.id)}:rejected"
+                      >
+                        Rejeitar
+                      </button>
+                    </div>
+                  </div>`,
+              )
+              .join('') || empty('Nenhum template aguardando.')}
+          </section>
+        </div>
+        <div class="sectionhead section-gap">
+          <div>
+            <div class="eyebrow">Certificação</div>
+            <h2>Matérias em revisão</h2>
+          </div>
+        </div>
+        <div class="admin-list">
+          ${reviewArticles
+            .map(
+              (article) =>
+                html`<article class="card">
+                  <div class="sectionhead">
+                    <div>
+                      <div class="eyebrow">${E(article.category)}</div>
+                      <h3>${E(article.title)}</h3>
+                    </div>
+                    <span class="badge status-${E(article.aiReviewStatus)}"
+                      >IA: ${E(article.aiReviewStatus)}</span
+                    >
+                  </div>
+                  <p>${E(article.summary)}</p>
+                  <details class="review-details">
+                    <summary>Ver texto, fontes e triagem</summary>
+                    <p class="article-preview">${E(article.body)}</p>
+                    <ul>
+                      ${article.sources
+                        .map(
+                          (source) =>
+                            html`<li>
+                              <a href="${E(source.url)}" target="_blank" rel="noopener"
+                                >${E(source.title)} ↗</a
+                              >
+                            </li>`,
+                        )
+                        .join('')}
+                    </ul>
+                    <div class="notice">
+                      ${E(article.aiReview?.summary || 'Sem resumo da triagem.')}
+                    </div>
+                  </details>
+                  <div class="actions admin-actions">
+                    <button class="solid" data-admin-news="${E(article.id)}:published">
+                      Certificar e publicar
+                    </button>
+                    <button class="outline" data-admin-news="${E(article.id)}:changes_requested">
+                      Pedir alterações
+                    </button>
+                    <button class="dangerbtn" data-admin-news="${E(article.id)}:rejected">
+                      Rejeitar
+                    </button>
+                  </div>
+                </article>`,
+            )
+            .join('') || empty('Nenhuma matéria aguardando certificação.')}
+        </div>`,
     );
   }
   if (tab === 'configuracoes') {

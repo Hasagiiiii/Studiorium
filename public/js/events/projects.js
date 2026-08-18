@@ -73,12 +73,63 @@ export async function handleProjectClick(event) {
   const deleteButton = event.target.closest('[data-delete-project]');
 
   if (deleteButton) {
-    if (!confirm('Excluir este projeto?')) return true;
+    if (!confirm('Mover este projeto para a lixeira?')) return true;
 
     await api(`/api/projects/${encodeURIComponent(deleteButton.dataset.deleteProject)}`, {
       method: 'DELETE',
     });
-    toast('Projeto excluído.');
+    toast('Projeto movido para a lixeira.');
+    await render();
+    return true;
+  }
+
+  const deleteCode = event.target.closest('[data-delete-code-project]');
+  if (deleteCode) {
+    if (!confirm('Mover este projeto de código para a lixeira?')) return true;
+    await api(`/api/code-projects/${encodeURIComponent(deleteCode.dataset.deleteCodeProject)}`, {
+      method: 'DELETE',
+    });
+    toast('Projeto de código movido para a lixeira.');
+    await render();
+    return true;
+  }
+
+  for (const [attribute, resource, endpoint, method, question, message] of [
+    ['restoreProject', 'projects', '/restore', 'POST', '', 'Projeto restaurado.'],
+    [
+      'purgeProject',
+      'projects',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente este projeto?',
+      'Projeto excluído definitivamente.',
+    ],
+    [
+      'restoreCodeProject',
+      'code-projects',
+      '/restore',
+      'POST',
+      '',
+      'Projeto de código restaurado.',
+    ],
+    [
+      'purgeCodeProject',
+      'code-projects',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente este projeto de código?',
+      'Projeto de código excluído definitivamente.',
+    ],
+  ]) {
+    const name = attribute.replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
+    const button = event.target.closest(`[data-${name}]`);
+    if (!button) continue;
+    if (question && !confirm(question)) return true;
+    await api(`/api/${resource}/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
+      method,
+      body: method === 'POST' ? '{}' : undefined,
+    });
+    toast(message);
     await render();
     return true;
   }

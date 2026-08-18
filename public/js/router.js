@@ -11,6 +11,7 @@ import {
   coloquio,
   thread,
   login,
+  requestPasswordReset,
   resetPassword,
   cadastro,
   escrivaninha,
@@ -25,6 +26,12 @@ import {
   sobre,
   requireLogin,
   notFound,
+  noticias,
+  newsDetail,
+  redacao,
+  templateStudio,
+  templateEditor,
+  publicCustomTemplate,
 } from './views.js';
 
 export function goto(path) {
@@ -70,7 +77,18 @@ async function renderRoute() {
   if (p.startsWith('/coloquio/') || p.startsWith('/comunidade/'))
     return await thread(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/login') return login();
+  if (p === '/recuperar-senha') return requestPasswordReset();
   if (p === '/redefinir-senha') return resetPassword();
+  if (p === '/noticias') return noticias();
+  if (p.startsWith('/noticias/'))
+    return await newsDetail(decodeURIComponent(p.split('/')[2] || ''));
+  if (p === '/redacao') return await redacao();
+  if (p.startsWith('/redacao/')) return await redacao(decodeURIComponent(p.split('/')[2] || ''));
+  if (p === '/estudio-templates') return await templateStudio();
+  if (p.startsWith('/estudio-templates/'))
+    return await templateEditor(decodeURIComponent(p.split('/')[2] || ''));
+  if (p.startsWith('/modelos-livres/'))
+    return await publicCustomTemplate(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/cadastro') return cadastro();
   if (['/escrivaninha', '/dashboard'].includes(p)) return await escrivaninha();
   if (p === '/editor/novo') {
@@ -92,6 +110,7 @@ async function renderRoute() {
   if (p === '/admin/publicacoes') return await adminPanel('publicacoes');
   if (p === '/admin/coloquio') return await adminPanel('coloquio');
   if (p === '/admin/acervo') return await adminPanel('acervo');
+  if (p === '/admin/noticias') return await adminPanel('noticias');
   if (p === '/admin/configuracoes') return await adminPanel('configuracoes');
   if (p === '/admin/registro') return await adminPanel('registro');
   if (p === '/diretrizes') return diretrizes();

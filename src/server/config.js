@@ -19,6 +19,10 @@ function config() {
     sessionDays: 14,
     maxBodyBytes: 8_000_000,
     maxUploadBytes: 5 * 1024 * 1024,
+    siteUrl: String(process.env.STUDIORIUM_SITE_URL || 'https://studiorium.vercel.app').replace(
+      /\/+$/,
+      '',
+    ),
   };
 }
 module.exports = { config };

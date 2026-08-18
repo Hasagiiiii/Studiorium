@@ -3,6 +3,7 @@ const { requireAdmin } = require('../auth');
 const { readJson } = require('../http');
 const { now } = require('../security');
 const { config } = require('../config');
+const { audit } = require('../admin-audit');
 const S = require('../serializers');
 
 const settingKeys = new Set([
@@ -13,20 +14,6 @@ const settingKeys = new Set([
   'registrations_open',
   'maintenance_mode',
 ]);
-
-async function audit(admin, action, targetType = 'system', targetId = '', details = {}) {
-  const { error } = await db()
-    .from('admin_audit_log')
-    .insert({
-      admin_id: admin.id,
-      action: String(action).slice(0, 100),
-      target_type: String(targetType).slice(0, 80),
-      target_id: String(targetId || '').slice(0, 160),
-      details,
-      created_at: now(),
-    });
-  if (error) console.error('[Studiorium audit]', error.message || error);
-}
 
 function settingsObject(rows = []) {
   return Object.fromEntries(rows.map((row) => [row.key, row.value]));

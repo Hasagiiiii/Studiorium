@@ -7,12 +7,16 @@ import { handleCommunityClick, handleCommunitySubmit } from './events/community.
 import { handleFilterSubmit } from './events/filters.js';
 import { handleNavigationClick } from './events/navigation.js';
 import { handleProjectClick } from './events/projects.js';
+import { handleNewsClick, handleNewsSubmit } from './events/news.js';
+import { handleTemplateClick, handleTemplateChange } from './events/template-studio.js';
 
 const clickHandlers = [
   handleNavigationClick,
   handleProjectClick,
   handleCommunityClick,
   handleAdminClick,
+  handleNewsClick,
+  handleTemplateClick,
 ];
 
 const submitHandlers = [
@@ -20,6 +24,7 @@ const submitHandlers = [
   handleAdminSubmit,
   handleAccountSubmit,
   handleCommunitySubmit,
+  handleNewsSubmit,
 ];
 
 async function dispatch(event, handlers) {
@@ -45,6 +50,10 @@ export function bindEvents() {
 
   addEventListener('input', (event) => {
     if (event.target.closest('[data-poster-form]')) syncPoster();
+  });
+
+  addEventListener('change', (event) => {
+    void handleTemplateChange(event).catch(reportFailure);
   });
 
   addEventListener('popstate', () => {

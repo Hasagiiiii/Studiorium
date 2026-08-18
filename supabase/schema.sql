@@ -314,6 +314,108 @@ create table if not exists public.code_projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Studiorium v2.9 — redação colaborativa e estúdio de templates.
+create table if not exists public.news_contributors (
+  user_id text primary key references public.users(id) on delete cascade,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'rejected')),
+  area text not null default '',
+  institution text not null default '',
+  portfolio_url text not null default '',
+  statement text not null default '',
+  reviewer_id text,
+  review_note text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.news_articles (
+  id text primary key,
+  contributor_id text references public.users(id) on delete set null,
+  author_name text not null,
+  title text not null,
+  slug text not null unique,
+  summary text not null,
+  body text not null,
+  category text not null default 'Atualizações',
+  sources jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(sources) = 'array'),
+  status text not null default 'draft'
+    check (
+      status in (
+        'draft',
+        'ai_review',
+        'editorial_review',
+        'changes_requested',
+        'published',
+        'rejected',
+        'archived'
+      )
+    ),
+  ai_review_status text not null default 'pending'
+    check (ai_review_status in ('pending', 'approved', 'flagged', 'unavailable')),
+  ai_review jsonb not null default '{}'::jsonb,
+  editorial_note text not null default '',
+  featured boolean not null default false,
+  certified_by text,
+  certified_at timestamptz,
+  published_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists news_articles_public_idx
+  on public.news_articles(featured desc, published_at desc)
+  where status = 'published' and certified_at is not null and deleted_at is null;
+create index if not exists news_articles_contributor_idx
+  on public.news_articles(contributor_id, updated_at desc);
+create index if not exists news_articles_review_idx
+  on public.news_articles(status, updated_at desc)
+  where deleted_at is null;
+
+create table if not exists public.custom_templates (
+  id text primary key,
+  owner_id text not null references public.users(id) on delete cascade,
+  title text not null,
+  description text not null default '',
+  document jsonb not null default '{"settings":{},"blocks":[]}'::jsonb
+    check (jsonb_typeof(document) = 'object'),
+  source_type text not null default 'editor'
+    check (source_type in ('editor', 'imported_image', 'imported_pdf', 'imported_json')),
+  status text not null default 'private'
+    check (status in ('private', 'pending_review', 'published', 'rejected')),
+  featured boolean not null default false,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists custom_templates_owner_idx
+  on public.custom_templates(owner_id, updated_at desc);
+create index if not exists custom_templates_public_idx
+  on public.custom_templates(featured desc, updated_at desc)
+  where status = 'published' and deleted_at is null;
+
+alter table public.projects add column if not exists deleted_at timestamptz;
+alter table public.code_projects add column if not exists deleted_at timestamptz;
+
+alter table public.news_contributors enable row level security;
+alter table public.news_articles enable row level security;
+alter table public.custom_templates enable row level security;
+
+revoke all on table public.news_contributors from public, anon, authenticated;
+revoke all on table public.news_articles from public, anon, authenticated;
+revoke all on table public.custom_templates from public, anon, authenticated;
+
+grant select, insert, update, delete on table public.news_contributors to service_role;
+grant select, insert, update, delete on table public.news_articles to service_role;
+grant select, insert, update, delete on table public.custom_templates to service_role;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('template-assets', 'template-assets', false, 8388608)
+on conflict (id) do update
+set public = false,
+    file_size_limit = 8388608;
 create index if not exists code_projects_owner_idx on public.code_projects(owner_id,updated_at desc);
 alter table public.tech_resources enable row level security;
 alter table public.code_projects enable row level security;

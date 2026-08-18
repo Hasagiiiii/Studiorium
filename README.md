@@ -18,6 +18,14 @@ Um catálogo central para descobrir pesquisas, trabalhos, materiais acadêmicos 
 
 Coleção de modelos para trabalhos escolares e universitários, documentos acadêmicos, apresentações, banners e outros formatos de produção.
 
+### Redação e Notícias
+
+Espaço para estudantes de Jornalismo, Comunicação e áreas relacionadas. As propostas exigem fontes declaradas, passam por triagem de risco com IA e só são publicadas após certificação editorial humana.
+
+### Estúdio livre de templates
+
+Editor visual em blocos para criar modelos do zero, inserir fotos, ajustar cores e importar JSON, PNG, JPG, WebP ou PDF como referência editável.
+
 ### Pesquisas & Autoria
 
 Espaço voltado à publicação de trabalhos e projetos, com perfis de autores, áreas de conhecimento, palavras-chave e organização por nível acadêmico.
@@ -29,6 +37,7 @@ Comunidade de discussão do Studiorium, criada para perguntas, debates, troca de
 ### Escrivaninha
 
 Área pessoal para organizar projetos, textos, publicações e trabalhos em andamento.
+Itens removidos vão para uma lixeira e podem ser restaurados ou excluídos definitivamente.
 
 ### Ateliê Científico
 

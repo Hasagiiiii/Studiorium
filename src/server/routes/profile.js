@@ -10,6 +10,8 @@ const TYPES = [
   'designer',
   'instituicao',
   'criador',
+  'jornalista',
+  'comunicador',
 ];
 
 async function updateProfile(req) {
