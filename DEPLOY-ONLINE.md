@@ -2,21 +2,44 @@
 
 O projeto foi preparado para **Vercel + Supabase**.
 
-### Supabase
-- Projeto novo: execute `supabase/schema.sql` e depois `supabase/seed.sql`.
-- Projeto que já usa a v2.1: execute apenas `supabase/upgrade-v2.2-admin.sql` para adicionar o painel ADM sem apagar os dados existentes.
+## Supabase
+
+- Em um projeto novo, execute `supabase/schema.sql` e depois `supabase/seed.sql`.
+- Em um projeto existente, aplique somente as migrações `supabase/upgrade-*.sql` ainda não
+  registradas, sempre na ordem de versão.
+- Confirme que o bucket privado `publications` existe e que as tabelas não concedem acesso a
+  `anon` ou `authenticated`.
 - Copie `Project URL` e `secret key` em Settings/API.
 
-### Vercel
+## Administrador
+
+A conta principal não pode ser criada pelo cadastro público nem promovida automaticamente por
+e-mail. Para provisioná-la uma única vez, defina temporariamente as quatro variáveis abaixo no
+terminal local e execute:
+
+```bash
+npm run provision-admin
+```
+
+Variáveis necessárias ao comando: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
+`STUDIORIUM_ADMIN_EMAIL` e `STUDIORIUM_ADMIN_PASSWORD`. A senha deve ter de 12 a 128 caracteres.
+Remova `STUDIORIUM_ADMIN_PASSWORD` do ambiente ao terminar; ela não pertence à Vercel.
+
+## Vercel
+
 Adicione as variáveis:
+
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
 - `STUDIORIUM_ADMIN_EMAIL`
 
 Depois publique o projeto. O endereço final será HTTPS público da Vercel ou seu domínio próprio.
 
-### Importante
+Execute `npm ci`, `npm run check` e `npm test` antes de publicar. O endpoint `/api/health` deve
+responder com estado saudável depois que as variáveis estiverem configuradas.
+
+## Importante
+
 A `SUPABASE_SECRET_KEY` é secreta. Ela existe somente nas variáveis do servidor da Vercel e nunca no JavaScript servido ao navegador.
 
-### Administrador
-Cadastre-se usando o e-mail definido em `STUDIORIUM_ADMIN_EMAIL`. Depois do login, abra `/admin`.
+Depois do provisionamento, entre com `STUDIORIUM_ADMIN_EMAIL` e abra `/admin`.

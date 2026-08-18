@@ -1,6 +1,8 @@
 function config() {
   const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const adminEmail = String(process.env.STUDIORIUM_ADMIN_EMAIL || '').trim().toLowerCase();
+  const adminEmail = String(process.env.STUDIORIUM_ADMIN_EMAIL || '')
+    .trim()
+    .toLowerCase();
   const missing = [];
   if (!process.env.SUPABASE_URL) missing.push('SUPABASE_URL');
   if (!supabaseKey) missing.push('SUPABASE_SECRET_KEY');

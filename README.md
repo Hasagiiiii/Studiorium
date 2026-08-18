@@ -2,7 +2,7 @@
 
 **Um espaço digital para estudar, pesquisar, criar, publicar e construir conhecimento em comunidade.**
 
-O Studiorium é uma plataforma acadêmica com identidade visual inspirada em *dark academia*, criada para reunir ferramentas de estudo, produção científica, projetos, tecnologia e colaboração em um único ambiente.
+O Studiorium é uma plataforma acadêmica com identidade visual inspirada em _dark academia_, criada para reunir ferramentas de estudo, produção científica, projetos, tecnologia e colaboração em um único ambiente.
 
 ## O que é o Studiorium
 
@@ -11,24 +11,31 @@ A proposta do Studiorium é ir além de uma biblioteca de arquivos. A plataforma
 ## Principais áreas
 
 ### Biblioteca
+
 Um catálogo central para descobrir pesquisas, trabalhos, materiais acadêmicos e conteúdos publicados pela comunidade.
 
 ### Acervo
+
 Coleção de modelos para trabalhos escolares e universitários, documentos acadêmicos, apresentações, banners e outros formatos de produção.
 
 ### Pesquisas & Autoria
+
 Espaço voltado à publicação de trabalhos e projetos, com perfis de autores, áreas de conhecimento, palavras-chave e organização por nível acadêmico.
 
 ### Colóquio
+
 Comunidade de discussão do Studiorium, criada para perguntas, debates, troca de experiências e colaboração entre membros.
 
 ### Escrivaninha
+
 Área pessoal para organizar projetos, textos, publicações e trabalhos em andamento.
 
 ### Ateliê Científico
+
 Ferramentas e referências voltadas à criação e organização de materiais científicos e acadêmicos.
 
 ### Officina Technica
+
 Área dedicada a tecnologia e conhecimento prático, incluindo:
 
 - programação e tutoriais;
@@ -39,6 +46,7 @@ Ferramentas e referências voltadas à criação e organização de materiais ci
 - conteúdos educativos sobre carros e motos.
 
 ### Studiorium Lab
+
 Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, visualizar o resultado no navegador e compartilhar projetos com a comunidade.
 
 ## Para quem é

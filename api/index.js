@@ -8,6 +8,8 @@ module.exports = async function handler(req, res) {
     console.error('[Studiorium API]', error);
     const status = Number(error.statusCode || 500);
     if (error.retryAfter) res.setHeader('Retry-After', String(Math.ceil(error.retryAfter)));
-    return send(res, status, { error: status >= 500 ? 'Não foi possível concluir a operação.' : error.message });
+    return send(res, status, {
+      error: status >= 500 ? 'Não foi possível concluir a operação.' : error.message,
+    });
   }
 };

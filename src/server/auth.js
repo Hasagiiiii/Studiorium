@@ -6,9 +6,18 @@ async function currentUser(req) {
   const rawToken = parseCookies(req).studiorium_session;
   if (!rawToken) return null;
   const hash = tokenHash(rawToken);
-  const { data: session, error } = await db().from('sessions').select('user_id,expires_at').eq('token_hash', hash).gt('expires_at', new Date().toISOString()).maybeSingle();
+  const { data: session, error } = await db()
+    .from('sessions')
+    .select('user_id,expires_at')
+    .eq('token_hash', hash)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
   if (error || !session) return null;
-  const { data: user, error: userError } = await db().from('users').select('*').eq('id', session.user_id).maybeSingle();
+  const { data: user, error: userError } = await db()
+    .from('users')
+    .select('*')
+    .eq('id', session.user_id)
+    .maybeSingle();
   if (userError || !user) return null;
   if ((user.status || 'active') === 'suspended') return null;
   return user;
@@ -36,7 +45,11 @@ async function requireAdmin(req) {
 
 async function publicUser(user) {
   if (!user) return null;
-  const { data: profile } = await db().from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+  const { data: profile } = await db()
+    .from('profiles')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
   return {
     id: user.id,
     email: user.email,
