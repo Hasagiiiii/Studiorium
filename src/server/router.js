@@ -29,6 +29,7 @@ async function handle(req, res) {
 
   if (method === 'POST' && pathname === '/auth/register') { const r = await authRoutes.register(req, res); return send(res, r.status, r.body); }
   if (method === 'POST' && pathname === '/auth/login') { const r = await authRoutes.login(req, res); return send(res, r.status, r.body); }
+  if (method === 'POST' && pathname === '/auth/change-password') { const r = await authRoutes.changePassword(req, res); return send(res, r.status, r.body); }
   if (method === 'POST' && pathname === '/auth/logout') { const r = await authRoutes.logout(req, res); return send(res, r.status, r.body); }
   if (method === 'PATCH' && pathname === '/profile') return send(res, 200, await profileRoutes.updateProfile(req));
 
