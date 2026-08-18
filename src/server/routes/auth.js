@@ -2,7 +2,7 @@ const { db, fail } = require('../db');
 const { config } = require('../config');
 const { readJson, setSessionCookie, parseCookies } = require('../http');
 const { id, now, slugify, hashPassword, verifyPassword, token, tokenHash } = require('../security');
-const { publicUser } = require('../auth');
+const { publicUser, requireUser } = require('../auth');
 const { assertAuthAllowed, recordAuthFailure, clearAuthFailures, logSecurityEvent } = require('../security-events');
 
 async function uniqueUsername(displayName) {
@@ -94,6 +94,31 @@ async function login(req, res) {
   return { status: 200, body: { user: await publicUser(user) } };
 }
 
+async function changePassword(req, res) {
+  const user = await requireUser(req);
+  const body = await readJson(req);
+  const currentPassword = String(body.currentPassword || '');
+  const newPassword = String(body.newPassword || '');
+  if (newPassword.length < 12 || newPassword.length > 128) {
+    throw Object.assign(new Error('A nova senha precisa ter entre 12 e 128 caracteres.'), { statusCode: 400 });
+  }
+  const { data: account, error } = await db().from('users').select('password_hash,email').eq('id', user.id).maybeSingle();
+  fail(error);
+  if (!account || !verifyPassword(currentPassword, account.password_hash)) {
+    await logSecurityEvent(req, 'auth.password_change_failed', { userId: user.id, email: user.email });
+    throw Object.assign(new Error('A senha atual está incorreta.'), { statusCode: 401 });
+  }
+  if (verifyPassword(newPassword, account.password_hash)) {
+    throw Object.assign(new Error('Escolha uma senha diferente da atual.'), { statusCode: 400 });
+  }
+  const { error: updateError } = await db().from('users').update({ password_hash: hashPassword(newPassword) }).eq('id', user.id);
+  fail(updateError);
+  await db().from('sessions').delete().eq('user_id', user.id);
+  await createSession(user.id, res);
+  await logSecurityEvent(req, 'auth.password_changed', { userId: user.id, email: user.email });
+  return { status: 200, body: { ok: true } };
+}
+
 async function logout(req, res) {
   const raw = parseCookies(req).studiorium_session;
   if (raw) await db().from('sessions').delete().eq('token_hash', tokenHash(raw));
@@ -101,4 +126,4 @@ async function logout(req, res) {
   return { status: 200, body: { ok: true } };
 }
 
-module.exports = { register, login, logout };
+module.exports = { register, login, changePassword, logout };
