@@ -1,67 +1,69 @@
-# Studiorium Online 2.6.1
+# Studiorium
 
-Plataforma acadêmica online em estética dark academia, com Biblioteca, Acervo de modelos, pesquisas/autoria, Colóquio, Oficina de Tecnologia, Studiorium Lab e painel administrativo.
+**Um espaço digital para estudar, pesquisar, criar, publicar e construir conhecimento em comunidade.**
 
-## Arquitetura atual
+O Studiorium é uma plataforma acadêmica com identidade visual inspirada em *dark academia*, criada para reunir ferramentas de estudo, produção científica, projetos, tecnologia e colaboração em um único ambiente.
 
-- `public/` — SPA e interface do Studiorium.
-- `src/server/` + `api/index.js` — backend Node compatível com Vercel.
-- `supabase/functions/studiorium-api-web/` — proxy web para a implantação GitHub Pages + Supabase Edge.
-- `supabase/` — schema, seed e migrações do banco PostgreSQL.
-- `.github/workflows/deploy-pages.yml` — build/deploy da interface no GitHub Pages quando Pages estiver habilitado nas configurações do repositório.
-- `scripts/build-pages.js` — gera a versão estática para Pages, com navegação SPA por hash e API Edge.
+## O que é o Studiorium
 
-## Banco e backend
+A proposta do Studiorium é ir além de uma biblioteca de arquivos. A plataforma combina criação, pesquisa, organização, autoria e comunidade para que estudantes, professores, pesquisadores e criadores possam desenvolver trabalhos e compartilhar conhecimento.
 
-O banco é Supabase/PostgreSQL. A API de produção usa Supabase Edge e mantém a secret key somente no servidor. Há também o backend Node original para Vercel.
+## Principais áreas
 
-Recursos principais:
+### Biblioteca
+Um catálogo central para descobrir pesquisas, trabalhos, materiais acadêmicos e conteúdos publicados pela comunidade.
 
-- cadastro, login, sessões e troca de senha;
-- `scrypt` + salt para senha e SHA-256 para token de sessão;
-- proteção persistente contra tentativas excessivas de login;
-- eventos de segurança com identificadores em hash;
-- perfis, projetos acadêmicos e laboratório HTML/CSS/JS;
-- publicações com arquivos privados e URLs assinadas;
-- comunidade/Colóquio, denúncias e moderação;
-- Oficina de Tecnologia, Jogos, PC & Hardware, Carros e Motos;
-- painel ADM, auditoria e configurações do site.
+### Acervo
+Coleção de modelos para trabalhos escolares e universitários, documentos acadêmicos, apresentações, banners e outros formatos de produção.
 
-## Administrador principal
+### Pesquisas & Autoria
+Espaço voltado à publicação de trabalhos e projetos, com perfis de autores, áreas de conhecimento, palavras-chave e organização por nível acadêmico.
 
-O e-mail administrativo padrão desta instalação é `umaduplagamer@gmail.com`. O cadastro público não pode assumir esse endereço nem ganhar privilégio ADM apenas por coincidência de e-mail. A conta principal deve ser provisionada diretamente no banco/migração e a senha não deve ser colocada no GitHub.
+### Colóquio
+Comunidade de discussão do Studiorium, criada para perguntas, debates, troca de experiências e colaboração entre membros.
 
-## Segurança
+### Escrivaninha
+Área pessoal para organizar projetos, textos, publicações e trabalhos em andamento.
 
-- RLS habilitado nas tabelas de aplicação; o navegador não recebe a secret key.
-- Desde a v2.6.1, `anon` e `authenticated` também não têm grants diretos nas tabelas, sequências e RPCs internos.
-- Bucket `publications` privado, com limite de 5 MB.
-- Arquivos aceitos: PDF, DOCX, PPTX, ODT e TXT.
-- Sessões com expiração e invalidação ao suspender usuário/trocar senha.
-- Área ADM protegida por função `admin`.
-- Ações administrativas em `admin_audit_log`.
-- Conteúdo de menores usa perfil/autoria pública protegidos por padrão.
-- Funções temporárias de diagnóstico não fazem parte do fluxo de produção.
+### Ateliê Científico
+Ferramentas e referências voltadas à criação e organização de materiais científicos e acadêmicos.
 
-## Banco — ordem de instalação
+### Officina Technica
+Área dedicada a tecnologia e conhecimento prático, incluindo:
 
-Consulte `supabase/README.md`. Para uma instalação já existente, aplique as migrações em ordem até a v2.6.1.
+- programação e tutoriais;
+- projetos da comunidade;
+- jogos e desenvolvimento;
+- solução de problemas de PC;
+- montagem, compatibilidade e custo-benefício de hardware;
+- conteúdos educativos sobre carros e motos.
 
-## Publicação
+### Studiorium Lab
+Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, visualizar o resultado no navegador e compartilhar projetos com a comunidade.
 
-### GitHub Pages + Supabase Edge
+## Para quem é
 
-O workflow `.github/workflows/deploy-pages.yml` publica a interface após GitHub Pages ser habilitado em **Settings → Pages → Source: GitHub Actions**. A versão Pages conversa com a API Edge por um proxy CORS restrito ao domínio `hasagiiiii.github.io`.
+O Studiorium foi pensado para:
 
-### Vercel + Supabase
+- estudantes do ensino fundamental e médio;
+- universitários;
+- professores e monitores;
+- pesquisadores;
+- criadores de conteúdo educacional;
+- pessoas interessadas em tecnologia e projetos práticos.
 
-O projeto também mantém `vercel.json`, `api/index.js` e o backend Node. Configure `SUPABASE_URL`, `SUPABASE_SECRET_KEY` e `STUDIORIUM_ADMIN_EMAIL` como variáveis privadas de produção.
+## Comunidade
 
-## Validação
+A plataforma foi projetada para permitir participação da comunidade com autoria, publicação de projetos, discussões e colaboração. Conteúdos passam por mecanismos de moderação e ferramentas de denúncia para ajudar a manter o ambiente adequado para diferentes públicos.
 
-```bash
-npm run check
-npm test
-```
+## Identidade
 
-Não versionar `.env`, secret keys ou senhas.
+O visual do Studiorium combina elementos de biblioteca, academia clássica e interfaces digitais modernas. A intenção é manter uma experiência organizada e imersiva sem transformar a plataforma em um site acadêmico tradicional e excessivamente formal.
+
+## Estado do projeto
+
+O Studiorium está em desenvolvimento ativo. Novas áreas, ferramentas e melhorias de experiência continuam sendo incorporadas à plataforma.
+
+---
+
+**Studiorium — conhecimento para pesquisar, criar e compartilhar.**
