@@ -3,6 +3,7 @@ const { requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now } = require('../security');
 const { moderate } = require('../moderation');
+const { buildReplyMap, rankRelatedDiscussions } = require('../comment-intelligence');
 const S = require('../serializers');
 
 async function createDiscussion(req) {
@@ -54,14 +55,38 @@ async function getThread(discussionId) {
   fail(discussionQ.error);
   if (!discussionQ.data)
     throw Object.assign(new Error('Discussão não encontrada.'), { statusCode: 404 });
-  const repliesQ = await db()
-    .from('replies')
-    .select('*')
-    .eq('discussion_id', discussionId)
-    .eq('status', 'published')
-    .order('created_at', { ascending: true });
+  const [repliesQ, relatedQ] = await Promise.all([
+    db()
+      .from('replies')
+      .select('*')
+      .eq('discussion_id', discussionId)
+      .eq('status', 'published')
+      .order('created_at', { ascending: true }),
+    db()
+      .from('discussions')
+      .select('*')
+      .eq('status', 'published')
+      .neq('id', discussionId)
+      .order('created_at', { ascending: false })
+      .limit(40),
+  ]);
   fail(repliesQ.error);
-  return { discussion: S.discussion(discussionQ.data), replies: repliesQ.data.map(S.reply) };
+  fail(relatedQ.error);
+
+  const discussion = S.discussion(discussionQ.data);
+  const replyMap = buildReplyMap(repliesQ.data.map(S.reply));
+  const relatedDiscussions = rankRelatedDiscussions(discussion, relatedQ.data.map(S.discussion));
+
+  return {
+    discussion,
+    replies: replyMap.replies,
+    replyMap: {
+      total: replyMap.total,
+      questionCount: replyMap.questionCount,
+      clusters: replyMap.clusters,
+    },
+    relatedDiscussions,
+  };
 }
 
 async function createReply(req, discussionId) {

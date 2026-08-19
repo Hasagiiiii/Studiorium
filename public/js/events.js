@@ -3,10 +3,20 @@ import { render } from './router.js';
 import { syncPoster } from './views.js';
 import { handleAccountSubmit } from './events/account.js';
 import { handleAdminClick, handleAdminSubmit } from './events/admin.js';
-import { handleCommunityClick, handleCommunitySubmit } from './events/community.js';
+import {
+  handleCommunityChange,
+  handleCommunityClick,
+  handleCommunityInput,
+  handleCommunitySubmit,
+} from './events/community.js';
 import { handleFilterSubmit } from './events/filters.js';
 import { handleNavigationClick } from './events/navigation.js';
-import { handleProjectClick } from './events/projects.js';
+import {
+  handleLabMessage,
+  handleProjectChange,
+  handleProjectClick,
+  handleProjectInput,
+} from './events/projects.js';
 import { handleNewsClick, handleNewsSubmit } from './events/news.js';
 import { handleTemplateClick, handleTemplateChange } from './events/template-studio.js';
 
@@ -50,10 +60,18 @@ export function bindEvents() {
 
   addEventListener('input', (event) => {
     if (event.target.closest('[data-poster-form]')) syncPoster();
+    handleCommunityInput(event);
+    handleProjectInput(event);
   });
 
   addEventListener('change', (event) => {
+    handleCommunityChange(event);
+    handleProjectChange(event);
     void handleTemplateChange(event).catch(reportFailure);
+  });
+
+  addEventListener('message', (event) => {
+    handleLabMessage(event);
   });
 
   addEventListener('popstate', () => {

@@ -1,11 +1,13 @@
 import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
 import { goto } from '../router.js';
+import { rankRelated } from '../content-intelligence.js';
 import {
   link,
   nav,
   footer,
   layout,
   empty,
+  notFound,
   templateCard,
   publicationCard,
   discussionRow,
@@ -62,6 +64,7 @@ function researchDetail(slug) {
     body: '{}',
   }).catch(() => {});
   const profile = state.boot.profiles.find((x) => x.userId === p.ownerId);
+  const relatedPublications = rankRelated(p, state.boot.publications);
   layout(
     html`<section class="pagehero">
       <div class="shell">
@@ -99,6 +102,18 @@ function researchDetail(slug) {
             </button>
           </div>
         </article>
+        ${relatedPublications.length
+          ? html`<section class="contextual-discovery">
+              <div class="sectionhead">
+                <div>
+                  <div class="eyebrow">Trilha de leitura</div>
+                  <h2>Pesquisas que dialogam com este trabalho</h2>
+                  <p>Relação calculada por área, nível, palavras-chave, título e resumo.</p>
+                </div>
+              </div>
+              <div class="grid grid3">${relatedPublications.map(publicationCard).join('')}</div>
+            </section>`
+          : ''}
       </div>
     </section>`,
   );

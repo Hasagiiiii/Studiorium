@@ -1,5 +1,6 @@
 import { state, api, E, date, html } from '../runtime.js';
 import { layout, link, empty } from './core.js';
+import { rankRelated } from '../content-intelligence.js';
 
 function newsCard(article) {
   return html`<article class="card news-card">
@@ -84,6 +85,7 @@ function noticias() {
 
 async function newsDetail(slug) {
   const { article } = await api(`/api/news/public/${encodeURIComponent(slug)}`);
+  const relatedNews = rankRelated(article, state.boot.news || []);
   layout(
     html`<section class="pagehero article-hero">
         <div class="shell article-width">
@@ -125,6 +127,18 @@ async function newsDetail(slug) {
             </div>
           </aside>
         </div>
+        ${relatedNews.length
+          ? html`<section class="contextual-discovery article-width">
+              <div class="sectionhead">
+                <div>
+                  <div class="eyebrow">Contexto editorial</div>
+                  <h2>Outras matérias para ampliar a leitura</h2>
+                  <p>Seleção calculada por tema, categoria, resumo e vocabulário da apuração.</p>
+                </div>
+              </div>
+              <div class="grid grid3">${relatedNews.map(newsCard).join('')}</div>
+            </section>`
+          : ''}
       </section>`,
   );
 }

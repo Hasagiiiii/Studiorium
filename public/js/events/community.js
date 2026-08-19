@@ -4,6 +4,80 @@ import { discussionForm, techResourceForm } from './composers.js';
 
 const MAX_PUBLICATION_BYTES = 5 * 1024 * 1024;
 
+function normalizedSearch(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function commentSort(order, left, right) {
+  const leftQuestion = left.dataset.commentQuestion === 'true' ? 1 : 0;
+  const rightQuestion = right.dataset.commentQuestion === 'true' ? 1 : 0;
+  const leftCreated = Number(left.dataset.commentCreated) || 0;
+  const rightCreated = Number(right.dataset.commentCreated) || 0;
+
+  if (order === 'recent') return rightCreated - leftCreated;
+  if (order === 'oldest') return leftCreated - rightCreated;
+  if (order === 'questions' && leftQuestion !== rightQuestion) {
+    return rightQuestion - leftQuestion;
+  }
+
+  const similarity = Number(right.dataset.commentSimilar) - Number(left.dataset.commentSimilar);
+  if (similarity) return similarity;
+  return Number(left.dataset.commentIndex) - Number(right.dataset.commentIndex);
+}
+
+function refreshCommentMap(root) {
+  const map = root?.matches?.('[data-comment-map]') ? root : root?.closest?.('[data-comment-map]');
+  if (!map) return;
+
+  const list = map.querySelector('[data-comment-list]');
+  if (!list) return;
+
+  const activeFilter = map.dataset.commentMapFilter || 'all';
+  const query = normalizedSearch(map.querySelector('[data-comment-search]')?.value);
+  const order = map.querySelector('[data-comment-order]')?.value || 'relevance';
+  const items = [...list.querySelectorAll('[data-comment-item]')];
+
+  items.sort((left, right) => commentSort(order, left, right));
+  items.forEach((item) => list.append(item));
+
+  let visible = 0;
+  items.forEach((item) => {
+    const matchesFilter =
+      activeFilter === 'all' ||
+      (activeFilter === 'questions' && item.dataset.commentQuestion === 'true') ||
+      item.dataset.commentCluster === activeFilter;
+    const matchesSearch = !query || normalizedSearch(item.textContent).includes(query);
+    item.hidden = !(matchesFilter && matchesSearch);
+    if (!item.hidden) visible += 1;
+  });
+
+  const counter = map.querySelector('[data-comment-count]');
+  const emptyState = map.querySelector('[data-comment-empty]');
+  if (counter) counter.textContent = String(visible);
+  if (emptyState) emptyState.hidden = visible > 0 || items.length === 0;
+}
+
+function refreshReplyQuality(textarea) {
+  const panel = textarea.closest('form')?.querySelector('[data-reply-quality]');
+  if (!panel) return;
+
+  const text = textarea.value.trim();
+  const checks = {
+    '[data-quality-context]': text.length >= 40,
+    '[data-quality-question]': /\?|\b(como|onde|qual|quais|por que|alguem sabe)\b/i.test(text),
+    '[data-quality-reference]':
+      /https?:\/\/|\b(fonte|referencia|exemplo|artigo|livro|pesquisa)\b/i.test(text),
+  };
+
+  Object.entries(checks).forEach(([selector, complete]) => {
+    panel.querySelector(selector)?.classList.toggle('complete', complete);
+  });
+}
+
 function requestReportDetails() {
   const category = prompt(
     'Categoria da denúncia: racismo, xenofobia, sexismo, machismo, ' +
@@ -38,6 +112,24 @@ async function publicationPayload(form) {
 }
 
 export async function handleCommunityClick(event) {
+  const commentFilter = event.target.closest('[data-comment-filter]');
+  if (commentFilter) {
+    const map = commentFilter.closest('[data-comment-map]');
+    if (!map) return true;
+
+    map.dataset.commentMapFilter = commentFilter.dataset.commentFilter;
+    map.querySelectorAll('[data-comment-filter]').forEach((button) => {
+      const active = button.dataset.commentFilter === commentFilter.dataset.commentFilter;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    refreshCommentMap(map);
+    map
+      .querySelector('[data-comment-list]')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  }
+
   if (event.target.closest('[data-open-tech]')) {
     const composer = document.getElementById('techComposer');
     if (composer) {
@@ -123,6 +215,26 @@ export async function handleCommunityClick(event) {
   }
 
   return false;
+}
+
+export function handleCommunityInput(event) {
+  if (event.target.matches('[data-comment-search]')) {
+    refreshCommentMap(event.target);
+    return true;
+  }
+
+  if (event.target.matches('[data-reply-body]')) {
+    refreshReplyQuality(event.target);
+    return true;
+  }
+
+  return false;
+}
+
+export function handleCommunityChange(event) {
+  if (!event.target.matches('[data-comment-order]')) return false;
+  refreshCommentMap(event.target);
+  return true;
 }
 
 export async function handleCommunitySubmit(event) {

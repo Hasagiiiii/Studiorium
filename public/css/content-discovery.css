@@ -1,0 +1,81 @@
+.discovery-strip {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.32fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 17px 19px;
+  border: 1px solid var(--line);
+  background: rgba(28, 24, 19, 0.72);
+}
+
+.discovery-strip strong {
+  display: block;
+  margin-top: 7px;
+  font: 500 17px/1.3 var(--serif);
+}
+
+.discovery-topics {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+}
+
+.discovery-topics a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(184, 144, 89, 0.38);
+  color: #c7bca9;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  transition: 180ms ease;
+}
+
+.discovery-topics a:hover {
+  border-color: var(--brass);
+  background: rgba(184, 144, 89, 0.09);
+  color: var(--ink);
+}
+
+.discovery-topics span {
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 50%;
+  background: #2b231b;
+  color: var(--brass2);
+  font-size: 9px;
+}
+
+.contextual-discovery {
+  margin-top: 42px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+.contextual-discovery > .sectionhead p {
+  max-width: 640px;
+}
+
+.article-width.contextual-discovery {
+  width: min(100% - 36px, 920px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .discovery-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-topics a {
+    transition: none;
+  }
+}

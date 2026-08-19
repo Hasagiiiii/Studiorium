@@ -12,7 +12,7 @@ A proposta do Studiorium é ir além de uma biblioteca de arquivos. A plataforma
 
 ### Biblioteca
 
-Um catálogo central para descobrir pesquisas, trabalhos, materiais acadêmicos e conteúdos publicados pela comunidade.
+Um catálogo central para descobrir pesquisas, trabalhos, materiais acadêmicos e conteúdos publicados pela comunidade. Um índice emergente acompanha os assuntos que realmente circulam no acervo, e as páginas sugerem leituras relacionadas pelo conteúdo.
 
 ### Acervo
 
@@ -32,7 +32,7 @@ Espaço voltado à publicação de trabalhos e projetos, com perfis de autores, 
 
 ### Colóquio
 
-Comunidade de discussão do Studiorium, criada para perguntas, debates, troca de experiências e colaboração entre membros.
+Comunidade de discussão com um **filtro vivo de dúvidas**. Os núcleos são recalculados a partir do texto real dos comentários: perguntas semelhantes ficam próximas, os rótulos surgem do vocabulário da conversa e não existem categorias de resposta pré-cadastradas. Cada tópico também oferece busca local, ordenação, sinalização de perguntas, orientação para escrever melhor e conversas relacionadas.
 
 ### Escrivaninha
 
@@ -56,7 +56,17 @@ Ferramentas e referências voltadas à criação e organização de materiais ci
 
 ### Studiorium Lab
 
-Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, visualizar o resultado no navegador e compartilhar projetos com a comunidade.
+Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, visualizar o resultado no navegador e compartilhar projetos com a comunidade. A prévia isolada possui atualização automática, console, captura de erros e aviso de alterações ainda não salvas.
+
+## Refinamento 3.0
+
+- mapa emergente de dúvidas e comentários semelhantes no Colóquio;
+- filtros, busca e ordenação que se atualizam com a conversa;
+- discussões, pesquisas, notícias, guias e modelos relacionados por contexto;
+- índice de temas calculado com o conteúdo existente da Biblioteca;
+- console seguro e diagnóstico de execução no Laboratório;
+- animações discretas com respeito à preferência de movimento reduzido;
+- páginas de erro centralizadas para evitar falhas em rotas inexistentes.
 
 ## Para quem é
 

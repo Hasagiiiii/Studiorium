@@ -1,5 +1,6 @@
 import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
 import { goto } from '../router.js';
+import { rankRelated } from '../content-intelligence.js';
 import { techResourceForm } from '../events/composers.js';
 import {
   link,
@@ -8,6 +9,7 @@ import {
   layout,
   empty,
   requireLogin,
+  notFound,
   templateCard,
   publicationCard,
   discussionRow,
@@ -130,6 +132,7 @@ async function oficina() {
 
 async function oficinaDetail(slug) {
   const { resource } = await api(`/api/tech-resources/public/${encodeURIComponent(slug)}`);
+  const relatedResources = rankRelated(resource, state.boot.techResources || []);
   layout(
     html`<section class="pagehero article-hero">
         <div class="shell article-width">
@@ -158,6 +161,34 @@ async function oficinaDetail(slug) {
             <div class="actions space-top">${link('/oficina', 'Voltar à Oficina', 'outline')}</div>
           </aside>
         </div>
+        ${relatedResources.length
+          ? html`<section class="contextual-discovery article-width">
+              <div class="sectionhead">
+                <div>
+                  <div class="eyebrow">Próximos passos</div>
+                  <h2>Soluções ligadas a este guia</h2>
+                  <p>Aproximação feita pelo problema, categoria, área técnica e etiquetas.</p>
+                </div>
+              </div>
+              <div class="grid grid3">
+                ${relatedResources
+                  .map(
+                    (item) =>
+                      html`<article class="card">
+                        <div class="eyebrow">${E(item.hub)} · ${E(item.category)}</div>
+                        <h3>${E(item.title)}</h3>
+                        <p>${E(item.summary)}</p>
+                        ${link(
+                          `/oficina/${encodeURIComponent(item.slug)}`,
+                          'Abrir guia',
+                          'outline',
+                        )}
+                      </article>`,
+                  )
+                  .join('')}
+              </div>
+            </section>`
+          : ''}
       </section>`,
   );
 }
@@ -207,6 +238,10 @@ async function laboratorio(projectId = '') {
             <input class="field code-title" name="codeTitle" value="${E(project.title)}" />
           </div>
           <div class="actions">
+            <span class="badge status-saved" data-code-save-state>Salvo</span>
+            <label class="lab-live-toggle">
+              <input type="checkbox" data-live-preview checked /> Prévia ao digitar
+            </label>
             <select class="select" name="codeVisibility">
               <option value="private" ${project.visibility === 'private' ? 'selected' : ''}>
                 Privado
@@ -235,8 +270,20 @@ ${E(project.javascript)}</textarea
             </label>
           </div>
           <div class="preview-pane">
-            <div class="eyebrow">Prévia segura</div>
+            <div class="preview-pane-head">
+              <div>
+                <div class="eyebrow">Prévia segura</div>
+                <span data-lab-run-status>Preparando execução…</span>
+              </div>
+              <button class="soft" type="button" data-clear-lab-console>Limpar console</button>
+            </div>
             <iframe id="codePreview" sandbox="allow-scripts" title="Prévia do projeto"></iframe>
+            <section class="lab-console" aria-label="Console da prévia">
+              <header><strong>Console</strong><span>Mensagens e erros desta execução</span></header>
+              <ol data-lab-console-list aria-live="polite">
+                <li class="empty-log">Execute a prévia para acompanhar o código.</li>
+              </ol>
+            </section>
           </div>
         </div>
       </div>
@@ -252,6 +299,16 @@ function runCodePreview() {
     c = document.querySelector('[name=codeCss]')?.value || '',
     j = document.querySelector('[name=codeJs]')?.value || '';
   const safeJs = j.split('</script').join('<\/script');
+  const runId = `run-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const consoleList = document.querySelector('[data-lab-console-list]');
+  const runStatus = document.querySelector('[data-lab-run-status]');
+
+  frame.dataset.runId = runId;
+  if (consoleList) consoleList.innerHTML = '<li class="empty-log">Executando nova prévia…</li>';
+  if (runStatus) {
+    runStatus.textContent = 'Executando…';
+    runStatus.className = 'running';
+  }
   frame.srcdoc = html`<!doctype html>
     <html>
       <head>
@@ -259,25 +316,46 @@ function runCodePreview() {
         <style>
           ${c}
         </style>
+        <script>
+          (() => {
+            const runId = ${JSON.stringify(runId)};
+            const send = (type, values = []) => {
+              const args = values.map((value) => {
+                if (typeof value === 'string') return value;
+                try {
+                  return JSON.stringify(value);
+                } catch {
+                  return String(value);
+                }
+              });
+              parent.postMessage({ channel: 'studiorium-lab', runId, type, args }, '*');
+            };
+            ['log', 'info', 'warn', 'error'].forEach((type) => {
+              const original = console[type];
+              console[type] = (...args) => {
+                send(type, args);
+                original.apply(console, args);
+              };
+            });
+            addEventListener('error', (event) => send('error', [event.message]));
+            addEventListener('unhandledrejection', (event) => {
+              send('error', ['Promise rejeitada:', event.reason]);
+            });
+            addEventListener('DOMContentLoaded', () => send('ready'));
+          })();
+        </script>
       </head>
       <body>
         ${h}
         <script>
-          ${safeJs};
+          try {
+            ${safeJs};
+          } catch (error) {
+            console.error(error && error.stack ? error.stack : error);
+          }
         </script>
       </body>
     </html>`;
-}
-
-function notFound() {
-  layout(
-    html`<div class="errorpage">
-      <div class="eyebrow">Error 404</div>
-      <h1>Página não encontrada</h1>
-      <p>Este registro não existe no arquivo do Studiorium.</p>
-      ${link('/', 'Voltar ao início', 'solid')}
-    </div>`,
-  );
 }
 
 export { oficina, oficinaDetail, laboratorio, runCodePreview, notFound };
