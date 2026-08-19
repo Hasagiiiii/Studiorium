@@ -264,7 +264,7 @@ function biblioteca() {
     (p) => (!q || contains(p, q)) && (!autor || p.displayName === autor),
   );
   const total = pubs.length + templates.length;
-  const circulatingTopics = emergentTopics(boot.publications);
+  const circulatingTopics = emergentTopics([...boot.publications, ...boot.templates]);
   layout(
     html`<section class="pagehero library-hero">
         <div class="shell">
