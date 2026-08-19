@@ -6,6 +6,7 @@ import {
   footer,
   layout,
   empty,
+  requireLogin,
   templateCard,
   publicationCard,
   discussionRow,

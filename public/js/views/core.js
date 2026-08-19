@@ -118,6 +118,23 @@ function empty(text) {
   return html`<div class="empty">${E(text)}</div>`;
 }
 
+function requireLogin() {
+  layout(
+    html`<section class="pagehero">
+      <div class="shell">
+        <div class="card" style="max-width:620px;margin:auto;text-align:center">
+          <div class="eyebrow">Área reservada</div>
+          <h1 class="pagetitle">Entre para continuar</h1>
+          <p>Essa função salva conteúdo em sua conta online do Studiorium.</p>
+          <div class="actions" style="justify-content:center">
+            ${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}
+          </div>
+        </div>
+      </div>
+    </section>`,
+  );
+}
+
 function templateCard(t, i = 0) {
   return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover"
     ><div class="catno">CAT. ${String(i + 1).padStart(2, '0')}</div>
@@ -164,4 +181,14 @@ function discussionRow(d, i) {
   >`;
 }
 
-export { link, nav, footer, layout, empty, templateCard, publicationCard, discussionRow };
+export {
+  link,
+  nav,
+  footer,
+  layout,
+  empty,
+  requireLogin,
+  templateCard,
+  publicationCard,
+  discussionRow,
+};
