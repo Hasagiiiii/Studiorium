@@ -89,6 +89,7 @@ async function bootstrap(req) {
       .not('certified_at', 'is', null)
       .is('deleted_at', null)
       .order('featured', { ascending: false })
+      .order('hypes', { ascending: false })
       .order('published_at', { ascending: false }),
     client
       .from('custom_templates')
