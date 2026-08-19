@@ -61,6 +61,23 @@ async function updateArticle(req, articleId) {
   fail(currentError);
   if (!current) throw inputError('Notícia não encontrada.', 404);
 
+  const featureOnly = body.status === undefined && typeof body.featured === 'boolean';
+  if (featureOnly) {
+    if (current.status !== 'published' || !current.certified_at || current.deleted_at) {
+      throw inputError('Somente notícias publicadas e certificadas podem receber destaque.');
+    }
+    const patch = { featured: body.featured, updated_at: now() };
+    const { data, error } = await db()
+      .from('news_articles')
+      .update(patch)
+      .eq('id', articleId)
+      .select('*')
+      .single();
+    fail(error);
+    await audit(admin, 'news.article.feature', 'news_article', articleId, patch);
+    return { article: S.newsArticle(data) };
+  }
+
   const allowed = ['editorial_review', 'changes_requested', 'published', 'rejected', 'archived'];
   if (!allowed.includes(body.status)) throw inputError('Status editorial inválido.');
   const editorialNote = String(body.note || '')
