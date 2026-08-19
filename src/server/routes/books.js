@@ -84,7 +84,9 @@ async function refreshBookMetrics(bookId) {
   fail(error);
   const reviewCount = reviews.length;
   const ratingAverage = reviewCount
-    ? Number((reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) / reviewCount).toFixed(2))
+    ? Number(
+        (reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) / reviewCount).toFixed(2),
+      )
     : 0;
   const recommendationCount = reviews.filter((item) => item.recommend === true).length;
   const { data, error: updateError } = await db()
