@@ -44,7 +44,11 @@ export function techResourceForm() {
         <label class="label">Tags (separadas por vírgula)</label>
         <input class="field" name="tags" />
       </div>
-      <button class="solid">Enviar para revisão</button>
+      <div class="actions">
+        <button class="solid" type="submit">Enviar para revisão</button>
+        <button class="soft" type="reset">Limpar formulário</button>
+        <button class="outline" type="button" data-cancel-tech>Cancelar</button>
+      </div>
     </form>
   `;
 }

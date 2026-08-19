@@ -40,7 +40,16 @@ async function publicationPayload(form) {
 export async function handleCommunityClick(event) {
   if (event.target.closest('[data-open-tech]')) {
     const composer = document.getElementById('techComposer');
-    if (composer) composer.innerHTML = techResourceForm();
+    if (composer) {
+      composer.innerHTML = techResourceForm();
+      composer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return true;
+  }
+
+  if (event.target.closest('[data-cancel-tech]')) {
+    const composer = document.getElementById('techComposer');
+    if (composer) composer.replaceChildren();
     return true;
   }
 

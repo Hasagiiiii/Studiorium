@@ -1,5 +1,6 @@
 import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
 import { goto } from '../router.js';
+import { techResourceForm } from '../events/composers.js';
 import {
   link,
   nav,
@@ -14,7 +15,8 @@ import {
 function oficina() {
   const all = state.boot.techResources || [],
     hub = state.query.get('hub') || '',
-    q = (state.query.get('q') || '').toLowerCase();
+    q = (state.query.get('q') || '').toLowerCase(),
+    openComposer = state.me && state.query.get('novo') === '1';
   const hubs = [
     ['Tecnologia', 'Tutoriais, programação e projetos da comunidade'],
     ['Jogos', 'Desenvolvimento, mods, configuração e desempenho'],
@@ -72,7 +74,7 @@ function oficina() {
               /><button class="solid">Buscar</button>
             </div>
           </form>
-          <div id="techComposer"></div>
+          <div id="techComposer">${openComposer ? techResourceForm() : ''}</div>
           ${['Carros', 'Motos'].includes(hub)
             ? html`<div class="notice" style="margin: 18px 0">
                 Conteúdo automotivo é educativo. Procedimentos envolvendo freios, direção, airbags,

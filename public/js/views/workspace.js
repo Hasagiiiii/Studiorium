@@ -122,7 +122,7 @@ async function escrivaninha() {
             )
             .join('') || empty('Você ainda não enviou conteúdo para a Oficina.')}
           <div class="actions" style="margin-top:14px">
-            ${link('/oficina', 'Enviar conteúdo', 'solid')}
+            ${link('/oficina?novo=1', 'Enviar conteúdo', 'solid')}
           </div>
         </div>
         <div class="card" style="margin-top:18px">
