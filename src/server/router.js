@@ -243,7 +243,7 @@ async function handle(req, res) {
       await adminRoutes.updateTemplate(req, decodeURIComponent(templateAdmin[1])),
     );
   const contentAdmin = pathname.match(
-    /^\/admin\/content\/(publication|discussion|reply)\/([^/]+)$/,
+    /^\/admin\/content\/(publication|tech_resource|discussion|reply)\/([^/]+)$/,
   );
   if (contentAdmin && method === 'PATCH')
     return send(

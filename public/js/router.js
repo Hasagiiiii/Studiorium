@@ -108,6 +108,7 @@ async function renderRoute() {
   if (p === '/admin') return await adminPanel('overview');
   if (p === '/admin/usuarios') return await adminPanel('usuarios');
   if (p === '/admin/publicacoes') return await adminPanel('publicacoes');
+  if (p === '/admin/oficina') return await adminPanel('oficina');
   if (p === '/admin/coloquio') return await adminPanel('coloquio');
   if (p === '/admin/acervo') return await adminPanel('acervo');
   if (p === '/admin/noticias') return await adminPanel('noticias');

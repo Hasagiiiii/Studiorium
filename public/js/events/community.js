@@ -85,12 +85,23 @@ export async function handleCommunitySubmit(event) {
 
   if (form.matches('[data-tech-resource]')) {
     event.preventDefault();
-    const data = await api('/api/tech-resources', {
-      method: 'POST',
-      body: JSON.stringify(formObj(form)),
-    });
-    toast(data.message || 'Enviado para revisão.');
-    form.reset();
+    if (form.dataset.submitting === 'true') return true;
+    form.dataset.submitting = 'true';
+    const submitButton = form.querySelector('[type="submit"], button:not([type])');
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const data = await api('/api/tech-resources', {
+        method: 'POST',
+        body: JSON.stringify(formObj(form)),
+      });
+      state.boot = null;
+      await bootstrap();
+      toast(data.message || 'Enviado para revisão.');
+      goto('/escrivaninha');
+    } finally {
+      form.dataset.submitting = 'false';
+      if (submitButton) submitButton.disabled = false;
+    }
     return true;
   }
 
