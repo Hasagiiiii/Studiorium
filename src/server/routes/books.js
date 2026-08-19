@@ -231,16 +231,26 @@ async function createBook(user, body) {
   const { data, error } = await db().from('books').insert(row).select('*').single();
   fail(error);
 
-  const reviewResult = await upsertReview(user, data.id, {
-    rating,
-    review,
-    recommend: body.recommend !== false,
-  });
-  return {
-    book: reviewResult.book,
-    review: reviewResult.review,
-    message: 'Livro adicionado ao Armarium com sua review.',
-  };
+  try {
+    const reviewResult = await upsertReview(user, data.id, {
+      rating,
+      review,
+      recommend: body.recommend !== false,
+    });
+    return {
+      book: reviewResult.book,
+      review: reviewResult.review,
+      message: 'Livro adicionado ao Armarium com sua review.',
+    };
+  } catch (error) {
+    const { error: cleanupError } = await db()
+      .from('books')
+      .delete()
+      .eq('id', data.id)
+      .eq('submitted_by', user.id);
+    if (cleanupError) console.error('Falha ao desfazer livro incompleto:', cleanupError.message);
+    throw error;
+  }
 }
 
 async function saveBook(req, bookId) {
