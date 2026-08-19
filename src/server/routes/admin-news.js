@@ -95,9 +95,93 @@ async function updateContributor(req, userId) {
   return { contributor: S.newsContributor(data) };
 }
 
+async function trashArticle(req, articleId) {
+  const admin = await requireAdmin(req);
+  const { data: current, error: currentError } = await db()
+    .from('news_articles')
+    .select('*')
+    .eq('id', articleId)
+    .maybeSingle();
+  fail(currentError);
+  if (!current) throw inputError('Notícia não encontrada.', 404);
+  if (current.deleted_at) {
+    return { article: S.newsArticle(current), message: 'Notícia já está na lixeira.' };
+  }
+
+  const patch = {
+    status: 'archived',
+    featured: false,
+    deleted_at: now(),
+    updated_at: now(),
+  };
+  const { data, error } = await db()
+    .from('news_articles')
+    .update(patch)
+    .eq('id', articleId)
+    .select('*')
+    .single();
+  fail(error);
+  await audit(admin, 'news.article.trash', 'news_article', articleId, {
+    title: current.title,
+    previousStatus: current.status,
+  });
+  return { article: S.newsArticle(data), message: 'Notícia movida para a lixeira.' };
+}
+
+async function restoreArticle(req, articleId) {
+  const admin = await requireAdmin(req);
+  const { data: current, error: currentError } = await db()
+    .from('news_articles')
+    .select('*')
+    .eq('id', articleId)
+    .maybeSingle();
+  fail(currentError);
+  if (!current) throw inputError('Notícia não encontrada.', 404);
+  if (!current.deleted_at) throw inputError('A notícia não está na lixeira.', 409);
+
+  const patch = { deleted_at: null, status: 'archived', featured: false, updated_at: now() };
+  const { data, error } = await db()
+    .from('news_articles')
+    .update(patch)
+    .eq('id', articleId)
+    .select('*')
+    .single();
+  fail(error);
+  await audit(admin, 'news.article.restore', 'news_article', articleId, { title: current.title });
+  return {
+    article: S.newsArticle(data),
+    message: 'Notícia restaurada para o arquivo. Publique novamente quando desejar.',
+  };
+}
+
+async function purgeArticle(req, articleId) {
+  const admin = await requireAdmin(req);
+  const { data: current, error: currentError } = await db()
+    .from('news_articles')
+    .select('*')
+    .eq('id', articleId)
+    .maybeSingle();
+  fail(currentError);
+  if (!current) throw inputError('Notícia não encontrada.', 404);
+  if (!current.deleted_at) throw inputError('Mova a notícia para a lixeira antes de excluir.', 409);
+
+  const { error } = await db().from('news_articles').delete().eq('id', articleId);
+  fail(error);
+  await audit(admin, 'news.article.delete', 'news_article', articleId, {
+    title: current.title,
+    status: current.status,
+  });
+  return { ok: true, message: 'Notícia excluída definitivamente.' };
+}
+
 async function updateArticle(req, articleId) {
   const admin = await requireAdmin(req);
   const body = await readJson(req);
+
+  if (body.action === 'trash') return trashArticle(req, articleId);
+  if (body.action === 'restore') return restoreArticle(req, articleId);
+  if (body.action === 'purge') return purgeArticle(req, articleId);
+
   const { data: current, error: currentError } = await db()
     .from('news_articles')
     .select('*')
@@ -181,83 +265,6 @@ async function updateArticle(req, articleId) {
   fail(error);
   await audit(admin, 'news.article.update', 'news_article', articleId, patch);
   return { article: S.newsArticle(data) };
-}
-
-async function trashArticle(req, articleId) {
-  const admin = await requireAdmin(req);
-  const { data: current, error: currentError } = await db()
-    .from('news_articles')
-    .select('*')
-    .eq('id', articleId)
-    .maybeSingle();
-  fail(currentError);
-  if (!current) throw inputError('Notícia não encontrada.', 404);
-  if (current.deleted_at) return { article: S.newsArticle(current), message: 'Notícia já está na lixeira.' };
-
-  const patch = {
-    status: 'archived',
-    featured: false,
-    deleted_at: now(),
-    updated_at: now(),
-  };
-  const { data, error } = await db()
-    .from('news_articles')
-    .update(patch)
-    .eq('id', articleId)
-    .select('*')
-    .single();
-  fail(error);
-  await audit(admin, 'news.article.trash', 'news_article', articleId, {
-    title: current.title,
-    previousStatus: current.status,
-  });
-  return { article: S.newsArticle(data), message: 'Notícia movida para a lixeira.' };
-}
-
-async function restoreArticle(req, articleId) {
-  const admin = await requireAdmin(req);
-  const { data: current, error: currentError } = await db()
-    .from('news_articles')
-    .select('*')
-    .eq('id', articleId)
-    .maybeSingle();
-  fail(currentError);
-  if (!current) throw inputError('Notícia não encontrada.', 404);
-  if (!current.deleted_at) throw inputError('A notícia não está na lixeira.', 409);
-
-  const patch = { deleted_at: null, status: 'archived', featured: false, updated_at: now() };
-  const { data, error } = await db()
-    .from('news_articles')
-    .update(patch)
-    .eq('id', articleId)
-    .select('*')
-    .single();
-  fail(error);
-  await audit(admin, 'news.article.restore', 'news_article', articleId, { title: current.title });
-  return {
-    article: S.newsArticle(data),
-    message: 'Notícia restaurada para o arquivo. Publique novamente quando desejar.',
-  };
-}
-
-async function purgeArticle(req, articleId) {
-  const admin = await requireAdmin(req);
-  const { data: current, error: currentError } = await db()
-    .from('news_articles')
-    .select('*')
-    .eq('id', articleId)
-    .maybeSingle();
-  fail(currentError);
-  if (!current) throw inputError('Notícia não encontrada.', 404);
-  if (!current.deleted_at) throw inputError('Mova a notícia para a lixeira antes de excluir.', 409);
-
-  const { error } = await db().from('news_articles').delete().eq('id', articleId);
-  fail(error);
-  await audit(admin, 'news.article.delete', 'news_article', articleId, {
-    title: current.title,
-    status: current.status,
-  });
-  return { ok: true, message: 'Notícia excluída definitivamente.' };
 }
 
 async function updateTemplate(req, templateId) {
