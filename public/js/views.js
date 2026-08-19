@@ -27,7 +27,8 @@ export {
   cadastro,
 } from './views/community.js';
 export { noticias, newsDetail, redacao } from './views/news.js';
-export { templateStudio, templateEditor, publicCustomTemplate } from './views/template-studio.js';
+export { templateStudio } from './views/template-studio-private-v329.js';
+export { templateEditor, publicCustomTemplate } from './views/template-studio.js';
 export { escrivaninha } from './views/workspace-personal-v329.js';
 export { editor, publicar } from './views/workspace.js';
 export { atelie, syncPoster, diretrizes, sobre } from './views/atelier-about.js';
