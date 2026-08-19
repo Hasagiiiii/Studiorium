@@ -10,6 +10,13 @@ function formDataObject(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
+function validForm(form) {
+  if (!(form instanceof HTMLFormElement)) return false;
+  if (form.checkValidity()) return true;
+  form.reportValidity();
+  return false;
+}
+
 export async function handleBookClick(event) {
   const create = event.target.closest('[data-book-create]');
   if (create) {
@@ -19,6 +26,7 @@ export async function handleBookClick(event) {
     }
     const form = create.closest('[data-book-create-form]');
     if (!form || create.dataset.submitting === 'true') return true;
+    if (!validForm(form)) return true;
     create.dataset.submitting = 'true';
     create.disabled = true;
     const original = create.textContent;
@@ -66,6 +74,7 @@ export async function handleBookClick(event) {
     }
     const form = reviewSave.closest('[data-book-review-form]');
     if (!form || reviewSave.dataset.submitting === 'true') return true;
+    if (!validForm(form)) return true;
     reviewSave.dataset.submitting = 'true';
     reviewSave.disabled = true;
     const original = reviewSave.textContent;
