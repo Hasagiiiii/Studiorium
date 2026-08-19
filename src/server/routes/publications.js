@@ -80,6 +80,48 @@ function matchesFileSignature(ext, bytes) {
   return archiveText.includes('application/vnd.oasis.opendocument.text');
 }
 
+function publicationInput(body, current = {}) {
+  const title = String(body.title ?? current.title ?? '')
+    .trim()
+    .slice(0, 180);
+  const abstract = String(body.abstract ?? current.abstract ?? '')
+    .trim()
+    .slice(0, 5000);
+  const content = String(body.content ?? current.content ?? '')
+    .trim()
+    .slice(0, 60_000);
+  const check = moderate(`${title}\n${abstract}\n${content}`);
+
+  if (!check.ok) throw fileError(check.message, 422);
+  if (title.length < 6 || abstract.length < 40) {
+    throw fileError('Informe um título e um resumo mais completos.');
+  }
+
+  const rawKeywords = body.keywords === undefined ? current.keywords || [] : body.keywords;
+  const keywords = Array.isArray(rawKeywords)
+    ? rawKeywords
+    : String(rawKeywords || '')
+        .split(',')
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  return {
+    title,
+    abstract,
+    content,
+    area:
+      String(body.area ?? current.area ?? 'Geral')
+        .trim()
+        .slice(0, 80) || 'Geral',
+    level:
+      String(body.level ?? current.level ?? 'Não informado')
+        .trim()
+        .slice(0, 80) || 'Não informado',
+    keywords: keywords.slice(0, 10),
+    license: String(body.license ?? current.license ?? 'Todos os direitos reservados').slice(0, 80),
+  };
+}
+
 function validatePublicationFile(file, maxBytes) {
   const fileName = String(file?.name || 'arquivo')
     .replace(/[\r\n]/g, '')
@@ -119,36 +161,28 @@ async function uniqueSlug(title) {
   return `${base}-${Date.now().toString(36)}`;
 }
 
-async function uploadFile(userId, publicationId, file) {
+async function uploadFile(userId, publicationId, file, upsert = false) {
   if (!file?.dataBase64) return null;
   const { fileName, ext, mime, bytes } = validatePublicationFile(file, config().maxUploadBytes);
   const storagePath = `${userId}/${publicationId}${ext}`;
   const { error } = await db().storage.from('publications').upload(storagePath, bytes, {
     contentType: mime,
-    upsert: false,
+    upsert,
   });
   fail(error);
   return { file_path: storagePath, file_name: fileName, file_mime: mime };
 }
 
+async function removeStoredFile(filePath) {
+  if (!filePath) return;
+  const { error } = await db().storage.from('publications').remove([filePath]);
+  if (error) console.error('[Studiorium publication file cleanup]', error.message || error);
+}
+
 async function createPublication(req) {
   const user = await requireUser(req);
   const body = await readJson(req);
-  const title = String(body.title || '')
-    .trim()
-    .slice(0, 180);
-  const abstract = String(body.abstract || '')
-    .trim()
-    .slice(0, 5000);
-  const content = String(body.content || '')
-    .trim()
-    .slice(0, 60000);
-  const check = moderate(`${title}\n${abstract}\n${content}`);
-  if (!check.ok) throw Object.assign(new Error(check.message), { statusCode: 422 });
-  if (title.length < 6 || abstract.length < 40)
-    throw Object.assign(new Error('Informe um título e um resumo mais completos.'), {
-      statusCode: 400,
-    });
+  const values = publicationInput(body);
 
   const { data: profile, error: profileError } = await db()
     .from('profiles')
@@ -166,24 +200,8 @@ async function createPublication(req) {
       author_name: user.is_minor
         ? 'Autor protegido'
         : safePublicName(profile?.display_name, profile?.username),
-      title,
-      slug: await uniqueSlug(title),
-      abstract,
-      content,
-      area:
-        String(body.area || 'Geral')
-          .trim()
-          .slice(0, 80) || 'Geral',
-      level:
-        String(body.level || 'Não informado')
-          .trim()
-          .slice(0, 80) || 'Não informado',
-      keywords: String(body.keywords || '')
-        .split(',')
-        .map((k) => k.trim())
-        .filter(Boolean)
-        .slice(0, 10),
-      license: String(body.license || 'Todos os direitos reservados').slice(0, 80),
+      ...values,
+      slug: await uniqueSlug(values.title),
       status: user.role === 'admin' ? 'published' : 'pending_review',
       views: 0,
       downloads: 0,
@@ -202,6 +220,94 @@ async function createPublication(req) {
       await db().storage.from('publications').remove([storedFile.file_path]);
     throw error;
   }
+}
+
+async function ownedPublication(userId, publicationId) {
+  const { data, error } = await db()
+    .from('publications')
+    .select('*')
+    .eq('id', publicationId)
+    .eq('owner_id', userId)
+    .maybeSingle();
+  fail(error);
+  if (!data) throw fileError('Publicação não encontrada.', 404);
+  return data;
+}
+
+function ensurePublicationEditable(publication) {
+  if (publication.status === 'published') {
+    throw fileError('Publicação aprovada não pode ser alterada ou apagada por esta ação.', 409);
+  }
+}
+
+async function getPublication(req, publicationId) {
+  const user = await requireUser(req);
+  const publication = await ownedPublication(user.id, publicationId);
+  ensurePublicationEditable(publication);
+  return { publication: S.publication(publication) };
+}
+
+async function updatePublication(req, publicationId) {
+  const user = await requireUser(req);
+  const current = await ownedPublication(user.id, publicationId);
+  ensurePublicationEditable(current);
+
+  const body = await readJson(req);
+  const values = publicationInput(body, current);
+  let storedFile = null;
+
+  try {
+    storedFile = await uploadFile(user.id, publicationId, body.file, true);
+    const patch = {
+      ...values,
+      slug: values.title === current.title ? current.slug : await uniqueSlug(values.title),
+      status: 'pending_review',
+      featured: false,
+      published_at: null,
+      ...(storedFile || {}),
+    };
+    const { data, error } = await db()
+      .from('publications')
+      .update(patch)
+      .eq('id', publicationId)
+      .eq('owner_id', user.id)
+      .select('*')
+      .maybeSingle();
+    fail(error);
+    if (!data) throw fileError('Publicação não encontrada.', 404);
+
+    if (storedFile && current.file_path && current.file_path !== storedFile.file_path) {
+      await removeStoredFile(current.file_path);
+    }
+
+    return {
+      publication: S.publication(data),
+      message: 'Trabalho atualizado e reenviado para revisão.',
+    };
+  } catch (error) {
+    if (storedFile?.file_path && storedFile.file_path !== current.file_path) {
+      await removeStoredFile(storedFile.file_path);
+    }
+    throw error;
+  }
+}
+
+async function deletePublication(req, publicationId) {
+  const user = await requireUser(req);
+  const current = await ownedPublication(user.id, publicationId);
+  ensurePublicationEditable(current);
+
+  const { data, error } = await db()
+    .from('publications')
+    .delete()
+    .eq('id', publicationId)
+    .eq('owner_id', user.id)
+    .select('id')
+    .maybeSingle();
+  fail(error);
+  if (!data) throw fileError('Publicação não encontrada.', 404);
+  await removeStoredFile(current.file_path);
+  return { ok: true, message: 'Publicação apagada definitivamente.' };
 }
 
 async function downloadPublication(req, res, publicationId) {
@@ -245,7 +351,11 @@ async function registerView(publicationId) {
 
 module.exports = {
   createPublication,
+  getPublication,
+  updatePublication,
+  deletePublication,
   downloadPublication,
   registerView,
   validatePublicationFile,
+  publicationInput,
 };

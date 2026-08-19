@@ -70,3 +70,39 @@ test('atalho da Escrivaninha abre o formulário da Oficina com opção de cancel
   assert.ok(composer.includes('data-cancel-tech'));
   assert.ok(events.includes('composer.replaceChildren()'));
 });
+
+test('envios não aprovados podem ser editados, reenviados ou apagados pelo proprietário', () => {
+  const router = read('src/server/router.js');
+  const techRoute = read('src/server/routes/tech.js');
+  const publicationRoute = read('src/server/routes/publications.js');
+  const workspace = read('public/js/views/workspace.js');
+  const events = read('public/js/events/community.js');
+
+  for (const capability of ['getMine', 'update', 'remove']) {
+    assert.ok(techRoute.includes(`function ${capability}`));
+  }
+  for (const capability of ['getPublication', 'updatePublication', 'deletePublication']) {
+    assert.ok(publicationRoute.includes(`function ${capability}`));
+  }
+  assert.ok(techRoute.includes(".eq('owner_id', user.id)"));
+  assert.ok(publicationRoute.includes(".eq('owner_id', user.id)"));
+  assert.ok(router.includes("method === 'DELETE'"));
+  assert.ok(workspace.includes('Editar e reenviar'));
+  assert.ok(workspace.includes('Apagar definitivamente'));
+  assert.ok(events.includes("method: resourceId ? 'PATCH' : 'POST'"));
+  assert.ok(events.includes("method: publicationId ? 'PATCH' : 'POST'"));
+});
+
+test('ADM pode corrigir ou apagar definitivamente conteúdo ainda não publicado', () => {
+  const routes = read('src/server/routes/admin.js');
+  const view = read('public/js/views/admin.js');
+  const events = read('public/js/events/admin.js');
+
+  assert.ok(routes.includes('function updateContentDetails'));
+  assert.ok(routes.includes('function deleteContent'));
+  assert.ok(routes.includes("current.status === 'published'"));
+  assert.ok(view.includes('data-admin-edit-content'));
+  assert.ok(view.includes('data-admin-delete-content'));
+  assert.ok(events.includes('/details'));
+  assert.ok(events.includes("method: 'DELETE'"));
+});

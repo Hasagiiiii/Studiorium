@@ -64,7 +64,7 @@ async function renderRoute() {
   const p = location.pathname.replace(/\/+$/, '') || '/';
   if (p === '/') return home();
   if (['/biblioteca', '/library'].includes(p)) return biblioteca();
-  if (['/oficina', '/tech'].includes(p)) return oficina();
+  if (['/oficina', '/tech'].includes(p)) return await oficina();
   if (p.startsWith('/oficina/'))
     return await oficinaDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/laboratorio') return await laboratorio();
@@ -105,7 +105,7 @@ async function renderRoute() {
     return await editor(d.project.id);
   }
   if (p.startsWith('/editor/')) return await editor(decodeURIComponent(p.split('/')[2] || ''));
-  if (['/publicar', '/dashboard/publicar'].includes(p)) return publicar();
+  if (['/publicar', '/dashboard/publicar'].includes(p)) return await publicar();
   if (['/atelie', '/banner-cientifico'].includes(p)) return atelie();
   if (p === '/moderacao' || p === '/admin/moderacao') return await moderacao();
   if (p === '/admin') return await adminPanel('overview');

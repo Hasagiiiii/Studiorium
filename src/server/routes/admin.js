@@ -4,6 +4,8 @@ const { readJson } = require('../http');
 const { now } = require('../security');
 const { config } = require('../config');
 const { audit } = require('../admin-audit');
+const { publicationInput } = require('./publications');
+const { resourceInput } = require('./tech');
 const S = require('../serializers');
 
 const settingKeys = new Set([
@@ -261,6 +263,107 @@ async function updateContent(req, type, targetId) {
   return { ok: true, status: body.status };
 }
 
+function editableContentConfig(type) {
+  const configByType = {
+    publication: {
+      table: 'publications',
+      clean: publicationInput,
+      serialize: S.publication,
+    },
+    tech_resource: {
+      table: 'tech_resources',
+      clean: resourceInput,
+      serialize: S.techResource,
+    },
+  };
+  const selected = configByType[type];
+  if (!selected) {
+    throw Object.assign(new Error('Este tipo de conteúdo não pode ser editado aqui.'), {
+      statusCode: 400,
+    });
+  }
+  return selected;
+}
+
+async function updateContentDetails(req, type, targetId) {
+  const admin = await requireAdmin(req);
+  const body = await readJson(req);
+  const contentConfig = editableContentConfig(type);
+  const { data: current, error: currentError } = await db()
+    .from(contentConfig.table)
+    .select('*')
+    .eq('id', targetId)
+    .maybeSingle();
+  fail(currentError);
+
+  if (!current) {
+    throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
+  }
+  if (current.status === 'published') {
+    throw Object.assign(new Error('Conteúdo publicado está protegido contra edição direta.'), {
+      statusCode: 409,
+    });
+  }
+
+  const patch = contentConfig.clean(body, current);
+  if (type === 'tech_resource') patch.updated_at = now();
+  const { data, error } = await db()
+    .from(contentConfig.table)
+    .update(patch)
+    .eq('id', targetId)
+    .select('*')
+    .maybeSingle();
+  fail(error);
+  if (!data) throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
+
+  await audit(admin, 'content.edit', type, targetId, {
+    title: patch.title,
+    status: current.status,
+  });
+  return { content: contentConfig.serialize(data), message: 'Conteúdo atualizado.' };
+}
+
+async function deleteContent(req, type, targetId) {
+  const admin = await requireAdmin(req);
+  const contentConfig = editableContentConfig(type);
+  const { data: current, error: currentError } = await db()
+    .from(contentConfig.table)
+    .select('*')
+    .eq('id', targetId)
+    .maybeSingle();
+  fail(currentError);
+
+  if (!current) {
+    throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
+  }
+  if (current.status === 'published') {
+    throw Object.assign(new Error('Conteúdo publicado não pode ser apagado por esta ação.'), {
+      statusCode: 409,
+    });
+  }
+
+  const { data, error } = await db()
+    .from(contentConfig.table)
+    .delete()
+    .eq('id', targetId)
+    .select('id')
+    .maybeSingle();
+  fail(error);
+  if (!data) throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
+
+  if (type === 'publication' && current.file_path) {
+    const cleanup = await db().storage.from('publications').remove([current.file_path]);
+    if (cleanup.error) {
+      console.error('[Studiorium admin publication cleanup]', cleanup.error.message);
+    }
+  }
+  await audit(admin, 'content.delete', type, targetId, {
+    title: current.title,
+    status: current.status,
+  });
+  return { ok: true, message: 'Conteúdo apagado definitivamente.' };
+}
+
 async function updateUser(req, userId) {
   const admin = await requireAdmin(req);
   const body = await readJson(req);
@@ -390,6 +493,8 @@ module.exports = {
   updateReport,
   updatePublication,
   updateContent,
+  updateContentDetails,
+  deleteContent,
   updateUser,
   updateTemplate,
   updateSettings,

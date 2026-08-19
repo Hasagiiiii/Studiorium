@@ -66,6 +66,13 @@ async function handle(req, res) {
   const publicTechResource = pathname.match(/^\/tech-resources\/public\/([^/]+)$/);
   if (publicTechResource && method === 'GET')
     return send(res, 200, await techRoutes.getPublic(decodeURIComponent(publicTechResource[1])));
+  const techResource = pathname.match(/^\/tech-resources\/([^/]+)$/);
+  if (techResource && method === 'GET')
+    return send(res, 200, await techRoutes.getMine(req, decodeURIComponent(techResource[1])));
+  if (techResource && method === 'PATCH')
+    return send(res, 200, await techRoutes.update(req, decodeURIComponent(techResource[1])));
+  if (techResource && method === 'DELETE')
+    return send(res, 200, await techRoutes.remove(req, decodeURIComponent(techResource[1])));
   if (method === 'POST' && pathname === '/code-projects')
     return send(res, 201, await codeRoutes.create(req));
   const codeProject = pathname.match(/^\/code-projects\/([^/]+)$/);
@@ -185,6 +192,25 @@ async function handle(req, res) {
   const pubView = pathname.match(/^\/publications\/([^/]+)\/view$/);
   if (pubView && method === 'POST')
     return send(res, 200, await publicationRoutes.registerView(decodeURIComponent(pubView[1])));
+  const publication = pathname.match(/^\/publications\/([^/]+)$/);
+  if (publication && method === 'GET')
+    return send(
+      res,
+      200,
+      await publicationRoutes.getPublication(req, decodeURIComponent(publication[1])),
+    );
+  if (publication && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await publicationRoutes.updatePublication(req, decodeURIComponent(publication[1])),
+    );
+  if (publication && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await publicationRoutes.deletePublication(req, decodeURIComponent(publication[1])),
+    );
 
   if (method === 'POST' && pathname === '/discussions')
     return send(res, 201, await discussionRoutes.createDiscussion(req));
@@ -253,6 +279,25 @@ async function handle(req, res) {
       res,
       200,
       await adminRoutes.updateContent(req, contentAdmin[1], decodeURIComponent(contentAdmin[2])),
+    );
+  const contentDetailsAdmin = pathname.match(
+    /^\/admin\/content\/(publication|tech_resource)\/([^/]+)\/details$/,
+  );
+  if (contentDetailsAdmin && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await adminRoutes.updateContentDetails(
+        req,
+        contentDetailsAdmin[1],
+        decodeURIComponent(contentDetailsAdmin[2]),
+      ),
+    );
+  if (contentAdmin && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await adminRoutes.deleteContent(req, contentAdmin[1], decodeURIComponent(contentAdmin[2])),
     );
   if (method === 'PATCH' && pathname === '/admin/settings')
     return send(res, 200, await adminRoutes.updateSettings(req));

@@ -60,6 +60,24 @@ export async function handleAdminClick(event) {
     return true;
   }
 
+  const deleteContent = event.target.closest('[data-admin-delete-content]');
+
+  if (deleteContent) {
+    const [type, id] = deleteContent.dataset.adminDeleteContent.split(':');
+    if (
+      !confirm('Apagar definitivamente este conteúdo rejeitado? Esta ação não pode ser desfeita.')
+    ) {
+      return true;
+    }
+    const result = await api(
+      `/api/admin/content/${encodeURIComponent(type)}/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
+    );
+    toast(result.message || 'Conteúdo apagado definitivamente.');
+    await refreshBootstrapAndRender();
+    return true;
+  }
+
   const userStatus = event.target.closest('[data-admin-user]');
 
   if (userStatus) {
@@ -168,6 +186,21 @@ export async function handleAdminClick(event) {
 
 export async function handleAdminSubmit(event) {
   const form = event.target;
+
+  if (form.matches('[data-admin-edit-content]')) {
+    event.preventDefault();
+    const [type, id] = form.dataset.adminEditContent.split(':');
+    const result = await api(
+      `/api/admin/content/${encodeURIComponent(type)}/${encodeURIComponent(id)}/details`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(formObj(form)),
+      },
+    );
+    toast(result.message || 'Conteúdo atualizado.');
+    await refreshBootstrapAndRender();
+    return true;
+  }
 
   if (form.matches('[data-admin-template]')) {
     event.preventDefault();

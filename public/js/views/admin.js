@@ -92,6 +92,94 @@ function adminSearch(label = 'Pesquisar') {
   </form>`;
 }
 
+function adminPublicationEditor(publication) {
+  const keywords = Array.isArray(publication.keywords)
+    ? publication.keywords.join(', ')
+    : publication.keywords || '';
+
+  return html`<details class="review-details admin-content-editor">
+    <summary>Editar conteúdo enviado</summary>
+    <form class="admin-edit-form" data-admin-edit-content="publication:${E(publication.id)}">
+      <div class="formgrid">
+        <div class="form-span-2">
+          <label class="label">Título</label>
+          <input class="field" name="title" value="${E(publication.title)}" required />
+        </div>
+        <div>
+          <label class="label">Área</label>
+          <input class="field" name="area" value="${E(publication.area)}" />
+        </div>
+        <div>
+          <label class="label">Nível</label>
+          <input class="field" name="level" value="${E(publication.level)}" />
+        </div>
+      </div>
+      <div class="formrow">
+        <label class="label">Resumo</label>
+        <textarea class="textarea" name="abstract" minlength="40" required>
+${E(publication.abstract || '')}</textarea
+        >
+      </div>
+      <div class="formrow">
+        <label class="label">Texto completo</label>
+        <textarea class="textarea article-textarea" name="content">
+${E(publication.content || '')}</textarea
+        >
+      </div>
+      <div class="formgrid">
+        <div>
+          <label class="label">Palavras-chave</label>
+          <input class="field" name="keywords" value="${E(keywords)}" />
+        </div>
+        <div>
+          <label class="label">Licença</label>
+          <input class="field" name="license" value="${E(publication.license)}" />
+        </div>
+      </div>
+      <button class="solid">Salvar alterações</button>
+    </form>
+  </details>`;
+}
+
+function adminTechEditor(resource) {
+  const tags = Array.isArray(resource.tags) ? resource.tags.join(', ') : resource.tags || '';
+
+  return html`<details class="review-details admin-content-editor">
+    <summary>Editar conteúdo enviado</summary>
+    <form class="admin-edit-form" data-admin-edit-content="tech_resource:${E(resource.id)}">
+      <div class="formgrid">
+        <div class="form-span-2">
+          <label class="label">Título</label>
+          <input class="field" name="title" value="${E(resource.title)}" required />
+        </div>
+        <div>
+          <label class="label">Área</label>
+          <input class="field" name="hub" value="${E(resource.hub)}" />
+        </div>
+        <div>
+          <label class="label">Tipo</label>
+          <input class="field" name="category" value="${E(resource.category)}" />
+        </div>
+      </div>
+      <div class="formrow">
+        <label class="label">Resumo</label>
+        <textarea class="textarea" name="summary" required>${E(resource.summary || '')}</textarea>
+      </div>
+      <div class="formrow">
+        <label class="label">Conteúdo completo</label>
+        <textarea class="textarea article-textarea" name="body" required>
+${E(resource.body || '')}</textarea
+        >
+      </div>
+      <div class="formrow">
+        <label class="label">Tags</label>
+        <input class="field" name="tags" value="${E(tags)}" />
+      </div>
+      <button class="solid">Salvar alterações</button>
+    </form>
+  </details>`;
+}
+
 async function adminPanel(tab = 'overview') {
   if (!state.me || state.me.role !== 'admin') {
     layout(
@@ -362,6 +450,7 @@ async function adminPanel(tab = 'overview') {
                   <span>${E(p.authorName)}</span><span>${num(p.views)} leituras</span
                   ><span>${date(p.createdAt)}</span>
                 </div>
+                ${p.status !== 'published' ? adminPublicationEditor(p) : ''}
                 <div class="actions admin-actions">
                   ${p.status !== 'published'
                     ? html`<button
@@ -391,7 +480,12 @@ async function adminPanel(tab = 'overview') {
                     ${p.featured ? 'Remover destaque' : 'Destacar'}</button
                   >${p.status === 'published'
                     ? link('/pesquisas/' + encodeURIComponent(p.slug), 'Abrir', 'outline')
-                    : ''}
+                    : html`<button
+                        class="dangerbtn"
+                        data-admin-delete-content="publication:${E(p.id)}"
+                      >
+                        Apagar definitivamente
+                      </button>`}
                 </div>
               </article>`,
           )
@@ -434,6 +528,7 @@ async function adminPanel(tab = 'overview') {
                 <div class="meta">
                   <span>${E(item.authorName)}</span><span>${date(item.createdAt)}</span>
                 </div>
+                ${item.status !== 'published' ? adminTechEditor(item) : ''}
                 <div class="actions admin-actions">
                   ${item.status !== 'published'
                     ? html`<button
@@ -457,6 +552,14 @@ async function adminPanel(tab = 'overview') {
                         data-admin-content="tech_resource:${E(item.id)}:rejected"
                       >
                         Rejeitar
+                      </button>`
+                    : ''}
+                  ${item.status !== 'published'
+                    ? html`<button
+                        class="dangerbtn"
+                        data-admin-delete-content="tech_resource:${E(item.id)}"
+                      >
+                        Apagar definitivamente
                       </button>`
                     : ''}
                 </div>
