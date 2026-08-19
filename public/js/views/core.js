@@ -135,6 +135,17 @@ function requireLogin() {
   );
 }
 
+function notFound() {
+  layout(
+    html`<div class="errorpage">
+      <div class="eyebrow">Error 404</div>
+      <h1>Página não encontrada</h1>
+      <p>Este registro não existe no arquivo do Studiorium.</p>
+      ${link('/', 'Voltar ao início', 'solid')}
+    </div>`,
+  );
+}
+
 function templateCard(t, i = 0) {
   return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover"
     ><div class="catno">CAT. ${String(i + 1).padStart(2, '0')}</div>
@@ -188,6 +199,7 @@ export {
   layout,
   empty,
   requireLogin,
+  notFound,
   templateCard,
   publicationCard,
   discussionRow,

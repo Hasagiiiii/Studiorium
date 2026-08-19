@@ -1,11 +1,13 @@
 import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
 import { goto } from '../router.js';
+import { emergentTopics, rankRelated } from '../content-intelligence.js';
 import {
   link,
   nav,
   footer,
   layout,
   empty,
+  notFound,
   templateCard,
   publicationCard,
   discussionRow,
@@ -262,6 +264,7 @@ function biblioteca() {
     (p) => (!q || contains(p, q)) && (!autor || p.displayName === autor),
   );
   const total = pubs.length + templates.length;
+  const circulatingTopics = emergentTopics(boot.publications);
   layout(
     html`<section class="pagehero library-hero">
         <div class="shell">
@@ -344,6 +347,24 @@ function biblioteca() {
             ? html`<div class="library-summary">
                 <strong>${total}</strong> resultado${total === 1 ? '' : 's'}
                 encontrado${total === 1 ? '' : 's'}${q ? ` para “${E(q)}”` : ''}.
+              </div>`
+            : ''}
+          ${circulatingTopics.length
+            ? html`<div class="discovery-strip">
+                <div>
+                  <span class="eyebrow">Índice emergente</span>
+                  <strong>Temas em circulação no acervo</strong>
+                </div>
+                <div class="discovery-topics">
+                  ${circulatingTopics
+                    .map(
+                      (topic) =>
+                        html`<a href="/biblioteca?q=${encodeURIComponent(topic.label)}" data-link>
+                          ${E(topic.label)} <span>${topic.count}</span>
+                        </a>`,
+                    )
+                    .join('')}
+                </div>
               </div>`
             : ''}
         </div>
@@ -483,6 +504,7 @@ function acervo() {
 function templateDetail(slug) {
   const t = state.boot.templates.find((x) => x.slug === slug);
   if (!t) return notFound();
+  const relatedTemplates = rankRelated(t, state.boot.templates);
   layout(
     html`<section class="pagehero">
       <div class="shell">
@@ -516,6 +538,18 @@ function templateDetail(slug) {
               .join('')}
           </div>
         </div>
+        ${relatedTemplates.length
+          ? html`<section class="contextual-discovery">
+              <div class="sectionhead">
+                <div>
+                  <div class="eyebrow">Modelos conectados</div>
+                  <h2>Continue sem recomeçar do zero</h2>
+                  <p>Seleção calculada pelo tipo, área, estrutura e estilo deste modelo.</p>
+                </div>
+              </div>
+              <div class="grid grid3">${relatedTemplates.map(templateCard).join('')}</div>
+            </section>`
+          : ''}
       </div>
     </section>`,
   );

@@ -1,6 +1,24 @@
 import { api, state, toast } from '../runtime.js';
 import { goto, render } from '../router.js';
 
+let livePreviewTimer;
+
+function updateCodeSaveState(label, status = '') {
+  const badge = document.querySelector('[data-code-save-state]');
+  if (!badge) return;
+  badge.textContent = label;
+  badge.className = `badge ${status}`.trim();
+}
+
+function requestLivePreview() {
+  if (!document.querySelector('[data-live-preview]:checked')) return;
+  clearTimeout(livePreviewTimer);
+  livePreviewTimer = setTimeout(async () => {
+    const { runCodePreview } = await import('../views.js');
+    runCodePreview();
+  }, 650);
+}
+
 function codeEditorPayload() {
   return {
     title: document.querySelector('[name=codeTitle]').value,
@@ -25,6 +43,12 @@ function projectEditorPayload(root) {
 }
 
 export async function handleProjectClick(event) {
+  if (event.target.closest('[data-clear-lab-console]')) {
+    const list = document.querySelector('[data-lab-console-list]');
+    if (list) list.innerHTML = '<li class="empty-log">Console limpo.</li>';
+    return true;
+  }
+
   if (event.target.closest('[data-new-code-project]')) {
     const data = await api('/api/code-projects', {
       method: 'POST',
@@ -48,6 +72,7 @@ export async function handleProjectClick(event) {
       body: JSON.stringify(codeEditorPayload()),
     });
     toast('Projeto de código salvo.');
+    updateCodeSaveState('Salvo agora', 'status-saved');
     return true;
   }
 
@@ -149,4 +174,55 @@ export async function handleProjectClick(event) {
   }
 
   return false;
+}
+
+export function handleProjectInput(event) {
+  if (!event.target.matches('.codearea, [name=codeTitle]')) return false;
+  updateCodeSaveState('Alterações não salvas', 'status-unsaved');
+  if (event.target.matches('.codearea')) requestLivePreview();
+  return true;
+}
+
+export function handleProjectChange(event) {
+  if (event.target.matches('[name=codeVisibility]')) {
+    updateCodeSaveState('Alterações não salvas', 'status-unsaved');
+    return true;
+  }
+  if (event.target.matches('[data-live-preview]') && event.target.checked) {
+    requestLivePreview();
+    return true;
+  }
+  return false;
+}
+
+export function handleLabMessage(event) {
+  const frame = document.getElementById('codePreview');
+  const message = event.data;
+  if (!frame || event.source !== frame.contentWindow) return false;
+  if (message?.channel !== 'studiorium-lab' || message.runId !== frame.dataset.runId) return false;
+
+  const status = document.querySelector('[data-lab-run-status]');
+  if (message.type === 'ready') {
+    if (status) {
+      status.textContent = 'Prévia atualizada';
+      status.className = 'ready';
+    }
+    return true;
+  }
+
+  const list = document.querySelector('[data-lab-console-list]');
+  if (!list) return true;
+  list.querySelector('.empty-log')?.remove();
+
+  const item = document.createElement('li');
+  item.className = `log-${message.type}`;
+  item.textContent = (message.args || []).join(' ');
+  list.append(item);
+  while (list.children.length > 100) list.firstElementChild.remove();
+
+  if (message.type === 'error' && status) {
+    status.textContent = 'Erro detectado';
+    status.className = 'error';
+  }
+  return true;
 }
