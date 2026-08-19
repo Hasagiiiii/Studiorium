@@ -134,9 +134,30 @@ export async function handleProjectClick(event) {
 
   for (const [attribute, resource, endpoint, method, question, message] of [
     ['restoreProject', 'projects', '/restore', 'POST', '', 'Projeto restaurado.'],
-    ['purgeProject', 'projects', '/purge', 'DELETE', 'Excluir definitivamente este projeto?', 'Projeto excluído definitivamente.'],
-    ['restoreCodeProject', 'code-projects', '/restore', 'POST', '', 'Projeto de código restaurado.'],
-    ['purgeCodeProject', 'code-projects', '/purge', 'DELETE', 'Excluir definitivamente este projeto de código?', 'Projeto de código excluído definitivamente.'],
+    [
+      'purgeProject',
+      'projects',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente este projeto?',
+      'Projeto excluído definitivamente.',
+    ],
+    [
+      'restoreCodeProject',
+      'code-projects',
+      '/restore',
+      'POST',
+      '',
+      'Projeto de código restaurado.',
+    ],
+    [
+      'purgeCodeProject',
+      'code-projects',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente este projeto de código?',
+      'Projeto de código excluído definitivamente.',
+    ],
   ]) {
     const name = attribute.replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
     const button = event.target.closest(`[data-${name}]`);
@@ -149,14 +170,18 @@ export async function handleProjectClick(event) {
       });
       if (!confirmed) return true;
     }
-    await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
-      await api(`/api/${resource}/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-        method,
-        body: method === 'POST' ? '{}' : undefined,
-      });
-      toast(message);
-      await render();
-    });
+    await withBusyControl(
+      button,
+      method === 'DELETE' ? 'Excluindo…' : 'Restaurando…',
+      async () => {
+        await api(`/api/${resource}/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
+          method,
+          body: method === 'POST' ? '{}' : undefined,
+        });
+        toast(message);
+        await render();
+      },
+    );
     return true;
   }
 
