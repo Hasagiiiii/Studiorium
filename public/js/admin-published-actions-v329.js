@@ -14,36 +14,20 @@ function publicationEditor(publication) {
           <label class="label">Título</label>
           <input class="field" name="title" value="${E(publication.title)}" required />
         </div>
-        <div>
-          <label class="label">Área</label>
-          <input class="field" name="area" value="${E(publication.area || '')}" />
-        </div>
-        <div>
-          <label class="label">Nível</label>
-          <input class="field" name="level" value="${E(publication.level || '')}" />
-        </div>
+        <div><label class="label">Área</label><input class="field" name="area" value="${E(publication.area || '')}" /></div>
+        <div><label class="label">Nível</label><input class="field" name="level" value="${E(publication.level || '')}" /></div>
       </div>
       <div class="formrow">
         <label class="label">Resumo</label>
-        <textarea class="textarea" name="abstract" minlength="40" required>${E(
-          publication.abstract || '',
-        )}</textarea>
+        <textarea class="textarea" name="abstract" minlength="40" required>${E(publication.abstract || '')}</textarea>
       </div>
       <div class="formrow">
         <label class="label">Texto completo</label>
-        <textarea class="textarea article-textarea" name="content">${E(
-          publication.content || '',
-        )}</textarea>
+        <textarea class="textarea article-textarea" name="content">${E(publication.content || '')}</textarea>
       </div>
       <div class="formgrid">
-        <div>
-          <label class="label">Palavras-chave</label>
-          <input class="field" name="keywords" value="${E(keywords)}" />
-        </div>
-        <div>
-          <label class="label">Licença</label>
-          <input class="field" name="license" value="${E(publication.license || '')}" />
-        </div>
+        <div><label class="label">Palavras-chave</label><input class="field" name="keywords" value="${E(keywords)}" /></div>
+        <div><label class="label">Licença</label><input class="field" name="license" value="${E(publication.license || '')}" /></div>
       </div>
       <button class="solid">Salvar alterações</button>
     </form>
@@ -57,35 +41,57 @@ function techEditor(resource) {
     <form class="admin-edit-form" data-admin-edit-content="tech_resource:${E(resource.id)}">
       <div class="formgrid">
         <div class="form-span-2">
-          <label class="label">Título</label>
-          <input class="field" name="title" value="${E(resource.title)}" required />
+          <label class="label">Título</label><input class="field" name="title" value="${E(resource.title)}" required />
         </div>
-        <div>
-          <label class="label">Área</label>
-          <input class="field" name="hub" value="${E(resource.hub || '')}" />
-        </div>
-        <div>
-          <label class="label">Tipo</label>
-          <input class="field" name="category" value="${E(resource.category || '')}" />
-        </div>
+        <div><label class="label">Área</label><input class="field" name="hub" value="${E(resource.hub || '')}" /></div>
+        <div><label class="label">Tipo</label><input class="field" name="category" value="${E(resource.category || '')}" /></div>
       </div>
       <div class="formrow">
-        <label class="label">Resumo</label>
-        <textarea class="textarea" name="summary" required>${E(resource.summary || '')}</textarea>
+        <label class="label">Resumo</label><textarea class="textarea" name="summary" required>${E(resource.summary || '')}</textarea>
       </div>
       <div class="formrow">
-        <label class="label">Conteúdo completo</label>
-        <textarea class="textarea article-textarea" name="body" required>${E(
-          resource.body || '',
-        )}</textarea>
+        <label class="label">Conteúdo completo</label><textarea class="textarea article-textarea" name="body" required>${E(resource.body || '')}</textarea>
+      </div>
+      <div class="formrow"><label class="label">Tags</label><input class="field" name="tags" value="${E(tags)}" /></div>
+      <button class="solid">Salvar alterações</button>
+    </form>
+  </details>`;
+}
+
+function discussionEditor(discussion) {
+  return html`<details class="review-details admin-content-editor" data-admin-published-editor>
+    <summary>Editar discussão</summary>
+    <form class="admin-edit-form" data-admin-edit-content="discussion:${E(discussion.id)}">
+      <div class="formgrid">
+        <div class="form-span-2">
+          <label class="label">Título</label><input class="field" name="title" value="${E(discussion.title)}" required />
+        </div>
+        <div><label class="label">Categoria</label><input class="field" name="category" value="${E(discussion.category || '')}" required /></div>
       </div>
       <div class="formrow">
-        <label class="label">Tags</label>
-        <input class="field" name="tags" value="${E(tags)}" />
+        <label class="label">Texto</label><textarea class="textarea article-textarea" name="body" required>${E(discussion.body || '')}</textarea>
       </div>
       <button class="solid">Salvar alterações</button>
     </form>
   </details>`;
+}
+
+function replyEditor(reply) {
+  return html`<details class="review-details admin-content-editor">
+    <summary>Editar resposta</summary>
+    <form class="admin-edit-form" data-admin-edit-content="reply:${E(reply.id)}">
+      <div class="formrow">
+        <label class="label">Resposta</label><textarea class="textarea" name="body" required>${E(reply.body || '')}</textarea>
+      </div>
+      <button class="solid">Salvar alterações</button>
+    </form>
+  </details>`;
+}
+
+function findCardByAction(type, id) {
+  return [...document.querySelectorAll('[data-admin-content]')]
+    .find((button) => button.dataset.adminContent.startsWith(`${type}:${id}:`))
+    ?.closest('article.card');
 }
 
 function findPublicationCard(id) {
@@ -94,26 +100,20 @@ function findPublicationCard(id) {
     ?.closest('article.card');
 }
 
-function findTechCard(id) {
-  return [...document.querySelectorAll('[data-admin-content]')]
-    .find((button) => button.dataset.adminContent === `tech_resource:${id}:pending_review`)
-    ?.closest('article.card');
-}
-
 function addDeleteAction(card, type, id) {
   const actions = card?.querySelector('.admin-actions');
-  if (!actions || actions.querySelector(`[data-admin-delete-content="${type}:${CSS.escape(id)}"]`)) {
-    return;
-  }
+  if (!actions) return;
+  const exists = [...actions.querySelectorAll('[data-admin-delete-content]')].some(
+    (button) => button.dataset.adminDeleteContent === `${type}:${id}`,
+  );
+  if (exists) return;
   actions.insertAdjacentHTML(
     'beforeend',
-    html`<button class="dangerbtn" type="button" data-admin-delete-content="${E(type)}:${E(id)}">
-      Excluir definitivamente
-    </button>`,
+    html`<button class="dangerbtn" type="button" data-admin-delete-content="${E(type)}:${E(id)}">Excluir definitivamente</button>`,
   );
 }
 
-function enhancePublished(publications, techResources) {
+function enhancePublications(publications) {
   for (const publication of publications.filter((item) => item.status === 'published')) {
     const card = findPublicationCard(publication.id);
     if (!card) continue;
@@ -122,9 +122,11 @@ function enhancePublished(publications, techResources) {
     }
     addDeleteAction(card, 'publication', publication.id);
   }
+}
 
+function enhanceTech(techResources) {
   for (const resource of techResources.filter((item) => item.status === 'published')) {
-    const card = findTechCard(resource.id);
+    const card = findCardByAction('tech_resource', resource.id);
     if (!card) continue;
     if (!card.querySelector('[data-admin-published-editor]')) {
       card.querySelector('.admin-actions')?.insertAdjacentHTML('beforebegin', techEditor(resource));
@@ -133,15 +135,59 @@ function enhancePublished(publications, techResources) {
   }
 }
 
-async function enhanceAdminPublishedActions() {
-  if (!['/admin/publicacoes', '/admin/oficina'].includes(location.pathname.replace(/\/+$/, ''))) {
-    return;
+function enhanceDiscussions(discussions) {
+  for (const discussion of discussions) {
+    const card = findCardByAction('discussion', discussion.id);
+    if (!card) continue;
+    if (!card.querySelector('[data-admin-published-editor]')) {
+      card.querySelector('.admin-actions')?.insertAdjacentHTML('beforebegin', discussionEditor(discussion));
+    }
+    addDeleteAction(card, 'discussion', discussion.id);
   }
+}
+
+function replyRow(reply) {
+  return html`<div class="admin-row">
+    <div class="min-width-zero">
+      <strong>Resposta no Colloquium</strong>
+      <small>${E(String(reply.body || '').slice(0, 220))}${String(reply.body || '').length > 220 ? '…' : ''}</small>
+      ${replyEditor(reply)}
+    </div>
+    <div class="actions admin-actions">
+      <button class="solid" type="button" data-admin-content="reply:${E(reply.id)}:published">Publicar</button>
+      <button class="outline" type="button" data-admin-content="reply:${E(reply.id)}:pending_review">Revisar</button>
+      <button class="dangerbtn" type="button" data-admin-content="reply:${E(reply.id)}:hidden">Ocultar</button>
+      <button class="dangerbtn" type="button" data-admin-delete-content="reply:${E(reply.id)}">Excluir definitivamente</button>
+    </div>
+  </div>`;
+}
+
+function enhanceReplies(replies) {
+  const shell = document.querySelector('.admin-page .shell');
+  if (!shell || shell.querySelector('[data-admin-replies-v329]')) return;
+  shell.insertAdjacentHTML(
+    'beforeend',
+    html`<details class="card trash-panel section-gap" data-admin-replies-v329>
+      <summary>Respostas do Colloquium (${replies.length})</summary>
+      <p class="muted small">Área administrativa recolhida para não ocupar a fila principal.</p>
+      ${replies.map(replyRow).join('') || '<div class="empty">Nenhuma resposta encontrada.</div>'}
+    </details>`,
+  );
+}
+
+async function enhanceAdminPublishedActions() {
+  const path = location.pathname.replace(/\/+$/, '');
+  if (!['/admin/publicacoes', '/admin/oficina', '/admin/coloquio'].includes(path)) return;
   if (loading) return;
   loading = true;
   try {
     const data = await api('/api/admin/dashboard');
-    enhancePublished(data.publications || [], data.techResources || []);
+    if (path === '/admin/publicacoes') enhancePublications(data.publications || []);
+    if (path === '/admin/oficina') enhanceTech(data.techResources || []);
+    if (path === '/admin/coloquio') {
+      enhanceDiscussions(data.discussions || []);
+      enhanceReplies(data.replies || []);
+    }
   } finally {
     loading = false;
   }
