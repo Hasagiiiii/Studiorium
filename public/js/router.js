@@ -19,6 +19,7 @@ import {
   publicar,
   atelie,
   oficina,
+  oficinaDetail,
   laboratorio,
   adminPanel,
   moderacao,
@@ -64,6 +65,8 @@ async function renderRoute() {
   if (p === '/') return home();
   if (['/biblioteca', '/library'].includes(p)) return biblioteca();
   if (['/oficina', '/tech'].includes(p)) return oficina();
+  if (p.startsWith('/oficina/'))
+    return await oficinaDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/laboratorio') return await laboratorio();
   if (p.startsWith('/laboratorio/'))
     return await laboratorio(decodeURIComponent(p.split('/')[2] || ''));

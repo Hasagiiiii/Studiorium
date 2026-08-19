@@ -63,6 +63,9 @@ async function handle(req, res) {
 
   if (method === 'POST' && pathname === '/tech-resources')
     return send(res, 201, await techRoutes.create(req));
+  const publicTechResource = pathname.match(/^\/tech-resources\/public\/([^/]+)$/);
+  if (publicTechResource && method === 'GET')
+    return send(res, 200, await techRoutes.getPublic(decodeURIComponent(publicTechResource[1])));
   if (method === 'POST' && pathname === '/code-projects')
     return send(res, 201, await codeRoutes.create(req));
   const codeProject = pathname.match(/^\/code-projects\/([^/]+)$/);

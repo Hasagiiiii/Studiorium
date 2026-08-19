@@ -103,10 +103,51 @@ function oficina() {
                     <div class="meta">
                       <span>${E(x.authorName)}</span><span>${date(x.createdAt)}</span>
                     </div>
+                    <div class="actions space-top">
+                      ${link(
+                        `/oficina/${encodeURIComponent(x.slug)}`,
+                        'Ler conteúdo completo',
+                        'outline',
+                      )}
+                    </div>
                   </article>`,
               )
               .join('') || empty('Ainda não há conteúdo publicado nessa área.')}
           </div>
+        </div>
+      </section>`,
+  );
+}
+
+async function oficinaDetail(slug) {
+  const { resource } = await api(`/api/tech-resources/public/${encodeURIComponent(slug)}`);
+  layout(
+    html`<section class="pagehero article-hero">
+        <div class="shell article-width">
+          <div class="crumbs">${link('/oficina', 'Oficina')} / ${E(resource.hub)}</div>
+          <div class="eyebrow">${E(resource.hub)} · ${E(resource.category)}</div>
+          <h1 class="pagetitle">${E(resource.title)}</h1>
+          <p class="article-summary">${E(resource.summary)}</p>
+          <div class="meta article-meta">
+            <span>Por ${E(resource.authorName)}</span>
+            <span>Atualizado em ${date(resource.updatedAt)}</span>
+          </div>
+        </div>
+      </section>
+      <section class="section compact">
+        <div class="shell article-layout">
+          <article class="article-body">${E(resource.body)}</article>
+          <aside class="article-sources">
+            <div class="eyebrow">Classificação</div>
+            <h2>${E(resource.hub)}</h2>
+            <p>${E(resource.category)}</p>
+            <div class="pills">
+              ${(resource.tags || [])
+                .map((tag) => html`<span class="pill">${E(tag)}</span>`)
+                .join('')}
+            </div>
+            <div class="actions space-top">${link('/oficina', 'Voltar à Oficina', 'outline')}</div>
+          </aside>
         </div>
       </section>`,
   );
@@ -247,4 +288,4 @@ function notFound() {
   );
 }
 
-export { oficina, laboratorio, runCodePreview, requireLogin, notFound };
+export { oficina, oficinaDetail, laboratorio, runCodePreview, requireLogin, notFound };
