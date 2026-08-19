@@ -7,6 +7,7 @@ import {
   footer,
   layout,
   empty,
+  requireLogin,
   templateCard,
   publicationCard,
   discussionRow,
@@ -268,23 +269,6 @@ function runCodePreview() {
     </html>`;
 }
 
-function requireLogin() {
-  layout(
-    html`<section class="pagehero">
-      <div class="shell">
-        <div class="card" style="max-width:620px;margin:auto;text-align:center">
-          <div class="eyebrow">Área reservada</div>
-          <h1 class="pagetitle">Entre para continuar</h1>
-          <p>Essa função salva conteúdo em sua conta online do Studiorium.</p>
-          <div class="actions" style="justify-content:center">
-            ${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}
-          </div>
-        </div>
-      </div>
-    </section>`,
-  );
-}
-
 function notFound() {
   layout(
     html`<div class="errorpage">
@@ -296,4 +280,4 @@ function notFound() {
   );
 }
 
-export { oficina, oficinaDetail, laboratorio, runCodePreview, requireLogin, notFound };
+export { oficina, oficinaDetail, laboratorio, runCodePreview, notFound };

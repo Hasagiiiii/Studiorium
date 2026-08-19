@@ -106,3 +106,13 @@ test('ADM pode corrigir ou apagar definitivamente conteúdo ainda não publicado
   assert.ok(events.includes('/details'));
   assert.ok(events.includes("method: 'DELETE'"));
 });
+
+test('telas privadas usam o aviso de login compartilhado sem referência ausente', () => {
+  const core = read('public/js/views/core.js');
+  const workspace = read('public/js/views/workspace.js');
+  const aggregate = read('public/js/views.js');
+
+  assert.ok(core.includes('function requireLogin'));
+  assert.ok(workspace.includes('requireLogin,'));
+  assert.ok(aggregate.includes('requireLogin,'));
+});
