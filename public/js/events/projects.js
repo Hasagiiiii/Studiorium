@@ -170,18 +170,14 @@ export async function handleProjectClick(event) {
       });
       if (!confirmed) return true;
     }
-    await withBusyControl(
-      button,
-      method === 'DELETE' ? 'Excluindo…' : 'Restaurando…',
-      async () => {
-        await api(`/api/${resource}/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-          method,
-          body: method === 'POST' ? '{}' : undefined,
-        });
-        toast(message);
-        await render();
-      },
-    );
+    await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
+      await api(`/api/${resource}/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
+        method,
+        body: method === 'POST' ? '{}' : undefined,
+      });
+      toast(message);
+      await render();
+    });
     return true;
   }
 

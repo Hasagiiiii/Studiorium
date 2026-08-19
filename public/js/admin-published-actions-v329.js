@@ -101,12 +101,7 @@ function discussionEditor(discussion) {
         </div>
         <div>
           <label class="label">Categoria</label>
-          <input
-            class="field"
-            name="category"
-            value="${E(discussion.category || '')}"
-            required
-          />
+          <input class="field" name="category" value="${E(discussion.category || '')}" required />
         </div>
       </div>
       <div class="formrow">
@@ -156,11 +151,7 @@ function addDeleteAction(card, type, id) {
 
   actions.insertAdjacentHTML(
     'beforeend',
-    html`<button
-      class="dangerbtn"
-      type="button"
-      data-admin-delete-content="${E(type)}:${E(id)}"
-    >
+    html`<button class="dangerbtn" type="button" data-admin-delete-content="${E(type)}:${E(id)}">
       Excluir definitivamente
     </button>`,
   );
@@ -186,9 +177,7 @@ function enhanceTech(techResources) {
     if (!card) continue;
 
     if (!card.querySelector('[data-admin-published-editor]')) {
-      card
-        .querySelector('.admin-actions')
-        ?.insertAdjacentHTML('beforebegin', techEditor(resource));
+      card.querySelector('.admin-actions')?.insertAdjacentHTML('beforebegin', techEditor(resource));
     }
     addDeleteAction(card, 'tech_resource', resource.id);
   }
@@ -219,11 +208,7 @@ function replyRow(reply) {
       ${replyEditor(reply)}
     </div>
     <div class="actions admin-actions">
-      <button
-        class="solid"
-        type="button"
-        data-admin-content="reply:${E(reply.id)}:published"
-      >
+      <button class="solid" type="button" data-admin-content="reply:${E(reply.id)}:published">
         Publicar
       </button>
       <button
@@ -233,18 +218,10 @@ function replyRow(reply) {
       >
         Revisar
       </button>
-      <button
-        class="dangerbtn"
-        type="button"
-        data-admin-content="reply:${E(reply.id)}:hidden"
-      >
+      <button class="dangerbtn" type="button" data-admin-content="reply:${E(reply.id)}:hidden">
         Ocultar
       </button>
-      <button
-        class="dangerbtn"
-        type="button"
-        data-admin-delete-content="reply:${E(reply.id)}"
-      >
+      <button class="dangerbtn" type="button" data-admin-delete-content="reply:${E(reply.id)}">
         Excluir definitivamente
       </button>
     </div>

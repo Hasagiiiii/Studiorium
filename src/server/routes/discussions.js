@@ -89,7 +89,8 @@ async function updateDiscussion(req, discussionId) {
   const user = await requireUser(req);
   const current = await ownedDiscussion(user.id, discussionId);
   const values = discussionInput(await readJson(req), current);
-  const status = values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
+  const status =
+    values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
   const patch = {
     title: values.title,
     body: values.body,
@@ -213,7 +214,8 @@ async function updateReply(req, replyId) {
   const user = await requireUser(req);
   const current = await ownedReply(user.id, replyId);
   const values = replyInput(await readJson(req), current);
-  const status = values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
+  const status =
+    values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
   const patch = { body: values.body, status, author_name: await profileName(user) };
   const { data, error } = await db()
     .from('replies')

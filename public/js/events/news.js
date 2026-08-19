@@ -68,7 +68,13 @@ export async function handleNewsClick(event) {
   }
 
   for (const [attribute, endpoint, method, question, message] of [
-    ['trashNews', '', 'DELETE', 'Mover esta notícia para a lixeira?', 'Notícia movida para a lixeira.'],
+    [
+      'trashNews',
+      '',
+      'DELETE',
+      'Mover esta notícia para a lixeira?',
+      'Notícia movida para a lixeira.',
+    ],
     ['restoreNews', '/restore', 'POST', '', 'Notícia restaurada.'],
     [
       'purgeNews',

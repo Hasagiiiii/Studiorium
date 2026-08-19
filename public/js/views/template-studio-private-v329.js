@@ -18,7 +18,9 @@ function templateCard(template) {
     <p>${E(template.description || 'Template livre para personalizar.')}</p>
     <div class="actions">
       ${link(`/estudio-templates/${encodeURIComponent(template.id)}`, 'Editar', 'solid')}
-      <button class="dangerbtn" type="button" data-trash-template="${E(template.id)}">Excluir</button>
+      <button class="dangerbtn" type="button" data-trash-template="${E(template.id)}">
+        Excluir
+      </button>
     </div>
   </article>`;
 }
@@ -35,14 +37,17 @@ export async function templateStudio() {
   const grid = page?.querySelector('.grid.grid3');
   if (!page || !grid) return;
 
-  grid.innerHTML = working.map(templateCard).join('') || empty('Nenhum template em edição ou revisão.');
+  grid.innerHTML =
+    working.map(templateCard).join('') || empty('Nenhum template em edição ou revisão.');
   const existing = page.querySelector('[data-published-template-vault]');
   if (existing) existing.remove();
   grid.insertAdjacentHTML(
     'afterend',
     html`<details class="card trash-panel section-gap" data-published-template-vault>
       <summary>Publicados (${published.length})</summary>
-      <p class="muted small">Templates já públicos ficam recolhidos aqui para não ocupar a área de criação.</p>
+      <p class="muted small">
+        Templates já públicos ficam recolhidos aqui para não ocupar a área de criação.
+      </p>
       <div class="grid grid3">
         ${published.map(templateCard).join('') || empty('Nenhum template publicado.')}
       </div>

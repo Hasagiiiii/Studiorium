@@ -179,9 +179,21 @@ export async function handleTemplateClick(event) {
   }
 
   for (const [attribute, endpoint, method, question, message] of [
-    ['trashTemplate', '', 'DELETE', 'Mover este template para a lixeira?', 'Template movido para a lixeira.'],
+    [
+      'trashTemplate',
+      '',
+      'DELETE',
+      'Mover este template para a lixeira?',
+      'Template movido para a lixeira.',
+    ],
     ['restoreTemplate', '/restore', 'POST', '', 'Template restaurado.'],
-    ['purgeTemplate', '/purge', 'DELETE', 'Excluir definitivamente o template e seus arquivos?', 'Template excluído definitivamente.'],
+    [
+      'purgeTemplate',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente o template e seus arquivos?',
+      'Template excluído definitivamente.',
+    ],
   ]) {
     const name = attribute.replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
     const button = event.target.closest(`[data-${name}]`);
@@ -195,10 +207,13 @@ export async function handleTemplateClick(event) {
       if (!confirmed) return true;
     }
     await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
-      await api(`/api/custom-templates/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-        method,
-        body: method === 'POST' ? '{}' : undefined,
-      });
+      await api(
+        `/api/custom-templates/${encodeURIComponent(button.dataset[attribute])}${endpoint}`,
+        {
+          method,
+          body: method === 'POST' ? '{}' : undefined,
+        },
+      );
       toast(message);
       await render();
     });

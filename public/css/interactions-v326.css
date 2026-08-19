@@ -13,11 +13,8 @@
   display: grid;
   place-items: center;
   min-height: 100dvh;
-  padding:
-    max(18px, env(safe-area-inset-top))
-    max(18px, env(safe-area-inset-right))
-    max(18px, env(safe-area-inset-bottom))
-    max(18px, env(safe-area-inset-left));
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
   overflow: auto;
   background: rgba(5, 4, 3, 0.76);
   backdrop-filter: blur(7px);

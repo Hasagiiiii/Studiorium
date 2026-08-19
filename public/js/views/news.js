@@ -249,8 +249,8 @@ function articleForm(article = {}) {
     </div>
     ${editingPublished
       ? html`<div class="notice">
-          Ao salvar uma notícia já publicada, ela sai do ar e volta para certificação editorial antes
-          de ser publicada novamente.
+          Ao salvar uma notícia já publicada, ela sai do ar e volta para certificação editorial
+          antes de ser publicada novamente.
         </div>`
       : ''}
     <div class="formgrid">
@@ -314,7 +314,9 @@ function newsroomRow(article, options = {}) {
       <p>${E(article.status)} · atualizado ${date(article.updatedAt)}</p>
     </div>
     <div class="actions">
-      ${options.open ? link(`/noticias/${encodeURIComponent(article.slug)}`, 'Abrir', 'outline') : ''}
+      ${options.open
+        ? link(`/noticias/${encodeURIComponent(article.slug)}`, 'Abrir', 'outline')
+        : ''}
       ${options.edit ? link(`/redacao/${encodeURIComponent(article.id)}`, 'Editar', 'outline') : ''}
       ${options.trash
         ? html`<button class="dangerbtn" data-trash-news="${E(article.id)}">Excluir</button>`
@@ -347,15 +349,14 @@ function newsroomList(articles) {
       <p class="muted small">
         Notícias já públicas ficam guardadas aqui para não ocupar sua mesa de edição.
       </p>
-      ${published.map((article) => newsroomRow(article, { open: true, edit: true, trash: true })).join('') ||
-      empty('Você ainda não tem notícias publicadas.')}
+      ${published
+        .map((article) => newsroomRow(article, { open: true, edit: true, trash: true }))
+        .join('') || empty('Você ainda não tem notícias publicadas.')}
     </details>
     ${archived.length
       ? html`<details class="card trash-panel newsroom-published-vault">
           <summary>Arquivadas (${archived.length})</summary>
-          ${archived
-            .map((article) => newsroomRow(article, { edit: true, trash: true }))
-            .join('')}
+          ${archived.map((article) => newsroomRow(article, { edit: true, trash: true })).join('')}
         </details>`
       : ''}
     ${trashed.length

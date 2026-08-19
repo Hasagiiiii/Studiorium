@@ -53,30 +53,22 @@ function newsRow(article, mode) {
       : '';
   const archiveButton =
     mode === 'published'
-      ? html`<button
-          type="button"
-          class="soft"
-          data-news-manager-action="archive:${E(article.id)}"
-        >
+      ? html`<button type="button" class="soft" data-news-manager-action="archive:${E(article.id)}">
           Arquivar
         </button>`
       : '';
   const trashButtons =
     mode === 'trash'
       ? html`<button
-          type="button"
-          class="outline"
-          data-news-manager-action="restore:${E(article.id)}"
-        >
-          Restaurar
-        </button>
-        <button
-          type="button"
-          class="dangerbtn"
-          data-news-manager-action="purge:${E(article.id)}"
-        >
-          Excluir definitivamente
-        </button>`
+            type="button"
+            class="outline"
+            data-news-manager-action="restore:${E(article.id)}"
+          >
+            Restaurar
+          </button>
+          <button type="button" class="dangerbtn" data-news-manager-action="purge:${E(article.id)}">
+            Excluir definitivamente
+          </button>`
       : html`<button
           type="button"
           class="dangerbtn"
@@ -87,11 +79,7 @@ function newsRow(article, mode) {
   const editButton =
     mode === 'trash'
       ? ''
-      : html`<button
-          type="button"
-          class="outline"
-          data-news-manager-action="edit:${E(article.id)}"
-        >
+      : html`<button type="button" class="outline" data-news-manager-action="edit:${E(article.id)}">
           Editar
         </button>`;
 
@@ -99,7 +87,8 @@ function newsRow(article, mode) {
     <div>
       <strong>${E(article.title)}</strong>
       <small>
-        ${E(article.category)} · ${date(article.publishedAt || article.updatedAt || article.createdAt)}
+        ${E(article.category)} ·
+        ${date(article.publishedAt || article.updatedAt || article.createdAt)}
         ${article.featured ? ' · Destaque na página inicial' : ''}
       </small>
     </div>
@@ -113,7 +102,11 @@ function vault(label, eyebrow, articles, mode, open = false) {
   const rows = articles.length
     ? articles.map((article) => newsRow(article, mode)).join('')
     : '<div class="empty">Nenhum item nesta área.</div>';
-  return html`<details class="card published-vault" data-news-vault="${E(mode)}" ${open ? 'open' : ''}>
+  return html`<details
+    class="card published-vault"
+    data-news-vault="${E(mode)}"
+    ${open ? 'open' : ''}
+  >
     <summary class="published-vault-summary">
       <span>
         <span class="eyebrow">${E(eyebrow)}</span>

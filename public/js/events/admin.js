@@ -104,10 +104,13 @@ export async function handleAdminClick(event) {
     if (status === 'suspended') {
       const result = await formDialog({
         title: 'Suspender conta',
-        message: 'As sessões ativas serão encerradas. O motivo ficará registrado para a administração.',
+        message:
+          'As sessões ativas serão encerradas. O motivo ficará registrado para a administração.',
         confirmLabel: 'Suspender conta',
         danger: true,
-        fields: [{ name: 'reason', label: 'Motivo da suspensão', type: 'textarea', maxLength: 1500 }],
+        fields: [
+          { name: 'reason', label: 'Motivo da suspensão', type: 'textarea', maxLength: 1500 },
+        ],
       });
       if (!result) return true;
       reason = result.reason || '';

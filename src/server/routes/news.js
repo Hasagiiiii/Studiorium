@@ -215,7 +215,10 @@ async function update(req, articleId) {
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId);
   if (['ai_review', 'editorial_review'].includes(current.status)) {
-    throw inputError('A notícia está em revisão. Aguarde a decisão editorial antes de editar.', 409);
+    throw inputError(
+      'A notícia está em revisão. Aguarde a decisão editorial antes de editar.',
+      409,
+    );
   }
   const article = cleanArticle(body, current);
   const wasPublic = current.status === 'published';
@@ -292,7 +295,10 @@ async function trash(req, articleId) {
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId);
   if (['ai_review', 'editorial_review'].includes(current.status)) {
-    throw inputError('A notícia está em revisão. Aguarde a decisão editorial antes de excluir.', 409);
+    throw inputError(
+      'A notícia está em revisão. Aguarde a decisão editorial antes de excluir.',
+      409,
+    );
   }
   const patch = {
     deleted_at: now(),
