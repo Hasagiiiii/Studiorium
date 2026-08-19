@@ -1,6 +1,7 @@
 import { api, bootstrap, fileToBase64, formObj, state, toast } from '../runtime.js';
 import { goto, render } from '../router.js';
 import { discussionForm, techResourceForm } from './composers.js';
+import { confirmAction, formDialog, withBusyControl } from '../ui-feedback.js';
 
 const MAX_PUBLICATION_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 3 * 1024 * 1024;
@@ -82,20 +83,41 @@ function refreshReplyQuality(textarea) {
   });
 }
 
-function requestReportDetails() {
-  const category = prompt(
-    'Categoria da denúncia: racismo, xenofobia, sexismo, machismo, ' +
-      'assedio, bullying, risco_menor, dados_pessoais, plagio, spam, ' +
-      'golpe, violencia ou outro',
-    'outro',
-  );
-
-  if (!category) return null;
-
-  return {
-    category,
-    description: prompt('Descreva brevemente o problema (opcional):', '') || '',
-  };
+async function requestReportDetails() {
+  return formDialog({
+    title: 'Enviar denúncia',
+    message: 'Escolha a categoria e, se quiser, descreva brevemente o problema.',
+    confirmLabel: 'Enviar denúncia',
+    fields: [
+      {
+        name: 'category',
+        label: 'Categoria',
+        type: 'select',
+        value: 'outro',
+        options: [
+          ['racismo', 'Racismo'],
+          ['xenofobia', 'Xenofobia'],
+          ['sexismo', 'Sexismo'],
+          ['machismo', 'Machismo'],
+          ['assedio', 'Assédio'],
+          ['bullying', 'Bullying'],
+          ['risco_menor', 'Risco a menor'],
+          ['dados_pessoais', 'Dados pessoais'],
+          ['plagio', 'Plágio'],
+          ['spam', 'Spam'],
+          ['golpe', 'Golpe'],
+          ['violencia', 'Violência'],
+          ['outro', 'Outro'],
+        ].map(([value, label]) => ({ value, label })),
+      },
+      {
+        name: 'description',
+        label: 'Descrição opcional',
+        type: 'textarea',
+        maxLength: 1200,
+      },
+    ],
+  });
 }
 
 async function publicationPayload(form) {
@@ -164,33 +186,49 @@ export async function handleCommunityClick(event) {
 
   const deleteTech = event.target.closest('[data-delete-tech-resource]');
   if (deleteTech) {
-    if (!confirm('Apagar definitivamente este conteúdo? Esta ação não pode ser desfeita.')) {
-      return true;
-    }
-    const result = await api(
-      `/api/tech-resources/${encodeURIComponent(deleteTech.dataset.deleteTechResource)}`,
-      { method: 'DELETE' },
+    const confirmed = await confirmAction(
+      'Apagar definitivamente este conteúdo? Esta ação não pode ser desfeita.',
+      {
+        title: 'Excluir conteúdo',
+        confirmLabel: 'Excluir definitivamente',
+        danger: true,
+      },
     );
-    state.boot = null;
-    await bootstrap();
-    toast(result.message || 'Conteúdo apagado definitivamente.');
-    await render();
+    if (!confirmed) return true;
+    await withBusyControl(deleteTech, 'Excluindo…', async () => {
+      const result = await api(
+        `/api/tech-resources/${encodeURIComponent(deleteTech.dataset.deleteTechResource)}`,
+        { method: 'DELETE' },
+      );
+      state.boot = null;
+      await bootstrap();
+      toast(result.message || 'Conteúdo apagado definitivamente.');
+      await render();
+    });
     return true;
   }
 
   const deletePublication = event.target.closest('[data-delete-publication]');
   if (deletePublication) {
-    if (!confirm('Apagar definitivamente esta publicação? Esta ação não pode ser desfeita.')) {
-      return true;
-    }
-    const result = await api(
-      `/api/publications/${encodeURIComponent(deletePublication.dataset.deletePublication)}`,
-      { method: 'DELETE' },
+    const confirmed = await confirmAction(
+      'Apagar definitivamente esta publicação? Esta ação não pode ser desfeita.',
+      {
+        title: 'Excluir publicação',
+        confirmLabel: 'Excluir definitivamente',
+        danger: true,
+      },
     );
-    state.boot = null;
-    await bootstrap();
-    toast(result.message || 'Publicação apagada definitivamente.');
-    await render();
+    if (!confirmed) return true;
+    await withBusyControl(deletePublication, 'Excluindo…', async () => {
+      const result = await api(
+        `/api/publications/${encodeURIComponent(deletePublication.dataset.deletePublication)}`,
+        { method: 'DELETE' },
+      );
+      state.boot = null;
+      await bootstrap();
+      toast(result.message || 'Publicação apagada definitivamente.');
+      await render();
+    });
     return true;
   }
 
@@ -208,22 +246,23 @@ export async function handleCommunityClick(event) {
   }
 
   const reportButton = event.target.closest('[data-report]');
-
   if (reportButton) {
     if (!state.me) {
       goto('/login');
       return true;
     }
 
-    const details = requestReportDetails();
+    const details = await requestReportDetails();
     if (!details) return true;
     const [targetType, targetId] = reportButton.dataset.report.split(':');
 
-    await api('/api/reports', {
-      method: 'POST',
-      body: JSON.stringify({ targetType, targetId, ...details }),
+    await withBusyControl(reportButton, 'Enviando…', async () => {
+      await api('/api/reports', {
+        method: 'POST',
+        body: JSON.stringify({ targetType, targetId, ...details }),
+      });
+      toast('Denúncia enviada para revisão.');
     });
-    toast('Denúncia enviada para revisão.');
     return true;
   }
 
@@ -258,7 +297,11 @@ export async function handleCommunitySubmit(event) {
     if (form.dataset.submitting === 'true') return true;
     form.dataset.submitting = 'true';
     const submitButton = form.querySelector('[type="submit"], button:not([type])');
-    if (submitButton) submitButton.disabled = true;
+    const originalLabel = submitButton?.textContent;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = form.dataset.techResource ? 'Salvando…' : 'Enviando…';
+    }
     try {
       const resourceId = form.dataset.techResource;
       const endpoint = resourceId
@@ -274,7 +317,10 @@ export async function handleCommunitySubmit(event) {
       goto('/escrivaninha');
     } finally {
       form.dataset.submitting = 'false';
-      if (submitButton) submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
     }
     return true;
   }
@@ -284,7 +330,11 @@ export async function handleCommunitySubmit(event) {
     if (form.dataset.submitting === 'true') return true;
     form.dataset.submitting = 'true';
     const submitButton = form.querySelector('[type="submit"], button:not([type])');
-    if (submitButton) submitButton.disabled = true;
+    const originalLabel = submitButton?.textContent;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = form.dataset.publication ? 'Salvando…' : 'Enviando…';
+    }
     const publicationId = form.dataset.publication;
     const endpoint = publicationId
       ? `/api/publications/${encodeURIComponent(publicationId)}`
@@ -300,7 +350,10 @@ export async function handleCommunitySubmit(event) {
       goto('/escrivaninha');
     } finally {
       form.dataset.submitting = 'false';
-      if (submitButton) submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
     }
     return true;
   }
