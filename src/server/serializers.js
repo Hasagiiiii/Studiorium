@@ -1,3 +1,5 @@
+const { safePublicName } = require('./public-identity');
+
 function template(row) {
   return {
     id: row.id,
@@ -16,7 +18,7 @@ function profile(row) {
   return {
     userId: row.user_id,
     username: row.username,
-    displayName: row.display_name,
+    displayName: safePublicName(row.display_name, row.username),
     bio: row.bio || '',
     profileType: row.profile_type,
     createdAt: row.created_at,
@@ -40,7 +42,7 @@ function publication(row) {
   return {
     id: row.id,
     ownerId: row.owner_id,
-    authorName: row.author_name,
+    authorName: safePublicName(row.author_name),
     title: row.title,
     slug: row.slug,
     abstract: row.abstract,
@@ -63,7 +65,7 @@ function discussion(row) {
   return {
     id: row.id,
     authorId: row.author_id,
-    authorName: row.author_name,
+    authorName: safePublicName(row.author_name),
     title: row.title,
     body: row.body,
     category: row.category,
@@ -76,7 +78,7 @@ function reply(row) {
     id: row.id,
     discussionId: row.discussion_id,
     authorId: row.author_id,
-    authorName: row.author_name,
+    authorName: safePublicName(row.author_name),
     body: row.body,
     status: row.status,
     createdAt: row.created_at,
@@ -119,7 +121,7 @@ function techResource(row) {
   return {
     id: row.id,
     ownerId: row.owner_id,
-    authorName: row.author_name,
+    authorName: safePublicName(row.author_name),
     title: row.title,
     slug: row.slug,
     summary: row.summary || '',
@@ -169,7 +171,7 @@ function newsArticle(row) {
   return {
     id: row.id,
     contributorId: row.contributor_id,
-    authorName: row.author_name,
+    authorName: safePublicName(row.author_name),
     title: row.title,
     slug: row.slug,
     summary: row.summary,

@@ -5,6 +5,7 @@ const { readJson } = require('../http');
 const { config } = require('../config');
 const { id, now, slugify } = require('../security');
 const { moderate } = require('../moderation');
+const { safePublicName } = require('../public-identity');
 const S = require('../serializers');
 
 const GENERIC_MIME = 'application/octet-stream';
@@ -151,7 +152,7 @@ async function createPublication(req) {
 
   const { data: profile, error: profileError } = await db()
     .from('profiles')
-    .select('display_name')
+    .select('display_name,username')
     .eq('user_id', user.id)
     .maybeSingle();
   fail(profileError);
@@ -164,7 +165,7 @@ async function createPublication(req) {
       owner_id: user.id,
       author_name: user.is_minor
         ? 'Autor protegido'
-        : profile?.display_name || user.email.split('@')[0],
+        : safePublicName(profile?.display_name, profile?.username),
       title,
       slug: await uniqueSlug(title),
       abstract,

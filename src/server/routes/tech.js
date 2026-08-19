@@ -2,11 +2,19 @@ const { db, fail } = require('../db');
 const { requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now } = require('../security');
+const { safePublicName } = require('../public-identity');
 const S = require('../serializers');
 const hubs = new Set(['Tecnologia', 'Jogos', 'PC & Hardware', 'Carros', 'Motos']);
+
 async function create(req) {
   const u = await requireUser(req),
     b = await readJson(req);
+  const { data: profile, error: profileError } = await db()
+    .from('profiles')
+    .select('display_name,username')
+    .eq('user_id', u.id)
+    .maybeSingle();
+  fail(profileError);
   const title = String(b.title || '')
     .trim()
     .slice(0, 180);
@@ -24,7 +32,7 @@ async function create(req) {
   const row = {
     id: id('tec'),
     owner_id: u.id,
-    author_name: u.displayName || u.email,
+    author_name: safePublicName(profile?.display_name, profile?.username),
     title,
     slug,
     summary: String(b.summary || '').slice(0, 600),
@@ -44,4 +52,19 @@ async function create(req) {
   fail(q.error);
   return { resource: S.techResource(q.data), message: 'Enviado para revisão.' };
 }
-module.exports = { create };
+
+async function getPublic(slug) {
+  const { data, error } = await db()
+    .from('tech_resources')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle();
+  fail(error);
+  if (!data) {
+    throw Object.assign(new Error('Conteúdo da Oficina não encontrado.'), { statusCode: 404 });
+  }
+  return { resource: S.techResource(data) };
+}
+
+module.exports = { create, getPublic };

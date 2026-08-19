@@ -23,4 +23,11 @@ export { templateStudio, templateEditor, publicCustomTemplate } from './views/te
 export { escrivaninha, editor, publicar } from './views/workspace.js';
 export { atelie, syncPoster, diretrizes, sobre } from './views/atelier-about.js';
 export { adminPanel, moderacao } from './views/admin.js';
-export { oficina, laboratorio, runCodePreview, requireLogin, notFound } from './views/tech.js';
+export {
+  oficina,
+  oficinaDetail,
+  laboratorio,
+  runCodePreview,
+  requireLogin,
+  notFound,
+} from './views/tech.js';

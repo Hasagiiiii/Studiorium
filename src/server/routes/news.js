@@ -4,6 +4,7 @@ const { readJson } = require('../http');
 const { id, now, slugify } = require('../security');
 const { moderate } = require('../moderation');
 const { moderateNews } = require('../ai-news-moderation');
+const { safePublicName } = require('../public-identity');
 const S = require('../serializers');
 
 function inputError(message, statusCode = 400) {
@@ -142,14 +143,14 @@ async function create(req) {
   const article = cleanArticle(body);
   const { data: profile, error: profileError } = await db()
     .from('profiles')
-    .select('display_name')
+    .select('display_name,username')
     .eq('user_id', user.id)
     .maybeSingle();
   fail(profileError);
   const row = {
     id: id('news'),
     contributor_id: user.id,
-    author_name: profile?.display_name || user.email.split('@')[0],
+    author_name: safePublicName(profile?.display_name, profile?.username),
     ...article,
     slug: await uniqueSlug(article.title || 'noticia'),
     status: 'draft',

@@ -5,6 +5,29 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const { safePublicName } = require('../src/server/public-identity');
+
+test('identidade pública nunca devolve endereço de e-mail', () => {
+  assert.equal(safePublicName('pessoa@example.com'), 'Membro do Studiorium');
+  assert.equal(safePublicName('Contato pessoa@example.com'), 'Membro do Studiorium');
+  assert.equal(safePublicName('Nome Público', 'pessoa@example.com'), 'Nome Público');
+
+  const serializers = read('src/server/serializers.js');
+  const tech = read('src/server/routes/tech.js');
+  assert.ok(serializers.includes('safePublicName(row.author_name)'));
+  assert.equal(tech.includes('u.displayName || u.email'), false);
+});
+
+test('Oficina oferece leitura completa apenas para conteúdo publicado', () => {
+  const router = read('src/server/router.js');
+  const route = read('src/server/routes/tech.js');
+  const view = read('public/js/views/tech.js');
+
+  assert.ok(router.includes('tech-resources\\/public'));
+  assert.ok(route.includes(".eq('status', 'published')"));
+  assert.ok(view.includes('Ler conteúdo completo'));
+  assert.ok(view.includes('function oficinaDetail'));
+});
 
 test('autenticação reserva o ADM sem promoção automática por e-mail', () => {
   const authRoutes = read('src/server/routes/auth.js');
