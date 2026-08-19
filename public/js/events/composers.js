@@ -1,52 +1,84 @@
-import { html } from '../runtime.js';
+import { E, html } from '../runtime.js';
 
-export function techResourceForm() {
+const techHubs = ['Tecnologia', 'Jogos', 'PC & Hardware', 'Carros', 'Motos'];
+const techCategories = [
+  'Tutorial',
+  'Projeto da comunidade',
+  'Resolução de problema',
+  'Guia de compra',
+  'Compatibilidade',
+  'Manutenção',
+];
+
+function selectOptions(options, selected) {
+  return options
+    .map(
+      (option) =>
+        html`<option value="${E(option)}" ${option === selected ? 'selected' : ''}>
+          ${E(option)}
+        </option>`,
+    )
+    .join('');
+}
+
+export function techResourceForm(resource = {}) {
+  const editing = Boolean(resource.id);
+  const tags = Array.isArray(resource.tags) ? resource.tags.join(', ') : resource.tags || '';
+
   return html`
-    <form class="card" data-tech-resource>
-      <div class="eyebrow">Contribuição da comunidade</div>
-      <h3>Publicar na Tech & Oficina</h3>
+    <form class="card" data-tech-resource="${E(resource.id || '')}">
+      <div class="eyebrow">${editing ? 'Reaproveitar envio' : 'Contribuição da comunidade'}</div>
+      <h3>${editing ? 'Editar conteúdo enviado' : 'Publicar na Tech & Oficina'}</h3>
+      ${editing
+        ? html`<p class="notice">
+            Salve as alterações para devolver este conteúdo à fila de revisão.
+          </p>`
+        : ''}
       <div class="formrow">
         <label class="label">Título</label>
-        <input class="field" name="title" required minlength="5" />
+        <input
+          class="field"
+          name="title"
+          value="${E(resource.title || '')}"
+          required
+          minlength="5"
+        />
       </div>
       <div class="formgrid">
         <div>
           <label class="label">Área</label>
           <select class="select" name="hub">
-            <option>Tecnologia</option>
-            <option>Jogos</option>
-            <option>PC & Hardware</option>
-            <option>Carros</option>
-            <option>Motos</option>
+            ${selectOptions(techHubs, resource.hub || 'Tecnologia')}
           </select>
         </div>
         <div>
           <label class="label">Tipo</label>
           <select class="select" name="category">
-            <option>Tutorial</option>
-            <option>Projeto da comunidade</option>
-            <option>Resolução de problema</option>
-            <option>Guia de compra</option>
-            <option>Compatibilidade</option>
-            <option>Manutenção</option>
+            ${selectOptions(techCategories, resource.category || 'Tutorial')}
           </select>
         </div>
       </div>
       <div class="formrow">
         <label class="label">Resumo</label>
-        <textarea class="textarea" name="summary" required></textarea>
+        <textarea class="textarea" name="summary" required>${E(resource.summary || '')}</textarea>
       </div>
       <div class="formrow">
         <label class="label">Conteúdo</label>
-        <textarea class="textarea" name="body" required></textarea>
+        <textarea class="textarea article-textarea" name="body" required>
+${E(resource.body || '')}</textarea
+        >
       </div>
       <div class="formrow">
         <label class="label">Tags (separadas por vírgula)</label>
-        <input class="field" name="tags" />
+        <input class="field" name="tags" value="${E(tags)}" />
       </div>
       <div class="actions">
-        <button class="solid" type="submit">Enviar para revisão</button>
-        <button class="soft" type="reset">Limpar formulário</button>
+        <button class="solid" type="submit">
+          ${editing ? 'Salvar e reenviar' : 'Enviar para revisão'}
+        </button>
+        <button class="soft" type="reset">
+          ${editing ? 'Restaurar valores' : 'Limpar formulário'}
+        </button>
         <button class="outline" type="button" data-cancel-tech>Cancelar</button>
       </div>
     </form>

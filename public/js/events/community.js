@@ -48,8 +48,44 @@ export async function handleCommunityClick(event) {
   }
 
   if (event.target.closest('[data-cancel-tech]')) {
+    if (state.query.get('novo') || state.query.get('editar')) {
+      goto('/oficina');
+      return true;
+    }
     const composer = document.getElementById('techComposer');
     if (composer) composer.replaceChildren();
+    return true;
+  }
+
+  const deleteTech = event.target.closest('[data-delete-tech-resource]');
+  if (deleteTech) {
+    if (!confirm('Apagar definitivamente este conteúdo? Esta ação não pode ser desfeita.')) {
+      return true;
+    }
+    const result = await api(
+      `/api/tech-resources/${encodeURIComponent(deleteTech.dataset.deleteTechResource)}`,
+      { method: 'DELETE' },
+    );
+    state.boot = null;
+    await bootstrap();
+    toast(result.message || 'Conteúdo apagado definitivamente.');
+    await render();
+    return true;
+  }
+
+  const deletePublication = event.target.closest('[data-delete-publication]');
+  if (deletePublication) {
+    if (!confirm('Apagar definitivamente esta publicação? Esta ação não pode ser desfeita.')) {
+      return true;
+    }
+    const result = await api(
+      `/api/publications/${encodeURIComponent(deletePublication.dataset.deletePublication)}`,
+      { method: 'DELETE' },
+    );
+    state.boot = null;
+    await bootstrap();
+    toast(result.message || 'Publicação apagada definitivamente.');
+    await render();
     return true;
   }
 
@@ -99,8 +135,12 @@ export async function handleCommunitySubmit(event) {
     const submitButton = form.querySelector('[type="submit"], button:not([type])');
     if (submitButton) submitButton.disabled = true;
     try {
-      const data = await api('/api/tech-resources', {
-        method: 'POST',
+      const resourceId = form.dataset.techResource;
+      const endpoint = resourceId
+        ? `/api/tech-resources/${encodeURIComponent(resourceId)}`
+        : '/api/tech-resources';
+      const data = await api(endpoint, {
+        method: resourceId ? 'PATCH' : 'POST',
         body: JSON.stringify(formObj(form)),
       });
       state.boot = null;
@@ -116,8 +156,12 @@ export async function handleCommunitySubmit(event) {
 
   if (form.matches('[data-publication]')) {
     event.preventDefault();
-    const data = await api('/api/publications', {
-      method: 'POST',
+    const publicationId = form.dataset.publication;
+    const endpoint = publicationId
+      ? `/api/publications/${encodeURIComponent(publicationId)}`
+      : '/api/publications';
+    const data = await api(endpoint, {
+      method: publicationId ? 'PATCH' : 'POST',
       body: JSON.stringify(await publicationPayload(form)),
     });
     toast(data.message || 'Trabalho enviado.');

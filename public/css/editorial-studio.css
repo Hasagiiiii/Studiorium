@@ -308,6 +308,24 @@ main > section,
   padding-top: 16px;
 }
 
+.admin-content-editor {
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+}
+
+.admin-edit-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-edit-form .formrow,
+.admin-edit-form .formgrid {
+  margin: 0;
+}
+
 .studio-start {
   display: flex;
   align-items: center;

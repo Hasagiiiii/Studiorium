@@ -12,11 +12,19 @@ import {
   discussionRow,
 } from './core.js';
 
-function oficina() {
+async function oficina() {
+  const editId = state.query.get('editar') || '';
+  let editing = null;
+
+  if (state.me && editId) {
+    const result = await api(`/api/tech-resources/${encodeURIComponent(editId)}`);
+    editing = result.resource;
+  }
+
   const all = state.boot.techResources || [],
     hub = state.query.get('hub') || '',
     q = (state.query.get('q') || '').toLowerCase(),
-    openComposer = state.me && state.query.get('novo') === '1';
+    openComposer = state.me && (state.query.get('novo') === '1' || editing);
   const hubs = [
     ['Tecnologia', 'Tutoriais, programação e projetos da comunidade'],
     ['Jogos', 'Desenvolvimento, mods, configuração e desempenho'],
@@ -74,7 +82,7 @@ function oficina() {
               /><button class="solid">Buscar</button>
             </div>
           </form>
-          <div id="techComposer">${openComposer ? techResourceForm() : ''}</div>
+          <div id="techComposer">${openComposer ? techResourceForm(editing || {}) : ''}</div>
           ${['Carros', 'Motos'].includes(hub)
             ? html`<div class="notice" style="margin: 18px 0">
                 Conteúdo automotivo é educativo. Procedimentos envolvendo freios, direção, airbags,
