@@ -78,27 +78,46 @@ async function enrichReports(rows) {
 
 async function dashboard(req) {
   await requireAdmin(req);
-  const [usersQ, profilesQ, publicationsQ, discussionsQ, reportsQ, templatesQ, settingsQ, auditQ] =
-    await Promise.all([
-      db().from('users').select('*').order('created_at', { ascending: false }).limit(300),
-      db().from('profiles').select('*').limit(500),
-      db().from('publications').select('*').order('created_at', { ascending: false }).limit(300),
-      db().from('discussions').select('*').order('created_at', { ascending: false }).limit(300),
-      db().from('reports').select('*').order('created_at', { ascending: false }).limit(300),
-      db()
-        .from('templates')
-        .select('*')
-        .order('featured', { ascending: false })
-        .order('downloads', { ascending: false }),
-      db().from('site_settings').select('*'),
-      db().from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100),
-    ]);
-  [usersQ, profilesQ, publicationsQ, discussionsQ, reportsQ, templatesQ, settingsQ, auditQ].forEach(
-    (q) => fail(q.error),
-  );
+  const [
+    usersQ,
+    profilesQ,
+    publicationsQ,
+    techResourcesQ,
+    discussionsQ,
+    reportsQ,
+    templatesQ,
+    settingsQ,
+    auditQ,
+  ] = await Promise.all([
+    db().from('users').select('*').order('created_at', { ascending: false }).limit(300),
+    db().from('profiles').select('*').limit(500),
+    db().from('publications').select('*').order('created_at', { ascending: false }).limit(300),
+    db().from('tech_resources').select('*').order('created_at', { ascending: false }).limit(300),
+    db().from('discussions').select('*').order('created_at', { ascending: false }).limit(300),
+    db().from('reports').select('*').order('created_at', { ascending: false }).limit(300),
+    db()
+      .from('templates')
+      .select('*')
+      .order('featured', { ascending: false })
+      .order('downloads', { ascending: false }),
+    db().from('site_settings').select('*'),
+    db().from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100),
+  ]);
+  [
+    usersQ,
+    profilesQ,
+    publicationsQ,
+    techResourcesQ,
+    discussionsQ,
+    reportsQ,
+    templatesQ,
+    settingsQ,
+    auditQ,
+  ].forEach((q) => fail(q.error));
   const profileMap = new Map(profilesQ.data.map((p) => [p.user_id, p]));
   const users = usersQ.data.map((u) => S.adminUser(u, profileMap.get(u.id)));
   const publications = publicationsQ.data.map(S.publication);
+  const techResources = techResourcesQ.data.map(S.techResource);
   const discussions = discussionsQ.data.map(S.discussion);
   const reports = await enrichReports(reportsQ.data);
   const templates = templatesQ.data.map(S.template);
@@ -107,6 +126,8 @@ async function dashboard(req) {
     suspendedUsers: users.filter((u) => u.status === 'suspended').length,
     pendingPublications: publications.filter((p) => p.status === 'pending_review').length,
     publishedPublications: publications.filter((p) => p.status === 'published').length,
+    pendingTechResources: techResources.filter((item) => item.status === 'pending_review').length,
+    publishedTechResources: techResources.filter((item) => item.status === 'published').length,
     openReports: reports.filter((r) => ['open', 'reviewing'].includes(r.status)).length,
     urgentReports: reports.filter(
       (r) => ['open', 'reviewing'].includes(r.status) && r.priority === 'urgent',
@@ -118,6 +139,7 @@ async function dashboard(req) {
     metrics,
     users,
     publications,
+    techResources,
     discussions,
     reports,
     templates,
@@ -136,7 +158,7 @@ async function dashboard(req) {
 
 async function queue(req) {
   await requireAdmin(req);
-  const [reportsQ, publicationsQ] = await Promise.all([
+  const [reportsQ, publicationsQ, techResourcesQ] = await Promise.all([
     db()
       .from('reports')
       .select('*')
@@ -147,15 +169,25 @@ async function queue(req) {
       .select('*')
       .eq('status', 'pending_review')
       .order('created_at', { ascending: false }),
+    db()
+      .from('tech_resources')
+      .select('*')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: false }),
   ]);
   fail(reportsQ.error);
   fail(publicationsQ.error);
+  fail(techResourcesQ.error);
   const reports = (await enrichReports(reportsQ.data)).sort(
     (a, b) =>
       (a.priority === 'urgent' ? 0 : 1) - (b.priority === 'urgent' ? 0 : 1) ||
       b.createdAt.localeCompare(a.createdAt),
   );
-  return { reports, publications: publicationsQ.data.map(S.publication) };
+  return {
+    reports,
+    publications: publicationsQ.data.map(S.publication),
+    techResources: techResourcesQ.data.map(S.techResource),
+  };
 }
 
 async function updateReport(req, reportId) {
@@ -203,6 +235,10 @@ async function updateContent(req, type, targetId) {
   const body = await readJson(req);
   const configByType = {
     publication: { table: 'publications', allowed: ['published', 'rejected', 'pending_review'] },
+    tech_resource: {
+      table: 'tech_resources',
+      allowed: ['published', 'rejected', 'pending_review', 'hidden'],
+    },
     discussion: { table: 'discussions', allowed: ['published', 'hidden', 'pending_review'] },
     reply: { table: 'replies', allowed: ['published', 'hidden', 'pending_review'] },
   };
@@ -212,6 +248,7 @@ async function updateContent(req, type, targetId) {
     throw Object.assign(new Error('Status inválido.'), { statusCode: 400 });
   const patch = { status: body.status };
   if (type === 'publication' && body.status === 'published') patch.published_at = now();
+  if (type === 'tech_resource') patch.updated_at = now();
   const { data, error } = await db()
     .from(c.table)
     .update(patch)

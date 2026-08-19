@@ -17,6 +17,7 @@ function adminTabs(active) {
     ['moderacao', '/admin/moderacao', 'Moderação'],
     ['usuarios', '/admin/usuarios', 'Usuários'],
     ['publicacoes', '/admin/publicacoes', 'Publicações'],
+    ['oficina', '/admin/oficina', 'Oficina'],
     ['coloquio', '/admin/coloquio', 'Colóquio'],
     ['acervo', '/admin/acervo', 'Acervo'],
     ['noticias', '/admin/noticias', 'Notícias'],
@@ -109,7 +110,16 @@ async function adminPanel(tab = 'overview') {
   }
   if (tab === 'overview') {
     const m = data.metrics;
-    const pending = data.publications.filter((p) => p.status === 'pending_review').slice(0, 5);
+    const pending = [
+      ...data.publications
+        .filter((item) => item.status === 'pending_review')
+        .map((item) => ({ ...item, reviewType: 'publication', reviewArea: 'Biblioteca' })),
+      ...data.techResources
+        .filter((item) => item.status === 'pending_review')
+        .map((item) => ({ ...item, reviewType: 'tech_resource', reviewArea: 'Oficina' })),
+    ]
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .slice(0, 8);
     const reports = data.reports
       .filter((r) => ['open', 'reviewing'].includes(r.status))
       .sort((a, b) => (a.priority === 'urgent' ? 0 : 1) - (b.priority === 'urgent' ? 0 : 1))
@@ -124,8 +134,12 @@ async function adminPanel(tab = 'overview') {
             ><small>${num(m.suspendedUsers)} suspensos</small>
           </div>
           <div class="admin-stat">
-            <strong>${num(m.pendingPublications)}</strong><span>Em revisão</span
-            ><small>${num(m.publishedPublications)} publicadas</small>
+            <strong>${num(m.pendingPublications + m.pendingTechResources)}</strong
+            ><span>Em revisão</span
+            ><small
+              >${num(m.pendingPublications)} biblioteca · ${num(m.pendingTechResources)}
+              oficina</small
+            >
           </div>
           <div class="admin-stat">
             <strong>${num(m.openReports)}</strong><span>Denúncias abertas</span
@@ -141,9 +155,9 @@ async function adminPanel(tab = 'overview') {
             <div class="sectionhead">
               <div>
                 <div class="eyebrow">Fila editorial</div>
-                <h2>Publicações aguardando</h2>
+                <h2>Conteúdos aguardando</h2>
               </div>
-              ${link('/admin/publicacoes', 'Ver todas →', 'linkbtn')}
+              ${link('/admin/oficina', 'Abrir Oficina →', 'linkbtn')}
             </div>
             ${pending
               .map(
@@ -151,21 +165,24 @@ async function adminPanel(tab = 'overview') {
                   html`<div class="admin-row">
                     <div>
                       <strong>${E(p.title)}</strong
-                      ><small>${E(p.authorName)} · ${date(p.createdAt)}</small>
+                      ><small>${E(p.reviewArea)} · ${E(p.authorName)} · ${date(p.createdAt)}</small>
                     </div>
                     <div class="actions">
-                      <button class="solid" data-admin-content="publication:${E(p.id)}:published">
+                      <button
+                        class="solid"
+                        data-admin-content="${E(p.reviewType)}:${E(p.id)}:published"
+                      >
                         Aprovar</button
                       ><button
                         class="dangerbtn"
-                        data-admin-content="publication:${E(p.id)}:rejected"
+                        data-admin-content="${E(p.reviewType)}:${E(p.id)}:rejected"
                       >
                         Rejeitar
                       </button>
                     </div>
                   </div>`,
               )
-              .join('') || empty('Nenhuma publicação aguardando.')}
+              .join('') || empty('Nenhum conteúdo aguardando.')}
           </div>
           <div class="card">
             <div class="sectionhead">
@@ -379,6 +396,73 @@ async function adminPanel(tab = 'overview') {
               </article>`,
           )
           .join('') || empty('Nenhuma publicação encontrada.')
+      }</div>`,
+    );
+  }
+  if (tab === 'oficina') {
+    const resources = adminFilter(data.techResources, [
+      'title',
+      'authorName',
+      'hub',
+      'category',
+      'status',
+    ]);
+    return adminShell(
+      'oficina',
+      'Oficina e tecnologia',
+      'Revise tutoriais, projetos práticos e conteúdos de tecnologia enviados pela comunidade.',
+      `${adminSearch('Título, autor, área, categoria ou status…')}<div class="admin-list">${
+        resources
+          .map(
+            (item) =>
+              html`<article class="card">
+                <div class="sectionhead">
+                  <div>
+                    <div class="eyebrow">${E(item.hub)} · ${E(item.category)}</div>
+                    <h3>${E(item.title)}</h3>
+                  </div>
+                  <div>
+                    ${adminStatus(item.status)}
+                    ${item.featured ? '<span class="badge">Destaque</span>' : ''}
+                  </div>
+                </div>
+                <p>${E((item.summary || '').slice(0, 360))}</p>
+                <details class="review-details">
+                  <summary>Ler conteúdo completo</summary>
+                  <p class="article-preview">${E(item.body || '')}</p>
+                </details>
+                <div class="meta">
+                  <span>${E(item.authorName)}</span><span>${date(item.createdAt)}</span>
+                </div>
+                <div class="actions admin-actions">
+                  ${item.status !== 'published'
+                    ? html`<button
+                        class="solid"
+                        data-admin-content="tech_resource:${E(item.id)}:published"
+                      >
+                        Publicar
+                      </button>`
+                    : ''}
+                  ${item.status !== 'pending_review'
+                    ? html`<button
+                        class="outline"
+                        data-admin-content="tech_resource:${E(item.id)}:pending_review"
+                      >
+                        Mandar para revisão
+                      </button>`
+                    : ''}
+                  ${item.status !== 'rejected'
+                    ? html`<button
+                        class="dangerbtn"
+                        data-admin-content="tech_resource:${E(item.id)}:rejected"
+                      >
+                        Rejeitar
+                      </button>`
+                    : ''}
+                </div>
+              </article>`,
+          )
+          .join('') || empty('Nenhum conteúdo da Oficina encontrado.')
       }</div>`,
     );
   }

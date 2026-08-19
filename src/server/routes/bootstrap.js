@@ -94,8 +94,17 @@ async function bootstrap(req) {
 
 async function me(req) {
   const user = await currentUser(req);
-  if (!user) return { user: null, projects: [], publications: [] };
-  const [projectsQ, publicationsQ, codeQ, newsQ, templatesQ] = await Promise.all([
+  if (!user)
+    return {
+      user: null,
+      projects: [],
+      publications: [],
+      techResources: [],
+      codeProjects: [],
+      news: [],
+      customTemplates: [],
+    };
+  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ] = await Promise.all([
     db()
       .from('projects')
       .select('*')
@@ -103,6 +112,11 @@ async function me(req) {
       .order('updated_at', { ascending: false }),
     db()
       .from('publications')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('tech_resources')
       .select('*')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false }),
@@ -122,11 +136,12 @@ async function me(req) {
       .eq('owner_id', user.id)
       .order('updated_at', { ascending: false }),
   ]);
-  [projectsQ, publicationsQ, codeQ, newsQ, templatesQ].forEach((query) => fail(query.error));
+  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ].forEach((query) => fail(query.error));
   return {
     user: await publicUser(user),
     projects: projectsQ.data.map(S.project),
     publications: publicationsQ.data.map(S.publication),
+    techResources: techQ.data.map(S.techResource),
     codeProjects: codeQ.data.map(S.codeProject),
     news: newsQ.data.map(S.newsArticle),
     customTemplates: templatesQ.data.map(S.customTemplate),

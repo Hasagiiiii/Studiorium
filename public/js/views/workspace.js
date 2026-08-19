@@ -23,7 +23,10 @@ async function escrivaninha() {
   const projectTrash = me.projects.filter((project) => project.deletedAt);
   const codeProjects = (me.codeProjects || []).filter((project) => !project.deletedAt);
   const codeTrash = (me.codeProjects || []).filter((project) => project.deletedAt);
-  const pending = me.publications.filter((p) => p.status === 'pending_review').length;
+  const techResources = me.techResources || [];
+  const pending =
+    me.publications.filter((item) => item.status === 'pending_review').length +
+    techResources.filter((item) => item.status === 'pending_review').length;
   layout(
     html`<section class="pagehero">
       <div class="shell">
@@ -101,6 +104,25 @@ async function escrivaninha() {
                   </div>`,
               )
               .join('') || empty('Você ainda não enviou trabalhos para publicação.')}
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="eyebrow">Oficina e tecnologia</div>
+          <h3>Seus tutoriais e projetos enviados</h3>
+          ${techResources
+            .map(
+              (item) =>
+                html`<div class="project">
+                  <div>
+                    <h3>${E(item.title)}</h3>
+                    <p>${E(item.hub)} · Status: ${E(item.status)} · ${date(item.createdAt)}</p>
+                  </div>
+                  ${item.status === 'published' ? link('/oficina', 'Ver publicado', 'outline') : ''}
+                </div>`,
+            )
+            .join('') || empty('Você ainda não enviou conteúdo para a Oficina.')}
+          <div class="actions" style="margin-top:14px">
+            ${link('/oficina', 'Enviar conteúdo', 'solid')}
           </div>
         </div>
         <div class="card" style="margin-top:18px">
