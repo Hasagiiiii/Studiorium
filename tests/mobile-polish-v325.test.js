@@ -1,9 +1,12 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
-const polish = readFileSync('public/css/mobile-polish-v325.css', 'utf8');
-const style = readFileSync('public/style.css', 'utf8');
+const root = path.join(__dirname, '..');
+const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
+const polish = read('public/css/mobile-polish-v325.css');
+const style = read('public/style.css');
 
 test('subtítulo acadêmico não usa margem negativa e preserva separação do título', () => {
   assert.match(polish, /\.pagehero \.pagetitle \+ \.academic-translation/);
@@ -19,9 +22,10 @@ test('Scriptorium organiza atalhos e estante vazia progressivamente no mobile', 
   assert.match(polish, /\.mini-shelf:has\(\.empty\)/);
 });
 
-test('acabamento mobile é carregado depois da responsividade global', () => {
+test('acabamento mobile respeita a camada responsiva global como última importação', () => {
   const responsiveIndex = style.indexOf("@import url('/css/responsive.css')");
   const polishIndex = style.indexOf("@import url('/css/mobile-polish-v325.css')");
-  assert.ok(responsiveIndex >= 0);
-  assert.ok(polishIndex > responsiveIndex);
+  assert.ok(polishIndex >= 0);
+  assert.ok(responsiveIndex > polishIndex);
+  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/responsive.css');");
 });
