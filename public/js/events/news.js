@@ -24,6 +24,25 @@ function articlePayload(form) {
 }
 
 export async function handleNewsClick(event) {
+  const hypeButton = event.target.closest('[data-hype-news]');
+  if (hypeButton) {
+    if (!state.me) {
+      goto('/login');
+      return true;
+    }
+    await withBusyControl(hypeButton, 'Registrando Hype…', async () => {
+      const result = await api(`/api/news/${encodeURIComponent(hypeButton.dataset.hypeNews)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'hype' }),
+      });
+      hypeButton.textContent = `🔥 Hype registrado · ${Number(result.hypes || 0)}`;
+      hypeButton.disabled = true;
+      state.boot = null;
+      toast(result.message || 'Hype registrado.');
+    });
+    return true;
+  }
+
   if (event.target.closest('[data-add-source]')) {
     document.querySelector('[data-news-sources]')?.insertAdjacentHTML('beforeend', sourceRow());
     return true;
@@ -51,7 +70,13 @@ export async function handleNewsClick(event) {
   for (const [attribute, endpoint, method, question, message] of [
     ['trashNews', '', 'DELETE', 'Mover esta notícia para a lixeira?', 'Notícia movida para a lixeira.'],
     ['restoreNews', '/restore', 'POST', '', 'Notícia restaurada.'],
-    ['purgeNews', '/purge', 'DELETE', 'Excluir definitivamente? Esta ação não pode ser desfeita.', 'Notícia excluída definitivamente.'],
+    [
+      'purgeNews',
+      '/purge',
+      'DELETE',
+      'Excluir definitivamente? Esta ação não pode ser desfeita.',
+      'Notícia excluída definitivamente.',
+    ],
   ]) {
     const button = event.target.closest(
       `[data-${attribute.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}]`,
@@ -59,18 +84,22 @@ export async function handleNewsClick(event) {
     if (!button) continue;
     if (question) {
       const confirmed = await confirmAction(question, {
-        title: method === 'DELETE' && endpoint === '/purge' ? 'Exclusão definitiva' : 'Confirmar ação',
+        title:
+          method === 'DELETE' && endpoint === '/purge' ? 'Exclusão definitiva' : 'Confirmar ação',
         confirmLabel: endpoint === '/purge' ? 'Excluir definitivamente' : 'Confirmar',
         danger: method === 'DELETE',
       });
       if (!confirmed) return true;
     }
     await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
-      await api(`/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-        method,
-        body: method === 'POST' ? '{}' : undefined,
-      });
-      toast(message);
+      const result = await api(
+        `/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`,
+        {
+          method,
+          body: method === 'POST' ? '{}' : undefined,
+        },
+      );
+      toast(result.message || message);
       await render();
     });
     return true;
@@ -97,7 +126,7 @@ export async function handleNewsSubmit(event) {
       method: id ? 'PATCH' : 'POST',
       body: JSON.stringify(articlePayload(form)),
     });
-    toast('Rascunho salvo.');
+    toast(result.message || 'Rascunho salvo.');
     state.boot = null;
     goto(`/redacao/${encodeURIComponent(result.article.id)}`);
     return true;
