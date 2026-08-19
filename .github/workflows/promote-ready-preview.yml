@@ -1,0 +1,35 @@
+name: Promote ready preview
+
+on:
+  push:
+    branches: [agent/button-dialog-ux-v326]
+    paths: [.github/workflows/promote-ready-preview.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Promote READY preview to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN="${VERCEL_TOKEN:-${VERCEL_ACCESS_TOKEN:-}}"
+          if [ -z "$TOKEN" ]; then
+            echo "No Vercel API token is configured in repository secrets."
+            exit 77
+          fi
+          STATUS=$(curl -sS -o /tmp/promote.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            "https://api.vercel.com/v10/projects/prj_zMQqgWtDBX1kC6sxhbpNtRX8CJeW/promote/dpl_NBrtNAZ1f4YBSXcxDiRdKdaNzUwS?teamId=team_pDupuD5MMUlz2rnoDeq9vXYM")
+          echo "Vercel promote HTTP status: $STATUS"
+          if [ "$STATUS" != "201" ] && [ "$STATUS" != "202" ]; then
+            cat /tmp/promote.json
+            exit 1
+          fi
+          echo "Promotion request accepted."
