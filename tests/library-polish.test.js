@@ -31,18 +31,20 @@ test('acabamento da biblioteca respeita a ordem responsiva global', () => {
   assert.equal(style.filter((line) => line.includes('library-polish.css')).length, 1);
 });
 
-test('contadores possuem layouts dedicados para desktop, tablet e celular', () => {
+test('contadores possuem fluxo flexível para desktop, tablet e celular', () => {
   const css = read('public/css/library-polish.css');
   for (const marker of [
-    'grid-template-columns: repeat(5, minmax(0, 1fr));',
+    '.stats.library-stats {',
+    'display: flex;',
+    'flex-wrap: wrap;',
+    'flex: 1 1 calc(20% - 1px);',
     '@media (max-width: 1040px)',
-    'grid-template-columns: repeat(6, minmax(0, 1fr));',
+    'flex-basis: calc(33.333% - 1px);',
+    'flex-basis: calc(50% - 1px);',
     '@media (max-width: 699px)',
-    'grid-template-columns: repeat(2, minmax(0, 1fr));',
-    '.library-stats .stat:last-child',
-    'grid-column: 1 / -1;',
+    '.stats.library-stats > .stat:last-child',
+    'flex-basis: 100%;',
     '@media (max-width: 360px)',
-    'grid-template-columns: 1fr;',
   ]) {
     assert.ok(css.includes(marker), `proteção responsiva ausente: ${marker}`);
   }
