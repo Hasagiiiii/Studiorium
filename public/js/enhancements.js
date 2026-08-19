@@ -74,7 +74,7 @@ function applyAcademicIdentity() {
     subtitle.className = 'academic-translation';
     heading.insertAdjacentElement('afterend', subtitle);
   }
-  subtitle.textContent = translation;
+  if (subtitle.textContent !== translation) subtitle.textContent = translation;
 }
 
 function armariumPanel() {
