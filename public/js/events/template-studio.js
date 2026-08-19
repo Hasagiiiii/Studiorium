@@ -1,5 +1,6 @@
 import { api, E, fileToBase64, toast } from '../runtime.js';
 import { goto, render } from '../router.js';
+import { confirmAction, withBusyControl } from '../ui-feedback.js';
 
 function blockMarkup(type, options = {}) {
   const id = `block_${crypto.randomUUID()}`;
@@ -102,27 +103,32 @@ async function upload(templateId, file) {
 }
 
 export async function handleTemplateClick(event) {
-  if (event.target.closest('[data-new-custom-template]')) {
-    const result = await api('/api/custom-templates', { method: 'POST', body: '{}' });
-    goto(`/estudio-templates/${encodeURIComponent(result.template.id)}`);
+  const create = event.target.closest('[data-new-custom-template]');
+  if (create) {
+    await withBusyControl(create, 'Criando…', async () => {
+      const result = await api('/api/custom-templates', { method: 'POST', body: '{}' });
+      goto(`/estudio-templates/${encodeURIComponent(result.template.id)}`);
+    });
     return true;
   }
   const copy = event.target.closest('[data-copy-custom-template]');
   if (copy) {
-    const original = await api(
-      `/api/custom-templates/${encodeURIComponent(copy.dataset.copyCustomTemplate)}`,
-    );
-    const result = await api('/api/custom-templates', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: `Cópia de ${original.template.title}`,
-        description: original.template.description,
-        document: original.template.document,
-        sourceType: 'editor',
-      }),
+    await withBusyControl(copy, 'Copiando…', async () => {
+      const original = await api(
+        `/api/custom-templates/${encodeURIComponent(copy.dataset.copyCustomTemplate)}`,
+      );
+      const result = await api('/api/custom-templates', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: `Cópia de ${original.template.title}`,
+          description: original.template.description,
+          document: original.template.document,
+          sourceType: 'editor',
+        }),
+      });
+      toast('Cópia criada no seu estúdio.');
+      goto(`/estudio-templates/${encodeURIComponent(result.template.id)}`);
     });
-    toast('Cópia criada no seu estúdio.');
-    goto(`/estudio-templates/${encodeURIComponent(result.template.id)}`);
     return true;
   }
   const addBlock = event.target.closest('[data-add-template-block]');
@@ -151,44 +157,51 @@ export async function handleTemplateClick(event) {
   if (save) {
     const templateId = save.dataset.saveCustomTemplate || save.dataset.submitCustomTemplate;
     const submit = Boolean(save.dataset.submitCustomTemplate);
-    if (submit && !confirm('Enviar este template para revisão e possível publicação no acervo?'))
-      return true;
-    await api(`/api/custom-templates/${encodeURIComponent(templateId)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(editorPayload(submit)),
+    if (submit) {
+      const confirmed = await confirmAction(
+        'Enviar este template para revisão e possível publicação no acervo?',
+        {
+          title: 'Enviar template',
+          confirmLabel: 'Enviar para revisão',
+        },
+      );
+      if (!confirmed) return true;
+    }
+    await withBusyControl(save, submit ? 'Enviando…' : 'Salvando…', async () => {
+      await api(`/api/custom-templates/${encodeURIComponent(templateId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(editorPayload(submit)),
+      });
+      toast(submit ? 'Template enviado para revisão.' : 'Template salvo.');
+      if (submit) goto('/estudio-templates');
     });
-    toast(submit ? 'Template enviado para revisão.' : 'Template salvo.');
-    if (submit) goto('/estudio-templates');
     return true;
   }
 
   for (const [attribute, endpoint, method, question, message] of [
-    [
-      'trashTemplate',
-      '',
-      'DELETE',
-      'Mover este template para a lixeira?',
-      'Template movido para a lixeira.',
-    ],
+    ['trashTemplate', '', 'DELETE', 'Mover este template para a lixeira?', 'Template movido para a lixeira.'],
     ['restoreTemplate', '/restore', 'POST', '', 'Template restaurado.'],
-    [
-      'purgeTemplate',
-      '/purge',
-      'DELETE',
-      'Excluir definitivamente o template e seus arquivos?',
-      'Template excluído definitivamente.',
-    ],
+    ['purgeTemplate', '/purge', 'DELETE', 'Excluir definitivamente o template e seus arquivos?', 'Template excluído definitivamente.'],
   ]) {
     const name = attribute.replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
     const button = event.target.closest(`[data-${name}]`);
     if (!button) continue;
-    if (question && !confirm(question)) return true;
-    await api(`/api/custom-templates/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-      method,
-      body: method === 'POST' ? '{}' : undefined,
+    if (question) {
+      const confirmed = await confirmAction(question, {
+        title: endpoint === '/purge' ? 'Exclusão definitiva' : 'Confirmar ação',
+        confirmLabel: endpoint === '/purge' ? 'Excluir definitivamente' : 'Confirmar',
+        danger: method === 'DELETE',
+      });
+      if (!confirmed) return true;
+    }
+    await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
+      await api(`/api/custom-templates/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
+        method,
+        body: method === 'POST' ? '{}' : undefined,
+      });
+      toast(message);
+      await render();
     });
-    toast(message);
-    await render();
     return true;
   }
   return false;
