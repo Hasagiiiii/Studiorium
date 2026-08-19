@@ -32,16 +32,17 @@ test('backend permite catálogo real, review, nota e estados da estante', () => 
     'recommendation_count',
     'safeHttpsUrl',
     'covers.openlibrary.org',
-    'rel',
+    'amazonPurchaseUrl',
+    "parsed.protocol !== 'https:'",
+    "eq('submitted_by', user.id)",
   ]) {
-    if (marker === 'rel') continue;
     assert.ok(books.includes(marker), `backend sem recurso: ${marker}`);
   }
   assert.ok(books.includes('new URL(raw)'));
-  assert.ok(books.includes("parsed.protocol !== 'https:'"));
+  assert.ok(books.includes('Falha ao desfazer livro incompleto'));
 });
 
-test('interface mostra Armarium com review, compra externa e estante em três estados', () => {
+test('interface mostra Armarium com formulário real, review, compra e três estados', () => {
   const enhancements = read('public/js/enhancements.js');
   const events = read('public/js/events/books.js');
   for (const marker of [
@@ -49,16 +50,34 @@ test('interface mostra Armarium com review, compra externa e estante em três es
     'Adicionar livro que eu li',
     'Minha review',
     'nofollow sponsored',
+    '<form class="book-review-form hidden"',
     'data-book-review-open',
     'data-book-save',
     'Quero ler',
     'Lendo',
     'Já li',
+    'referrerpolicy="no-referrer"',
   ]) {
     assert.ok(enhancements.includes(marker), `interface sem: ${marker}`);
   }
   assert.ok(events.includes("body.action = 'create'"));
   assert.ok(events.includes("body.action = 'review'"));
+  assert.ok(events.includes('form.reportValidity()'));
+  assert.ok(events.includes('form instanceof HTMLFormElement'));
+});
+
+test('capas HTTPS externas são compatíveis com a política de conteúdo', () => {
+  const vercel = read('vercel.json');
+  assert.ok(vercel.includes("img-src 'self' data: blob: https:"));
+  assert.ok(vercel.includes("frame-ancestors 'none'"));
+});
+
+test('home não deixa um vazio de viewport entre hero e acessos principais', () => {
+  const css = read('public/css/armarium-v32.css');
+  assert.ok(css.includes('min-height: 0;'));
+  assert.ok(css.includes('padding: 58px 0 46px;'));
+  assert.ok(css.includes('.hero + .section'));
+  assert.ok(css.includes('grid-template-columns: repeat(4, minmax(0, 1fr));'));
 });
 
 test('identidade visual recupera a nomenclatura acadêmica', () => {
