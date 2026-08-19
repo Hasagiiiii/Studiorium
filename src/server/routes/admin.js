@@ -6,6 +6,7 @@ const { config } = require('../config');
 const { audit } = require('../admin-audit');
 const { publicationInput } = require('./publications');
 const { resourceInput } = require('./tech');
+const { discussionInput, replyInput } = require('./discussions');
 const { createNotification } = require('./notifications');
 const S = require('../serializers');
 
@@ -87,6 +88,7 @@ async function dashboard(req) {
     publicationsQ,
     techResourcesQ,
     discussionsQ,
+    repliesQ,
     reportsQ,
     templatesQ,
     settingsQ,
@@ -98,6 +100,7 @@ async function dashboard(req) {
     db().from('publications').select('*').order('created_at', { ascending: false }).limit(300),
     db().from('tech_resources').select('*').order('created_at', { ascending: false }).limit(300),
     db().from('discussions').select('*').order('created_at', { ascending: false }).limit(300),
+    db().from('replies').select('*').order('created_at', { ascending: false }).limit(300),
     db().from('reports').select('*').order('created_at', { ascending: false }).limit(300),
     db()
       .from('templates')
@@ -118,6 +121,7 @@ async function dashboard(req) {
     publicationsQ,
     techResourcesQ,
     discussionsQ,
+    repliesQ,
     reportsQ,
     templatesQ,
     settingsQ,
@@ -129,6 +133,7 @@ async function dashboard(req) {
   const publications = publicationsQ.data.map(S.publication);
   const techResources = techResourcesQ.data.map(S.techResource);
   const discussions = discussionsQ.data.map(S.discussion);
+  const replies = repliesQ.data.map(S.reply);
   const reports = await enrichReports(reportsQ.data);
   const templates = templatesQ.data.map(S.template);
   const metrics = {
@@ -152,6 +157,7 @@ async function dashboard(req) {
     publications,
     techResources,
     discussions,
+    replies,
     reports,
     templates,
     verificationRequests: verificationQ.data.map((row) =>
@@ -317,6 +323,22 @@ function editableContentConfig(type) {
       clean: resourceInput,
       serialize: S.techResource,
     },
+    discussion: {
+      table: 'discussions',
+      clean: (body, current) => {
+        const values = discussionInput(body, current);
+        return { title: values.title, body: values.body, category: values.category };
+      },
+      serialize: S.discussion,
+    },
+    reply: {
+      table: 'replies',
+      clean: (body, current) => {
+        const values = replyInput(body, current);
+        return { body: values.body };
+      },
+      serialize: S.reply,
+    },
   };
   const selected = configByType[type];
   if (!selected) {
@@ -354,7 +376,7 @@ async function updateContentDetails(req, type, targetId) {
   if (!data) throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
 
   await audit(admin, 'content.edit', type, targetId, {
-    title: patch.title,
+    title: patch.title || current.title || 'Resposta no Colóquio',
     status: current.status,
   });
   return { content: contentConfig.serialize(data), message: 'Conteúdo atualizado.' };
@@ -392,7 +414,7 @@ async function deleteContent(req, type, targetId) {
     }
   }
   await audit(admin, 'content.delete', type, targetId, {
-    title: current.title,
+    title: current.title || 'Resposta no Colóquio',
     status: current.status,
   });
   return { ok: true, message: 'Conteúdo apagado definitivamente.' };
