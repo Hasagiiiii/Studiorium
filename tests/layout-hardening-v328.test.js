@@ -6,10 +6,13 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
 
-test('endurecimento responsivo é carregado antes da camada global final', () => {
+test('endurecimento responsivo é a camada final da cascata', () => {
   const style = read('public/style.css').trim().split('\n');
-  assert.ok(style.includes("@import url('/css/layout-hardening-v328.css');"));
-  assert.equal(style.at(-1), "@import url('/css/responsive.css');");
+  const responsive = style.indexOf("@import url('/css/responsive.css');");
+  const hardening = style.indexOf("@import url('/css/layout-hardening-v328.css');");
+  assert.ok(responsive >= 0);
+  assert.ok(hardening > responsive);
+  assert.equal(style.at(-1), "@import url('/css/layout-hardening-v328.css');");
 });
 
 test('telas muito estreitas possuem tratamento dedicado sem remover ações', () => {
