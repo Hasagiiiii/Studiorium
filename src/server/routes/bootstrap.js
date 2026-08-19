@@ -155,63 +155,96 @@ async function me(req) {
       publications: [],
       techResources: [],
       codeProjects: [],
+      discussions: [],
+      replies: [],
       news: [],
       customTemplates: [],
       bookSaves: [],
       bookReviews: [],
     };
-  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ, bookReviewsQ] =
-    await Promise.all([
-      db()
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false }),
-      db()
-        .from('publications')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false }),
-      db()
-        .from('tech_resources')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false }),
-      db()
-        .from('code_projects')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('updated_at', { ascending: false }),
-      db()
-        .from('news_articles')
-        .select('*')
-        .eq('contributor_id', user.id)
-        .order('updated_at', { ascending: false }),
-      db()
-        .from('custom_templates')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('updated_at', { ascending: false }),
-      db()
-        .from('book_saves')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false }),
-      db()
-        .from('book_reviews')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false }),
-    ]);
-  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ, bookReviewsQ].forEach(
-    (query) => fail(query.error),
-  );
+  const [
+    projectsQ,
+    publicationsQ,
+    techQ,
+    codeQ,
+    discussionsQ,
+    repliesQ,
+    newsQ,
+    templatesQ,
+    bookSavesQ,
+    bookReviewsQ,
+  ] = await Promise.all([
+    db()
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false }),
+    db()
+      .from('publications')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('tech_resources')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('code_projects')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('updated_at', { ascending: false }),
+    db()
+      .from('discussions')
+      .select('*')
+      .eq('author_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('replies')
+      .select('*')
+      .eq('author_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('news_articles')
+      .select('*')
+      .eq('contributor_id', user.id)
+      .order('updated_at', { ascending: false }),
+    db()
+      .from('custom_templates')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('updated_at', { ascending: false }),
+    db()
+      .from('book_saves')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
+    db()
+      .from('book_reviews')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false }),
+  ]);
+  [
+    projectsQ,
+    publicationsQ,
+    techQ,
+    codeQ,
+    discussionsQ,
+    repliesQ,
+    newsQ,
+    templatesQ,
+    bookSavesQ,
+    bookReviewsQ,
+  ].forEach((query) => fail(query.error));
   return {
     user: await publicUser(user),
     projects: projectsQ.data.map(S.project),
     publications: publicationsQ.data.map(S.publication),
     techResources: techQ.data.map(S.techResource),
     codeProjects: codeQ.data.map(S.codeProject),
+    discussions: discussionsQ.data.map(S.discussion),
+    replies: repliesQ.data.map(S.reply),
     news: newsQ.data.map(S.newsArticle),
     customTemplates: templatesQ.data.map(S.customTemplate),
     bookSaves: bookSavesQ.data.map(S.bookSave),
