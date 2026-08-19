@@ -30,6 +30,14 @@ function normalizeIsbn(value) {
     .slice(0, 13);
 }
 
+function amazonPurchaseUrl(title, author) {
+  const url = new URL('https://www.amazon.com.br/s');
+  url.searchParams.set('k', `${title} ${author}`.trim());
+  const affiliateTag = safeText(process.env.STUDIORIUM_AMAZON_AFFILIATE_TAG, 80);
+  if (affiliateTag) url.searchParams.set('tag', affiliateTag);
+  return url.toString();
+}
+
 function serializeBook(row) {
   return {
     ...S.book(row),
@@ -127,6 +135,13 @@ async function upsertReview(user, bookId, body) {
     ? 'Membro da comunidade'
     : safeText(profile?.displayName || profile?.username || 'Membro da comunidade', 120);
   const timestamp = now();
+  const { data: previousReview, error: previousError } = await db()
+    .from('book_reviews')
+    .select('created_at')
+    .eq('book_id', bookId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  fail(previousError);
   const { data, error } = await db()
     .from('book_reviews')
     .upsert(
@@ -137,7 +152,7 @@ async function upsertReview(user, bookId, body) {
         rating,
         review,
         recommend: body.recommend !== false,
-        created_at: timestamp,
+        created_at: previousReview?.created_at || timestamp,
         updated_at: timestamp,
       },
       { onConflict: 'book_id,user_id' },
@@ -166,10 +181,11 @@ async function createBook(user, body) {
     (isbn.length >= 10
       ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg`
       : '');
-  const purchaseUrl = safeHttpsUrl(body.purchaseUrl);
-  const purchaseLabel = purchaseUrl
+  const suppliedPurchase = safeHttpsUrl(body.purchaseUrl);
+  const purchaseUrl = suppliedPurchase || amazonPurchaseUrl(title, author);
+  const purchaseLabel = suppliedPurchase
     ? safeText(body.purchaseLabel, 80) || 'Ver edição / comprar'
-    : '';
+    : 'Buscar edição na Amazon';
   const review = safeText(body.review, 2400);
   const rating = Number(body.rating);
 
