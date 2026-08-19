@@ -1,0 +1,94 @@
+/* Biblioteca — acabamento da estante e contadores responsivos. */
+
+.armarium-community-head p {
+  max-width: 760px;
+  margin-bottom: 0;
+}
+
+.armarium-empty strong,
+.armarium-empty span {
+  display: block;
+}
+
+/* Cinco métricas em uma única faixa nos desktops com espaço suficiente. */
+.library-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.library-stats .stat,
+.library-stats .stat + .stat {
+  min-width: 0;
+  padding: clamp(17px, 2vw, 22px);
+  border: 0;
+  background: var(--bg2);
+}
+
+.library-stats .stat strong {
+  display: block;
+  font-size: clamp(27px, 3vw, 34px);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.library-stats .stat span {
+  display: block;
+  margin-top: 7px;
+  font-size: clamp(9px, 1vw, 10px);
+  line-height: 1.35;
+  text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* Tablets e janelas intermediárias: três métricas acima e duas equilibradas abaixo. */
+@media (max-width: 1040px) {
+  .library-stats {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .library-stats .stat {
+    grid-column: span 2;
+  }
+
+  .library-stats .stat:nth-child(4),
+  .library-stats .stat:nth-child(5) {
+    grid-column: span 3;
+  }
+}
+
+/* Celulares: duas colunas compactas e a última métrica centralizada em largura total. */
+@media (max-width: 699px) {
+  .library-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .library-stats .stat {
+    grid-column: auto;
+  }
+
+  .library-stats .stat:last-child {
+    grid-column: 1 / -1;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* Telas muito estreitas: uma coluna evita compressão e quebra ruim dos rótulos. */
+@media (max-width: 360px) {
+  .library-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .library-stats .stat,
+  .library-stats .stat:last-child {
+    grid-column: auto;
+    align-items: initial;
+    text-align: left;
+  }
+}
