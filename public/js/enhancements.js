@@ -338,7 +338,13 @@ function enhanceMiniShelf() {
     if (book.coverUrl) {
       item.insertAdjacentHTML(
         'afterbegin',
-        `<img class="mini-book-cover" src="${E(book.coverUrl)}" alt="Capa de ${E(book.title)}" loading="lazy" referrerpolicy="no-referrer" />`,
+        html`<img
+          class="mini-book-cover"
+          src="${E(book.coverUrl)}"
+          alt="Capa de ${E(book.title)}"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+        />`,
       );
       const image = item.querySelector('.mini-book-cover');
       image?.addEventListener('error', () => image.remove());
