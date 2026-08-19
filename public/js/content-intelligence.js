@@ -133,9 +133,13 @@ export function emergentTopics(items, limit = 8) {
     itemTokens.forEach((token) => counts.set(token, (counts.get(token) || 0) + 1));
   });
 
-  return [...counts]
-    .filter(([, count]) => count >= (items.length >= 6 ? 2 : 1))
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+  const sortedTopics = [...counts].sort(
+    (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+  );
+  const recurringTopics = sortedTopics.filter(([, count]) => count >= 2);
+  const visibleTopics = recurringTopics.length >= 3 ? recurringTopics : sortedTopics;
+
+  return visibleTopics
     .slice(0, limit)
     .map(([token, count]) => ({ label: labels.get(token) || token, count }));
 }
