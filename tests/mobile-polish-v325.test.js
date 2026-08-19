@@ -22,10 +22,12 @@ test('Scriptorium organiza atalhos e estante vazia progressivamente no mobile', 
   assert.match(polish, /\.mini-shelf:has\(\.empty\)/);
 });
 
-test('acabamento mobile respeita a camada responsiva global como última importação', () => {
+test('acabamento mobile precede a responsividade e o endurecimento final', () => {
   const responsiveIndex = style.indexOf("@import url('/css/responsive.css')");
   const polishIndex = style.indexOf("@import url('/css/mobile-polish-v325.css')");
+  const hardeningIndex = style.indexOf("@import url('/css/layout-hardening-v328.css')");
   assert.ok(polishIndex >= 0);
   assert.ok(responsiveIndex > polishIndex);
-  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/responsive.css');");
+  assert.ok(hardeningIndex > responsiveIndex);
+  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/layout-hardening-v328.css');");
 });
