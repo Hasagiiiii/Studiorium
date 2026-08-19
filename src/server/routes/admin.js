@@ -328,7 +328,7 @@ function editableContentConfig(type) {
 }
 
 async function updateContentDetails(req, type, targetId) {
-  const admin = await requireStaff(req, ['curator', 'editor', 'admin']);
+  const admin = await requireAdmin(req);
   const body = await readJson(req);
   const contentConfig = editableContentConfig(type);
   const { data: current, error: currentError } = await db()
@@ -340,11 +340,6 @@ async function updateContentDetails(req, type, targetId) {
 
   if (!current) {
     throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
-  }
-  if (current.status === 'published') {
-    throw Object.assign(new Error('Conteúdo publicado está protegido contra edição direta.'), {
-      statusCode: 409,
-    });
   }
 
   const patch = contentConfig.clean(body, current);
@@ -377,11 +372,6 @@ async function deleteContent(req, type, targetId) {
 
   if (!current) {
     throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
-  }
-  if (current.status === 'published') {
-    throw Object.assign(new Error('Conteúdo publicado não pode ser apagado por esta ação.'), {
-      statusCode: 409,
-    });
   }
 
   const { data, error } = await db()
