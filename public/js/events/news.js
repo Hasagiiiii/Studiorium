@@ -1,5 +1,6 @@
 import { api, formObj, state, toast, E } from '../runtime.js';
 import { goto, render } from '../router.js';
+import { confirmAction, withBusyControl } from '../ui-feedback.js';
 
 function sourceRow() {
   const index = document.querySelectorAll('[data-news-source]').length + 1;
@@ -36,44 +37,42 @@ export async function handleNewsClick(event) {
   }
   const submit = event.target.closest('[data-submit-news]');
   if (submit) {
-    submit.disabled = true;
-    await api(`/api/news/${encodeURIComponent(submit.dataset.submitNews)}/submit`, {
-      method: 'POST',
-      body: '{}',
+    await withBusyControl(submit, 'Enviando…', async () => {
+      await api(`/api/news/${encodeURIComponent(submit.dataset.submitNews)}/submit`, {
+        method: 'POST',
+        body: '{}',
+      });
+      toast('Notícia enviada para certificação editorial.');
+      goto('/redacao');
     });
-    toast('Notícia enviada para certificação editorial.');
-    goto('/redacao');
     return true;
   }
 
   for (const [attribute, endpoint, method, question, message] of [
-    [
-      'trashNews',
-      '',
-      'DELETE',
-      'Mover esta notícia para a lixeira?',
-      'Notícia movida para a lixeira.',
-    ],
+    ['trashNews', '', 'DELETE', 'Mover esta notícia para a lixeira?', 'Notícia movida para a lixeira.'],
     ['restoreNews', '/restore', 'POST', '', 'Notícia restaurada.'],
-    [
-      'purgeNews',
-      '/purge',
-      'DELETE',
-      'Excluir definitivamente? Esta ação não pode ser desfeita.',
-      'Notícia excluída definitivamente.',
-    ],
+    ['purgeNews', '/purge', 'DELETE', 'Excluir definitivamente? Esta ação não pode ser desfeita.', 'Notícia excluída definitivamente.'],
   ]) {
     const button = event.target.closest(
       `[data-${attribute.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}]`,
     );
     if (!button) continue;
-    if (question && !confirm(question)) return true;
-    await api(`/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-      method,
-      body: method === 'POST' ? '{}' : undefined,
+    if (question) {
+      const confirmed = await confirmAction(question, {
+        title: method === 'DELETE' && endpoint === '/purge' ? 'Exclusão definitiva' : 'Confirmar ação',
+        confirmLabel: endpoint === '/purge' ? 'Excluir definitivamente' : 'Confirmar',
+        danger: method === 'DELETE',
+      });
+      if (!confirmed) return true;
+    }
+    await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
+      await api(`/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
+        method,
+        body: method === 'POST' ? '{}' : undefined,
+      });
+      toast(message);
+      await render();
     });
-    toast(message);
-    await render();
     return true;
   }
   return false;
