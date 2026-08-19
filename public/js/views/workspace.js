@@ -35,6 +35,13 @@ async function escrivaninha() {
   const codeProjects = (me.codeProjects || []).filter((project) => !project.deletedAt);
   const codeTrash = (me.codeProjects || []).filter((project) => project.deletedAt);
   const techResources = me.techResources || [];
+  const bookSaves = me.bookSaves || [];
+  const bookshelf = bookSaves
+    .map((saved) => ({
+      ...saved,
+      book: (state.boot.books || []).find((book) => book.id === saved.bookId),
+    }))
+    .filter((saved) => saved.book);
   const pending =
     me.publications.filter((item) => item.status === 'pending_review').length +
     techResources.filter((item) => item.status === 'pending_review').length;
@@ -53,7 +60,7 @@ async function escrivaninha() {
           <div class="stat"><strong>${me.publications.length}</strong><span>Publicações</span></div>
           <div class="stat"><strong>${pending}</strong><span>Em revisão</span></div>
           <div class="stat">
-            <strong>${state.me.isMinor ? 'Privado' : 'Público'}</strong><span>Perfil</span>
+            <strong>${bookshelf.length}</strong><span>Livros na estante</span>
           </div>
         </div>
         <div class="actions" style="margin-bottom:25px">
@@ -69,10 +76,34 @@ async function escrivaninha() {
             '/redacao',
             'Redação',
             'outline',
-          )}${link('/estudio-templates', 'Estúdio de templates', 'outline')}${state.me.role ===
-          'admin'
-            ? link('/admin', 'Painel ADM', 'dangerbtn')
-            : ''}
+          )}${link('/estudio-templates', 'Estúdio de templates', 'outline')}${[
+            'moderator',
+            'curator',
+            'editor',
+            'admin',
+          ].includes(state.me.role)
+            ? link('/moderacao', 'Moderação', 'outline')
+            : ''}${state.me.role === 'admin' ? link('/admin', 'Painel ADM', 'dangerbtn') : ''}
+        </div>
+        <div class="card personal-shelf" style="margin-bottom:18px">
+          <div class="sectionhead">
+            <div>
+              <div class="eyebrow">Armarium personale</div>
+              <h3>Minha estante de livros</h3>
+            </div>
+            ${link('/biblioteca?tipo=livros', 'Explorar livros →', 'linkbtn')}
+          </div>
+          <div class="mini-shelf">
+            ${bookshelf
+              .map(
+                ({ book, shelfStatus }) => html`<article class="mini-book theme-${E(book.coverTheme)}">
+                  <span>${E(book.category)}</span><strong>${E(book.title)}</strong
+                  ><small>${E(book.author)} · ${E(shelfStatus)}</small>
+                  <button class="soft" type="button" data-book-remove="${E(book.id)}">Remover</button>
+                </article>`,
+              )
+              .join('') || empty('Sua estante está vazia. Guarde livros pela Biblioteca.')}
+          </div>
         </div>
         <div class="grid grid2">
           <div class="card">
@@ -84,7 +115,10 @@ async function escrivaninha() {
                   html`<div class="project">
                     <div>
                       <h3>${E(p.title)}</h3>
-                      <p>${E(p.type)} · atualizado ${date(p.updatedAt)}</p>
+                      <p>
+                        ${E(p.type)} · ${p.visibility === 'public' ? 'público' : 'privado'} ·
+                        atualizado ${date(p.updatedAt)}
+                      </p>
                     </div>
                     <div class="actions">
                       ${link('/editor/' + encodeURIComponent(p.id), 'Editar', 'outline')}<button
@@ -251,6 +285,11 @@ async function escrivaninha() {
                     'criador',
                     'jornalista',
                     'comunicador',
+                    'monitor',
+                    'tecnico',
+                    'profissional',
+                    'autodidata',
+                    'internauta',
                   ]
                     .map(
                       (x) =>
@@ -259,6 +298,49 @@ async function escrivaninha() {
                     .join('')}
                 </select>
               </div>
+            </div>
+            <div class="formgrid">
+              <div>
+                <label class="label">Curso ou área de formação</label>
+                <input
+                  class="field"
+                  name="course"
+                  value="${E(state.me.course || '')}"
+                  placeholder="Ex.: Farmácia, Matemática, Técnico em Informática"
+                />
+              </div>
+              <div>
+                <label class="label">Instituição</label>
+                <input
+                  class="field"
+                  name="institution"
+                  value="${E(state.me.institution || '')}"
+                  placeholder="Escola, faculdade ou instituição"
+                />
+              </div>
+            </div>
+            <div class="formrow">
+              <label class="label">Nível de formação</label>
+              <select class="select" name="educationLevel">
+                ${[
+                  '',
+                  'Ensino fundamental',
+                  'Ensino médio',
+                  'Curso técnico',
+                  'Graduação em andamento',
+                  'Graduação concluída',
+                  'Pós-graduação',
+                  'Mestrado',
+                  'Doutorado',
+                  'Autodidata',
+                ]
+                  .map(
+                    (level) => html`<option value="${E(level)}" ${
+                      level === state.me.educationLevel ? 'selected' : ''
+                    }>${E(level || 'Não informar')}</option>`,
+                  )
+                  .join('')}
+              </select>
             </div>
             <div class="formrow" style="margin-top:16px">
               <label class="label">Biografia</label
@@ -276,6 +358,76 @@ async function escrivaninha() {
               <button class="solid">Salvar perfil</button>
             </div>
           </form>
+        </div>
+        <div class="card verification-card" style="margin-top:18px">
+          <div class="eyebrow">Fides academica</div>
+          <h3>Verificação de especialista</h3>
+          ${state.me.verificationStatus === 'verified'
+            ? html`<div class="verified-banner">
+                <span class="verified-seal">✓</span>
+                <div>
+                  <strong>Especialista verificado</strong>
+                  <p>${E(state.me.verifiedSpecialty || state.me.course || 'Área confirmada')}</p>
+                </div>
+              </div>`
+            : state.me.verificationStatus === 'pending'
+              ? html`<div class="notice">
+                  Sua solicitação está em análise. A decisão aparecerá na central de notificações.
+                </div>`
+              : state.me.isMinor
+                ? html`<div class="notice">
+                    A verificação profissional fica disponível quando a conta atingir a maioridade.
+                  </div>`
+                : html`<p>
+                    Envie sua formação e uma referência verificável. O selo só aparece depois da
+                    análise de um administrador.
+                  </p>
+                  <form data-profile-verification>
+                    <div class="formgrid">
+                      <div>
+                        <label class="label">Curso ou formação</label>
+                        <input class="field" name="course" value="${E(state.me.course || '')}" required />
+                      </div>
+                      <div>
+                        <label class="label">Instituição</label>
+                        <input
+                          class="field"
+                          name="institution"
+                          value="${E(state.me.institution || '')}"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="formgrid">
+                      <div>
+                        <label class="label">Nível de formação</label>
+                        <input
+                          class="field"
+                          name="educationLevel"
+                          value="${E(state.me.educationLevel || '')}"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label class="label">Especialidade para o selo</label>
+                        <input class="field" name="specialty" required />
+                      </div>
+                    </div>
+                    <div class="formrow">
+                      <label class="label">Referência de comprovação (opcional)</label>
+                      <input
+                        class="field"
+                        name="credentialReference"
+                        type="url"
+                        placeholder="Link institucional, currículo ou registro profissional"
+                      />
+                    </div>
+                    <div class="formrow">
+                      <label class="label">Explique sua formação e experiência</label>
+                      <textarea class="textarea" name="statement" minlength="30" required></textarea>
+                    </div>
+                    <button class="solid">Solicitar verificação</button>
+                  </form>`}
         </div>
         <div class="card" style="margin-top:18px">
           <div class="eyebrow">Segurança</div>
@@ -388,9 +540,18 @@ ${E(s.content)}</textarea
             >
 ${E(p.notes || '')}</textarea
             >
+            <label class="label" style="margin-top:15px">Compartilhamento</label>
+            <select class="select" data-project-visibility>
+              <option value="private" ${p.visibility !== 'public' ? 'selected' : ''}>
+                Privado — somente eu
+              </option>
+              <option value="public" ${p.visibility === 'public' ? 'selected' : ''}>
+                Público — aparece no meu perfil
+              </option>
+            </select>
             <div class="notice" style="margin-top:15px">
-              O editor salva texto estruturado. Use “Imprimir / PDF” para gerar uma versão pronta
-              pelo navegador.
+              As notas nunca são exibidas no perfil. Use “Imprimir / PDF” para gerar uma versão
+              pronta pelo navegador.
             </div>
           </aside>
         </div>
@@ -505,6 +666,21 @@ ${E(publication.content || '')}</textarea
                   ? `Arquivo atual: ${E(publication.fileName)}. Escolha outro somente se quiser substituí-lo.`
                   : 'PDF, DOCX, PPTX, ODT ou TXT, até 5 MB.'}
                 O arquivo só fica público depois da aprovação.
+              </p>
+            </div>
+            <div class="formrow">
+              <label class="label">Foto de apresentação (opcional)</label>
+              <input
+                class="field"
+                data-publication-cover
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              />
+              <p class="small muted">
+                ${publication.coverName
+                  ? `Foto atual: ${E(publication.coverName)}. Escolha outra somente para substituir.`
+                  : 'JPG, PNG ou WebP, até 3 MB.'}
+                Se você não enviar foto, o trabalho continua com o cartão clássico do Studiorium.
               </p>
             </div>
             <div class="formrow">

@@ -119,6 +119,28 @@ export async function handleAdminClick(event) {
     return true;
   }
 
+  const verification = event.target.closest('[data-admin-verification]');
+
+  if (verification) {
+    const [id, status, contributionStatus] = verification.dataset.adminVerification.split(':');
+    const note = prompt(
+      status === 'approved'
+        ? 'Observação interna da verificação (opcional):'
+        : 'Explique o que precisa ser corrigido:',
+      '',
+    ) || '';
+    if (status === 'rejected' && !note.trim()) return true;
+    if (!confirm(status === 'approved' ? 'Conceder este selo público?' : 'Recusar a solicitação?'))
+      return true;
+    await api(`/api/admin/verifications/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, contributionStatus, note }),
+    });
+    toast(status === 'approved' ? 'Perfil verificado.' : 'Solicitação devolvida.');
+    await refreshBootstrapAndRender();
+    return true;
+  }
+
   const feature = event.target.closest('[data-admin-feature-publication]');
 
   if (feature) {
@@ -152,7 +174,7 @@ export async function handleAdminClick(event) {
     const [id, status] = news.dataset.adminNews.split(':');
     const promptText =
       status === 'published'
-        ? 'Nota da decisão editorial (obrigatória se a IA sinalizou):'
+        ? 'Nota da decisão editorial (obrigatória se a triagem sinalizou):'
         : 'Retorno editorial:';
     const note = prompt(promptText, '') || '';
     if (status !== 'published' && !note.trim()) return true;
@@ -182,6 +204,24 @@ export async function handleAdminClick(event) {
   }
 
   return false;
+}
+
+export async function handleAdminChange(event) {
+  const select = event.target.closest('[data-admin-role-select]');
+  if (!select) return false;
+  const id = select.dataset.adminRoleSelect;
+  const role = select.value;
+  if (!confirm(`Alterar a função desta conta para ${role}?`)) {
+    await render();
+    return true;
+  }
+  await api(`/api/admin/users/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ role }),
+  });
+  toast('Função atualizada.');
+  await render();
+  return true;
 }
 
 export async function handleAdminSubmit(event) {

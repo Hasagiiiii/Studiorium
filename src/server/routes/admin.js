@@ -1,11 +1,12 @@
 const { db, fail } = require('../db');
-const { requireAdmin } = require('../auth');
+const { requireAdmin, requireStaff } = require('../auth');
 const { readJson } = require('../http');
 const { now } = require('../security');
 const { config } = require('../config');
 const { audit } = require('../admin-audit');
 const { publicationInput } = require('./publications');
 const { resourceInput } = require('./tech');
+const { createNotification } = require('./notifications');
 const S = require('../serializers');
 
 const settingKeys = new Set([
@@ -90,6 +91,7 @@ async function dashboard(req) {
     templatesQ,
     settingsQ,
     auditQ,
+    verificationQ,
   ] = await Promise.all([
     db().from('users').select('*').order('created_at', { ascending: false }).limit(300),
     db().from('profiles').select('*').limit(500),
@@ -104,6 +106,11 @@ async function dashboard(req) {
       .order('downloads', { ascending: false }),
     db().from('site_settings').select('*'),
     db().from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100),
+    db()
+      .from('profile_verification_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200),
   ]);
   [
     usersQ,
@@ -115,6 +122,7 @@ async function dashboard(req) {
     templatesQ,
     settingsQ,
     auditQ,
+    verificationQ,
   ].forEach((q) => fail(q.error));
   const profileMap = new Map(profilesQ.data.map((p) => [p.user_id, p]));
   const users = usersQ.data.map((u) => S.adminUser(u, profileMap.get(u.id)));
@@ -136,6 +144,7 @@ async function dashboard(req) {
     ).length,
     discussions: discussions.filter((d) => d.status === 'published').length,
     templates: templates.length,
+    pendingVerifications: verificationQ.data.filter((item) => item.status === 'pending').length,
   };
   return {
     metrics,
@@ -145,6 +154,9 @@ async function dashboard(req) {
     discussions,
     reports,
     templates,
+    verificationRequests: verificationQ.data.map((row) =>
+      S.verificationRequest(row, profileMap.get(row.user_id)),
+    ),
     settings: settingsObject(settingsQ.data),
     audit: auditQ.data.map((row) => ({
       id: row.id,
@@ -159,7 +171,7 @@ async function dashboard(req) {
 }
 
 async function queue(req) {
-  await requireAdmin(req);
+  await requireStaff(req);
   const [reportsQ, publicationsQ, techResourcesQ] = await Promise.all([
     db()
       .from('reports')
@@ -193,7 +205,7 @@ async function queue(req) {
 }
 
 async function updateReport(req, reportId) {
-  const admin = await requireAdmin(req);
+  const admin = await requireStaff(req);
   const body = await readJson(req);
   const patch = { updated_at: now() };
   if (['open', 'reviewing', 'resolved', 'dismissed'].includes(body.status))
@@ -229,11 +241,22 @@ async function updatePublication(req, publicationId) {
   fail(error);
   if (!data) throw Object.assign(new Error('Publicação não encontrada.'), { statusCode: 404 });
   await audit(admin, 'publication.update', 'publication', publicationId, patch);
+  if (patch.status) {
+    await createNotification(data.owner_id, {
+      type: 'publication',
+      title: patch.status === 'published' ? 'Trabalho publicado' : 'Revisão da publicação atualizada',
+      message:
+        patch.status === 'published'
+          ? `“${data.title}” foi aprovado e já está na Biblioteca.`
+          : patch.moderation_note || `O status de “${data.title}” foi atualizado para ${patch.status}.`,
+      link: patch.status === 'published' ? `/pesquisas/${data.slug}` : '/escrivaninha',
+    });
+  }
   return { publication: S.publication(data) };
 }
 
 async function updateContent(req, type, targetId) {
-  const admin = await requireAdmin(req);
+  const admin = await requireStaff(req);
   const body = await readJson(req);
   const configByType = {
     publication: { table: 'publications', allowed: ['published', 'rejected', 'pending_review'] },
@@ -260,6 +283,22 @@ async function updateContent(req, type, targetId) {
   fail(error);
   if (!data) throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
   await audit(admin, 'content.status', type, targetId, patch);
+  const ownerId = data.owner_id || data.author_id;
+  if (ownerId && ['publication', 'tech_resource'].includes(type)) {
+    await createNotification(ownerId, {
+      type: 'moderation',
+      title: body.status === 'published' ? 'Conteúdo aprovado' : 'Moderação atualizada',
+      message:
+        body.status === 'published'
+          ? `“${data.title}” foi aprovado pela equipe.`
+          : `“${data.title}” recebeu o status ${body.status}.`,
+      link: body.status === 'published' && data.slug
+        ? type === 'publication'
+          ? `/pesquisas/${data.slug}`
+          : `/oficina/${data.slug}`
+        : '/escrivaninha',
+    });
+  }
   return { ok: true, status: body.status };
 }
 
@@ -286,7 +325,7 @@ function editableContentConfig(type) {
 }
 
 async function updateContentDetails(req, type, targetId) {
-  const admin = await requireAdmin(req);
+  const admin = await requireStaff(req, ['curator', 'editor', 'admin']);
   const body = await readJson(req);
   const contentConfig = editableContentConfig(type);
   const { data: current, error: currentError } = await db()
@@ -351,8 +390,10 @@ async function deleteContent(req, type, targetId) {
   fail(error);
   if (!data) throw Object.assign(new Error('Conteúdo não encontrado.'), { statusCode: 404 });
 
-  if (type === 'publication' && current.file_path) {
-    const cleanup = await db().storage.from('publications').remove([current.file_path]);
+  if (type === 'publication' && (current.file_path || current.cover_path)) {
+    const cleanup = await db()
+      .storage.from('publications')
+      .remove([current.file_path, current.cover_path].filter(Boolean));
     if (cleanup.error) {
       console.error('[Studiorium admin publication cleanup]', cleanup.error.message);
     }
@@ -377,7 +418,7 @@ async function updateUser(req, userId) {
   const cfg = config();
   const protectedAdmin = cfg.adminEmail && target.email === cfg.adminEmail;
   const patch = {};
-  if (body.role && ['user', 'admin'].includes(body.role)) {
+  if (body.role && ['user', 'moderator', 'curator', 'editor', 'admin'].includes(body.role)) {
     if (protectedAdmin && body.role !== 'admin')
       throw Object.assign(
         new Error('A conta administradora principal não pode perder a função de ADM.'),
@@ -424,6 +465,14 @@ async function updateUser(req, userId) {
     status: patch.status,
     reason: patch.suspension_reason,
   });
+  if (patch.role) {
+    await createNotification(userId, {
+      type: 'role',
+      title: 'Função da equipe atualizada',
+      message: `Sua função no Studiorium agora é ${patch.role}.`,
+      link: patch.role === 'user' ? '/escrivaninha' : '/moderacao',
+    });
+  }
   return { user: S.adminUser(data, profile) };
 }
 

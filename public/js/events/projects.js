@@ -37,6 +37,7 @@ function projectEditorPayload(root) {
 
   return {
     title: root.querySelector('[name=title]').value,
+    visibility: document.querySelector('[data-project-visibility]')?.value || 'private',
     sections,
     notes: document.querySelector('[data-project-notes]')?.value || '',
   };

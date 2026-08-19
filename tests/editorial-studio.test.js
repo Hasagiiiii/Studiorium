@@ -2,13 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { cleanReview } = require('../src/server/ai-news-moderation');
+const { cleanReview, moderateNews } = require('../src/server/news-moderation');
 const { resetEmailHtml } = require('../src/server/email');
 
 const root = path.resolve(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
 
-test('notícias exigem triagem por IA e certificação editorial humana', () => {
+test('notícias exigem triagem local e certificação editorial humana', () => {
   const news = read('src/server/routes/news.js');
   const adminNews = read('src/server/routes/admin-news.js');
   const schema = read('supabase/upgrade-v2.9-editorial-studio.sql');
@@ -20,13 +20,28 @@ test('notícias exigem triagem por IA e certificação editorial humana', () => 
   assert.ok(schema.includes("status = 'published' and certified_at is not null"));
 });
 
-test('normalização da IA nunca transforma resposta desconhecida em aprovação', () => {
+test('normalização da triagem nunca transforma resposta desconhecida em aprovação', () => {
   const flagged = cleanReview({ decision: 'anything', risks: ['risco'] });
   const approved = cleanReview({ decision: 'approved', suggestions: ['revisar'] });
 
   assert.equal(flagged.decision, 'flagged');
   assert.equal(approved.decision, 'approved');
   assert.equal(flagged.purpose, 'triage_only_human_certification_required');
+});
+
+test('triagem editorial local aprova texto regular e sinaliza sensacionalismo', () => {
+  const base = {
+    title: 'Universidade publica novo calendário acadêmico',
+    summary: 'A instituição divulgou as datas do próximo semestre letivo.',
+    body: 'O calendário apresenta datas de matrícula, início das aulas e avaliações.',
+    sources: [
+      { title: 'Universidade', url: 'https://universidade.example/calendario' },
+      { title: 'Secretaria', url: 'https://secretaria.example/educacao' },
+    ],
+  };
+  assert.equal(moderateNews(base).decision, 'approved');
+  assert.equal(moderateNews({ ...base, title: 'CHOCANTE!!! Compartilhe antes que apaguem' }).decision, 'flagged');
+  assert.equal(moderateNews(base).engine, 'studiorium_local_rules_v1');
 });
 
 test('recuperação de senha usa fragmento, token com hash e resposta sem enumeração', () => {
@@ -70,10 +85,10 @@ test('animações respeitam a preferência de reduzir movimento', () => {
   assert.ok(css.includes('min-width: 0'));
 });
 
-test('saúde online informa disponibilidade das integrações sem expor segredos', () => {
+test('saúde online informa moderação local e disponibilidade de e-mail sem expor segredos', () => {
   const system = read('src/server/routes/system.js');
 
-  assert.ok(system.includes('aiModeration'));
+  assert.ok(system.includes("moderation: 'local_rules_and_human_review'"));
   assert.ok(system.includes('emailDelivery'));
   assert.equal(system.includes('RESEND_API_KEY:'), false);
   assert.equal(system.includes('OPENAI_API_KEY:'), false);

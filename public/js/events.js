@@ -2,7 +2,7 @@ import { toast } from './runtime.js';
 import { render } from './router.js';
 import { syncPoster } from './views.js';
 import { handleAccountSubmit } from './events/account.js';
-import { handleAdminClick, handleAdminSubmit } from './events/admin.js';
+import { handleAdminChange, handleAdminClick, handleAdminSubmit } from './events/admin.js';
 import {
   handleCommunityChange,
   handleCommunityClick,
@@ -11,6 +11,9 @@ import {
 } from './events/community.js';
 import { handleFilterSubmit } from './events/filters.js';
 import { handleNavigationClick } from './events/navigation.js';
+import { handleNotificationClick } from './events/notifications.js';
+import { handleBookClick } from './events/books.js';
+import { handlePublicationClick } from './events/publications.js';
 import {
   handleLabMessage,
   handleProjectChange,
@@ -22,6 +25,9 @@ import { handleTemplateClick, handleTemplateChange } from './events/template-stu
 
 const clickHandlers = [
   handleNavigationClick,
+  handleNotificationClick,
+  handleBookClick,
+  handlePublicationClick,
   handleProjectClick,
   handleCommunityClick,
   handleAdminClick,
@@ -68,6 +74,7 @@ export function bindEvents() {
     handleCommunityChange(event);
     handleProjectChange(event);
     void handleTemplateChange(event).catch(reportFailure);
+    void handleAdminChange(event).catch(reportFailure);
   });
 
   addEventListener('message', (event) => {

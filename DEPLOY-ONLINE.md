@@ -7,6 +7,10 @@ O projeto foi preparado para **Vercel + Supabase**.
 - Em um projeto novo, execute `supabase/schema.sql` e depois `supabase/seed.sql`.
 - Em um projeto existente, aplique somente as migrações `supabase/upgrade-*.sql` ainda não
   registradas, sempre na ordem de versão.
+- Para liberar os recursos 3.1, aplique `supabase/upgrade-v3.1-community-identity.sql` antes do
+  deploy do código correspondente.
+- Em seguida, aplique `supabase/upgrade-v3.1.1-local-moderation-public-projects.sql` para liberar
+  projetos públicos. A moderação local não exige chave de IA.
 - Confirme que o bucket privado `publications` existe e que as tabelas não concedem acesso a
   `anon` ou `authenticated`.
 - Copie `Project URL` e `secret key` em Settings/API.

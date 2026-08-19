@@ -26,6 +26,7 @@ async function createProject(req) {
         .slice(0, 160) || 'Projeto sem título',
     template_id: template?.id || null,
     type: template?.doc_type || String(body.type || 'Documento acadêmico').slice(0, 80),
+    visibility: 'private',
     sections: template
       ? (template.sections || []).map((name) => ({ name, content: '' }))
       : [
@@ -69,6 +70,7 @@ async function updateProject(req, projectId) {
       content: String(s.content || '').slice(0, 30000),
     }));
   if (typeof body.notes === 'string') patch.notes = body.notes.slice(0, 10000);
+  if (['private', 'public'].includes(body.visibility)) patch.visibility = body.visibility;
   const { data, error } = await db()
     .from('projects')
     .update(patch)

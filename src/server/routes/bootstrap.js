@@ -14,6 +14,8 @@ async function bootstrap(req) {
     codeQ,
     newsQ,
     customTemplatesQ,
+    booksQ,
+    communityProjectsQ,
     user,
   ] = await Promise.all([
     client
@@ -25,6 +27,8 @@ async function bootstrap(req) {
       .from('publications')
       .select('*')
       .eq('status', 'published')
+      .order('featured', { ascending: false })
+      .order('boosts', { ascending: false })
       .order('created_at', { ascending: false }),
     client
       .from('discussions')
@@ -64,6 +68,18 @@ async function bootstrap(req) {
       .is('deleted_at', null)
       .order('featured', { ascending: false })
       .order('updated_at', { ascending: false }),
+    client
+      .from('books')
+      .select('*')
+      .order('featured', { ascending: false })
+      .order('title', { ascending: true }),
+    client
+      .from('projects')
+      .select('*')
+      .eq('visibility', 'public')
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false })
+      .limit(200),
     currentUser(req),
   ]);
   [
@@ -76,6 +92,8 @@ async function bootstrap(req) {
     codeQ,
     newsQ,
     customTemplatesQ,
+    booksQ,
+    communityProjectsQ,
   ].forEach((query) => fail(query.error));
   const settings = Object.fromEntries(settingsQ.data.map((row) => [row.key, row.value]));
   return {
@@ -84,6 +102,8 @@ async function bootstrap(req) {
     codeProjects: codeQ.data.map(S.codeProject),
     news: newsQ.data.map(S.newsArticle),
     customTemplates: customTemplatesQ.data.map(S.customTemplate),
+    books: booksQ.data.map(S.book),
+    communityProjects: communityProjectsQ.data.map(S.publicProject),
     discussions: discussionsQ.data.map(S.discussion),
     profiles: profilesQ.data.map(S.profile),
     settings,
@@ -103,8 +123,9 @@ async function me(req) {
       codeProjects: [],
       news: [],
       customTemplates: [],
+      bookSaves: [],
     };
-  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ] = await Promise.all([
+  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ] = await Promise.all([
     db()
       .from('projects')
       .select('*')
@@ -135,8 +156,15 @@ async function me(req) {
       .select('*')
       .eq('owner_id', user.id)
       .order('updated_at', { ascending: false }),
+    db()
+      .from('book_saves')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
   ]);
-  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ].forEach((query) => fail(query.error));
+  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ].forEach((query) =>
+    fail(query.error),
+  );
   return {
     user: await publicUser(user),
     projects: projectsQ.data.map(S.project),
@@ -145,6 +173,7 @@ async function me(req) {
     codeProjects: codeQ.data.map(S.codeProject),
     news: newsQ.data.map(S.newsArticle),
     customTemplates: templatesQ.data.map(S.customTemplate),
+    bookSaves: bookSavesQ.data.map(S.bookSave),
   };
 }
 

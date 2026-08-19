@@ -14,6 +14,9 @@ const securityRoutes = require('./routes/security');
 const newsRoutes = require('./routes/news');
 const adminNewsRoutes = require('./routes/admin-news');
 const customTemplateRoutes = require('./routes/custom-templates');
+const notificationRoutes = require('./routes/notifications');
+const bookRoutes = require('./routes/books');
+const verificationRoutes = require('./routes/verification');
 
 const { apiPath } = require('./route-utils');
 
@@ -60,6 +63,26 @@ async function handle(req, res) {
   }
   if (method === 'PATCH' && pathname === '/profile')
     return send(res, 200, await profileRoutes.updateProfile(req));
+  if (method === 'POST' && pathname === '/profile/verification')
+    return send(res, 201, await verificationRoutes.submitVerification(req));
+
+  if (method === 'GET' && pathname === '/notifications')
+    return send(res, 200, await notificationRoutes.listNotifications(req));
+  if (method === 'PATCH' && pathname === '/notifications/read-all')
+    return send(res, 200, await notificationRoutes.markAllRead(req));
+  const notification = pathname.match(/^\/notifications\/([^/]+)\/read$/);
+  if (notification && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await notificationRoutes.markRead(req, decodeURIComponent(notification[1])),
+    );
+
+  const bookSave = pathname.match(/^\/books\/([^/]+)\/save$/);
+  if (bookSave && method === 'POST')
+    return send(res, 200, await bookRoutes.saveBook(req, decodeURIComponent(bookSave[1])));
+  if (bookSave && method === 'DELETE')
+    return send(res, 200, await bookRoutes.removeBook(req, decodeURIComponent(bookSave[1])));
 
   if (method === 'POST' && pathname === '/tech-resources')
     return send(res, 201, await techRoutes.create(req));
@@ -189,6 +212,16 @@ async function handle(req, res) {
   const pubFile = pathname.match(/^\/publications\/([^/]+)\/file$/);
   if (pubFile && method === 'GET')
     return publicationRoutes.downloadPublication(req, res, decodeURIComponent(pubFile[1]));
+  const pubCover = pathname.match(/^\/publications\/([^/]+)\/cover$/);
+  if (pubCover && method === 'GET')
+    return publicationRoutes.serveCover(req, res, decodeURIComponent(pubCover[1]));
+  const pubBoost = pathname.match(/^\/publications\/([^/]+)\/boost$/);
+  if (pubBoost && method === 'POST')
+    return send(
+      res,
+      200,
+      await publicationRoutes.boostPublication(req, decodeURIComponent(pubBoost[1])),
+    );
   const pubView = pathname.match(/^\/publications\/([^/]+)\/view$/);
   if (pubView && method === 'POST')
     return send(res, 200, await publicationRoutes.registerView(decodeURIComponent(pubView[1])));
@@ -264,6 +297,13 @@ async function handle(req, res) {
   const userAdmin = pathname.match(/^\/admin\/users\/([^/]+)$/);
   if (userAdmin && method === 'PATCH')
     return send(res, 200, await adminRoutes.updateUser(req, decodeURIComponent(userAdmin[1])));
+  const verificationAdmin = pathname.match(/^\/admin\/verifications\/([^/]+)$/);
+  if (verificationAdmin && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await verificationRoutes.reviewVerification(req, decodeURIComponent(verificationAdmin[1])),
+    );
   const templateAdmin = pathname.match(/^\/admin\/templates\/([^/]+)$/);
   if (templateAdmin && method === 'PATCH')
     return send(

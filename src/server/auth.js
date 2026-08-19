@@ -43,6 +43,16 @@ async function requireAdmin(req) {
   return user;
 }
 
+async function requireStaff(req, allowedRoles = ['moderator', 'curator', 'editor', 'admin']) {
+  const user = await requireUser(req);
+  if (!allowedRoles.includes(user.role)) {
+    const err = new Error('Acesso restrito à equipe de moderação.');
+    err.statusCode = 403;
+    throw err;
+  }
+  return user;
+}
+
 async function publicUser(user) {
   if (!user) return null;
   const { data: profile } = await db()
@@ -61,8 +71,14 @@ async function publicUser(user) {
     bio: profile?.bio || '',
     profileType: profile?.profile_type || 'estudante',
     isPublic: profile?.is_public !== false,
+    course: profile?.course || '',
+    institution: profile?.institution || '',
+    educationLevel: profile?.education_level || '',
+    verificationStatus: profile?.verification_status || 'unverified',
+    verifiedSpecialty: profile?.verified_specialty || '',
+    contributionStatus: profile?.contribution_status || 'member',
     createdAt: user.created_at,
   };
 }
 
-module.exports = { currentUser, requireUser, requireAdmin, publicUser };
+module.exports = { currentUser, requireUser, requireAdmin, requireStaff, publicUser };

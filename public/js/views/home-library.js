@@ -69,8 +69,8 @@ function home() {
               ><div class="glyph">✦</div>
               <h3>Notícias</h3>
               <p>
-                Matérias de estudantes e novos autores, com fontes declaradas, triagem por IA e
-                certificação editorial humana.
+                Matérias de estudantes e novos autores, com fontes declaradas, triagem automática
+                local e certificação editorial humana.
               </p></a
             ><a href="/coloquio" data-link class="feature featurelink"
               ><div class="glyph">⌂</div>
@@ -173,6 +173,14 @@ function libraryPublicationCard(p) {
     (x) => x.userId === p.ownerId || x.displayName === p.authorName,
   );
   return html`<article class="card library-card">
+    ${p.coverName
+      ? html`<img
+          class="publication-cover"
+          src="/api/publications/${encodeURIComponent(p.id)}/cover"
+          alt="Foto de apresentação de ${E(p.title)}"
+          loading="lazy"
+        />`
+      : ''}
     <div class="eyebrow">${E(p.area || 'Pesquisa')} · ${E(p.level || 'Trabalho acadêmico')}</div>
     <h3>${link('/pesquisas/' + encodeURIComponent(p.slug), E(p.title), 'library-title')}</h3>
     <p>${E((p.abstract || '').slice(0, 220))}${(p.abstract || '').length > 220 ? '…' : ''}</p>
@@ -190,11 +198,14 @@ function libraryPublicationCard(p) {
           ? link('/autores/' + encodeURIComponent(profile.username), E(p.authorName), 'authorlink')
           : E(p.authorName)}</span
       ><span>${num(p.views)} leituras</span><span>${date(p.createdAt)}</span>
+      <span><strong data-boost-count="${E(p.id)}">${num(p.boosts)}</strong> impulsos</span>
     </div>
     <div class="actions" style="margin-top:18px">
       ${link('/pesquisas/' + encodeURIComponent(p.slug), 'Abrir trabalho', 'outline')}${profile
         ? link('/autores/' + encodeURIComponent(profile.username), 'Ver autor', 'soft')
-        : ''}
+        : ''}<button class="soft" type="button" data-publication-boost="${E(p.id)}">
+        Impulsionar
+      </button>
     </div>
   </article>`;
 }
@@ -220,6 +231,23 @@ function libraryTemplateCard(t, i = 0) {
   </article>`;
 }
 
+function bookCard(book) {
+  return html`<article class="book-card">
+    <div class="book-cover theme-${E(book.coverTheme)}" aria-hidden="true">
+      <span>Studiorium</span><strong>${E(book.title)}</strong><small>${E(book.author)}</small>
+    </div>
+    <div class="book-copy">
+      <div class="eyebrow">${E(book.category)}</div>
+      <h3>${E(book.title)}</h3>
+      <p class="book-author">${E(book.author)}</p>
+      <p>${E(book.description)}</p>
+      <button class="outline" type="button" data-book-save="${E(book.id)}:want_to_read">
+        Guardar na minha estante
+      </button>
+    </div>
+  </article>`;
+}
+
 function biblioteca() {
   const boot = state.boot;
   const q = (state.query.get('q') || '').trim();
@@ -232,9 +260,11 @@ function biblioteca() {
   const contains = (obj, term) => !term || norm(JSON.stringify(obj)).includes(norm(term));
   const areas = [
     ...new Set(
-      [...boot.publications.map((p) => p.area), ...boot.templates.map((t) => t.category)].filter(
-        Boolean,
-      ),
+      [
+        ...boot.publications.map((p) => p.area),
+        ...boot.templates.map((t) => t.category),
+        ...(boot.books || []).map((book) => book.category),
+      ].filter(Boolean),
     ),
   ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const niveis = [...new Set(boot.publications.map((p) => p.level).filter(Boolean))].sort((a, b) =>
@@ -244,7 +274,7 @@ function biblioteca() {
     (a, b) => a.localeCompare(b, 'pt-BR'),
   );
   let pubs =
-    tipo === 'modelos'
+    ['modelos', 'livros'].includes(tipo)
       ? []
       : boot.publications.filter(
           (p) =>
@@ -255,15 +285,26 @@ function biblioteca() {
             (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
         );
   let templates =
-    tipo === 'pesquisas'
+    ['pesquisas', 'livros'].includes(tipo)
       ? []
       : boot.templates.filter(
           (t) => contains(t, q) && (!area || t.category === area) && !nivel && !autor && !palavra,
         );
+  let books =
+    ['pesquisas', 'modelos'].includes(tipo)
+      ? []
+      : (boot.books || []).filter(
+          (book) =>
+            contains(book, q) &&
+            (!area || book.category === area) &&
+            !nivel &&
+            !autor &&
+            !palavra,
+        );
   const authorMatches = boot.profiles.filter(
     (p) => (!q || contains(p, q)) && (!autor || p.displayName === autor),
   );
-  const total = pubs.length + templates.length;
+  const total = pubs.length + templates.length + books.length;
   const circulatingTopics = emergentTopics([...boot.publications, ...boot.templates]);
   layout(
     html`<section class="pagehero library-hero">
@@ -280,6 +321,9 @@ function biblioteca() {
             </div>
             <div class="stat">
               <strong>${boot.templates.length}</strong><span>Modelos no acervo</span>
+            </div>
+            <div class="stat">
+              <strong>${(boot.books || []).length}</strong><span>Livros na estante</span>
             </div>
             <div class="stat">
               <strong>${boot.profiles.length}</strong><span>Autores públicos</span>
@@ -304,6 +348,9 @@ function biblioteca() {
                 </option>
                 <option value="modelos" ${tipo === 'modelos' ? 'selected' : ''}>
                   Modelos do acervo
+                </option>
+                <option value="livros" ${tipo === 'livros' ? 'selected' : ''}>
+                  Livros da estante
                 </option></select
               ><select class="select" name="area">
                 <option value="">Todas as áreas</option>
@@ -383,6 +430,15 @@ function biblioteca() {
                   ${link('/pesquisas', 'Ver somente pesquisas →', 'linkbtn')}
                 </div>
                 <div class="grid grid3">${pubs.map(libraryPublicationCard).join('')}</div>`
+            : ''}${books.length
+            ? html`<div class="sectionhead library-section-gap">
+                  <div>
+                    <div class="eyebrow">Armarium librorum</div>
+                    <h2>Estante de livros</h2>
+                    <p>Obras para ampliar repertório em literatura, ciência, filosofia e educação.</p>
+                  </div>
+                </div>
+                <div class="book-shelf">${books.map(bookCard).join('')}</div>`
             : ''}${templates.length
             ? html`<div class="sectionhead library-section-gap">
                   <div>
@@ -555,4 +611,12 @@ function templateDetail(slug) {
   );
 }
 
-export { home, libraryPublicationCard, libraryTemplateCard, biblioteca, acervo, templateDetail };
+export {
+  home,
+  libraryPublicationCard,
+  libraryTemplateCard,
+  bookCard,
+  biblioteca,
+  acervo,
+  templateDetail,
+};

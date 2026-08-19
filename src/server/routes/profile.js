@@ -12,6 +12,11 @@ const TYPES = [
   'criador',
   'jornalista',
   'comunicador',
+  'monitor',
+  'tecnico',
+  'profissional',
+  'autodidata',
+  'internauta',
 ];
 
 async function updateProfile(req) {
@@ -33,6 +38,15 @@ async function updateProfile(req) {
       .trim()
       .slice(0, 500),
     profile_type: TYPES.includes(body.profileType) ? body.profileType : current.profile_type,
+    course: String(body.course ?? current.course ?? '')
+      .trim()
+      .slice(0, 160),
+    institution: String(body.institution ?? current.institution ?? '')
+      .trim()
+      .slice(0, 160),
+    education_level: String(body.educationLevel ?? current.education_level ?? '')
+      .trim()
+      .slice(0, 100),
   };
   if (!user.is_minor && typeof body.isPublic === 'boolean') patch.is_public = body.isPublic;
   const { error: updateError } = await db().from('profiles').update(patch).eq('user_id', user.id);

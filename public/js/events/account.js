@@ -19,16 +19,32 @@ export async function handleAccountSubmit(event) {
 
   if (form.matches('[data-register]')) {
     event.preventDefault();
+    if (form.dataset.submitting === 'true') return true;
+    form.dataset.submitting = 'true';
+    const button = form.querySelector('button[type="submit"], button:not([type])');
+    const originalLabel = button?.textContent;
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Criando conta…';
+    }
     const values = formObj(form);
     values.birthYear = Number(values.birthYear);
-    await api('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(values),
-    });
-    state.boot = null;
-    await bootstrap();
-    toast('Conta criada com sucesso.');
-    goto('/escrivaninha');
+    try {
+      await api('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(values),
+      });
+      state.boot = null;
+      await bootstrap();
+      toast('Conta criada com sucesso.');
+      goto('/escrivaninha');
+    } finally {
+      form.dataset.submitting = 'false';
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
     return true;
   }
 
@@ -80,6 +96,19 @@ export async function handleAccountSubmit(event) {
     state.boot = null;
     await bootstrap();
     toast('Perfil atualizado.');
+    await render();
+    return true;
+  }
+
+  if (form.matches('[data-profile-verification]')) {
+    event.preventDefault();
+    const result = await api('/api/profile/verification', {
+      method: 'POST',
+      body: JSON.stringify(formObj(form)),
+    });
+    state.boot = null;
+    await bootstrap();
+    toast(result.message || 'Solicitação enviada.');
     await render();
     return true;
   }

@@ -10,6 +10,7 @@ function nav() {
   const title = String(settings.site_title || 'Studiorium');
   const items = [
     ['/biblioteca', 'Biblioteca'],
+    ['/projetos', 'Projetos'],
     ['/noticias', 'Notícias'],
     ['/oficina', 'Oficina'],
     ['/acervo', 'Acervo'],
@@ -34,7 +35,18 @@ function nav() {
       </div>
       <div class="nav-actions">
         ${state.me
-          ? html`<a href="/escrivaninha" data-link class="outline"
+          ? html`<button
+                class="notification-trigger"
+                type="button"
+                data-notifications
+                aria-label="Abrir notificações"
+                aria-expanded="false"
+              >
+                <span aria-hidden="true">♢</span>
+                ${state.unreadNotificationCount
+                  ? html`<strong>${Math.min(state.unreadNotificationCount, 99)}</strong>`
+                  : ''}
+              </button><a href="/escrivaninha" data-link class="outline"
                 >${E(state.me.displayName.split(' ')[0])}</a
               ><button class="iconbtn mobile" data-menu aria-label="Abrir menu">☰</button>`
           : html`<a href="/login" data-link class="outline">Entrar</a
@@ -62,7 +74,48 @@ function nav() {
         )
         .join('')}
     </div>
+    ${state.me ? notificationPanel() : ''}
   </nav>`;
+}
+
+function notificationPanel() {
+  return html`<aside class="notification-panel" data-notification-panel aria-label="Notificações">
+    <div class="notification-head">
+      <div>
+        <span class="eyebrow">Nuntii</span>
+        <h2>Notificações</h2>
+      </div>
+      <div class="actions">
+        ${state.unreadNotificationCount
+          ? html`<button class="soft" type="button" data-notifications-read-all>
+              Marcar lidas
+            </button>`
+          : ''}
+        <button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">×</button>
+      </div>
+    </div>
+    <div class="notification-list">
+      ${state.notifications.length
+        ? state.notifications
+            .map(
+              (item) => html`<button
+                type="button"
+                class="notification-item ${item.readAt ? '' : 'unread'}"
+                data-notification-open="${E(item.id)}"
+                data-notification-link="${E(item.link || '')}"
+              >
+                <span class="notification-mark" aria-hidden="true"></span>
+                <span>
+                  <strong>${E(item.title)}</strong>
+                  <small>${E(item.message)}</small>
+                  <time>${date(item.createdAt)}</time>
+                </span>
+              </button>`,
+            )
+            .join('')
+        : html`<div class="empty">Nenhuma notificação por enquanto.</div>`}
+    </div>
+  </aside>`;
 }
 
 function footer() {
@@ -165,9 +218,17 @@ function templateCard(t, i = 0) {
 }
 
 function publicationCard(p) {
-  return html`<a href="/pesquisas/${encodeURIComponent(p.slug)}" data-link class="card hover"
-    ><div class="eyebrow">${E(p.area || 'Pesquisa')}</div>
-    <h3>${E(p.title)}</h3>
+  return html`<article class="card hover publication-card">
+    ${p.coverName
+      ? html`<img
+          class="publication-cover"
+          src="/api/publications/${encodeURIComponent(p.id)}/cover"
+          alt="Foto de apresentação de ${E(p.title)}"
+          loading="lazy"
+        />`
+      : ''}
+    <div class="eyebrow">${E(p.area || 'Pesquisa')}</div>
+    <h3>${link('/pesquisas/' + encodeURIComponent(p.slug), E(p.title), 'library-title')}</h3>
     <p>${E((p.abstract || '').slice(0, 180))}${(p.abstract || '').length > 180 ? '…' : ''}</p>
     <div class="pills">
       ${(p.keywords || [])
@@ -178,9 +239,14 @@ function publicationCard(p) {
     <div class="rule"></div>
     <div class="meta">
       <span>por ${E(p.authorName)}</span><span>${num(p.views)} leituras</span
+      ><span><strong data-boost-count="${E(p.id)}">${num(p.boosts)}</strong> impulsos</span
       ><span>${date(p.createdAt)}</span>
-    </div></a
-  >`;
+    </div>
+    <div class="actions publication-actions">
+      ${link('/pesquisas/' + encodeURIComponent(p.slug), 'Abrir trabalho', 'outline')}
+      <button class="soft" type="button" data-publication-boost="${E(p.id)}">Impulsionar</button>
+    </div>
+  </article>`;
 }
 
 function discussionRow(d, i) {

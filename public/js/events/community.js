@@ -3,6 +3,7 @@ import { goto, render } from '../router.js';
 import { discussionForm, techResourceForm } from './composers.js';
 
 const MAX_PUBLICATION_BYTES = 5 * 1024 * 1024;
+const MAX_COVER_BYTES = 3 * 1024 * 1024;
 
 function normalizedSearch(value) {
   return String(value || '')
@@ -100,17 +101,26 @@ function requestReportDetails() {
 async function publicationPayload(form) {
   const body = formObj(form);
   const file = form.querySelector('[data-publication-file]')?.files?.[0];
+  const cover = form.querySelector('[data-publication-cover]')?.files?.[0];
 
-  if (!file) return body;
-  if (file.size > MAX_PUBLICATION_BYTES) {
+  if (file && file.size > MAX_PUBLICATION_BYTES) {
     throw new Error('O arquivo precisa ter até 5 MB.');
   }
-
-  body.file = {
-    name: file.name,
-    mime: file.type,
-    dataBase64: await fileToBase64(file),
-  };
+  if (cover && cover.size > MAX_COVER_BYTES) {
+    throw new Error('A foto precisa ter até 3 MB.');
+  }
+  if (file)
+    body.file = {
+      name: file.name,
+      mime: file.type,
+      dataBase64: await fileToBase64(file),
+    };
+  if (cover)
+    body.cover = {
+      name: cover.name,
+      mime: cover.type,
+      dataBase64: await fileToBase64(cover),
+    };
   return body;
 }
 
@@ -271,18 +281,27 @@ export async function handleCommunitySubmit(event) {
 
   if (form.matches('[data-publication]')) {
     event.preventDefault();
+    if (form.dataset.submitting === 'true') return true;
+    form.dataset.submitting = 'true';
+    const submitButton = form.querySelector('[type="submit"], button:not([type])');
+    if (submitButton) submitButton.disabled = true;
     const publicationId = form.dataset.publication;
     const endpoint = publicationId
       ? `/api/publications/${encodeURIComponent(publicationId)}`
       : '/api/publications';
-    const data = await api(endpoint, {
-      method: publicationId ? 'PATCH' : 'POST',
-      body: JSON.stringify(await publicationPayload(form)),
-    });
-    toast(data.message || 'Trabalho enviado.');
-    state.boot = null;
-    await bootstrap();
-    goto('/escrivaninha');
+    try {
+      const data = await api(endpoint, {
+        method: publicationId ? 'PATCH' : 'POST',
+        body: JSON.stringify(await publicationPayload(form)),
+      });
+      toast(data.message || 'Trabalho enviado.');
+      state.boot = null;
+      await bootstrap();
+      goto('/escrivaninha');
+    } finally {
+      form.dataset.submitting = 'false';
+      if (submitButton) submitButton.disabled = false;
+    }
     return true;
   }
 
@@ -294,18 +313,18 @@ export async function handleCommunitySubmit(event) {
     });
     state.boot = null;
     await bootstrap();
-    toast('Discussão publicada.');
-    goto(`/coloquio/${data.discussion.id}`);
+    toast(data.message || 'Discussão enviada.');
+    goto(data.discussion.status === 'published' ? `/coloquio/${data.discussion.id}` : '/coloquio');
     return true;
   }
 
   if (form.matches('[data-reply]')) {
     event.preventDefault();
-    await api(`/api/discussions/${encodeURIComponent(form.dataset.reply)}/replies`, {
+    const data = await api(`/api/discussions/${encodeURIComponent(form.dataset.reply)}/replies`, {
       method: 'POST',
       body: JSON.stringify(formObj(form)),
     });
-    toast('Resposta publicada.');
+    toast(data.message || 'Resposta enviada.');
     await render();
     return true;
   }
