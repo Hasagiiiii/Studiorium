@@ -289,9 +289,7 @@ async function ownedPublication(userId, publicationId) {
 }
 
 function ensurePublicationEditable(publication) {
-  if (publication.status === 'published') {
-    throw fileError('Publicação aprovada não pode ser alterada ou apagada por esta ação.', 409);
-  }
+  return publication;
 }
 
 async function getPublication(req, publicationId) {
@@ -342,7 +340,10 @@ async function updatePublication(req, publicationId) {
 
     return {
       publication: S.publication(data),
-      message: 'Trabalho atualizado e reenviado para revisão.',
+      message:
+        current.status === 'published'
+          ? 'Alterações salvas. O trabalho saiu do ar e voltou para revisão.'
+          : 'Trabalho atualizado e reenviado para revisão.',
     };
   } catch (error) {
     if (storedFile?.file_path && storedFile.file_path !== current.file_path) {
