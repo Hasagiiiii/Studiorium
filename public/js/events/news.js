@@ -1,5 +1,6 @@
 import { api, formObj, state, toast, E } from '../runtime.js';
 import { goto, render } from '../router.js';
+import { confirmAction, withBusyControl } from '../ui-feedback.js';
 
 function sourceRow() {
   const index = document.querySelectorAll('[data-news-source]').length + 1;
@@ -23,6 +24,25 @@ function articlePayload(form) {
 }
 
 export async function handleNewsClick(event) {
+  const hypeButton = event.target.closest('[data-hype-news]');
+  if (hypeButton) {
+    if (!state.me) {
+      goto('/login');
+      return true;
+    }
+    await withBusyControl(hypeButton, 'Registrando Hype…', async () => {
+      const result = await api(`/api/news/${encodeURIComponent(hypeButton.dataset.hypeNews)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'hype' }),
+      });
+      hypeButton.textContent = `🔥 Hype registrado · ${Number(result.hypes || 0)}`;
+      hypeButton.disabled = true;
+      state.boot = null;
+      toast(result.message || 'Hype registrado.');
+    });
+    return true;
+  }
+
   if (event.target.closest('[data-add-source]')) {
     document.querySelector('[data-news-sources]')?.insertAdjacentHTML('beforeend', sourceRow());
     return true;
@@ -36,13 +56,14 @@ export async function handleNewsClick(event) {
   }
   const submit = event.target.closest('[data-submit-news]');
   if (submit) {
-    submit.disabled = true;
-    await api(`/api/news/${encodeURIComponent(submit.dataset.submitNews)}/submit`, {
-      method: 'POST',
-      body: '{}',
+    await withBusyControl(submit, 'Enviando…', async () => {
+      await api(`/api/news/${encodeURIComponent(submit.dataset.submitNews)}/submit`, {
+        method: 'POST',
+        body: '{}',
+      });
+      toast('Notícia enviada para certificação editorial.');
+      goto('/redacao');
     });
-    toast('Notícia enviada para certificação editorial.');
-    goto('/redacao');
     return true;
   }
 
@@ -67,13 +88,26 @@ export async function handleNewsClick(event) {
       `[data-${attribute.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}]`,
     );
     if (!button) continue;
-    if (question && !confirm(question)) return true;
-    await api(`/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`, {
-      method,
-      body: method === 'POST' ? '{}' : undefined,
+    if (question) {
+      const confirmed = await confirmAction(question, {
+        title:
+          method === 'DELETE' && endpoint === '/purge' ? 'Exclusão definitiva' : 'Confirmar ação',
+        confirmLabel: endpoint === '/purge' ? 'Excluir definitivamente' : 'Confirmar',
+        danger: method === 'DELETE',
+      });
+      if (!confirmed) return true;
+    }
+    await withBusyControl(button, method === 'DELETE' ? 'Excluindo…' : 'Restaurando…', async () => {
+      const result = await api(
+        `/api/news/${encodeURIComponent(button.dataset[attribute])}${endpoint}`,
+        {
+          method,
+          body: method === 'POST' ? '{}' : undefined,
+        },
+      );
+      toast(result.message || message);
+      await render();
     });
-    toast(message);
-    await render();
     return true;
   }
   return false;
@@ -98,7 +132,7 @@ export async function handleNewsSubmit(event) {
       method: id ? 'PATCH' : 'POST',
       body: JSON.stringify(articlePayload(form)),
     });
-    toast('Rascunho salvo.');
+    toast(result.message || 'Rascunho salvo.');
     state.boot = null;
     goto(`/redacao/${encodeURIComponent(result.article.id)}`);
     return true;

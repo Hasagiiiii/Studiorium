@@ -1,5 +1,6 @@
 import { api, state, toast } from '../runtime.js';
 import { goto } from '../router.js';
+import { withBusyControl } from '../ui-feedback.js';
 
 export async function handlePublicationClick(event) {
   const button = event.target.closest('[data-publication-boost]');
@@ -8,8 +9,7 @@ export async function handlePublicationClick(event) {
     goto('/login');
     return true;
   }
-  button.disabled = true;
-  try {
+  await withBusyControl(button, 'Impulsionando…', async () => {
     const id = button.dataset.publicationBoost;
     const result = await api(`/api/publications/${encodeURIComponent(id)}/boost`, {
       method: 'POST',
@@ -22,8 +22,6 @@ export async function handlePublicationClick(event) {
       element.textContent = String(result.boosts);
     });
     toast(result.message || 'Publicação impulsionada.');
-  } finally {
-    button.disabled = false;
-  }
+  });
   return true;
 }

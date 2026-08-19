@@ -93,14 +93,15 @@ test('envios não aprovados podem ser editados, reenviados ou apagados pelo prop
   assert.ok(events.includes("method: publicationId ? 'PATCH' : 'POST'"));
 });
 
-test('ADM pode corrigir ou apagar definitivamente conteúdo ainda não publicado', () => {
+test('ADM pode corrigir ou apagar definitivamente conteúdo em qualquer estado', () => {
   const routes = read('src/server/routes/admin.js');
   const view = read('public/js/views/admin.js');
   const events = read('public/js/events/admin.js');
 
+  assert.ok(routes.includes('function editableContentConfig'));
   assert.ok(routes.includes('function updateContentDetails'));
   assert.ok(routes.includes('function deleteContent'));
-  assert.ok(routes.includes("current.status === 'published'"));
+  assert.ok(routes.includes('const contentConfig = editableContentConfig(type);'));
   assert.ok(view.includes('data-admin-edit-content'));
   assert.ok(view.includes('data-admin-delete-content'));
   assert.ok(events.includes('/details'));

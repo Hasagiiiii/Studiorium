@@ -2,6 +2,11 @@ import { state, api, E, date, html } from '../runtime.js';
 import { layout, link, empty } from './core.js';
 import { rankRelated } from '../content-intelligence.js';
 
+function hypeLabel(article) {
+  const amount = Number(article.hypes || 0);
+  return `${amount} Hype${amount === 1 ? '' : 's'}`;
+}
+
 function newsCard(article) {
   return html`<article class="card news-card">
     <div class="news-card-top">
@@ -17,6 +22,7 @@ function newsCard(article) {
       <span>por ${E(article.authorName)}</span>
       <span>${date(article.publishedAt)}</span>
       <span>${article.sources.length} fonte${article.sources.length === 1 ? '' : 's'}</span>
+      <span>🔥 ${E(hypeLabel(article))}</span>
     </div>
   </article>`;
 }
@@ -25,6 +31,11 @@ function noticias() {
   const articles = state.boot.news || [];
   const featured = articles.find((article) => article.featured) || articles[0];
   const rest = articles.filter((article) => article.id !== featured?.id);
+  const featuredLabel = featured?.featured
+    ? 'Destaque editorial'
+    : Number(featured?.hypes || 0) > 0
+      ? 'Em alta na comunidade'
+      : 'Em destaque';
   layout(
     html`<section class="pagehero editorial-hero">
         <div class="shell editorial-hero-grid">
@@ -55,12 +66,13 @@ function noticias() {
           ${featured
             ? html`<article class="featured-news">
                 <div>
-                  <div class="eyebrow">Em destaque · ${E(featured.category)}</div>
+                  <div class="eyebrow">${E(featuredLabel)} · ${E(featured.category)}</div>
                   <h2>${E(featured.title)}</h2>
                   <p>${E(featured.summary)}</p>
                   <div class="meta">
                     <span>${E(featured.authorName)}</span>
                     <span>${date(featured.publishedAt)}</span>
+                    <span>🔥 ${E(hypeLabel(featured))}</span>
                   </div>
                 </div>
                 <div class="featured-news-action">
@@ -100,6 +112,17 @@ async function newsDetail(slug) {
               ${article.sources.length} fonte${article.sources.length === 1 ? '' : 's'}
               declarada${article.sources.length === 1 ? '' : 's'}
             </span>
+            <span>🔥 ${E(hypeLabel(article))}</span>
+          </div>
+          <div class="actions space-top">
+            <button
+              class="soft"
+              type="button"
+              data-hype-news="${E(article.id)}"
+              data-hype-count="${Number(article.hypes || 0)}"
+            >
+              🔥 Dar Hype · ${Number(article.hypes || 0)}
+            </button>
           </div>
         </div>
       </section>
@@ -215,6 +238,7 @@ function sourcesFields(sources = []) {
 }
 
 function articleForm(article = {}) {
+  const editingPublished = article.status === 'published';
   return html`<form class="card newsroom-editor" data-news-article="${E(article.id || '')}">
     <div class="sectionhead">
       <div>
@@ -223,6 +247,12 @@ function articleForm(article = {}) {
       </div>
       ${article.id ? link('/redacao', 'Fechar edição', 'soft') : ''}
     </div>
+    ${editingPublished
+      ? html`<div class="notice">
+          Ao salvar uma notícia já publicada, ela sai do ar e volta para certificação editorial
+          antes de ser publicada novamente.
+        </div>`
+      : ''}
     <div class="formgrid">
       <div class="form-span-2">
         <label class="label">Título</label>
@@ -268,7 +298,7 @@ ${E(article.body || '')}</textarea
     </div>
     <div class="actions">
       <button class="solid">Salvar rascunho</button>
-      ${article.id
+      ${article.id && ['draft', 'changes_requested'].includes(article.status)
         ? html`<button class="outline" type="button" data-submit-news="${E(article.id)}">
             Enviar para certificação
           </button>`
@@ -277,34 +307,58 @@ ${E(article.body || '')}</textarea
   </form>`;
 }
 
+function newsroomRow(article, options = {}) {
+  return html`<div class="project">
+    <div class="min-width-zero">
+      <h3>${E(article.title)}</h3>
+      <p>${E(article.status)} · atualizado ${date(article.updatedAt)}</p>
+    </div>
+    <div class="actions">
+      ${options.open
+        ? link(`/noticias/${encodeURIComponent(article.slug)}`, 'Abrir', 'outline')
+        : ''}
+      ${options.edit ? link(`/redacao/${encodeURIComponent(article.id)}`, 'Editar', 'outline') : ''}
+      ${options.trash
+        ? html`<button class="dangerbtn" data-trash-news="${E(article.id)}">Excluir</button>`
+        : ''}
+    </div>
+  </div>`;
+}
+
 function newsroomList(articles) {
-  const active = articles.filter((article) => !article.deletedAt);
+  const visible = articles.filter((article) => !article.deletedAt);
+  const working = visible.filter((article) => !['published', 'archived'].includes(article.status));
+  const published = visible.filter((article) => article.status === 'published');
+  const archived = visible.filter((article) => article.status === 'archived');
   const trashed = articles.filter((article) => article.deletedAt);
+
   return html`<div class="card newsroom-list">
       <div class="eyebrow">Seus textos</div>
       <h2>Rascunhos e revisões</h2>
-      ${active
-        .map(
-          (article) =>
-            html`<div class="project">
-              <div class="min-width-zero">
-                <h3>${E(article.title)}</h3>
-                <p>${E(article.status)} · atualizado ${date(article.updatedAt)}</p>
-              </div>
-              <div class="actions">
-                ${['draft', 'changes_requested'].includes(article.status)
-                  ? link(`/redacao/${encodeURIComponent(article.id)}`, 'Editar', 'outline')
-                  : ''}
-                ${article.status !== 'published'
-                  ? html`<button class="dangerbtn" data-trash-news="${E(article.id)}">
-                      Excluir
-                    </button>`
-                  : link(`/noticias/${encodeURIComponent(article.slug)}`, 'Abrir', 'outline')}
-              </div>
-            </div>`,
+      ${working
+        .map((article) =>
+          newsroomRow(article, {
+            edit: ['draft', 'changes_requested', 'rejected'].includes(article.status),
+            trash: !['ai_review', 'editorial_review'].includes(article.status),
+          }),
         )
-        .join('') || empty('Você ainda não escreveu uma notícia.')}
+        .join('') || empty('Nenhum rascunho ou revisão pendente.')}
     </div>
+    <details class="card trash-panel newsroom-published-vault">
+      <summary>Publicadas (${published.length})</summary>
+      <p class="muted small">
+        Notícias já públicas ficam guardadas aqui para não ocupar sua mesa de edição.
+      </p>
+      ${published
+        .map((article) => newsroomRow(article, { open: true, edit: true, trash: true }))
+        .join('') || empty('Você ainda não tem notícias publicadas.')}
+    </details>
+    ${archived.length
+      ? html`<details class="card trash-panel newsroom-published-vault">
+          <summary>Arquivadas (${archived.length})</summary>
+          ${archived.map((article) => newsroomRow(article, { edit: true, trash: true })).join('')}
+        </details>`
+      : ''}
     ${trashed.length
       ? html`<details class="card trash-panel">
           <summary>Lixeira da redação (${trashed.length})</summary>

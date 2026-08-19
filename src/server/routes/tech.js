@@ -6,7 +6,7 @@ const { safePublicName } = require('../public-identity');
 const S = require('../serializers');
 
 const hubs = new Set(['Tecnologia', 'Jogos', 'PC & Hardware', 'Carros', 'Motos']);
-const editableStatuses = new Set(['pending_review', 'rejected', 'hidden']);
+const editableStatuses = new Set(['pending_review', 'rejected', 'hidden', 'published']);
 
 function inputError(message, statusCode = 400) {
   return Object.assign(new Error(message), { statusCode });
@@ -71,7 +71,7 @@ async function ownedResource(userId, resourceId) {
 
 function ensureEditable(resource) {
   if (!editableStatuses.has(resource.status)) {
-    throw inputError('Conteúdo publicado não pode ser alterado ou apagado por esta ação.', 409);
+    throw inputError('Este conteúdo não pode ser alterado enquanto está neste estado.', 409);
   }
 }
 
@@ -130,7 +130,10 @@ async function update(req, resourceId) {
   if (!data) throw inputError('Conteúdo da Oficina não encontrado.', 404);
   return {
     resource: S.techResource(data),
-    message: 'Conteúdo atualizado e reenviado para revisão.',
+    message:
+      current.status === 'published'
+        ? 'Alterações salvas. O conteúdo saiu do ar e voltou para revisão.'
+        : 'Conteúdo atualizado e reenviado para revisão.',
   };
 }
 

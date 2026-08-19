@@ -17,8 +17,14 @@ test('métricas da biblioteca usam fluxo flexível sem células implícitas', ()
 
 test('busca da biblioteca preserva input e leva botão para linha própria no celular', () => {
   const css = read('public/css/library-polish.css');
-  assert.match(css, /\.library-search\s*\{[\s\S]*grid-template-columns:\s*auto minmax\(0, 1fr\) auto;/);
-  assert.match(css, /@media \(max-width: 699px\)[\s\S]*\.library-search \.solid\s*\{[\s\S]*grid-column:\s*1 \/ -1;/);
+  assert.match(
+    css,
+    /\.library-search\s*\{[\s\S]*grid-template-columns:\s*auto minmax\(0, 1fr\) auto;/,
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 699px\)[\s\S]*\.library-search \.solid\s*\{[\s\S]*grid-column:\s*1 \/ -1;/,
+  );
 });
 
 test('acabamento não usa zoom ou escala artificial para corrigir viewport', () => {

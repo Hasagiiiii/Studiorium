@@ -177,21 +177,61 @@ async function ownedArticle(user, articleId, includeDeleted = false) {
   return data;
 }
 
+async function hype(req, articleId) {
+  const user = await requireUser(req);
+  const { data: article, error: articleError } = await db()
+    .from('news_articles')
+    .select('id,contributor_id,status,certified_at,deleted_at,hypes')
+    .eq('id', articleId)
+    .maybeSingle();
+  fail(articleError);
+  if (!article || article.status !== 'published' || !article.certified_at || article.deleted_at) {
+    throw inputError('Notícia não encontrada.', 404);
+  }
+  if (article.contributor_id === user.id) {
+    throw inputError('Você não pode dar hype na própria notícia.', 409);
+  }
+  const { data: existing, error: existingError } = await db()
+    .from('news_hypes')
+    .select('article_id')
+    .eq('article_id', articleId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  fail(existingError);
+  if (existing) throw inputError('Você já deu hype nesta notícia.', 409);
+
+  const { data: hypes, error } = await db().rpc('hype_news_article', {
+    p_article_id: articleId,
+    p_user_id: user.id,
+  });
+  fail(error);
+  return { hypes: Number(hypes || article.hypes || 0), message: 'Hype registrado.' };
+}
+
 async function update(req, articleId) {
+  const body = await readJson(req);
+  if (body.action === 'hype') return hype(req, articleId);
+
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId);
-  if (!['draft', 'changes_requested'].includes(current.status)) {
-    throw inputError('A notícia não pode ser editada durante a revisão.', 409);
+  if (['ai_review', 'editorial_review'].includes(current.status)) {
+    throw inputError(
+      'A notícia está em revisão. Aguarde a decisão editorial antes de editar.',
+      409,
+    );
   }
-  const body = await readJson(req);
   const article = cleanArticle(body, current);
+  const wasPublic = current.status === 'published';
   const patch = {
     ...article,
     slug:
       article.title === current.title ? current.slug : await uniqueSlug(article.title, articleId),
     status: 'draft',
+    featured: false,
     ai_review_status: 'pending',
     ai_review: {},
+    certified_by: wasPublic ? null : current.certified_by,
+    certified_at: wasPublic ? null : current.certified_at,
     updated_at: now(),
   };
   const { data, error } = await db()
@@ -202,7 +242,12 @@ async function update(req, articleId) {
     .select('*')
     .single();
   fail(error);
-  return { article: S.newsArticle(data) };
+  return {
+    article: S.newsArticle(data),
+    message: wasPublic
+      ? 'Alterações salvas. A notícia saiu do ar e precisa ser certificada novamente.'
+      : 'Rascunho salvo.',
+  };
 }
 
 async function submit(req, articleId) {
@@ -249,35 +294,51 @@ async function submit(req, articleId) {
 async function trash(req, articleId) {
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId);
-  if (current.status === 'published') {
-    throw inputError('Peça o arquivamento de uma notícia publicada à equipe editorial.', 409);
+  if (['ai_review', 'editorial_review'].includes(current.status)) {
+    throw inputError(
+      'A notícia está em revisão. Aguarde a decisão editorial antes de excluir.',
+      409,
+    );
   }
+  const patch = {
+    deleted_at: now(),
+    featured: false,
+    status: current.status === 'published' ? 'archived' : current.status,
+    updated_at: now(),
+  };
   const { error } = await db()
     .from('news_articles')
-    .update({ deleted_at: now(), updated_at: now() })
+    .update(patch)
     .eq('id', articleId)
     .eq('contributor_id', user.id);
   fail(error);
-  return { ok: true };
+  return { ok: true, message: 'Notícia movida para a sua lixeira privada.' };
 }
 
 async function restore(req, articleId) {
   const user = await requireUser(req);
-  await ownedArticle(user, articleId, true);
+  const current = await ownedArticle(user, articleId, true);
+  if (!current.deleted_at) throw inputError('A notícia não está na lixeira.', 409);
+  const patch = {
+    deleted_at: null,
+    status: current.status === 'archived' ? 'archived' : current.status,
+    featured: false,
+    updated_at: now(),
+  };
   const { error } = await db()
     .from('news_articles')
-    .update({ deleted_at: null, updated_at: now() })
+    .update(patch)
     .eq('id', articleId)
     .eq('contributor_id', user.id);
   fail(error);
-  return { ok: true };
+  return { ok: true, message: 'Notícia restaurada para o seu arquivo privado.' };
 }
 
 async function purge(req, articleId) {
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId, true);
-  if (!current.deleted_at || current.status === 'published') {
-    throw inputError('Mova o rascunho para a lixeira antes da exclusão definitiva.', 409);
+  if (!current.deleted_at) {
+    throw inputError('Mova a notícia para a lixeira antes da exclusão definitiva.', 409);
   }
   const { error } = await db()
     .from('news_articles')
@@ -285,7 +346,7 @@ async function purge(req, articleId) {
     .eq('id', articleId)
     .eq('contributor_id', user.id);
   fail(error);
-  return { ok: true };
+  return { ok: true, message: 'Notícia excluída definitivamente.' };
 }
 
 async function detail(slug) {
@@ -312,5 +373,6 @@ module.exports = {
   trash,
   restore,
   purge,
+  hype,
   detail,
 };

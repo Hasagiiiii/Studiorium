@@ -46,7 +46,7 @@ async function handle(req, res) {
     return send(res, r.status, r.body);
   }
   if (method === 'POST' && pathname === '/auth/change-password') {
-    const r = await authRoutes.changePassword(req, res);
+    const r = await authRoutes.changePassword(req);
     return send(res, r.status, r.body);
   }
   if (method === 'POST' && pathname === '/auth/password-reset/request') {
@@ -252,6 +252,24 @@ async function handle(req, res) {
     return send(res, 200, await discussionRoutes.getThread(decodeURIComponent(replies[1])));
   if (replies && method === 'POST')
     return send(res, 201, await discussionRoutes.createReply(req, decodeURIComponent(replies[1])));
+  const discussion = pathname.match(/^\/discussions\/([^/]+)$/);
+  if (discussion && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await discussionRoutes.updateDiscussion(req, decodeURIComponent(discussion[1])),
+    );
+  if (discussion && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await discussionRoutes.deleteDiscussion(req, decodeURIComponent(discussion[1])),
+    );
+  const reply = pathname.match(/^\/replies\/([^/]+)$/);
+  if (reply && method === 'PATCH')
+    return send(res, 200, await discussionRoutes.updateReply(req, decodeURIComponent(reply[1])));
+  if (reply && method === 'DELETE')
+    return send(res, 200, await discussionRoutes.deleteReply(req, decodeURIComponent(reply[1])));
 
   if (method === 'POST' && pathname === '/reports')
     return send(res, 201, await reportRoutes.createReport(req));
@@ -321,7 +339,7 @@ async function handle(req, res) {
       await adminRoutes.updateContent(req, contentAdmin[1], decodeURIComponent(contentAdmin[2])),
     );
   const contentDetailsAdmin = pathname.match(
-    /^\/admin\/content\/(publication|tech_resource)\/([^/]+)\/details$/,
+    /^\/admin\/content\/(publication|tech_resource|discussion|reply)\/([^/]+)\/details$/,
   );
   if (contentDetailsAdmin && method === 'PATCH')
     return send(

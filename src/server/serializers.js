@@ -264,6 +264,7 @@ function newsArticle(row) {
     aiReview: row.ai_review || {},
     editorialNote: row.editorial_note || '',
     featured: row.featured === true,
+    hypes: Number(row.hypes || 0),
     certifiedBy: row.certified_by || null,
     certifiedAt: row.certified_at || null,
     publishedAt: row.published_at || null,
