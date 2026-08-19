@@ -1,5 +1,5 @@
 const { db, fail } = require('../db');
-const { requireUser, currentUser } = require('../auth');
+const { requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now, slugify } = require('../security');
 const { moderate } = require('../moderation');
@@ -177,13 +177,46 @@ async function ownedArticle(user, articleId, includeDeleted = false) {
   return data;
 }
 
+async function hype(req, articleId) {
+  const user = await requireUser(req);
+  const { data: article, error: articleError } = await db()
+    .from('news_articles')
+    .select('id,contributor_id,status,certified_at,deleted_at,hypes')
+    .eq('id', articleId)
+    .maybeSingle();
+  fail(articleError);
+  if (!article || article.status !== 'published' || !article.certified_at || article.deleted_at) {
+    throw inputError('Notícia não encontrada.', 404);
+  }
+  if (article.contributor_id === user.id) {
+    throw inputError('Você não pode dar hype na própria notícia.', 409);
+  }
+  const { data: existing, error: existingError } = await db()
+    .from('news_hypes')
+    .select('article_id')
+    .eq('article_id', articleId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  fail(existingError);
+  if (existing) throw inputError('Você já deu hype nesta notícia.', 409);
+
+  const { data: hypes, error } = await db().rpc('hype_news_article', {
+    p_article_id: articleId,
+    p_user_id: user.id,
+  });
+  fail(error);
+  return { hypes: Number(hypes || article.hypes || 0), message: 'Hype registrado.' };
+}
+
 async function update(req, articleId) {
+  const body = await readJson(req);
+  if (body.action === 'hype') return hype(req, articleId);
+
   const user = await requireUser(req);
   const current = await ownedArticle(user, articleId);
   if (['ai_review', 'editorial_review'].includes(current.status)) {
     throw inputError('A notícia está em revisão. Aguarde a decisão editorial antes de editar.', 409);
   }
-  const body = await readJson(req);
   const article = cleanArticle(body, current);
   const wasPublic = current.status === 'published';
   const patch = {
@@ -310,38 +343,7 @@ async function purge(req, articleId) {
   return { ok: true, message: 'Notícia excluída definitivamente.' };
 }
 
-async function hype(req, articleId) {
-  const user = await requireUser(req);
-  const { data: article, error: articleError } = await db()
-    .from('news_articles')
-    .select('id,contributor_id,status,certified_at,deleted_at,hypes')
-    .eq('id', articleId)
-    .maybeSingle();
-  fail(articleError);
-  if (!article || article.status !== 'published' || !article.certified_at || article.deleted_at) {
-    throw inputError('Notícia não encontrada.', 404);
-  }
-  if (article.contributor_id === user.id) {
-    throw inputError('Você não pode dar hype na própria notícia.', 409);
-  }
-  const { data: existing, error: existingError } = await db()
-    .from('news_hypes')
-    .select('article_id')
-    .eq('article_id', articleId)
-    .eq('user_id', user.id)
-    .maybeSingle();
-  fail(existingError);
-  if (existing) throw inputError('Você já deu hype nesta notícia.', 409);
-
-  const { data: hypes, error } = await db().rpc('hype_news_article', {
-    p_article_id: articleId,
-    p_user_id: user.id,
-  });
-  fail(error);
-  return { hypes: Number(hypes || article.hypes || 0), message: 'Hype registrado.' };
-}
-
-async function detail(req, slug) {
+async function detail(slug) {
   const { data, error } = await db()
     .from('news_articles')
     .select('*')
@@ -352,20 +354,7 @@ async function detail(req, slug) {
     .maybeSingle();
   fail(error);
   if (!data) throw inputError('Notícia não encontrada.', 404);
-
-  const user = await currentUser(req);
-  let hypedByMe = false;
-  if (user) {
-    const { data: hypeRow, error: hypeError } = await db()
-      .from('news_hypes')
-      .select('article_id')
-      .eq('article_id', data.id)
-      .eq('user_id', user.id)
-      .maybeSingle();
-    fail(hypeError);
-    hypedByMe = Boolean(hypeRow);
-  }
-  return { article: { ...S.newsArticle(data), hypedByMe } };
+  return { article: S.newsArticle(data) };
 }
 
 module.exports = {
