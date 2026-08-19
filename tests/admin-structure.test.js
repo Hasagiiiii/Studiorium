@@ -57,3 +57,16 @@ test('conteúdo da Oficina aparece para o autor e na revisão administrativa', (
   assert.ok(dashboard.includes('techResources: techQ.data.map(S.techResource)'));
   assert.ok(workspace.includes('Seus tutoriais e projetos enviados'));
 });
+
+test('atalho da Escrivaninha abre o formulário da Oficina com opção de cancelar', () => {
+  const workspace = read('public/js/views/workspace.js');
+  const techView = read('public/js/views/tech.js');
+  const composer = read('public/js/events/composers.js');
+  const events = read('public/js/events/community.js');
+
+  assert.ok(workspace.includes('/oficina?novo=1'));
+  assert.ok(techView.includes("state.query.get('novo') === '1'"));
+  assert.ok(composer.includes('Limpar formulário'));
+  assert.ok(composer.includes('data-cancel-tech'));
+  assert.ok(events.includes('composer.replaceChildren()'));
+});
