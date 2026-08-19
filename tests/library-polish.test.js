@@ -50,6 +50,21 @@ test('contadores possuem fluxo flexível para desktop, tablet e celular', () => 
   }
 });
 
+test('estante de livros não cria colunas vazias nem estica a capa pela review', () => {
+  const css = read('public/css/library-polish.css');
+  for (const marker of [
+    'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+    '.book-shelf:has(> .book-card:only-child) > .book-card',
+    'grid-template-columns: clamp(160px, 22vw, 230px) minmax(0, 1fr);',
+    'aspect-ratio: 2 / 3;',
+    'align-self: start;',
+    '@media (max-width: 520px)',
+    'width: min(170px, 56vw);',
+  ]) {
+    assert.ok(css.includes(marker), `proteção da estante ausente: ${marker}`);
+  }
+});
+
 test('main instala o acabamento da biblioteca junto das melhorias existentes', () => {
   const main = read('public/js/main.js');
   assert.ok(main.includes("import { installLibraryPolish } from './library-polish.js';"));
