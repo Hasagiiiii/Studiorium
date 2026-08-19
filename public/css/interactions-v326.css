@@ -1,4 +1,6 @@
-/* Studiorium v3.2.6 — ações, diálogos e controles */
+/* Studiorium — feedback interno e acabamento dos controles.
+ * Este módulo não define grids, shell, cards ou estrutura das páginas.
+ */
 
 .ui-dialog-open {
   overflow: hidden;
@@ -84,6 +86,12 @@
   letter-spacing: 0.11em;
 }
 
+.ui-dialog-field .field,
+.ui-dialog-field .select,
+.ui-dialog-field .textarea {
+  width: 100%;
+}
+
 .ui-dialog-field .textarea {
   min-height: 112px;
   resize: vertical;
@@ -97,6 +105,7 @@
   border-top: 1px solid var(--line);
 }
 
+/* O texto pode ir para outra linha, mas nunca quebra uma palavra no meio. */
 button.outline,
 a.outline,
 button.solid,
@@ -110,25 +119,14 @@ a.tab,
 button.admin-tab,
 a.admin-tab {
   word-break: normal;
-  overflow-wrap: normal;
+  overflow-wrap: break-word;
   hyphens: none;
   line-height: 1.25;
 }
 
 button[data-event-busy='true'] {
-  position: relative;
   cursor: progress;
   opacity: 0.72;
-}
-
-button[data-event-busy='true']::after {
-  content: ' ···';
-  letter-spacing: 0.08em;
-}
-
-.actions > a,
-.actions > button {
-  max-width: 100%;
 }
 
 @media (max-width: 520px) {
@@ -159,14 +157,11 @@ button[data-event-busy='true']::after {
     width: 100%;
     min-height: 46px;
   }
+}
 
-  .project .actions > a,
-  .project .actions > button,
-  .studio-start .actions > a,
-  .studio-start .actions > button,
-  .admin-row .actions > a,
-  .admin-row .actions > button {
-    overflow-wrap: normal;
-    word-break: normal;
+@media (prefers-reduced-motion: reduce) {
+  .ui-dialog-backdrop,
+  .ui-dialog {
+    transition: none;
   }
 }
