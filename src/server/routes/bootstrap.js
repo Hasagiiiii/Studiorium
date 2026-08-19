@@ -2,6 +2,34 @@ const { db, fail } = require('../db');
 const { currentUser, publicUser } = require('../auth');
 const S = require('../serializers');
 
+function communityBook(row) {
+  return {
+    ...S.book(row),
+    submittedBy: row.submitted_by || null,
+    isbn: row.isbn || '',
+    coverUrl: row.cover_url || '',
+    purchaseUrl: row.purchase_url || '',
+    purchaseLabel: row.purchase_label || '',
+    ratingAverage: Number(row.rating_average || 0),
+    reviewCount: Number(row.review_count || 0),
+    recommendationCount: Number(row.recommendation_count || 0),
+    createdAt: row.created_at || null,
+  };
+}
+
+function communityBookReview(row) {
+  return {
+    bookId: row.book_id,
+    userId: row.user_id,
+    reviewerName: row.reviewer_name || 'Membro da comunidade',
+    rating: Number(row.rating || 0),
+    review: row.review || '',
+    recommend: row.recommend === true,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 async function bootstrap(req) {
   const client = db();
   const [
@@ -15,6 +43,7 @@ async function bootstrap(req) {
     newsQ,
     customTemplatesQ,
     booksQ,
+    bookReviewsQ,
     communityProjectsQ,
     user,
   ] = await Promise.all([
@@ -71,8 +100,10 @@ async function bootstrap(req) {
     client
       .from('books')
       .select('*')
-      .order('featured', { ascending: false })
-      .order('title', { ascending: true }),
+      .order('recommendation_count', { ascending: false })
+      .order('rating_average', { ascending: false })
+      .order('created_at', { ascending: false }),
+    client.from('book_reviews').select('*').order('updated_at', { ascending: false }).limit(400),
     client
       .from('projects')
       .select('*')
@@ -93,6 +124,7 @@ async function bootstrap(req) {
     newsQ,
     customTemplatesQ,
     booksQ,
+    bookReviewsQ,
     communityProjectsQ,
   ].forEach((query) => fail(query.error));
   const settings = Object.fromEntries(settingsQ.data.map((row) => [row.key, row.value]));
@@ -102,7 +134,8 @@ async function bootstrap(req) {
     codeProjects: codeQ.data.map(S.codeProject),
     news: newsQ.data.map(S.newsArticle),
     customTemplates: customTemplatesQ.data.map(S.customTemplate),
-    books: booksQ.data.map(S.book),
+    books: booksQ.data.map(communityBook),
+    bookReviews: bookReviewsQ.data.map(communityBookReview),
     communityProjects: communityProjectsQ.data.map(S.publicProject),
     discussions: discussionsQ.data.map(S.discussion),
     profiles: profilesQ.data.map(S.profile),
@@ -124,9 +157,10 @@ async function me(req) {
       news: [],
       customTemplates: [],
       bookSaves: [],
+      bookReviews: [],
     };
-  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ] = await Promise.all(
-    [
+  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ, bookReviewsQ] =
+    await Promise.all([
       db()
         .from('projects')
         .select('*')
@@ -162,10 +196,14 @@ async function me(req) {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false }),
-    ],
-  );
-  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ].forEach((query) =>
-    fail(query.error),
+      db()
+        .from('book_reviews')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false }),
+    ]);
+  [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ, bookReviewsQ].forEach(
+    (query) => fail(query.error),
   );
   return {
     user: await publicUser(user),
@@ -176,6 +214,7 @@ async function me(req) {
     news: newsQ.data.map(S.newsArticle),
     customTemplates: templatesQ.data.map(S.customTemplate),
     bookSaves: bookSavesQ.data.map(S.bookSave),
+    bookReviews: bookReviewsQ.data.map(communityBookReview),
   };
 }
 
