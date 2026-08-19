@@ -80,7 +80,7 @@ test('home não deixa um vazio de viewport entre hero e acessos principais', () 
   assert.ok(css.includes('grid-template-columns: repeat(4, minmax(0, 1fr));'));
 });
 
-test('identidade visual recupera a nomenclatura acadêmica', () => {
+test('identidade visual recupera a nomenclatura acadêmica sem loop de mutação', () => {
   const enhancements = read('public/js/enhancements.js');
   for (const name of [
     'Bibliotheca',
@@ -95,4 +95,5 @@ test('identidade visual recupera a nomenclatura acadêmica', () => {
   ]) {
     assert.ok(enhancements.includes(name), `nome acadêmico ausente: ${name}`);
   }
+  assert.ok(enhancements.includes('if (subtitle.textContent !== translation)'));
 });
