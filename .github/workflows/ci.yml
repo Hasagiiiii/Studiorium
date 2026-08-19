@@ -7,14 +7,16 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -26,27 +28,22 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Validate project structure and syntax
-        run: npm run check
+        run: node scripts/check-project.js
 
-      - name: Export Prettier output
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: prettier-output
-          path: |
-            public/css/interactions-v326.css
-            public/js/admin-news-feature.js
-            public/js/admin-published-actions-v329.js
-            public/js/events/admin.js
-            public/js/events/news.js
-            public/js/events/projects.js
-            public/js/events/template-studio.js
-            public/js/views/news.js
-            public/js/views/template-studio-private-v329.js
-            public/js/views/workspace-personal-v329.js
-            src/server/routes/discussions.js
-            src/server/routes/news.js
-            tests/library-mobile-layout.test.js
+      - name: Apply Prettier
+        run: npx prettier --write .
+
+      - name: Commit formatted files
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: aplica formatação Prettier"
+          git push origin HEAD:${{ github.head_ref }}
 
       - name: Run tests
         run: npm test
