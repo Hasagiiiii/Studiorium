@@ -32,9 +32,9 @@ function noticias() {
             <div class="eyebrow">Nuntii · Redação colaborativa</div>
             <h1 class="pagetitle">Notícias com fontes, contexto e responsabilidade.</h1>
             <p>
-              Estudantes de Jornalismo, Comunicação e áreas relacionadas podem propor matérias. A IA
-              auxilia na triagem, mas toda certificação e publicação é decidida por uma pessoa da
-              equipe editorial.
+              Estudantes de Jornalismo, Comunicação e áreas relacionadas podem propor matérias. A
+              triagem automática local ajuda a identificar riscos e lacunas, mas toda certificação e
+              publicação é decidida por uma pessoa da equipe editorial.
             </p>
             <div class="actions space-top">
               ${link('/redacao', 'Participar da redação', 'solid')}
@@ -122,8 +122,8 @@ async function newsDetail(slug) {
                 .join('')}
             </ol>
             <div class="notice ok">
-              A IA foi usada apenas para identificar riscos e lacunas. A decisão de publicar foi
-              humana e não transforma o texto em verdade absoluta.
+              A triagem automática local foi usada apenas para identificar riscos e lacunas. A
+              decisão de publicar foi humana e não transforma o texto em verdade absoluta.
             </div>
           </aside>
         </div>
