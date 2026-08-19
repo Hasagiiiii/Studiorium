@@ -5,7 +5,7 @@
   "description": "Studiorium — plataforma acadêmica dark academia com redação certificada, templates livres, biblioteca e comunidade na Vercel + Supabase.",
   "type": "commonjs",
   "scripts": {
-    "check": "node scripts/check-project.js && prettier --check .",
+    "check": "node scripts/check-project.js && prettier --write public/js/enhancements.js src/server/routes/books.js tests/armarium-v32.test.js && git diff --exit-code && prettier --check .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test tests/*.test.js",
