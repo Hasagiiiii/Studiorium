@@ -28,7 +28,8 @@ export {
 } from './views/community.js';
 export { noticias, newsDetail, redacao } from './views/news.js';
 export { templateStudio, templateEditor, publicCustomTemplate } from './views/template-studio.js';
-export { escrivaninha, editor, publicar } from './views/workspace.js';
+export { escrivaninha } from './views/workspace-personal-v329.js';
+export { editor, publicar } from './views/workspace.js';
 export { atelie, syncPoster, diretrizes, sobre } from './views/atelier-about.js';
 export { adminPanel, moderacao } from './views/admin.js';
 export { oficina, oficinaDetail, laboratorio, runCodePreview, notFound } from './views/tech.js';
