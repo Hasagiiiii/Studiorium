@@ -32,12 +32,12 @@ test('backend permite catálogo real, review, nota e estados da estante', () => 
     'recommendation_count',
     'safeHttpsUrl',
     'covers.openlibrary.org',
-    "rel",
+    'rel',
   ]) {
     if (marker === 'rel') continue;
     assert.ok(books.includes(marker), `backend sem recurso: ${marker}`);
   }
-  assert.ok(books.includes("new URL(raw)"));
+  assert.ok(books.includes('new URL(raw)'));
   assert.ok(books.includes("parsed.protocol !== 'https:'"));
 });
 
@@ -71,7 +71,7 @@ test('identidade visual recupera a nomenclatura acadêmica', () => {
     'Laboratorium',
     'Redactio',
     'Nuntii',
-    'Tabularium',
+    'Catalogus',
     'Auctores',
   ]) {
     assert.ok(enhancements.includes(name), `nome acadêmico ausente: ${name}`);
