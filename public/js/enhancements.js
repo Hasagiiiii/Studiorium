@@ -2,18 +2,18 @@ import { state, E, html } from './runtime.js';
 
 const navigationNames = new Map([
   ['/biblioteca', 'Bibliotheca'],
-  ['/projetos', 'Opera'],
+  ['/projetos', 'Opera Communitatis'],
   ['/noticias', 'Nuntii'],
-  ['/oficina', 'Officina'],
-  ['/acervo', 'Tabularium'],
-  ['/atelie', 'Atelier'],
+  ['/oficina', 'Officina Technica'],
+  ['/acervo', 'Catalogus'],
+  ['/atelie', 'Officina Scientifica'],
   ['/coloquio', 'Colloquium'],
   ['/escrivaninha', 'Scriptorium'],
 ]);
 
 const pageNames = [
   ['/biblioteca', () => ['Bibliotheca', 'Biblioteca acadêmica e Armarium Librorum']],
-  ['/acervo', () => ['Tabularium', 'Acervo de modelos e documentos']],
+  ['/acervo', () => ['Catalogus', 'Acervo de modelos e documentos']],
   ['/coloquio', () => ['Colloquium', 'Comunidade de discussões acadêmicas']],
   [
     '/escrivaninha',
@@ -22,16 +22,16 @@ const pageNames = [
       'Escrivaninha pessoal',
     ],
   ],
-  ['/oficina', () => ['Officina', 'Tecnologia, tutoriais e projetos']],
+  ['/oficina', () => ['Officina Technica', 'Tecnologia, tutoriais e projetos']],
   ['/laboratorio', () => ['Laboratorium', 'Laboratório de código']],
   ['/noticias', () => ['Nuntii', 'Notícias certificadas da comunidade']],
   ['/redacao', () => ['Redactio', 'Redação colaborativa']],
-  ['/projetos', () => ['Opera', 'Projetos públicos da comunidade']],
-  ['/pesquisas', () => ['Investigationes', 'Pesquisas e trabalhos publicados']],
+  ['/projetos', () => ['Opera Communitatis', 'Projetos públicos da comunidade']],
+  ['/pesquisas', () => ['Opera Publica', 'Pesquisas e trabalhos publicados']],
   ['/autores', () => ['Auctores', 'Autores e especialistas da comunidade']],
-  ['/atelie', () => ['Atelier Scientificum', 'Criação de banners científicos']],
+  ['/atelie', () => ['Officina Scientifica', 'Criação de banners científicos']],
   ['/estudio-templates', () => ['Officina Exemplorum', 'Estúdio livre de templates']],
-  ['/admin', () => ['Curia', 'Administração do Studiorium']],
+  ['/admin', () => ['Administratio Studiorum', 'Administração do Studiorium']],
 ];
 
 const shelfLabels = {
@@ -199,7 +199,9 @@ function armariumPanel() {
       ? ''
       : html`<div class="armarium-empty">
           <strong>A estante começa vazia de propósito.</strong>
-          <span>O primeiro livro aparecerá quando a comunidade publicar uma recomendação real.</span>
+          <span
+            >O primeiro livro aparecerá quando a comunidade publicar uma recomendação real.</span
+          >
         </div>`}
   </section>`;
 }
@@ -240,8 +242,14 @@ function enhanceBookCard(card) {
     html`<div class="book-metrics" aria-label="Avaliação da comunidade">
         <span class="book-stars">${stars(book.ratingAverage)}</span>
         <strong>${Number(book.ratingAverage || 0).toFixed(book.reviewCount ? 1 : 0)}</strong>
-        <span>${Number(book.reviewCount || 0)} review${Number(book.reviewCount || 0) === 1 ? '' : 's'}</span>
-        <span>${Number(book.recommendationCount || 0)} recomendaç${Number(book.recommendationCount || 0) === 1 ? 'ão' : 'ões'}</span>
+        <span
+          >${Number(book.reviewCount || 0)}
+          review${Number(book.reviewCount || 0) === 1 ? '' : 's'}</span
+        >
+        <span
+          >${Number(book.recommendationCount || 0)}
+          recomendaç${Number(book.recommendationCount || 0) === 1 ? 'ão' : 'ões'}</span
+        >
       </div>
       <div class="book-actions-grid">
         <button class="soft" type="button" data-book-save="${E(bookId)}:want_to_read">
@@ -274,7 +282,9 @@ function enhanceBookCard(card) {
             <option value="2">2 — Regular</option>
             <option value="1">1 — Não gostei</option>
           </select>
-          <label class="armarium-check"><input type="checkbox" name="recommend" checked /> Recomendo</label>
+          <label class="armarium-check"
+            ><input type="checkbox" name="recommend" checked /> Recomendo</label
+          >
         </div>
         <textarea
           class="textarea"
@@ -289,13 +299,14 @@ function enhanceBookCard(card) {
         ? html`<div class="book-review-list">
             ${reviews
               .map(
-                (review) => html`<blockquote>
-                  <div>
-                    <strong>${E(review.reviewerName)}</strong>
-                    <span>${stars(review.rating)}${review.recommend ? ' · recomenda' : ''}</span>
-                  </div>
-                  <p>${E(review.review)}</p>
-                </blockquote>`,
+                (review) =>
+                  html`<blockquote>
+                    <div>
+                      <strong>${E(review.reviewerName)}</strong>
+                      <span>${stars(review.rating)}${review.recommend ? ' · recomenda' : ''}</span>
+                    </div>
+                    <p>${E(review.review)}</p>
+                  </blockquote>`,
               )
               .join('')}
           </div>`
@@ -308,7 +319,9 @@ function enhanceMiniShelf() {
     if (item.dataset.armariumEnhanced === 'true') return;
     const remove = item.querySelector('[data-book-remove]');
     if (!remove) return;
-    const book = (state.boot?.books || []).find((candidate) => candidate.id === remove.dataset.bookRemove);
+    const book = (state.boot?.books || []).find(
+      (candidate) => candidate.id === remove.dataset.bookRemove,
+    );
     if (!book) return;
     item.dataset.armariumEnhanced = 'true';
     const small = item.querySelector('small');
@@ -328,7 +341,7 @@ function enhanceMiniShelf() {
 }
 
 function enhanceArmarium() {
-  if (location.pathname === '/biblioteca') {
+  if (['/biblioteca', '/library'].includes(location.pathname)) {
     const shell = document.querySelector('.library-hero .shell');
     const filter = shell?.querySelector('.library-filter');
     if (shell && filter && !shell.querySelector('[data-armarium-community]')) {
