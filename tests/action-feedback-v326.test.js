@@ -88,7 +88,7 @@ test('notícias publicadas podem ser destacadas sem recertificação e ganham pr
   assert.match(bootstrap, /from\('news_articles'\)[\s\S]*?order\('featured'/);
   assert.match(home, /const news = \(b\.news \|\| \[\]\)\.slice\(0, 3\)/);
   assert.match(home, /news-home-grid/);
-  assert.match(featureUi, /data-admin-news-feature/);
-  assert.match(featureUi, /Destacar na página inicial/);
+  assert.match(featureUi, /data-news-manager-action="feature:/);
+  assert.match(featureUi, /Destacar/);
   assert.match(main, /installAdminNewsFeature/);
 });
