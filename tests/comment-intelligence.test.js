@@ -19,6 +19,7 @@ test('reconhece perguntas explícitas e dúvidas escritas sem interrogação', (
   assert.equal(isQuestion('Como adiciono uma imagem no modelo?'), true);
   assert.equal(isQuestion('Não entendi a etapa de revisão'), true);
   assert.equal(isQuestion('A revisão editorial foi concluída.'), false);
+  assert.equal(isQuestion('É importante declarar quando a ferramenta foi usada.'), false);
 });
 
 test('cria filtros somente a partir de dúvidas semelhantes presentes nos comentários', () => {

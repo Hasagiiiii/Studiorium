@@ -137,9 +137,12 @@ function isQuestion(text) {
 
   if (normalized.includes('?')) return true;
 
-  return /(^|\b)(como|onde|quando|por que|qual|quais|alguem sabe|nao entendi|tenho duvida|poderia explicar)(\b|$)/.test(
+  const interrogativeOpening = /^(como|onde|quando|por que|qual|quais|quem)\b/.test(normalized);
+  const doubtExpression = /\b(alguem sabe|nao entendi|tenho duvida|poderia explicar)\b/.test(
     normalized,
   );
+
+  return interrogativeOpening || doubtExpression;
 }
 
 function countTerms(terms) {
