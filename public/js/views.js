@@ -10,7 +10,14 @@ export {
   discussionRow,
 } from './views/core.js';
 export { home, biblioteca, acervo, templateDetail } from './views/home-library.js';
-export { pesquisas, researchDetail, autores, authorDetail } from './views/research.js';
+export {
+  pesquisas,
+  researchDetail,
+  projetos,
+  publicProjectDetail,
+  autores,
+  authorDetail,
+} from './views/research.js';
 export {
   coloquio,
   thread,

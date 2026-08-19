@@ -37,12 +37,18 @@ async function createDiscussion(req) {
       String(body.category || 'Geral')
         .trim()
         .slice(0, 60) || 'Geral',
-    status: 'published',
+    status: check.reviewRequired ? 'pending_review' : 'published',
     created_at: now(),
   };
   const { data, error } = await db().from('discussions').insert(row).select('*').single();
   fail(error);
-  return { discussion: S.discussion(data) };
+  return {
+    discussion: S.discussion(data),
+    message:
+      data.status === 'published'
+        ? 'Discussão publicada.'
+        : 'Discussão enviada para revisão da equipe.',
+  };
 }
 
 async function getThread(discussionId) {
@@ -119,12 +125,15 @@ async function createReply(req, discussionId) {
     author_id: user.id,
     author_name: user.is_minor ? 'Membro protegido' : profile?.display_name || 'Membro',
     body: text,
-    status: 'published',
+    status: check.reviewRequired ? 'pending_review' : 'published',
     created_at: now(),
   };
   const { data, error } = await db().from('replies').insert(row).select('*').single();
   fail(error);
-  return { reply: S.reply(data) };
+  return {
+    reply: S.reply(data),
+    message: data.status === 'published' ? 'Resposta publicada.' : 'Resposta enviada para revisão.',
+  };
 }
 
 module.exports = { createDiscussion, getThread, createReply };

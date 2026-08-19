@@ -82,6 +82,13 @@ function researchDetail(slug) {
             ><span>${E(p.license)}</span>
           </div>
           <div class="rule"></div>
+          ${p.coverName
+            ? html`<img
+                class="research-cover"
+                src="/api/publications/${encodeURIComponent(p.id)}/cover"
+                alt="Foto de apresentação de ${E(p.title)}"
+              />`
+            : ''}
           <h2 class="serif">Resumo</h2>
           <p style="white-space:pre-wrap;line-height:1.8;color:#c7bdab">${E(p.abstract)}</p>
           ${p.content
@@ -97,8 +104,9 @@ function researchDetail(slug) {
                   >Baixar arquivo</a
                 >`
               : ''}<button class="outline" data-print>Imprimir / salvar PDF</button
-            ><button class="outline" data-report="publication:${E(p.id)}">
-              Denunciar conteúdo
+            ><button class="outline" data-report="publication:${E(p.id)}">Denunciar conteúdo</button
+            ><button class="soft" type="button" data-publication-boost="${E(p.id)}">
+              Impulsionar · <span data-boost-count="${E(p.id)}">${num(p.boosts)}</span>
             </button>
           </div>
         </article>
@@ -120,7 +128,16 @@ function researchDetail(slug) {
 }
 
 function autores() {
-  const profiles = state.boot.profiles;
+  const q = (state.query.get('q') || '').trim().toLocaleLowerCase('pt-BR');
+  const type = state.query.get('tipo') || '';
+  const types = [...new Set(state.boot.profiles.map((profile) => profile.profileType))].sort(
+    (a, b) => a.localeCompare(b, 'pt-BR'),
+  );
+  const profiles = state.boot.profiles.filter(
+    (profile) =>
+      (!q || JSON.stringify(profile).toLocaleLowerCase('pt-BR').includes(q)) &&
+      (!type || profile.profileType === type),
+  );
   layout(
     html`<section class="pagehero">
       <div class="shell">
@@ -130,6 +147,27 @@ function autores() {
           Perfis públicos de estudantes, professores, pesquisadores, criadores e instituições que
           compartilham conhecimento no Studiorium.
         </p>
+        <form class="toolbar author-search" data-author-filter>
+          <input
+            class="field"
+            type="search"
+            name="q"
+            value="${E(state.query.get('q') || '')}"
+            placeholder="Pesquisar nome, curso, instituição ou especialidade"
+          />
+          <select class="select" name="tipo">
+            <option value="">Todos os perfis</option>
+            ${types
+              .map(
+                (item) =>
+                  html`<option value="${E(item)}" ${item === type ? 'selected' : ''}>
+                    ${E(item)}
+                  </option>`,
+              )
+              .join('')}
+          </select>
+          <button class="solid">Pesquisar usuários</button>
+        </form>
         <div class="grid grid3" style="margin-top:28px">
           ${profiles
             .map(
@@ -142,7 +180,19 @@ function autores() {
                     ${E(initials(p.displayName))}
                   </div>
                   <h3>${E(p.displayName)}</h3>
-                  <div class="pills"><span class="pill">${E(p.profileType)}</span></div>
+                  <div class="pills">
+                    <span class="pill">${E(p.profileType)}</span>
+                    ${p.verificationStatus === 'verified'
+                      ? html`<span class="verified-badge"
+                          >✓ ${E(p.verifiedSpecialty || 'Especialista verificado')}</span
+                        >`
+                      : ''}
+                  </div>
+                  ${p.course
+                    ? html`<p class="profile-course">
+                        ${E(p.course)}${p.institution ? ` · ${E(p.institution)}` : ''}
+                      </p>`
+                    : ''}
                   <p>${E(p.bio || 'Perfil público da comunidade Studiorium.')}</p></a
                 >`,
             )
@@ -159,6 +209,7 @@ function authorDetail(username) {
   const pubs = state.boot.publications.filter(
     (x) => x.ownerId === p.userId || x.authorName === p.displayName,
   );
+  const projects = (state.boot.communityProjects || []).filter((x) => x.ownerId === p.userId);
   layout(
     html`<section class="pagehero">
       <div class="shell">
@@ -167,7 +218,20 @@ function authorDetail(username) {
           <div>
             <div class="eyebrow">${E(p.profileType)}</div>
             <h1 class="pagetitle">${E(p.displayName)}</h1>
+            ${p.verificationStatus === 'verified'
+              ? html`<span class="verified-badge large"
+                  >✓ Especialista verificado · ${E(p.verifiedSpecialty || p.course)}</span
+                >`
+              : ''}
+            ${p.contributionStatus === 'active_collaborator'
+              ? '<span class="badge collaborator">Colaborador ativo</span>'
+              : ''}
             <p>${E(p.bio || 'Membro da comunidade Studiorium.')}</p>
+            ${p.course || p.institution
+              ? html`<p class="profile-credentials">
+                  ${E(p.course || p.educationLevel)}${p.institution ? ` · ${E(p.institution)}` : ''}
+                </p>`
+              : ''}
             <span class="badge">@${E(p.username)}</span>
           </div>
         </div>
@@ -183,9 +247,98 @@ function authorDetail(username) {
             empty('Este autor ainda não possui publicações públicas.')}
           </div>
         </div>
+        <div class="section compact">
+          <div class="sectionhead">
+            <div>
+              <div class="eyebrow">Projetos</div>
+              <h2>Projetos públicos deste autor</h2>
+            </div>
+          </div>
+          <div class="grid grid3">
+            ${projects.map(projectCard).join('') ||
+            empty('Este autor ainda não compartilhou projetos.')}
+          </div>
+        </div>
       </div>
     </section>`,
   );
 }
 
-export { pesquisas, researchDetail, autores, authorDetail };
+function projectCard(project) {
+  const profile = state.boot.profiles.find((item) => item.userId === project.ownerId);
+  const excerpt = (project.sections || []).find((section) => section.content)?.content || '';
+  return html`<article class="card hover">
+    <div class="eyebrow">${E(project.type)}</div>
+    <h3>${link('/projetos/' + encodeURIComponent(project.id), E(project.title))}</h3>
+    <p>${E(excerpt.slice(0, 220) || 'Projeto acadêmico compartilhado pela comunidade.')}</p>
+    <div class="meta">
+      <span>${E(profile?.displayName || 'Membro do Studiorium')}</span
+      ><span>Atualizado ${date(project.updatedAt)}</span>
+    </div>
+  </article>`;
+}
+
+function projetos() {
+  const q = (state.query.get('q') || '').trim().toLocaleLowerCase('pt-BR');
+  const projects = (state.boot.communityProjects || []).filter(
+    (project) => !q || JSON.stringify(project).toLocaleLowerCase('pt-BR').includes(q),
+  );
+  layout(
+    html`<section class="pagehero">
+      <div class="shell">
+        <div class="eyebrow">Opera communitatis</div>
+        <h1 class="pagetitle">Projetos da comunidade</h1>
+        <p>Explore projetos acadêmicos que seus autores escolheram compartilhar publicamente.</p>
+        <form class="toolbar" data-project-filter>
+          <input
+            class="field"
+            type="search"
+            name="q"
+            value="${E(state.query.get('q') || '')}"
+            placeholder="Pesquisar projeto, tipo ou conteúdo"
+          />
+          <button class="solid">Pesquisar projetos</button>
+        </form>
+        <div class="grid grid3" style="margin-top:28px">
+          ${projects.map(projectCard).join('') || empty('Nenhum projeto público encontrado.')}
+        </div>
+      </div>
+    </section>`,
+  );
+}
+
+function publicProjectDetail(projectId) {
+  const project = (state.boot.communityProjects || []).find((item) => item.id === projectId);
+  if (!project) return notFound();
+  const profile = state.boot.profiles.find((item) => item.userId === project.ownerId);
+  layout(
+    html`<section class="pagehero">
+      <div class="shell article-width">
+        <div class="eyebrow">${E(project.type)}</div>
+        <h1 class="pagetitle">${E(project.title)}</h1>
+        <p>
+          Compartilhado por
+          ${profile
+            ? link('/autores/' + encodeURIComponent(profile.username), E(profile.displayName))
+            : 'membro do Studiorium'}
+          · atualizado ${date(project.updatedAt)}
+        </p>
+        <article class="paper public-project">
+          ${(project.sections || [])
+            .map(
+              (section) =>
+                html`<section>
+                  <h2>${E(section.name)}</h2>
+                  <p style="white-space:pre-wrap">
+                    ${E(section.content || 'Seção ainda não preenchida.')}
+                  </p>
+                </section>`,
+            )
+            .join('')}
+        </article>
+      </div>
+    </section>`,
+  );
+}
+
+export { pesquisas, researchDetail, projetos, publicProjectDetail, autores, authorDetail };

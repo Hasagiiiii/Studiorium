@@ -39,6 +39,19 @@ export async function handleFilterSubmit(event) {
     return true;
   }
 
+  if (form.matches('[data-author-filter]')) {
+    event.preventDefault();
+    const values = formObj(form);
+    updateQuery({ q: values.q, tipo: values.tipo });
+    return true;
+  }
+
+  if (form.matches('[data-project-filter]')) {
+    event.preventDefault();
+    updateQuery({ q: formObj(form).q });
+    return true;
+  }
+
   if (form.matches('[data-discussion-filter]')) {
     event.preventDefault();
     const values = formObj(form);

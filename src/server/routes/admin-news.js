@@ -78,7 +78,9 @@ async function updateArticle(req, articleId) {
       throw inputError('A matéria precisa de pelo menos duas fontes antes da certificação.');
     }
     if (current.ai_review_status !== 'approved' && editorialNote.length < 20) {
-      throw inputError('Explique a decisão humana ao publicar uma matéria sinalizada pela IA.');
+      throw inputError(
+        'Explique a decisão humana ao publicar uma matéria sinalizada pela triagem.',
+      );
     }
     patch.certified_by = admin.id;
     patch.certified_at = now();

@@ -23,4 +23,5 @@ test('moderação rejeita conteúdo vazio e padrões críticos', () => {
   assert.equal(moderate('').ok, false);
   assert.equal(moderate('conteúdo sexual com menor').ok, false);
   assert.equal(moderate('Discussão acadêmica sobre metodologia científica.').ok, true);
+  assert.equal(moderate('O telefone da pessoa está exposto neste texto.').reviewRequired, true);
 });

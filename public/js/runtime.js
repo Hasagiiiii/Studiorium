@@ -7,6 +7,8 @@ export const state = {
   params: {},
   query: new URLSearchParams(location.search),
   mobile: false,
+  notifications: [],
+  unreadNotificationCount: 0,
 };
 
 export const E = (v = '') =>
@@ -100,6 +102,23 @@ export async function api(path, options = {}) {
 export async function bootstrap() {
   state.boot = await api('/api/bootstrap');
   state.me = state.boot.user;
+  if (state.me) {
+    try {
+      await loadNotifications();
+    } catch {
+      state.notifications = [];
+      state.unreadNotificationCount = 0;
+    }
+  } else {
+    state.notifications = [];
+    state.unreadNotificationCount = 0;
+  }
+}
+export async function loadNotifications() {
+  const data = await api('/api/notifications');
+  state.notifications = data.notifications || [];
+  state.unreadNotificationCount = Number(data.unreadCount || 0);
+  return data;
 }
 export function formObj(form) {
   return Object.fromEntries(new FormData(form).entries());

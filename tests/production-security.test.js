@@ -61,6 +61,8 @@ test('migrações de segurança e produção estão versionadas', () => {
     'supabase/upgrade-v2.7-security-events.sql',
     'supabase/upgrade-v2.8-password-reset.sql',
     'supabase/upgrade-v2.9-editorial-studio.sql',
+    'supabase/upgrade-v3.1-community-identity.sql',
+    'supabase/upgrade-v3.1.1-local-moderation-public-projects.sql',
   ];
   for (const rel of required)
     assert.ok(fs.existsSync(path.join(root, rel)), `migração ausente: ${rel}`);

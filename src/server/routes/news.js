@@ -3,7 +3,7 @@ const { requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now, slugify } = require('../security');
 const { moderate } = require('../moderation');
-const { moderateNews } = require('../ai-news-moderation');
+const { moderateNews } = require('../news-moderation');
 const { safePublicName } = require('../public-identity');
 const S = require('../serializers');
 
@@ -227,21 +227,8 @@ async function submit(req, articleId) {
     .update({ status: 'ai_review', ai_review_status: 'pending', updated_at: now() })
     .eq('id', articleId);
 
-  let review;
-  let aiStatus;
-  try {
-    review = await moderateNews(current);
-    aiStatus = review.decision;
-  } catch (error) {
-    review = {
-      decision: 'unavailable',
-      summary: 'A triagem automática ficou indisponível. A revisão humana continua obrigatória.',
-      reviewedAt: now(),
-      purpose: 'triage_only_human_certification_required',
-    };
-    aiStatus = 'unavailable';
-    console.error('[Studiorium news triage]', error.message || error);
-  }
+  const review = moderateNews(current);
+  const aiStatus = review.decision;
 
   const { data, error } = await db()
     .from('news_articles')

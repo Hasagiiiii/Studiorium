@@ -6,6 +6,8 @@ import {
   templateDetail,
   pesquisas,
   researchDetail,
+  projetos,
+  publicProjectDetail,
   autores,
   authorDetail,
   coloquio,
@@ -74,6 +76,9 @@ async function renderRoute() {
   if (p.startsWith('/templates/')) return templateDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/pesquisas') return pesquisas();
   if (p.startsWith('/pesquisas/')) return researchDetail(decodeURIComponent(p.split('/')[2] || ''));
+  if (p === '/projetos') return projetos();
+  if (p.startsWith('/projetos/'))
+    return publicProjectDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/autores') return autores();
   if (p.startsWith('/autores/')) return authorDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (['/coloquio', '/comunidade'].includes(p)) return coloquio();
@@ -110,6 +115,7 @@ async function renderRoute() {
   if (p === '/moderacao' || p === '/admin/moderacao') return await moderacao();
   if (p === '/admin') return await adminPanel('overview');
   if (p === '/admin/usuarios') return await adminPanel('usuarios');
+  if (p === '/admin/verificacoes') return await adminPanel('verificacoes');
   if (p === '/admin/publicacoes') return await adminPanel('publicacoes');
   if (p === '/admin/oficina') return await adminPanel('oficina');
   if (p === '/admin/coloquio') return await adminPanel('coloquio');

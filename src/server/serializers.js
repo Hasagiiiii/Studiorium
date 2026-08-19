@@ -21,6 +21,13 @@ function profile(row) {
     displayName: safePublicName(row.display_name, row.username),
     bio: row.bio || '',
     profileType: row.profile_type,
+    course: row.course || '',
+    institution: row.institution || '',
+    educationLevel: row.education_level || '',
+    verificationStatus: row.verification_status || 'unverified',
+    verifiedSpecialty: row.verified_specialty || '',
+    contributionStatus: row.contribution_status || 'member',
+    verifiedAt: row.verified_at || null,
     createdAt: row.created_at,
   };
 }
@@ -31,11 +38,23 @@ function project(row) {
     title: row.title,
     templateId: row.template_id,
     type: row.type,
+    visibility: row.visibility || 'private',
     sections: row.sections || [],
     notes: row.notes || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at || null,
+  };
+}
+function publicProject(row) {
+  return {
+    id: row.id,
+    ownerId: row.user_id,
+    title: row.title,
+    type: row.type,
+    sections: row.sections || [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 function publication(row) {
@@ -54,11 +73,14 @@ function publication(row) {
     status: row.status,
     views: row.views || 0,
     downloads: row.downloads || 0,
+    boosts: row.boosts || 0,
     featured: row.featured === true,
     createdAt: row.created_at,
     publishedAt: row.published_at || null,
     fileName: row.file_name || null,
     fileMime: row.file_mime || null,
+    coverName: row.cover_name || null,
+    coverMime: row.cover_mime || null,
   };
 }
 function discussion(row) {
@@ -99,6 +121,65 @@ function adminUser(row, profile) {
     displayName: profile?.display_name || row.email.split('@')[0],
     profileType: profile?.profile_type || 'estudante',
     isPublic: profile?.is_public !== false,
+    course: profile?.course || '',
+    institution: profile?.institution || '',
+    educationLevel: profile?.education_level || '',
+    verificationStatus: profile?.verification_status || 'unverified',
+    verifiedSpecialty: profile?.verified_specialty || '',
+    contributionStatus: profile?.contribution_status || 'member',
+  };
+}
+
+function verificationRequest(row, profile = null) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    displayName: profile?.display_name || '',
+    username: profile?.username || '',
+    profileType: row.profile_type,
+    course: row.course || '',
+    institution: row.institution || '',
+    educationLevel: row.education_level || '',
+    specialty: row.specialty || '',
+    credentialReference: row.credential_reference || '',
+    statement: row.statement || '',
+    status: row.status,
+    reviewerId: row.reviewer_id || null,
+    reviewNote: row.review_note || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function notification(row) {
+  return {
+    id: row.id,
+    type: row.type || 'system',
+    title: row.title,
+    message: row.message || '',
+    link: row.link || '',
+    readAt: row.read_at || null,
+    createdAt: row.created_at,
+  };
+}
+
+function book(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    author: row.author,
+    description: row.description || '',
+    category: row.category || 'Humanidades',
+    coverTheme: row.cover_theme || 'umber',
+    featured: row.featured === true,
+  };
+}
+
+function bookSave(row) {
+  return {
+    bookId: row.book_id,
+    shelfStatus: row.shelf_status || 'want_to_read',
+    createdAt: row.created_at,
   };
 }
 function report(row) {
@@ -211,6 +292,7 @@ module.exports = {
   template,
   profile,
   project,
+  publicProject,
   publication,
   discussion,
   reply,
@@ -221,4 +303,8 @@ module.exports = {
   newsContributor,
   newsArticle,
   customTemplate,
+  verificationRequest,
+  notification,
+  book,
+  bookSave,
 };

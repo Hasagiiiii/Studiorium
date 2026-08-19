@@ -20,7 +20,7 @@ Coleção de modelos para trabalhos escolares e universitários, documentos acad
 
 ### Redação e Notícias
 
-Espaço para estudantes de Jornalismo, Comunicação e áreas relacionadas. As propostas exigem fontes declaradas, passam por triagem de risco com IA e só são publicadas após certificação editorial humana.
+Espaço para estudantes de Jornalismo, Comunicação e áreas relacionadas. As propostas exigem fontes declaradas, passam por triagem local de risco e só são publicadas após certificação editorial humana.
 
 ### Estúdio livre de templates
 
@@ -67,6 +67,20 @@ Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, 
 - console seguro e diagnóstico de execução no Laboratório;
 - animações discretas com respeito à preferência de movimento reduzido;
 - páginas de erro centralizadas para evitar falhas em rotas inexistentes.
+
+## Comunidade verificada 3.1
+
+- perfis com tipo de participação, curso, instituição e nível de formação;
+- solicitação de verificação analisada pela administração, com selo de especialista ou colaborador;
+- cargos separados de moderador, curador, editor e administrador;
+- pesquisa pública de usuários por nome, curso, instituição, especialidade ou tipo de perfil;
+- estante de livros na Biblioteca e coleção pessoal na Escrivaninha;
+- fotos opcionais em publicações, mantendo o cartão clássico quando nenhuma imagem é enviada;
+- impulso único por usuário para destacar trabalhos relevantes sem substituir a curadoria;
+- central de notificações responsiva dentro do site para decisões de moderação, selos e funções;
+- bloqueio de reenvio no cadastro enquanto a criação da conta está em andamento.
+- projetos acadêmicos com compartilhamento opcional e exibição no perfil público;
+- moderação local com bloqueio de risco grave, fila para casos duvidosos e revisão humana.
 
 ## Para quem é
 

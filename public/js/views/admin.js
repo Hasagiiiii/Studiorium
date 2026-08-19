@@ -12,10 +12,20 @@ import {
 } from './core.js';
 
 function adminTabs(active) {
+  if (state.me?.role !== 'admin') {
+    return html`<div class="admin-tabs">
+      ${link(
+        '/moderacao',
+        'Fila de moderação',
+        `admin-tab ${active === 'moderacao' ? 'active' : ''}`,
+      )}
+    </div>`;
+  }
   const tabs = [
     ['overview', '/admin', 'Visão geral'],
     ['moderacao', '/admin/moderacao', 'Moderação'],
     ['usuarios', '/admin/usuarios', 'Usuários'],
+    ['verificacoes', '/admin/verificacoes', 'Verificações'],
     ['publicacoes', '/admin/publicacoes', 'Publicações'],
     ['oficina', '/admin/oficina', 'Oficina'],
     ['coloquio', '/admin/coloquio', 'Colóquio'],
@@ -45,6 +55,11 @@ function adminStatus(status) {
     dismissed: 'Descartada',
     admin: 'ADM',
     user: 'Usuário',
+    moderator: 'Moderador',
+    curator: 'Curador',
+    editor: 'Editor',
+    pending: 'Pendente',
+    approved: 'Aprovada',
   };
   return html`<span class="badge status-${E(status)}">${E(labels[status] || status)}</span>`;
 }
@@ -181,7 +196,9 @@ ${E(resource.body || '')}</textarea
 }
 
 async function adminPanel(tab = 'overview') {
-  if (!state.me || state.me.role !== 'admin') {
+  const staffRoles = ['moderator', 'curator', 'editor', 'admin'];
+  const canModerate = tab === 'moderacao' && staffRoles.includes(state.me?.role);
+  if (!state.me || (state.me.role !== 'admin' && !canModerate)) {
     layout(
       html`<section class="pagehero">
         <div class="shell">${empty('Acesso restrito à administração.')}</div>
@@ -191,7 +208,7 @@ async function adminPanel(tab = 'overview') {
   }
   let data;
   try {
-    data = await api('/api/admin/dashboard');
+    data = await api(state.me.role === 'admin' ? '/api/admin/dashboard' : '/api/admin/queue');
   } catch (err) {
     toast(err.message, true);
     return;
@@ -234,8 +251,8 @@ async function adminPanel(tab = 'overview') {
             ><small>${num(m.urgentReports)} urgentes</small>
           </div>
           <div class="admin-stat">
-            <strong>${num(m.discussions)}</strong><span>Discussões</span
-            ><small>${num(m.templates)} modelos</small>
+            <strong>${num(m.pendingVerifications)}</strong><span>Verificações</span
+            ><small>${num(m.discussions)} discussões · ${num(m.templates)} modelos</small>
           </div>
         </div>
         <div class="grid grid2 admin-gap">
@@ -406,13 +423,28 @@ async function adminPanel(tab = 'overview') {
                             : html`<button class="dangerbtn" data-admin-user="${E(u.id)}:suspended">
                                 Suspender
                               </button>`}${u.id !== state.me.id
-                            ? u.role === 'admin'
-                              ? html`<button class="outline" data-admin-role="${E(u.id)}:user">
-                                  Remover ADM
-                                </button>`
-                              : html`<button class="outline" data-admin-role="${E(u.id)}:admin">
-                                  Tornar ADM
-                                </button>`
+                            ? html`<label class="role-control">
+                                <span>Função</span>
+                                <select class="select" data-admin-role-select="${E(u.id)}">
+                                  ${[
+                                    ['user', 'Usuário'],
+                                    ['moderator', 'Moderador'],
+                                    ['curator', 'Curador'],
+                                    ['editor', 'Editor'],
+                                    ['admin', 'ADM'],
+                                  ]
+                                    .map(
+                                      ([value, label]) =>
+                                        html`<option
+                                          value="${value}"
+                                          ${u.role === value ? 'selected' : ''}
+                                        >
+                                          ${label}
+                                        </option>`,
+                                    )
+                                    .join('')}
+                                </select>
+                              </label>`
                             : '<span class="muted small">Sua conta</span>'}
                         </div>
                       </td>
@@ -421,6 +453,83 @@ async function adminPanel(tab = 'overview') {
                 .join('')}
             </tbody>
           </table>
+        </div>`,
+    );
+  }
+  if (tab === 'verificacoes') {
+    const requests = adminFilter(data.verificationRequests || [], [
+      'displayName',
+      'username',
+      'course',
+      'institution',
+      'specialty',
+      'status',
+    ]);
+    return adminShell(
+      'verificacoes',
+      'Verificação de especialistas',
+      'Confirme formação e área de atuação antes de conceder selos públicos.',
+      html`${adminSearch('Nome, curso, instituição ou especialidade…')}
+        <div class="admin-list">
+          ${requests
+            .map(
+              (request) =>
+                html`<article class="card verification-review">
+                  <div class="sectionhead">
+                    <div>
+                      <div class="eyebrow">${E(request.profileType)} · @${E(request.username)}</div>
+                      <h3>${E(request.displayName || 'Membro do Studiorium')}</h3>
+                    </div>
+                    ${adminStatus(request.status)}
+                  </div>
+                  <div class="verification-facts">
+                    <span><strong>Curso</strong>${E(request.course)}</span>
+                    <span><strong>Instituição</strong>${E(request.institution)}</span>
+                    <span
+                      ><strong>Formação</strong>${E(
+                        request.educationLevel || 'Não informada',
+                      )}</span
+                    >
+                    <span><strong>Especialidade</strong>${E(request.specialty)}</span>
+                  </div>
+                  <p>${E(request.statement)}</p>
+                  ${request.credentialReference
+                    ? html`<p class="small">
+                        Referência informada:
+                        <a
+                          href="${E(request.credentialReference)}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          consultar comprovação ↗
+                        </a>
+                      </p>`
+                    : ''}
+                  ${request.status === 'pending'
+                    ? html`<div class="actions admin-actions">
+                        <button
+                          class="solid"
+                          data-admin-verification="${E(request.id)}:approved:specialist"
+                        >
+                          Verificar especialista
+                        </button>
+                        <button
+                          class="outline"
+                          data-admin-verification="${E(request.id)}:approved:active_collaborator"
+                        >
+                          Verificar colaborador
+                        </button>
+                        <button
+                          class="dangerbtn"
+                          data-admin-verification="${E(request.id)}:rejected:member"
+                        >
+                          Recusar
+                        </button>
+                      </div>`
+                    : html`<p class="small muted">Analisada em ${date(request.updatedAt)}.</p>`}
+                </article>`,
+            )
+            .join('') || empty('Nenhuma solicitação de verificação encontrada.')}
         </div>`,
     );
   }
@@ -765,7 +874,7 @@ async function adminPanel(tab = 'overview') {
                       <h3>${E(article.title)}</h3>
                     </div>
                     <span class="badge status-${E(article.aiReviewStatus)}"
-                      >IA: ${E(article.aiReviewStatus)}</span
+                      >Triagem: ${E(article.aiReviewStatus)}</span
                     >
                   </div>
                   <p>${E(article.summary)}</p>
