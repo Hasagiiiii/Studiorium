@@ -223,7 +223,12 @@ function enhanceBookCard(card) {
   const cover = card.querySelector('.book-cover');
   if (cover && book.coverUrl) {
     cover.outerHTML = html`<figure class="book-cover-real">
-      <img src="${E(book.coverUrl)}" alt="Capa de ${E(book.title)}" loading="lazy" />
+      <img
+        src="${E(book.coverUrl)}"
+        alt="Capa de ${E(book.title)}"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      />
       <figcaption>${E(book.title)}</figcaption>
     </figure>`;
     const image = card.querySelector('.book-cover-real img');
@@ -273,9 +278,9 @@ function enhanceBookCard(card) {
       ${book.purchaseUrl
         ? html`<small class="affiliate-note">Link externo comercial/afiliado.</small>`
         : ''}
-      <div class="book-review-form hidden" data-book-review-form="${E(bookId)}">
+      <form class="book-review-form hidden" data-book-review-form="${E(bookId)}">
         <div class="formgrid compact-fields">
-          <select class="select" name="rating" aria-label="Nota">
+          <select class="select" name="rating" aria-label="Nota" required>
             <option value="5">5 — Excelente</option>
             <option value="4">4 — Muito bom</option>
             <option value="3">3 — Bom</option>
@@ -291,10 +296,11 @@ function enhanceBookCard(card) {
           name="review"
           minlength="10"
           maxlength="2400"
+          required
           placeholder="Escreva sua review desta leitura…"
         ></textarea>
         <button class="solid" type="button" data-book-review-save>Publicar review</button>
-      </div>
+      </form>
       ${reviews.length
         ? html`<div class="book-review-list">
             ${reviews
@@ -332,7 +338,7 @@ function enhanceMiniShelf() {
     if (book.coverUrl) {
       item.insertAdjacentHTML(
         'afterbegin',
-        `<img class="mini-book-cover" src="${E(book.coverUrl)}" alt="Capa de ${E(book.title)}" loading="lazy" />`,
+        `<img class="mini-book-cover" src="${E(book.coverUrl)}" alt="Capa de ${E(book.title)}" loading="lazy" referrerpolicy="no-referrer" />`,
       );
       const image = item.querySelector('.mini-book-cover');
       image?.addEventListener('error', () => image.remove());
