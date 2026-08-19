@@ -185,13 +185,27 @@ export async function promptAction(message, options = {}) {
 export function setControlBusy(control, busy) {
   if (!(control instanceof HTMLElement)) return;
   if (busy) {
-    if (control.dataset.eventBusy === 'true') return;
+    if (control.dataset.eventBusy === 'true') return false;
     control.dataset.eventBusy = 'true';
     control.setAttribute('aria-busy', 'true');
     if ('disabled' in control) control.disabled = true;
-    return;
+    return true;
   }
   delete control.dataset.eventBusy;
   control.removeAttribute('aria-busy');
   if ('disabled' in control) control.disabled = false;
+  return true;
+}
+
+export async function withBusyControl(control, label, action) {
+  if (!(control instanceof HTMLElement)) return action();
+  if (!setControlBusy(control, true)) return undefined;
+  const originalLabel = control.textContent;
+  if (label) control.textContent = label;
+  try {
+    return await action();
+  } finally {
+    if (label) control.textContent = originalLabel;
+    setControlBusy(control, false);
+  }
 }
