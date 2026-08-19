@@ -97,3 +97,14 @@ test('identidade visual recupera a nomenclatura acadêmica sem loop de mutação
   }
   assert.ok(enhancements.includes('if (subtitle.textContent !== translation)'));
 });
+
+test('navbar preserva logo e usuário sem quebrar nomes acadêmicos', () => {
+  const css = read('public/css/nav-v323.css');
+  const style = read('public/style.css');
+  assert.ok(style.includes("@import url('/css/nav-v323.css');"));
+  assert.ok(css.includes('min-width: max-content;'));
+  assert.ok(css.includes('white-space: nowrap;'));
+  assert.ok(css.includes('@media (max-width: 1120px)'));
+  assert.ok(css.includes('.nav .navlinks {\n    display: none;'));
+  assert.ok(css.includes('.nav .mobile {\n    display: grid;'));
+});
