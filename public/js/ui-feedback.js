@@ -1,4 +1,5 @@
 let activeDialog = null;
+let dialogSequence = 0;
 
 function closeActiveDialog(value = null) {
   if (!activeDialog) return;
@@ -52,6 +53,12 @@ function createField(field) {
   return { wrapper, control };
 }
 
+function focusableElements(root) {
+  return [...root.querySelectorAll('button, input, select, textarea, a[href], [tabindex]')].filter(
+    (element) => !element.disabled && element.getAttribute('tabindex') !== '-1',
+  );
+}
+
 export function formDialog({
   title = 'Confirmação',
   message = '',
@@ -72,7 +79,8 @@ export function formDialog({
     form.setAttribute('role', 'dialog');
     form.setAttribute('aria-modal', 'true');
 
-    const headingId = `ui-dialog-title-${crypto.randomUUID()}`;
+    dialogSequence += 1;
+    const headingId = `ui-dialog-title-${dialogSequence}`;
     const heading = document.createElement('h2');
     heading.id = headingId;
     heading.textContent = title;
@@ -124,6 +132,19 @@ export function formDialog({
       if (event.key === 'Escape') {
         event.preventDefault();
         closeActiveDialog(null);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = focusableElements(form);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -183,7 +204,7 @@ export async function promptAction(message, options = {}) {
 }
 
 export function setControlBusy(control, busy) {
-  if (!(control instanceof HTMLElement)) return;
+  if (!(control instanceof HTMLElement)) return false;
   if (busy) {
     if (control.dataset.eventBusy === 'true') return false;
     control.dataset.eventBusy = 'true';
