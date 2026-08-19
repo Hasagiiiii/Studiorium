@@ -10,32 +10,37 @@
   display: block;
 }
 
-/* Cinco métricas em uma única faixa nos desktops com espaço suficiente. */
-.library-stats {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+/*
+ * Métricas da Biblioteca usam flexbox em vez de uma grade rígida.
+ * Isso evita células implícitas, espaços vazios e conflitos com regras genéricas
+ * de .stats quando o viewport muda por zoom, orientação ou tamanho de texto.
+ */
+.stats.library-stats {
+  display: flex;
+  flex-wrap: wrap;
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
   background: var(--line);
 }
 
-.library-stats .stat,
-.library-stats .stat + .stat {
+.stats.library-stats > .stat,
+.stats.library-stats > .stat + .stat {
+  flex: 1 1 calc(20% - 1px);
   min-width: 0;
   padding: clamp(17px, 2vw, 22px);
   border: 0;
   background: var(--bg2);
 }
 
-.library-stats .stat strong {
+.stats.library-stats > .stat strong {
   display: block;
   font-size: clamp(27px, 3vw, 34px);
   line-height: 1;
   white-space: nowrap;
 }
 
-.library-stats .stat span {
+.stats.library-stats > .stat span {
   display: block;
   margin-top: 7px;
   font-size: clamp(9px, 1vw, 10px);
@@ -46,48 +51,64 @@
   hyphens: none;
 }
 
-/* Tablets e janelas intermediárias: três métricas acima e duas equilibradas abaixo. */
+/* A busca nunca deixa o input empurrar o botão para fora do container. */
+.library-search {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.library-search > * {
+  min-width: 0;
+}
+
+.library-search .field {
+  width: 100%;
+}
+
+/* Tablets, zoom elevado e janelas intermediárias: 3 + 2 métricas equilibradas. */
 @media (max-width: 1040px) {
-  .library-stats {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .stats.library-stats > .stat {
+    flex-basis: calc(33.333% - 1px);
   }
 
-  .library-stats .stat {
-    grid-column: span 2;
-  }
-
-  .library-stats .stat:nth-child(4),
-  .library-stats .stat:nth-child(5) {
-    grid-column: span 3;
+  .stats.library-stats > .stat:nth-child(4),
+  .stats.library-stats > .stat:nth-child(5) {
+    flex-basis: calc(50% - 1px);
   }
 }
 
-/* Celulares: duas colunas compactas e a última métrica centralizada em largura total. */
+/* Celulares: duas colunas; a última métrica ocupa a faixa inteira. */
 @media (max-width: 699px) {
-  .library-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .stats.library-stats > .stat,
+  .stats.library-stats > .stat:nth-child(4) {
+    flex-basis: calc(50% - 1px);
   }
 
-  .library-stats .stat {
-    grid-column: auto;
-  }
-
-  .library-stats .stat:last-child {
-    grid-column: 1 / -1;
+  .stats.library-stats > .stat:last-child {
+    flex-basis: 100%;
     align-items: center;
     text-align: center;
   }
-}
 
-/* Telas muito estreitas: uma coluna evita compressão e quebra ruim dos rótulos. */
-@media (max-width: 360px) {
-  .library-stats {
-    grid-template-columns: 1fr;
+  .library-search {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .library-stats .stat,
-  .library-stats .stat:last-child {
-    grid-column: auto;
+  .library-search .solid {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+/* Telas estreitas ou zoom muito alto: uma coluna, sem compressão de rótulos. */
+@media (max-width: 360px) {
+  .stats.library-stats > .stat,
+  .stats.library-stats > .stat:nth-child(4),
+  .stats.library-stats > .stat:last-child {
+    flex-basis: 100%;
     align-items: initial;
     text-align: left;
   }
