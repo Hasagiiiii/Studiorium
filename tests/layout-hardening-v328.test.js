@@ -38,3 +38,22 @@ test('etiquetas e metadados longos não forçam overflow horizontal', () => {
   assert.ok(css.includes('.meta > *'));
   assert.ok(css.includes('max-width: 100%;'));
 });
+
+test('pôster do Ateliê refluí em telas estreitas sem escala artificial', () => {
+  const css = read('public/css/layout-hardening-v328.css');
+  for (const marker of [
+    'grid-template-columns: repeat(2, minmax(0, 1fr));',
+    '@media screen and (max-width: 720px)',
+    '@media screen and (max-width: 520px)',
+    '.poster-shell',
+    '.postergrid',
+    '.postersection',
+    'grid-template-columns: 1fr;',
+    'overflow-x: hidden;',
+    'word-break: normal;',
+  ]) {
+    assert.ok(css.includes(marker), `proteção do pôster ausente: ${marker}`);
+  }
+  assert.equal(css.includes('transform: scale('), false);
+  assert.equal(css.includes('zoom:'), false);
+});
