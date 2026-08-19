@@ -1,0 +1,142 @@
+/* Studiorium v3.2.5 — acabamento mobile e prevenção de sobreposição */
+
+/* A tradução acadêmica nunca deve colar nem invadir o título da página. */
+.pagehero .pagetitle + .academic-translation {
+  margin: 10px 0 18px;
+  line-height: 1.45;
+}
+
+.pagehero .pagetitle {
+  text-wrap: balance;
+}
+
+.pagehero > .shell > .sectionhead:first-child {
+  row-gap: 16px;
+}
+
+/* Scriptorium: preserva hierarquia e organiza os muitos atalhos sem comprimir texto. */
+.pagehero:has(.personal-shelf) > .shell > .stats + .actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pagehero:has(.personal-shelf) > .shell > .stats + .actions > * {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pagehero:has(.personal-shelf) .personal-shelf > .sectionhead {
+  margin-bottom: 18px;
+}
+
+.pagehero:has(.personal-shelf) .personal-shelf .mini-shelf:has(.empty) {
+  display: block;
+  padding: 18px;
+  box-shadow: none;
+}
+
+.pagehero:has(.personal-shelf) .personal-shelf .mini-shelf:has(.empty) .empty {
+  width: 100%;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px 18px;
+}
+
+/* Cards com ações devem crescer verticalmente em vez de espremê-las. */
+@media (max-width: 720px) {
+  .pagehero .sectionhead .actions {
+    flex-wrap: wrap;
+  }
+
+  .card > .actions,
+  .publication-actions,
+  .book-actions-grid,
+  .reply-submit-actions {
+    max-width: 100%;
+  }
+
+  .pagehero:has(.personal-shelf) > .shell > .stats + .actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pagehero:has(.personal-shelf) .personal-shelf > .sectionhead {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .pagehero .pagetitle + .academic-translation {
+    margin-top: 8px;
+    margin-bottom: 16px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+
+  .pagehero > .shell > .sectionhead:first-child {
+    margin-bottom: 18px;
+  }
+
+  .pagehero > .shell > .sectionhead:first-child > .actions,
+  .pagehero > .shell > .sectionhead:first-child > .actions > * {
+    width: 100%;
+  }
+
+  .pagehero:has(.personal-shelf) > .shell > .stats + .actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 22px !important;
+  }
+
+  .pagehero:has(.personal-shelf) > .shell > .stats + .actions > * {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .pagehero:has(.personal-shelf) .personal-shelf {
+    padding: 18px 16px;
+  }
+
+  .pagehero:has(.personal-shelf) .personal-shelf .mini-shelf:has(.empty) {
+    padding: 12px;
+  }
+
+  .pagehero:has(.personal-shelf) .personal-shelf .mini-shelf:has(.empty) .empty {
+    min-height: 100px;
+    padding: 18px 12px;
+    font-size: 16px;
+  }
+
+  .card > .actions:not(.book-actions-grid),
+  .publication-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .card > .actions:not(.book-actions-grid) > *,
+  .publication-actions > * {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .pagehero .pagetitle {
+    font-size: 29px;
+  }
+
+  .pagehero .pagetitle + .academic-translation {
+    font-size: 8px;
+    letter-spacing: 0.11em;
+  }
+}
