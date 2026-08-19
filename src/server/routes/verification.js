@@ -15,9 +15,12 @@ function clean(value, limit) {
 async function submitVerification(req) {
   const user = await requireUser(req);
   if (user.is_minor) {
-    throw Object.assign(new Error('Verificação profissional está disponível para maiores de 18 anos.'), {
-      statusCode: 403,
-    });
+    throw Object.assign(
+      new Error('Verificação profissional está disponível para maiores de 18 anos.'),
+      {
+        statusCode: 403,
+      },
+    );
   }
   const body = await readJson(req);
   const course = clean(body.course, 160);
@@ -72,7 +75,9 @@ async function submitVerification(req) {
     .select('*')
     .single();
   if (error?.code === '23505') {
-    throw Object.assign(new Error('Você já possui uma solicitação em análise.'), { statusCode: 409 });
+    throw Object.assign(new Error('Você já possui uma solicitação em análise.'), {
+      statusCode: 409,
+    });
   }
   fail(error);
   const { error: updateError } = await db()
@@ -97,7 +102,8 @@ async function submitVerification(req) {
 async function reviewVerification(req, requestId) {
   const admin = await requireAdmin(req);
   const body = await readJson(req);
-  const status = body.status === 'approved' ? 'approved' : body.status === 'rejected' ? 'rejected' : '';
+  const status =
+    body.status === 'approved' ? 'approved' : body.status === 'rejected' ? 'rejected' : '';
   if (!status) throw Object.assign(new Error('Decisão inválida.'), { statusCode: 400 });
   const { data: request, error: requestError } = await db()
     .from('profile_verification_requests')

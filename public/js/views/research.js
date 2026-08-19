@@ -104,9 +104,8 @@ function researchDetail(slug) {
                   >Baixar arquivo</a
                 >`
               : ''}<button class="outline" data-print>Imprimir / salvar PDF</button
-            ><button class="outline" data-report="publication:${E(p.id)}">
-              Denunciar conteúdo
-            </button><button class="soft" type="button" data-publication-boost="${E(p.id)}">
+            ><button class="outline" data-report="publication:${E(p.id)}">Denunciar conteúdo</button
+            ><button class="soft" type="button" data-publication-boost="${E(p.id)}">
               Impulsionar · <span data-boost-count="${E(p.id)}">${num(p.boosts)}</span>
             </button>
           </div>
@@ -131,8 +130,8 @@ function researchDetail(slug) {
 function autores() {
   const q = (state.query.get('q') || '').trim().toLocaleLowerCase('pt-BR');
   const type = state.query.get('tipo') || '';
-  const types = [...new Set(state.boot.profiles.map((profile) => profile.profileType))].sort((a, b) =>
-    a.localeCompare(b, 'pt-BR'),
+  const types = [...new Set(state.boot.profiles.map((profile) => profile.profileType))].sort(
+    (a, b) => a.localeCompare(b, 'pt-BR'),
   );
   const profiles = state.boot.profiles.filter(
     (profile) =>
@@ -160,9 +159,10 @@ function autores() {
             <option value="">Todos os perfis</option>
             ${types
               .map(
-                (item) => html`<option value="${E(item)}" ${item === type ? 'selected' : ''}>
-                  ${E(item)}
-                </option>`,
+                (item) =>
+                  html`<option value="${E(item)}" ${item === type ? 'selected' : ''}>
+                    ${E(item)}
+                  </option>`,
               )
               .join('')}
           </select>
@@ -183,15 +183,15 @@ function autores() {
                   <div class="pills">
                     <span class="pill">${E(p.profileType)}</span>
                     ${p.verificationStatus === 'verified'
-                      ? html`<span class="verified-badge">✓ ${E(
-                          p.verifiedSpecialty || 'Especialista verificado',
-                        )}</span>`
+                      ? html`<span class="verified-badge"
+                          >✓ ${E(p.verifiedSpecialty || 'Especialista verificado')}</span
+                        >`
                       : ''}
                   </div>
                   ${p.course
-                    ? html`<p class="profile-course">${E(p.course)}${
-                        p.institution ? ` · ${E(p.institution)}` : ''
-                      }</p>`
+                    ? html`<p class="profile-course">
+                        ${E(p.course)}${p.institution ? ` · ${E(p.institution)}` : ''}
+                      </p>`
                     : ''}
                   <p>${E(p.bio || 'Perfil público da comunidade Studiorium.')}</p></a
                 >`,
@@ -219,9 +219,9 @@ function authorDetail(username) {
             <div class="eyebrow">${E(p.profileType)}</div>
             <h1 class="pagetitle">${E(p.displayName)}</h1>
             ${p.verificationStatus === 'verified'
-              ? html`<span class="verified-badge large">✓ Especialista verificado · ${E(
-                  p.verifiedSpecialty || p.course,
-                )}</span>`
+              ? html`<span class="verified-badge large"
+                  >✓ Especialista verificado · ${E(p.verifiedSpecialty || p.course)}</span
+                >`
               : ''}
             ${p.contributionStatus === 'active_collaborator'
               ? '<span class="badge collaborator">Colaborador ativo</span>'
@@ -229,9 +229,7 @@ function authorDetail(username) {
             <p>${E(p.bio || 'Membro da comunidade Studiorium.')}</p>
             ${p.course || p.institution
               ? html`<p class="profile-credentials">
-                  ${E(p.course || p.educationLevel)}${p.institution
-                    ? ` · ${E(p.institution)}`
-                    : ''}
+                  ${E(p.course || p.educationLevel)}${p.institution ? ` · ${E(p.institution)}` : ''}
                 </p>`
               : ''}
             <span class="badge">@${E(p.username)}</span>
@@ -257,7 +255,8 @@ function authorDetail(username) {
             </div>
           </div>
           <div class="grid grid3">
-            ${projects.map(projectCard).join('') || empty('Este autor ainda não compartilhou projetos.')}
+            ${projects.map(projectCard).join('') ||
+            empty('Este autor ainda não compartilhou projetos.')}
           </div>
         </div>
       </div>
@@ -291,9 +290,13 @@ function projetos() {
         <h1 class="pagetitle">Projetos da comunidade</h1>
         <p>Explore projetos acadêmicos que seus autores escolheram compartilhar publicamente.</p>
         <form class="toolbar" data-project-filter>
-          <input class="field" type="search" name="q" value="${E(
-            state.query.get('q') || '',
-          )}" placeholder="Pesquisar projeto, tipo ou conteúdo" />
+          <input
+            class="field"
+            type="search"
+            name="q"
+            value="${E(state.query.get('q') || '')}"
+            placeholder="Pesquisar projeto, tipo ou conteúdo"
+          />
           <button class="solid">Pesquisar projetos</button>
         </form>
         <div class="grid grid3" style="margin-top:28px">
@@ -323,10 +326,13 @@ function publicProjectDetail(projectId) {
         <article class="paper public-project">
           ${(project.sections || [])
             .map(
-              (section) => html`<section>
-                <h2>${E(section.name)}</h2>
-                <p style="white-space:pre-wrap">${E(section.content || 'Seção ainda não preenchida.')}</p>
-              </section>`,
+              (section) =>
+                html`<section>
+                  <h2>${E(section.name)}</h2>
+                  <p style="white-space:pre-wrap">
+                    ${E(section.content || 'Seção ainda não preenchida.')}
+                  </p>
+                </section>`,
             )
             .join('')}
         </article>

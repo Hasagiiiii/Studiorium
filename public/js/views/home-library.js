@@ -273,34 +273,27 @@ function biblioteca() {
   const autores = [...new Set(boot.publications.map((p) => p.authorName).filter(Boolean))].sort(
     (a, b) => a.localeCompare(b, 'pt-BR'),
   );
-  let pubs =
-    ['modelos', 'livros'].includes(tipo)
-      ? []
-      : boot.publications.filter(
-          (p) =>
-            contains(p, q) &&
-            (!area || p.area === area) &&
-            (!nivel || p.level === nivel) &&
-            (!autor || p.authorName === autor) &&
-            (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
-        );
-  let templates =
-    ['pesquisas', 'livros'].includes(tipo)
-      ? []
-      : boot.templates.filter(
-          (t) => contains(t, q) && (!area || t.category === area) && !nivel && !autor && !palavra,
-        );
-  let books =
-    ['pesquisas', 'modelos'].includes(tipo)
-      ? []
-      : (boot.books || []).filter(
-          (book) =>
-            contains(book, q) &&
-            (!area || book.category === area) &&
-            !nivel &&
-            !autor &&
-            !palavra,
-        );
+  let pubs = ['modelos', 'livros'].includes(tipo)
+    ? []
+    : boot.publications.filter(
+        (p) =>
+          contains(p, q) &&
+          (!area || p.area === area) &&
+          (!nivel || p.level === nivel) &&
+          (!autor || p.authorName === autor) &&
+          (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
+      );
+  let templates = ['pesquisas', 'livros'].includes(tipo)
+    ? []
+    : boot.templates.filter(
+        (t) => contains(t, q) && (!area || t.category === area) && !nivel && !autor && !palavra,
+      );
+  let books = ['pesquisas', 'modelos'].includes(tipo)
+    ? []
+    : (boot.books || []).filter(
+        (book) =>
+          contains(book, q) && (!area || book.category === area) && !nivel && !autor && !palavra,
+      );
   const authorMatches = boot.profiles.filter(
     (p) => (!q || contains(p, q)) && (!autor || p.displayName === autor),
   );
@@ -435,7 +428,9 @@ function biblioteca() {
                   <div>
                     <div class="eyebrow">Armarium librorum</div>
                     <h2>Estante de livros</h2>
-                    <p>Obras para ampliar repertório em literatura, ciência, filosofia e educação.</p>
+                    <p>
+                      Obras para ampliar repertório em literatura, ciência, filosofia e educação.
+                    </p>
                   </div>
                 </div>
                 <div class="book-shelf">${books.map(bookCard).join('')}</div>`

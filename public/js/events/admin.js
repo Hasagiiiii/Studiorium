@@ -123,12 +123,13 @@ export async function handleAdminClick(event) {
 
   if (verification) {
     const [id, status, contributionStatus] = verification.dataset.adminVerification.split(':');
-    const note = prompt(
-      status === 'approved'
-        ? 'Observação interna da verificação (opcional):'
-        : 'Explique o que precisa ser corrigido:',
-      '',
-    ) || '';
+    const note =
+      prompt(
+        status === 'approved'
+          ? 'Observação interna da verificação (opcional):'
+          : 'Explique o que precisa ser corrigido:',
+        '',
+      ) || '';
     if (status === 'rejected' && !note.trim()) return true;
     if (!confirm(status === 'approved' ? 'Conceder este selo público?' : 'Recusar a solicitação?'))
       return true;

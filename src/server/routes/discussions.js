@@ -132,8 +132,7 @@ async function createReply(req, discussionId) {
   fail(error);
   return {
     reply: S.reply(data),
-    message:
-      data.status === 'published' ? 'Resposta publicada.' : 'Resposta enviada para revisão.',
+    message: data.status === 'published' ? 'Resposta publicada.' : 'Resposta enviada para revisão.',
   };
 }
 

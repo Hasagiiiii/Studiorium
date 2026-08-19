@@ -40,7 +40,10 @@ test('triagem editorial local aprova texto regular e sinaliza sensacionalismo', 
     ],
   };
   assert.equal(moderateNews(base).decision, 'approved');
-  assert.equal(moderateNews({ ...base, title: 'CHOCANTE!!! Compartilhe antes que apaguem' }).decision, 'flagged');
+  assert.equal(
+    moderateNews({ ...base, title: 'CHOCANTE!!! Compartilhe antes que apaguem' }).decision,
+    'flagged',
+  );
   assert.equal(moderateNews(base).engine, 'studiorium_local_rules_v1');
 });
 

@@ -45,8 +45,8 @@ function nav() {
                 <span aria-hidden="true">♢</span>
                 ${state.unreadNotificationCount
                   ? html`<strong>${Math.min(state.unreadNotificationCount, 99)}</strong>`
-                  : ''}
-              </button><a href="/escrivaninha" data-link class="outline"
+                  : ''}</button
+              ><a href="/escrivaninha" data-link class="outline"
                 >${E(state.me.displayName.split(' ')[0])}</a
               ><button class="iconbtn mobile" data-menu aria-label="Abrir menu">☰</button>`
           : html`<a href="/login" data-link class="outline">Entrar</a
@@ -91,26 +91,29 @@ function notificationPanel() {
               Marcar lidas
             </button>`
           : ''}
-        <button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">×</button>
+        <button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">
+          ×
+        </button>
       </div>
     </div>
     <div class="notification-list">
       ${state.notifications.length
         ? state.notifications
             .map(
-              (item) => html`<button
-                type="button"
-                class="notification-item ${item.readAt ? '' : 'unread'}"
-                data-notification-open="${E(item.id)}"
-                data-notification-link="${E(item.link || '')}"
-              >
-                <span class="notification-mark" aria-hidden="true"></span>
-                <span>
-                  <strong>${E(item.title)}</strong>
-                  <small>${E(item.message)}</small>
-                  <time>${date(item.createdAt)}</time>
-                </span>
-              </button>`,
+              (item) =>
+                html`<button
+                  type="button"
+                  class="notification-item ${item.readAt ? '' : 'unread'}"
+                  data-notification-open="${E(item.id)}"
+                  data-notification-link="${E(item.link || '')}"
+                >
+                  <span class="notification-mark" aria-hidden="true"></span>
+                  <span>
+                    <strong>${E(item.title)}</strong>
+                    <small>${E(item.message)}</small>
+                    <time>${date(item.createdAt)}</time>
+                  </span>
+                </button>`,
             )
             .join('')
         : html`<div class="empty">Nenhuma notificação por enquanto.</div>`}

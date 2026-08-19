@@ -96,7 +96,9 @@ function moderateNews(article) {
     score += sensationalCount * 2;
   }
   if (textAnalysis.signals.some((signal) => signal.category === 'dados_pessoais')) {
-    suggestions.push('Remova ou anonimize dados que identifiquem pessoas sem necessidade editorial.');
+    suggestions.push(
+      'Remova ou anonimize dados que identifiquem pessoas sem necessidade editorial.',
+    );
   }
 
   risks.push(...sources.risks);

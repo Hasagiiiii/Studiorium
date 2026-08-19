@@ -125,43 +125,45 @@ async function me(req) {
       customTemplates: [],
       bookSaves: [],
     };
-  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ] = await Promise.all([
-    db()
-      .from('projects')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false }),
-    db()
-      .from('publications')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: false }),
-    db()
-      .from('tech_resources')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: false }),
-    db()
-      .from('code_projects')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('updated_at', { ascending: false }),
-    db()
-      .from('news_articles')
-      .select('*')
-      .eq('contributor_id', user.id)
-      .order('updated_at', { ascending: false }),
-    db()
-      .from('custom_templates')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('updated_at', { ascending: false }),
-    db()
-      .from('book_saves')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false }),
-  ]);
+  const [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ] = await Promise.all(
+    [
+      db()
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false }),
+      db()
+        .from('publications')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false }),
+      db()
+        .from('tech_resources')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false }),
+      db()
+        .from('code_projects')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('updated_at', { ascending: false }),
+      db()
+        .from('news_articles')
+        .select('*')
+        .eq('contributor_id', user.id)
+        .order('updated_at', { ascending: false }),
+      db()
+        .from('custom_templates')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('updated_at', { ascending: false }),
+      db()
+        .from('book_saves')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
+    ],
+  );
   [projectsQ, publicationsQ, techQ, codeQ, newsQ, templatesQ, bookSavesQ].forEach((query) =>
     fail(query.error),
   );

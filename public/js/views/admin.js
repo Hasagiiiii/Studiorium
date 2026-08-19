@@ -14,7 +14,11 @@ import {
 function adminTabs(active) {
   if (state.me?.role !== 'admin') {
     return html`<div class="admin-tabs">
-      ${link('/moderacao', 'Fila de moderação', `admin-tab ${active === 'moderacao' ? 'active' : ''}`)}
+      ${link(
+        '/moderacao',
+        'Fila de moderação',
+        `admin-tab ${active === 'moderacao' ? 'active' : ''}`,
+      )}
     </div>`;
   }
   const tabs = [
@@ -431,7 +435,10 @@ async function adminPanel(tab = 'overview') {
                                   ]
                                     .map(
                                       ([value, label]) =>
-                                        html`<option value="${value}" ${u.role === value ? 'selected' : ''}>
+                                        html`<option
+                                          value="${value}"
+                                          ${u.role === value ? 'selected' : ''}
+                                        >
                                           ${label}
                                         </option>`,
                                     )
@@ -478,14 +485,22 @@ async function adminPanel(tab = 'overview') {
                   <div class="verification-facts">
                     <span><strong>Curso</strong>${E(request.course)}</span>
                     <span><strong>Instituição</strong>${E(request.institution)}</span>
-                    <span><strong>Formação</strong>${E(request.educationLevel || 'Não informada')}</span>
+                    <span
+                      ><strong>Formação</strong>${E(
+                        request.educationLevel || 'Não informada',
+                      )}</span
+                    >
                     <span><strong>Especialidade</strong>${E(request.specialty)}</span>
                   </div>
                   <p>${E(request.statement)}</p>
                   ${request.credentialReference
                     ? html`<p class="small">
                         Referência informada:
-                        <a href="${E(request.credentialReference)}" target="_blank" rel="noopener noreferrer">
+                        <a
+                          href="${E(request.credentialReference)}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           consultar comprovação ↗
                         </a>
                       </p>`

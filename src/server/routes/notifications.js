@@ -9,9 +9,15 @@ async function createNotification(userId, values = {}) {
     id: id('ntf'),
     user_id: userId,
     type: String(values.type || 'system').slice(0, 60),
-    title: String(values.title || 'Atualização do Studiorium').trim().slice(0, 140),
-    message: String(values.message || '').trim().slice(0, 1200),
-    link: String(values.link || '').trim().slice(0, 400),
+    title: String(values.title || 'Atualização do Studiorium')
+      .trim()
+      .slice(0, 140),
+    message: String(values.message || '')
+      .trim()
+      .slice(0, 1200),
+    link: String(values.link || '')
+      .trim()
+      .slice(0, 400),
     created_at: now(),
   };
   const { data, error } = await db().from('notifications').insert(row).select('*').single();

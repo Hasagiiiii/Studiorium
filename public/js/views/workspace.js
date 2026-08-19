@@ -59,9 +59,7 @@ async function escrivaninha() {
           <div class="stat"><strong>${projects.length}</strong><span>Projetos</span></div>
           <div class="stat"><strong>${me.publications.length}</strong><span>Publicações</span></div>
           <div class="stat"><strong>${pending}</strong><span>Em revisão</span></div>
-          <div class="stat">
-            <strong>${bookshelf.length}</strong><span>Livros na estante</span>
-          </div>
+          <div class="stat"><strong>${bookshelf.length}</strong><span>Livros na estante</span></div>
         </div>
         <div class="actions" style="margin-bottom:25px">
           ${link('/acervo', 'Novo a partir de modelo', 'solid')}${link(
@@ -96,11 +94,14 @@ async function escrivaninha() {
           <div class="mini-shelf">
             ${bookshelf
               .map(
-                ({ book, shelfStatus }) => html`<article class="mini-book theme-${E(book.coverTheme)}">
-                  <span>${E(book.category)}</span><strong>${E(book.title)}</strong
-                  ><small>${E(book.author)} · ${E(shelfStatus)}</small>
-                  <button class="soft" type="button" data-book-remove="${E(book.id)}">Remover</button>
-                </article>`,
+                ({ book, shelfStatus }) =>
+                  html`<article class="mini-book theme-${E(book.coverTheme)}">
+                    <span>${E(book.category)}</span><strong>${E(book.title)}</strong
+                    ><small>${E(book.author)} · ${E(shelfStatus)}</small>
+                    <button class="soft" type="button" data-book-remove="${E(book.id)}">
+                      Remover
+                    </button>
+                  </article>`,
               )
               .join('') || empty('Sua estante está vazia. Guarde livros pela Biblioteca.')}
           </div>
@@ -335,9 +336,13 @@ async function escrivaninha() {
                   'Autodidata',
                 ]
                   .map(
-                    (level) => html`<option value="${E(level)}" ${
-                      level === state.me.educationLevel ? 'selected' : ''
-                    }>${E(level || 'Não informar')}</option>`,
+                    (level) =>
+                      html`<option
+                        value="${E(level)}"
+                        ${level === state.me.educationLevel ? 'selected' : ''}
+                      >
+                        ${E(level || 'Não informar')}
+                      </option>`,
                   )
                   .join('')}
               </select>
@@ -379,55 +384,65 @@ async function escrivaninha() {
                     A verificação profissional fica disponível quando a conta atingir a maioridade.
                   </div>`
                 : html`<p>
-                    Envie sua formação e uma referência verificável. O selo só aparece depois da
-                    análise de um administrador.
-                  </p>
-                  <form data-profile-verification>
-                    <div class="formgrid">
-                      <div>
-                        <label class="label">Curso ou formação</label>
-                        <input class="field" name="course" value="${E(state.me.course || '')}" required />
+                      Envie sua formação e uma referência verificável. O selo só aparece depois da
+                      análise de um administrador.
+                    </p>
+                    <form data-profile-verification>
+                      <div class="formgrid">
+                        <div>
+                          <label class="label">Curso ou formação</label>
+                          <input
+                            class="field"
+                            name="course"
+                            value="${E(state.me.course || '')}"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="label">Instituição</label>
+                          <input
+                            class="field"
+                            name="institution"
+                            value="${E(state.me.institution || '')}"
+                            required
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label class="label">Instituição</label>
+                      <div class="formgrid">
+                        <div>
+                          <label class="label">Nível de formação</label>
+                          <input
+                            class="field"
+                            name="educationLevel"
+                            value="${E(state.me.educationLevel || '')}"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="label">Especialidade para o selo</label>
+                          <input class="field" name="specialty" required />
+                        </div>
+                      </div>
+                      <div class="formrow">
+                        <label class="label">Referência de comprovação (opcional)</label>
                         <input
                           class="field"
-                          name="institution"
-                          value="${E(state.me.institution || '')}"
-                          required
+                          name="credentialReference"
+                          type="url"
+                          placeholder="Link institucional, currículo ou registro profissional"
                         />
                       </div>
-                    </div>
-                    <div class="formgrid">
-                      <div>
-                        <label class="label">Nível de formação</label>
-                        <input
-                          class="field"
-                          name="educationLevel"
-                          value="${E(state.me.educationLevel || '')}"
+                      <div class="formrow">
+                        <label class="label">Explique sua formação e experiência</label>
+                        <textarea
+                          class="textarea"
+                          name="statement"
+                          minlength="30"
                           required
-                        />
+                        ></textarea>
                       </div>
-                      <div>
-                        <label class="label">Especialidade para o selo</label>
-                        <input class="field" name="specialty" required />
-                      </div>
-                    </div>
-                    <div class="formrow">
-                      <label class="label">Referência de comprovação (opcional)</label>
-                      <input
-                        class="field"
-                        name="credentialReference"
-                        type="url"
-                        placeholder="Link institucional, currículo ou registro profissional"
-                      />
-                    </div>
-                    <div class="formrow">
-                      <label class="label">Explique sua formação e experiência</label>
-                      <textarea class="textarea" name="statement" minlength="30" required></textarea>
-                    </div>
-                    <button class="solid">Solicitar verificação</button>
-                  </form>`}
+                      <button class="solid">Solicitar verificação</button>
+                    </form>`}
         </div>
         <div class="card" style="margin-top:18px">
           <div class="eyebrow">Segurança</div>

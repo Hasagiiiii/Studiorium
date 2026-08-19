@@ -9,9 +9,7 @@ const SHELF_STATUSES = new Set(['want_to_read', 'reading', 'read']);
 async function saveBook(req, bookId) {
   const user = await requireUser(req);
   const body = await readJson(req);
-  const shelfStatus = SHELF_STATUSES.has(body.shelfStatus)
-    ? body.shelfStatus
-    : 'want_to_read';
+  const shelfStatus = SHELF_STATUSES.has(body.shelfStatus) ? body.shelfStatus : 'want_to_read';
   const { data: book, error: bookError } = await db()
     .from('books')
     .select('id')

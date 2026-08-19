@@ -47,7 +47,7 @@ test('perfil acadêmico declara formação sem permitir auto-verificação', () 
   assert.ok(profile.includes("'internauta'"));
   assert.ok(profile.includes('education_level'));
   assert.equal(profile.includes('verified_specialty:'), false);
-  assert.ok(verification.includes("requireAdmin(req)"));
+  assert.ok(verification.includes('requireAdmin(req)'));
   assert.ok(verification.includes("db().rpc('complete_profile_verification'"));
   assert.ok(auth.includes('verificationStatus'));
 });
@@ -103,7 +103,12 @@ test('projetos acadêmicos podem ser compartilhados sem expor notas privadas', (
   assert.ok(projects.includes("['private', 'public'].includes(body.visibility)"));
   assert.ok(serializers.includes('function publicProject'));
   assert.equal(
-    serializers.slice(serializers.indexOf('function publicProject'), serializers.indexOf('function publication')).includes('notes:'),
+    serializers
+      .slice(
+        serializers.indexOf('function publicProject'),
+        serializers.indexOf('function publication'),
+      )
+      .includes('notes:'),
     false,
   );
   assert.ok(research.includes('Projetos da comunidade'));

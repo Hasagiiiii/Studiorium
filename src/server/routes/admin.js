@@ -244,11 +244,13 @@ async function updatePublication(req, publicationId) {
   if (patch.status) {
     await createNotification(data.owner_id, {
       type: 'publication',
-      title: patch.status === 'published' ? 'Trabalho publicado' : 'Revisão da publicação atualizada',
+      title:
+        patch.status === 'published' ? 'Trabalho publicado' : 'Revisão da publicação atualizada',
       message:
         patch.status === 'published'
           ? `“${data.title}” foi aprovado e já está na Biblioteca.`
-          : patch.moderation_note || `O status de “${data.title}” foi atualizado para ${patch.status}.`,
+          : patch.moderation_note ||
+            `O status de “${data.title}” foi atualizado para ${patch.status}.`,
       link: patch.status === 'published' ? `/pesquisas/${data.slug}` : '/escrivaninha',
     });
   }
@@ -292,11 +294,12 @@ async function updateContent(req, type, targetId) {
         body.status === 'published'
           ? `“${data.title}” foi aprovado pela equipe.`
           : `“${data.title}” recebeu o status ${body.status}.`,
-      link: body.status === 'published' && data.slug
-        ? type === 'publication'
-          ? `/pesquisas/${data.slug}`
-          : `/oficina/${data.slug}`
-        : '/escrivaninha',
+      link:
+        body.status === 'published' && data.slug
+          ? type === 'publication'
+            ? `/pesquisas/${data.slug}`
+            : `/oficina/${data.slug}`
+          : '/escrivaninha',
     });
   }
   return { ok: true, status: body.status };
