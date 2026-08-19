@@ -55,8 +55,15 @@ function reportFailure(error) {
   toast(message, true);
 }
 
+function preventAccidentalActionSubmit(event) {
+  const button = event.target.closest?.('button');
+  if (!button || !Object.keys(button.dataset).length) return;
+  event.preventDefault();
+}
+
 export function bindEvents() {
   addEventListener('click', (event) => {
+    preventAccidentalActionSubmit(event);
     void dispatch(event, clickHandlers).catch(reportFailure);
   });
 
