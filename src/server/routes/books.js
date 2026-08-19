@@ -30,6 +30,34 @@ function normalizeIsbn(value) {
     .slice(0, 13);
 }
 
+function serializeBook(row) {
+  return {
+    ...S.book(row),
+    submittedBy: row.submitted_by || null,
+    isbn: row.isbn || '',
+    coverUrl: row.cover_url || '',
+    purchaseUrl: row.purchase_url || '',
+    purchaseLabel: row.purchase_label || '',
+    ratingAverage: Number(row.rating_average || 0),
+    reviewCount: Number(row.review_count || 0),
+    recommendationCount: Number(row.recommendation_count || 0),
+    createdAt: row.created_at || null,
+  };
+}
+
+function serializeReview(row) {
+  return {
+    bookId: row.book_id,
+    userId: row.user_id,
+    reviewerName: row.reviewer_name || 'Membro da comunidade',
+    rating: Number(row.rating || 0),
+    review: row.review || '',
+    recommend: row.recommend === true,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function validateCommunityText(text, label) {
   const result = moderate(text);
   if (!result.ok) badRequest(`${label}: ${result.message}`, 422);
@@ -120,8 +148,8 @@ async function upsertReview(user, bookId, body) {
   await upsertShelf(user.id, bookId, 'read');
   const updatedBook = await refreshBookMetrics(bookId);
   return {
-    review: S.bookReview(data),
-    book: S.book(updatedBook),
+    review: serializeReview(data),
+    book: serializeBook(updatedBook),
     message: 'Review publicada no Armarium.',
   };
 }
@@ -133,7 +161,11 @@ async function createBook(user, body) {
   const category = safeText(body.category, 80) || 'Leituras da comunidade';
   const isbn = normalizeIsbn(body.isbn);
   const suppliedCover = safeHttpsUrl(body.coverUrl);
-  const coverUrl = suppliedCover || (isbn.length >= 10 ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg` : '');
+  const coverUrl =
+    suppliedCover ||
+    (isbn.length >= 10
+      ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg`
+      : '');
   const purchaseUrl = safeHttpsUrl(body.purchaseUrl);
   const purchaseLabel = purchaseUrl
     ? safeText(body.purchaseLabel, 80) || 'Ver edição / comprar'
@@ -157,7 +189,8 @@ async function createBook(user, body) {
     .limit(1)
     .maybeSingle();
   fail(duplicateError);
-  if (duplicate) badRequest('Esse livro já existe no Armarium. Abra o registro e publique sua review.', 409);
+  if (duplicate)
+    badRequest('Esse livro já existe no Armarium. Abra o registro e publique sua review.', 409);
 
   const row = {
     id: id('book'),
