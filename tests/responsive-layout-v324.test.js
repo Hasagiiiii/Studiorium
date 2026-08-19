@@ -6,9 +6,13 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
 
-test('responsividade global é carregada por último', () => {
+test('responsividade global precede apenas o endurecimento final', () => {
   const style = read('public/style.css').trim().split('\n');
-  assert.equal(style.at(-1), "@import url('/css/responsive.css');");
+  const responsive = style.indexOf("@import url('/css/responsive.css');");
+  const hardening = style.indexOf("@import url('/css/layout-hardening-v328.css');");
+  assert.ok(responsive >= 0);
+  assert.ok(hardening > responsive);
+  assert.equal(style.at(-1), "@import url('/css/layout-hardening-v328.css');");
 });
 
 test('layout possui guardas contra overflow horizontal e componentes espremidos', () => {
