@@ -68,7 +68,10 @@ function refreshReplyQuality(textarea) {
   const text = textarea.value.trim();
   const checks = {
     '[data-quality-context]': text.length >= 40,
-    '[data-quality-question]': /\?|\b(como|onde|qual|quais|por que|alguem sabe)\b/i.test(text),
+    '[data-quality-question]':
+      /\?/.test(text) ||
+      /^(como|onde|quando|qual|quais|por que|quem)\b/i.test(text) ||
+      /\b(alguem sabe|nao entendi|tenho duvida|poderia explicar)\b/i.test(text),
     '[data-quality-reference]':
       /https?:\/\/|\b(fonte|referencia|exemplo|artigo|livro|pesquisa)\b/i.test(text),
   };
