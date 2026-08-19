@@ -19,6 +19,78 @@
   max-width: 100%;
 }
 
+/* O pôster do Ateliê precisa refluír sem alterar a composição de impressão. */
+.postergrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.postergrid > *,
+.postersection,
+.postersection h2,
+.postersection p {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.postersection h2,
+.postersection p {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+@media screen and (max-width: 720px) {
+  .poster-shell {
+    overflow-x: hidden;
+    padding: clamp(8px, 2.8vw, 16px);
+  }
+
+  .poster {
+    width: 100%;
+    min-height: 0;
+    padding: clamp(20px, 5vw, 32px);
+  }
+
+  .poster h1 {
+    font-size: clamp(26px, 7.5vw, 34px);
+  }
+
+  .poster .authors {
+    font-size: clamp(12px, 3.3vw, 14px);
+  }
+
+  .postergrid {
+    gap: clamp(12px, 3vw, 18px);
+  }
+
+  .postersection {
+    min-height: 0;
+    padding: clamp(12px, 3vw, 15px);
+  }
+
+  .postersection h2 {
+    font-size: clamp(15px, 4.3vw, 18px);
+  }
+
+  .postersection p {
+    font-size: clamp(11px, 3.2vw, 13px);
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .postergrid {
+    grid-template-columns: 1fr;
+  }
+
+  .poster header {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .poster footer {
+    margin-top: 18px;
+  }
+}
+
 @media (max-width: 520px) {
   /* Etiquetas podem quebrar internamente quando o conteúdo for maior que o card. */
   .pill,
@@ -100,6 +172,20 @@
 
   .feature h3 {
     font-size: clamp(19px, 6.5vw, 23px);
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .poster-shell {
+    padding: 6px;
+  }
+
+  .poster {
+    padding: 18px 14px;
+  }
+
+  .postersection {
+    padding: 11px;
   }
 }
 
