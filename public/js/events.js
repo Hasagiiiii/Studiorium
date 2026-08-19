@@ -13,6 +13,7 @@ import { handleFilterSubmit } from './events/filters.js';
 import { handleNavigationClick } from './events/navigation.js';
 import { handleNotificationClick } from './events/notifications.js';
 import { handleBookClick } from './events/books.js';
+import { handleOwnedContentClick } from './events/owned-content-v329.js';
 import { handlePublicationClick } from './events/publications.js';
 import {
   handleLabMessage,
@@ -27,6 +28,7 @@ const clickHandlers = [
   handleNavigationClick,
   handleNotificationClick,
   handleBookClick,
+  handleOwnedContentClick,
   handlePublicationClick,
   handleProjectClick,
   handleCommunityClick,
