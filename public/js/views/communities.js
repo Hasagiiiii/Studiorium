@@ -21,6 +21,9 @@ function communityCard(community) {
     <div class="community-card-meta">
       <span>${num(community.memberCount || 0)} participantes</span>
       ${community.joined ? '<span class="brass">Você participa</span>' : ''}
+      ${community.memberModerationStatus === 'muted'
+        ? '<span class="muted">Participação silenciada</span>'
+        : ''}
     </div>
     <div class="community-card-actions">
       ${link(
@@ -134,9 +137,24 @@ export async function comunidades() {
   );
 }
 
-function techResourceCard(resource) {
-  return html`<article class="community-resource-card">
+function moderationButton(community, type, item) {
+  const hidden = item.communityHidden === true;
+  return html`<button
+    class="soft community-content-moderation"
+    type="button"
+    data-community-content-status="${hidden ? 'visible' : 'hidden'}"
+    data-community-slug="${E(community.slug)}"
+    data-community-content-type="${E(type)}"
+    data-community-content-id="${E(item.id)}"
+  >
+    ${hidden ? 'Restaurar na comunidade' : 'Ocultar da comunidade'}
+  </button>`;
+}
+
+function techResourceCard(resource, community, canModerateContent) {
+  return html`<article class="community-resource-card ${resource.communityHidden ? 'is-hidden' : ''}">
     <span class="eyebrow">${E(resource.category || 'Oficina')}</span>
+    ${resource.communityHidden ? '<span class="community-hidden-label">Oculto localmente</span>' : ''}
     <h3>${link(`/oficina/${encodeURIComponent(resource.slug)}`, E(resource.title))}</h3>
     <p>${E(resource.summary || '')}</p>
     <div class="pills">
@@ -145,7 +163,16 @@ function techResourceCard(resource) {
         .map((tag) => html`<span class="pill">${E(tag)}</span>`)
         .join('')}
     </div>
+    ${canModerateContent ? moderationButton(community, 'tech_resource', resource) : ''}
   </article>`;
+}
+
+function communityDiscussionItem(discussion, index, community, canModerateContent) {
+  return html`<div class="community-discussion-item ${discussion.communityHidden ? 'is-hidden' : ''}">
+    ${discussion.communityHidden ? '<span class="community-hidden-label">Oculto localmente</span>' : ''}
+    ${discussionRow(discussion, index)}
+    ${canModerateContent ? moderationButton(community, 'discussion', discussion) : ''}
+  </div>`;
 }
 
 function rulesBlock(community) {
@@ -167,10 +194,17 @@ export async function comunidadeDetalhe(slug, options = {}) {
   const discussions = data.discussions || [];
   const resources = data.techResources || [];
   const permissions = data.permissions || [];
+  const canParticipate = permissions.includes('participate');
+  const canModerateContent = permissions.includes('moderate_content');
   const canManage = permissions.some((permission) =>
     ['manage_roles', 'manage_rules', 'moderate_members'].includes(permission),
   );
   const canonical = `/comunidades/${encodeURIComponent(community.slug)}`;
+  const officeCreatePath = `/oficina?novo=1&comunidade=${encodeURIComponent(
+    community.slug,
+  )}&comunidadeNome=${encodeURIComponent(community.name)}`;
+  const discussionDisabled =
+    data.storageReady === false || (Boolean(state.me) && !canParticipate);
 
   layout(
     html`<section class="pagehero community-detail">
@@ -191,6 +225,9 @@ export async function comunidadeDetalhe(slug, options = {}) {
           <div class="community-membership">
             ${community.joined
               ? html`<span class="community-status">Participando</span>
+                  ${community.memberModerationStatus === 'muted'
+                    ? '<small class="community-restriction">Silenciado temporariamente</small>'
+                    : ''}
                   ${community.memberRole && community.memberRole !== 'member'
                     ? html`<small
                         >Função:
@@ -207,14 +244,16 @@ export async function comunidadeDetalhe(slug, options = {}) {
                   >
                     Sair da comunidade
                   </button>`
-              : html`<button
-                  class="solid"
-                  type="button"
-                  data-community-join="${E(community.slug)}"
-                  ${data.storageReady === false ? 'disabled' : ''}
-                >
-                  ${state.me ? 'Participar' : 'Entrar para participar'}
-                </button>`}
+              : community.memberModerationStatus === 'removed'
+                ? '<button class="outline" type="button" disabled>Participação removida</button>'
+                : html`<button
+                    class="solid"
+                    type="button"
+                    data-community-join="${E(community.slug)}"
+                    ${data.storageReady === false ? 'disabled' : ''}
+                  >
+                    ${state.me ? 'Participar' : 'Entrar para participar'}
+                  </button>`}
             ${canManage
               ? html`<button
                   class="soft"
@@ -258,9 +297,9 @@ export async function comunidadeDetalhe(slug, options = {}) {
               type="button"
               data-community-discussion="${E(community.slug)}"
               data-community-name="${E(community.name)}"
-              ${data.storageReady === false ? 'disabled' : ''}
+              ${discussionDisabled ? 'disabled' : ''}
             >
-              Abrir discussão
+              ${state.me && !canParticipate ? 'Participe para discutir' : 'Abrir discussão'}
             </button>
           </div>
           <p class="community-section-copy">
@@ -269,7 +308,16 @@ export async function comunidadeDetalhe(slug, options = {}) {
           </p>
           <div class="community-discussion-list">
             ${discussions.length
-              ? discussions.map((discussion, index) => discussionRow(discussion, index)).join('')
+              ? discussions
+                  .map((discussion, index) =>
+                    communityDiscussionItem(
+                      discussion,
+                      index,
+                      community,
+                      canModerateContent,
+                    ),
+                  )
+                  .join('')
               : empty('Ainda não há discussões vinculadas a esta comunidade.')}
           </div>
           <div id="communityComposer"></div>
@@ -281,7 +329,10 @@ export async function comunidadeDetalhe(slug, options = {}) {
               <div class="eyebrow">Officina</div>
               <h2>Conhecimento prático relacionado</h2>
             </div>
-            ${link('/oficina', 'Explorar toda a Oficina', 'outline')}
+            <div class="actions">
+              ${canParticipate ? link(officeCreatePath, 'Criar nesta comunidade', 'solid') : ''}
+              ${link('/oficina', 'Explorar toda a Oficina', 'outline')}
+            </div>
           </div>
           <p class="community-section-copy">
             Tutoriais, guias e soluções permanecem como conteúdo estruturado da Oficina e aparecem
@@ -289,7 +340,11 @@ export async function comunidadeDetalhe(slug, options = {}) {
           </p>
           ${resources.length
             ? html`<div class="community-resource-grid">
-                ${resources.map(techResourceCard).join('')}
+                ${resources
+                  .map((resource) =>
+                    techResourceCard(resource, community, canModerateContent),
+                  )
+                  .join('')}
               </div>`
             : empty('Ainda não há recursos da Oficina associados a esta comunidade.')}
         </section>
