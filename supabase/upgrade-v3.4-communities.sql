@@ -54,13 +54,17 @@ create table if not exists public.community_content_links (
       )
     ),
   content_id text not null,
+  status text not null default 'visible'
+    check (status in ('visible', 'hidden')),
+  moderated_by text references public.users(id) on delete set null,
+  moderated_at timestamptz,
   created_at timestamptz not null default now(),
   primary key (community_id, content_type, content_id)
 );
 create index if not exists community_content_lookup_idx
   on public.community_content_links(content_type, content_id);
 create index if not exists community_content_recent_idx
-  on public.community_content_links(community_id, created_at desc);
+  on public.community_content_links(community_id, status, created_at desc);
 
 alter table public.communities enable row level security;
 alter table public.community_members enable row level security;
