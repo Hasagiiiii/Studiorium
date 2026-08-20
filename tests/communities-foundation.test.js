@@ -64,6 +64,19 @@ test('Colóquio usa vínculo comunitário e exige participação ativa', () => {
   assert.match(links, /community_content_links/);
 });
 
+test('discussões ocultas não vazam no bootstrap nem em conversas relacionadas', () => {
+  const discussions = read('src/server/routes/discussions.js');
+  const bootstrap = read('src/server/routes/bootstrap.js');
+  const links = read('src/server/community-links.js');
+
+  assert.match(links, /hiddenCommunityContentIds/);
+  assert.match(bootstrap, /hiddenCommunityContentIds\('discussion'\)/);
+  assert.match(bootstrap, /publicDiscussions/);
+  assert.match(discussions, /hiddenCommunityContentIds\('discussion'\)/);
+  assert.match(discussions, /visibleRelated/);
+  assert.match(discussions, /communityPermissions/);
+});
+
 test('Oficina pode pertencer à comunidade sem duplicar o conteúdo', () => {
   const tech = read('src/server/routes/tech.js');
   const composer = read('public/js/events/composers.js');
@@ -128,7 +141,7 @@ test('navegação usa Comunidades e mantém Colóquio antigo apenas por compatib
   assert.match(serverRouter, /communityRoutes\.detail/);
   assert.match(clientRouter, /p === '\/comunidades'/);
   assert.match(clientRouter, /history\.replaceState\(\{\}, '', '\/comunidades'\)/);
-  assert.match(clientRouter, /\/comunidades\\\/\(\[\^\/\]\+\)\\\/coloquio/);
+  assert.match(clientRouter, /communityThread/);
   assert.match(clientRouter, /p\.startsWith\('\/coloquio\/'\)/);
   assert.match(core, /\['\/comunidades', 'Comunidades'\]/);
   assert.doesNotMatch(core, /\['\/coloquio', 'Colóquio'\]/);
