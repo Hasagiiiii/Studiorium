@@ -43,7 +43,8 @@
   margin: 26px 0 42px;
 }
 
-.community-toolbar label > span {
+.community-toolbar label > span,
+.community-member-controls label > span {
   display: block;
   margin-bottom: 7px;
   color: var(--muted);
@@ -204,6 +205,77 @@
   margin: 12px 0 18px;
 }
 
+.community-rules-list {
+  display: grid;
+  gap: 10px;
+  padding-left: 24px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.community-management-panel {
+  display: grid;
+  gap: 28px;
+  margin-top: 22px;
+}
+
+.community-rules-form,
+.community-member-management {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.018);
+  padding: clamp(18px, 2.4vw, 28px);
+}
+
+.community-rules-form {
+  display: grid;
+  gap: 16px;
+}
+
+.community-member-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(300px, 1.4fr) auto;
+  gap: 14px;
+  align-items: end;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.community-member-row:first-of-type {
+  border-top: 0;
+}
+
+.community-member-identity {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.community-member-identity strong,
+.community-member-identity span,
+.community-member-identity small {
+  overflow-wrap: anywhere;
+}
+
+.community-member-identity span,
+.community-member-identity small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.community-member-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.community-role-note {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  line-height: 1.6;
+}
+
 @media (max-width: 980px) {
   .community-grid,
   .community-resource-grid {
@@ -217,6 +289,11 @@
   .community-toolbar > button,
   .community-toolbar > a {
     width: 100%;
+  }
+
+  .community-member-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 }
 
@@ -235,12 +312,15 @@
 
   .community-card-actions .outline,
   .community-membership .solid,
-  .community-membership .outline {
+  .community-membership .outline,
+  .community-membership .soft,
+  .community-member-row > button {
     width: 100%;
     text-align: center;
   }
 
-  .community-stats {
+  .community-stats,
+  .community-member-controls {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -249,6 +329,12 @@
     border-right: 0;
     border-bottom: 1px solid var(--line);
     padding: 0 0 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .community-member-controls {
+    grid-template-columns: 1fr;
   }
 }
 
