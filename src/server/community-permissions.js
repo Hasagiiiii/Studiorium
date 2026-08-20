@@ -24,7 +24,7 @@ function permissionsFor(role, isAdmin = false) {
 async function membershipFor(communityId, userId) {
   const query = await db()
     .from('community_members')
-    .select('community_id,user_id,role,status,joined_at')
+    .select('community_id,user_id,role,status,moderation_status,joined_at')
     .eq('community_id', communityId)
     .eq('user_id', userId)
     .maybeSingle();
@@ -38,9 +38,13 @@ async function communityActor(req, slug) {
   if (community.storageReady === false) {
     throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
   }
+
   const membership = await membershipFor(community.id, user.id);
   const isAdmin = user.role === 'admin';
-  const role = membership?.status === 'active' ? membership.role : null;
+  const activeMembership = membership?.status === 'active';
+  const moderationClear = membership?.moderation_status === 'clear';
+  const role = activeMembership && moderationClear ? membership.role : null;
+
   return {
     user,
     community,
