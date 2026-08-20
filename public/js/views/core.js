@@ -15,7 +15,7 @@ function nav() {
     ['/oficina', 'Oficina'],
     ['/acervo', 'Acervo'],
     ['/atelie', 'Ateliê'],
-    ['/coloquio', 'Colóquio'],
+    ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
   ];
   if (state.me?.role === 'admin') items.push(['/admin', 'ADM']);
@@ -146,10 +146,10 @@ function footer() {
         ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link(
           '/estudio-templates',
           'Estúdio de templates',
-        )}${link('/redacao', 'Redação colaborativa')}${link('/coloquio', 'Abrir discussão')}${link(
-          '/sobre',
-          'Sobre o projeto',
-        )}
+        )}${link('/redacao', 'Redação colaborativa')}${link(
+          '/comunidades',
+          'Abrir discussão',
+        )}${link('/sobre', 'Sobre o projeto')}
       </div>
     </div>
   </footer>`;
