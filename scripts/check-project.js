@@ -106,14 +106,21 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'ut
 const lockfile = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
 void vercel;
 
-if (manifest.version !== lockfile.version || manifest.version !== lockfile.packages?.['']?.version) {
+if (
+  manifest.version !== lockfile.version ||
+  manifest.version !== lockfile.packages?.['']?.version
+) {
   throw new Error('Versão divergente entre package.json e package-lock.json.');
 }
 
 const supabaseVersion = manifest.dependencies?.['@supabase/supabase-js'];
 const lockedSupabaseVersion = lockfile.packages?.['']?.dependencies?.['@supabase/supabase-js'];
 const installedSupabaseVersion = lockfile.packages?.['node_modules/@supabase/supabase-js']?.version;
-if (!supabaseVersion || supabaseVersion !== lockedSupabaseVersion || supabaseVersion !== installedSupabaseVersion) {
+if (
+  !supabaseVersion ||
+  supabaseVersion !== lockedSupabaseVersion ||
+  supabaseVersion !== installedSupabaseVersion
+) {
   throw new Error('Versão do @supabase/supabase-js divergente entre manifesto e lockfile.');
 }
 
