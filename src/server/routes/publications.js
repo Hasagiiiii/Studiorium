@@ -293,9 +293,18 @@ function ensurePublicationEditable(publication) {
 }
 
 async function getPublication(req, publicationId) {
-  const user = await requireUser(req);
-  const publication = await ownedPublication(user.id, publicationId);
-  ensurePublicationEditable(publication);
+  const user = await currentUser(req);
+  const { data: publication, error } = await db()
+    .from('publications')
+    .select('*')
+    .eq('id', publicationId)
+    .maybeSingle();
+  fail(error);
+
+  const isOwner = Boolean(user && publication?.owner_id === user.id);
+  const isPublic = publication?.status === 'published';
+  if (!publication || (!isOwner && !isPublic)) throw fileError('Publicação não encontrada.', 404);
+
   return { publication: S.publication(publication) };
 }
 

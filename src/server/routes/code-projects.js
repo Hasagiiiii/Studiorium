@@ -1,8 +1,9 @@
 const { db, fail } = require('../db');
-const { requireUser } = require('../auth');
+const { requireUser, currentUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now } = require('../security');
 const S = require('../serializers');
+
 async function create(req) {
   const u = await requireUser(req),
     b = await readJson(req);
@@ -11,7 +12,7 @@ async function create(req) {
     owner_id: u.id,
     title: String(b.title || 'Novo projeto').slice(0, 160),
     description: '',
-    html: '<main>\\n  <h1>Meu projeto</h1>\\n  <p>Comece a criar.</p>\\n</main>',
+    html: '<main>\n  <h1>Meu projeto</h1>\n  <p>Comece a criar.</p>\n</main>',
     css: 'body { font-family: system-ui; padding: 2rem; }',
     javascript: 'console.log("Studiorium Lab");',
     visibility: 'private',
@@ -22,8 +23,9 @@ async function create(req) {
   fail(q.error);
   return { project: S.codeProject(q.data) };
 }
+
 async function get(req, pid) {
-  const u = await requireUser(req);
+  const u = await currentUser(req);
   const q = await db()
     .from('code_projects')
     .select('*')
@@ -31,10 +33,15 @@ async function get(req, pid) {
     .is('deleted_at', null)
     .maybeSingle();
   fail(q.error);
-  if (!q.data || (q.data.owner_id !== u.id && q.data.visibility !== 'public'))
+
+  const isOwner = Boolean(u && q.data?.owner_id === u.id);
+  const isPublic = q.data?.visibility === 'public';
+  if (!q.data || (!isOwner && !isPublic))
     throw Object.assign(new Error('Projeto não encontrado.'), { statusCode: 404 });
+
   return { project: S.codeProject(q.data) };
 }
+
 async function update(req, pid) {
   const u = await requireUser(req),
     b = await readJson(req);

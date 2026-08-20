@@ -43,7 +43,7 @@ test('backend permite catálogo real, review, nota e estados da estante', () => 
 });
 
 test('interface mostra Armarium com formulário real, review, compra e três estados', () => {
-  const enhancements = read('public/js/enhancements.js');
+  const armarium = read('public/js/features/armarium.js');
   const events = read('public/js/events/books.js');
   for (const marker of [
     'Armarium Librorum',
@@ -58,7 +58,7 @@ test('interface mostra Armarium com formulário real, review, compra e três est
     'Já li',
     'referrerpolicy="no-referrer"',
   ]) {
-    assert.ok(enhancements.includes(marker), `interface sem: ${marker}`);
+    assert.ok(armarium.includes(marker), `interface sem: ${marker}`);
   }
   assert.ok(events.includes("body.action = 'create'"));
   assert.ok(events.includes("body.action = 'review'"));
@@ -81,7 +81,7 @@ test('home não deixa um vazio de viewport entre hero e acessos principais', () 
 });
 
 test('identidade visual recupera a nomenclatura acadêmica sem loop de mutação', () => {
-  const enhancements = read('public/js/enhancements.js');
+  const identity = read('public/js/features/academic-identity.js');
   for (const name of [
     'Bibliotheca',
     'Colloquium',
@@ -93,15 +93,15 @@ test('identidade visual recupera a nomenclatura acadêmica sem loop de mutação
     'Catalogus',
     'Auctores',
   ]) {
-    assert.ok(enhancements.includes(name), `nome acadêmico ausente: ${name}`);
+    assert.ok(identity.includes(name), `nome acadêmico ausente: ${name}`);
   }
-  assert.ok(enhancements.includes('if (subtitle.textContent !== translation)'));
+  assert.ok(identity.includes('if (subtitle.textContent !== translation)'));
 });
 
 test('navbar preserva logo e usuário sem quebrar nomes acadêmicos', () => {
-  const css = read('public/css/nav-v323.css');
+  const css = read('public/css/responsive/navigation.css');
   const style = read('public/style.css');
-  assert.ok(style.includes("@import url('/css/nav-v323.css');"));
+  assert.ok(style.includes("@import url('/css/responsive/navigation.css');"));
   assert.ok(css.includes('min-width: max-content;'));
   assert.ok(css.includes('white-space: nowrap;'));
   assert.ok(css.includes('@media (max-width: 1120px)'));

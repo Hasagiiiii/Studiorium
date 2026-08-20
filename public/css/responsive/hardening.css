@@ -190,9 +190,16 @@
 }
 
 @media (max-width: 330px) {
-  .nav .brand > span:last-child,
-  .nav .brand strong {
-    max-width: 68px;
+  /*
+   * Em zoom muito alto a marca textual deixa de competir com login, notificações
+   * e menu. O selo continua identificando o produto e todas as ações permanecem.
+   */
+  .nav .brand {
+    flex: 0 0 32px;
+  }
+
+  .nav .brand > span:last-child {
+    display: none;
   }
 
   .nav .nav-actions .outline,

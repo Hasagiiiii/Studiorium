@@ -2,6 +2,89 @@ const { db, fail } = require('../db');
 const { currentUser, publicUser } = require('../auth');
 const S = require('../serializers');
 
+const PUBLICATION_LIST_FIELDS = [
+  'id',
+  'owner_id',
+  'author_name',
+  'title',
+  'slug',
+  'abstract',
+  'content',
+  'area',
+  'level',
+  'keywords',
+  'license',
+  'status',
+  'views',
+  'downloads',
+  'boosts',
+  'featured',
+  'created_at',
+  'published_at',
+  'file_name',
+  'file_mime',
+  'cover_name',
+  'cover_mime',
+].join(',');
+
+const TECH_LIST_FIELDS = [
+  'id',
+  'owner_id',
+  'author_name',
+  'title',
+  'slug',
+  'summary',
+  'hub',
+  'category',
+  'tags',
+  'status',
+  'featured',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const CODE_PROJECT_LIST_FIELDS = [
+  'id',
+  'owner_id',
+  'title',
+  'description',
+  'visibility',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+].join(',');
+
+const NEWS_LIST_FIELDS = [
+  'id',
+  'contributor_id',
+  'author_name',
+  'title',
+  'slug',
+  'summary',
+  'category',
+  'status',
+  'featured',
+  'hypes',
+  'certified_by',
+  'certified_at',
+  'published_at',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const CUSTOM_TEMPLATE_LIST_FIELDS = [
+  'id',
+  'owner_id',
+  'title',
+  'description',
+  'source_type',
+  'status',
+  'featured',
+  'deleted_at',
+  'created_at',
+  'updated_at',
+].join(',');
+
 function communityBook(row) {
   return {
     ...S.book(row),
@@ -54,7 +137,7 @@ async function bootstrap(req) {
       .order('downloads', { ascending: false }),
     client
       .from('publications')
-      .select('*')
+      .select(PUBLICATION_LIST_FIELDS)
       .eq('status', 'published')
       .order('featured', { ascending: false })
       .order('boosts', { ascending: false })
@@ -72,19 +155,19 @@ async function bootstrap(req) {
     client.from('site_settings').select('*'),
     client
       .from('tech_resources')
-      .select('*')
+      .select(TECH_LIST_FIELDS)
       .eq('status', 'published')
       .order('featured', { ascending: false })
       .order('created_at', { ascending: false }),
     client
       .from('code_projects')
-      .select('*')
+      .select(CODE_PROJECT_LIST_FIELDS)
       .eq('visibility', 'public')
       .is('deleted_at', null)
       .order('updated_at', { ascending: false }),
     client
       .from('news_articles')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('status', 'published')
       .not('certified_at', 'is', null)
       .is('deleted_at', null)
@@ -93,7 +176,7 @@ async function bootstrap(req) {
       .order('published_at', { ascending: false }),
     client
       .from('custom_templates')
-      .select('*')
+      .select(CUSTOM_TEMPLATE_LIST_FIELDS)
       .eq('status', 'published')
       .is('deleted_at', null)
       .order('featured', { ascending: false })

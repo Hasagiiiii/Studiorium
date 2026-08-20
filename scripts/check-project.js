@@ -16,6 +16,15 @@ const required = [
   'public/js/router.js',
   'public/js/views.js',
   'public/js/events.js',
+  'public/js/animations/motion.js',
+  'public/css/responsive/navigation.css',
+  'public/css/responsive/mobile.css',
+  'public/css/responsive/home.css',
+  'public/css/responsive/headings.css',
+  'public/css/responsive/global.css',
+  'public/css/responsive/hardening.css',
+  'public/css/animations/interactions.css',
+  'public/css/animations/motion.css',
   'supabase/schema.sql',
   'supabase/seed.sql',
   'supabase/upgrade-v2.7-security-events.sql',
@@ -97,14 +106,21 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'ut
 const lockfile = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
 void vercel;
 
-if (manifest.version !== lockfile.version || manifest.version !== lockfile.packages?.['']?.version) {
+if (
+  manifest.version !== lockfile.version ||
+  manifest.version !== lockfile.packages?.['']?.version
+) {
   throw new Error('Versão divergente entre package.json e package-lock.json.');
 }
 
 const supabaseVersion = manifest.dependencies?.['@supabase/supabase-js'];
 const lockedSupabaseVersion = lockfile.packages?.['']?.dependencies?.['@supabase/supabase-js'];
 const installedSupabaseVersion = lockfile.packages?.['node_modules/@supabase/supabase-js']?.version;
-if (!supabaseVersion || supabaseVersion !== lockedSupabaseVersion || supabaseVersion !== installedSupabaseVersion) {
+if (
+  !supabaseVersion ||
+  supabaseVersion !== lockedSupabaseVersion ||
+  supabaseVersion !== installedSupabaseVersion
+) {
   throw new Error('Versão do @supabase/supabase-js divergente entre manifesto e lockfile.');
 }
 
@@ -119,8 +135,8 @@ const styleImports = [...styleSource.matchAll(/@import\s+url\(['"]([^'"]+)['"]\)
 if (new Set(styleImports).size !== styleImports.length) {
   throw new Error('public/style.css contém imports CSS duplicados.');
 }
-if (styleImports.at(-1) !== '/css/layout-hardening-v328.css') {
-  throw new Error('layout-hardening-v328.css deve permanecer como última camada CSS.');
+if (styleImports.at(-1) !== '/css/responsive/hardening.css') {
+  throw new Error('responsive/hardening.css deve permanecer como última camada CSS.');
 }
 
 console.log(
