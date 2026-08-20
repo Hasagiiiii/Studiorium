@@ -1,4 +1,5 @@
 import { app, state, bootstrap, E, html } from './runtime.js';
+import { bookDetail } from './views/books-v331.js';
 import {
   home,
   biblioteca,
@@ -66,6 +67,7 @@ async function renderRoute() {
   const p = location.pathname.replace(/\/+$/, '') || '/';
   if (p === '/') return home();
   if (['/biblioteca', '/library'].includes(p)) return biblioteca();
+  if (p.startsWith('/livros/')) return bookDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (['/oficina', '/tech'].includes(p)) return await oficina();
   if (p.startsWith('/oficina/'))
     return await oficinaDetail(decodeURIComponent(p.split('/')[2] || ''));
