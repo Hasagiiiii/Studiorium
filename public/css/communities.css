@@ -119,6 +119,11 @@
   text-transform: uppercase;
 }
 
+.community-restriction {
+  color: var(--brass);
+  font-size: 12px;
+}
+
 .community-preview-notice {
   margin: 20px 0;
 }
@@ -197,8 +202,47 @@
   margin-top: 18px;
 }
 
+.community-discussion-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.community-discussion-item .discussion-row {
+  min-width: 0;
+}
+
+.community-discussion-item + .community-discussion-item {
+  border-top: 1px solid var(--line);
+}
+
+.community-resource-card {
+  position: relative;
+}
+
 .community-resource-card .pills {
   margin-top: 14px;
+}
+
+.community-content-moderation {
+  margin-top: 14px;
+  justify-self: end;
+}
+
+.community-hidden-label {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.community-discussion-item.is-hidden,
+.community-resource-card.is-hidden {
+  opacity: 0.72;
 }
 
 .discussion-community-context {
@@ -308,6 +352,16 @@
 
   .community-toolbar {
     align-items: stretch;
+  }
+
+  .community-discussion-item {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .community-content-moderation {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .community-card-actions .outline,
