@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run check && npm test",
   "functions": {
     "api/index.js": { "maxDuration": 20 }
   },
