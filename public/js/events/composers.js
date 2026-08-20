@@ -21,14 +21,37 @@ function selectOptions(options, selected) {
     .join('');
 }
 
-export function techResourceForm(resource = {}) {
+function routeCommunityContext() {
+  if (typeof location === 'undefined') return { slug: '', name: '' };
+  const query = new URLSearchParams(location.search);
+  return {
+    slug: String(query.get('comunidade') || '').trim(),
+    name: String(query.get('comunidadeNome') || '').trim(),
+  };
+}
+
+export function techResourceForm(resource = {}, context = {}) {
   const editing = Boolean(resource.id);
   const tags = Array.isArray(resource.tags) ? resource.tags.join(', ') : resource.tags || '';
+  const routeContext = routeCommunityContext();
+  const communitySlug = String(
+    context.communitySlug || context.slug || routeContext.slug || '',
+  ).trim();
+  const communityName = String(
+    context.communityName || context.name || routeContext.name || '',
+  ).trim();
 
   return html`
     <form class="card" data-tech-resource="${E(resource.id || '')}">
       <div class="eyebrow">${editing ? 'Reaproveitar envio' : 'Contribuição da comunidade'}</div>
       <h3>${editing ? 'Editar conteúdo enviado' : 'Publicar na Tech & Oficina'}</h3>
+      ${communitySlug
+        ? html`<input type="hidden" name="communitySlug" value="${E(communitySlug)}" />
+            <div class="notice discussion-community-context">
+              Este conteúdo ficará vinculado à comunidade
+              <strong>${E(communityName || communitySlug)}</strong>.
+            </div>`
+        : ''}
       ${editing
         ? html`<p class="notice">
             Salve as alterações para devolver este conteúdo à fila de revisão.
@@ -85,19 +108,34 @@ ${E(resource.body || '')}</textarea
   `;
 }
 
-export function discussionForm() {
+export function discussionForm(options = {}) {
+  const communitySlug = String(options.communitySlug || '').trim();
+  const communityName = String(options.communityName || '').trim();
+
   return html`
-    <form class="card" data-new-discussion-form style="margin-top: 20px">
+    <form class="card discussion-composer" data-new-discussion-form style="margin-top: 20px">
       <div class="eyebrow">Nova mesa</div>
-      <h3>Abrir discussão</h3>
+      <h3>Abrir discussão${communityName ? ` em ${E(communityName)}` : ''}</h3>
+      ${communitySlug
+        ? html`<input type="hidden" name="communitySlug" value="${E(communitySlug)}" />
+            <div class="notice discussion-community-context">
+              Este Colóquio ficará vinculado à comunidade <strong>${E(communityName)}</strong>.
+            </div>`
+        : ''}
       <div class="formrow">
         <label class="label">Título</label>
         <input class="field" name="title" required minlength="6" />
       </div>
-      <div class="formrow">
-        <label class="label">Categoria</label>
-        <input class="field" name="category" placeholder="Ex.: Matemática, Educação, Tecnologia" />
-      </div>
+      ${communitySlug
+        ? ''
+        : html`<div class="formrow">
+            <label class="label">Categoria</label>
+            <input
+              class="field"
+              name="category"
+              placeholder="Ex.: Matemática, Educação, Tecnologia"
+            />
+          </div>`}
       <div class="formrow">
         <label class="label">Contexto da discussão</label>
         <textarea class="textarea" name="body" required minlength="10"></textarea>

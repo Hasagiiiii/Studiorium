@@ -13,6 +13,8 @@ import {
   authorDetail,
   coloquio,
   thread,
+  comunidades,
+  comunidadeDetalhe,
   login,
   requestPasswordReset,
   resetPassword,
@@ -83,9 +85,24 @@ async function renderRoute() {
     return publicProjectDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/autores') return autores();
   if (p.startsWith('/autores/')) return authorDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (['/coloquio', '/comunidade'].includes(p)) return coloquio();
+
+  if (p === '/comunidades') return await comunidades();
+  if (p === '/coloquio' || p === '/comunidade') {
+    history.replaceState({}, '', '/comunidades');
+    return await comunidades();
+  }
+  const communityThread = p.match(/^\/comunidades\/([^/]+)\/coloquio\/([^/]+)$/);
+  if (communityThread) return await thread(decodeURIComponent(communityThread[2]));
+  const communityColloquium = p.match(/^\/comunidades\/([^/]+)\/coloquio$/);
+  if (communityColloquium)
+    return await comunidadeDetalhe(decodeURIComponent(communityColloquium[1]), {
+      focus: 'coloquio',
+    });
+  const communityDetail = p.match(/^\/comunidades\/([^/]+)$/);
+  if (communityDetail) return await comunidadeDetalhe(decodeURIComponent(communityDetail[1]));
   if (p.startsWith('/coloquio/') || p.startsWith('/comunidade/'))
     return await thread(decodeURIComponent(p.split('/')[2] || ''));
+
   if (p === '/login') return login();
   if (p === '/recuperar-senha') return requestPasswordReset();
   if (p === '/redefinir-senha') return resetPassword();

@@ -1,5 +1,6 @@
 const { db, fail } = require('../db');
 const { currentUser, publicUser } = require('../auth');
+const { hiddenCommunityContentIds } = require('../community-links');
 const S = require('../serializers');
 
 const PUBLICATION_LIST_FIELDS = [
@@ -211,6 +212,9 @@ async function bootstrap(req) {
     bookReviewsQ,
     communityProjectsQ,
   ].forEach((query) => fail(query.error));
+
+  const hiddenDiscussionIds = new Set(await hiddenCommunityContentIds('discussion'));
+  const publicDiscussions = discussionsQ.data.filter((row) => !hiddenDiscussionIds.has(row.id));
   const settings = Object.fromEntries(settingsQ.data.map((row) => [row.key, row.value]));
   return {
     templates: templatesQ.data.map(S.template),
@@ -221,7 +225,7 @@ async function bootstrap(req) {
     books: booksQ.data.map(communityBook),
     bookReviews: bookReviewsQ.data.map(communityBookReview),
     communityProjects: communityProjectsQ.data.map(S.publicProject),
-    discussions: discussionsQ.data.map(S.discussion),
+    discussions: publicDiscussions.map(S.discussion),
     profiles: profilesQ.data.map(S.profile),
     settings,
     techResources: techQ.data.map(S.techResource),

@@ -1,9 +1,20 @@
 const { db, fail } = require('../db');
-const { requireUser } = require('../auth');
+const { currentUser, requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now } = require('../security');
 const { moderate } = require('../moderation');
 const { buildReplyMap, rankRelatedDiscussions } = require('../comment-intelligence');
+const {
+  setContentCommunity,
+  removeContentCommunity,
+  communityLinkForContent,
+  hiddenCommunityContentIds,
+} = require('../community-links');
+const {
+  requireCommunityPermission,
+  membershipFor,
+  permissionsFor,
+} = require('../community-permissions');
 const S = require('../serializers');
 
 function inputError(message, statusCode = 400) {
@@ -21,12 +32,27 @@ function discussionInput(body, current = {}) {
     String(body.category ?? current.category ?? 'Geral')
       .trim()
       .slice(0, 60) || 'Geral';
+  const communityProvided = Object.prototype.hasOwnProperty.call(body, 'communitySlug');
+  const communitySlug = communityProvided
+    ? String(body.communitySlug || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '')
+        .slice(0, 80)
+    : '';
   const check = moderate(`${title}\n${text}`);
   if (!check.ok) throw inputError(check.message, 422);
   if (title.length < 6 || text.length < 10) {
     throw inputError('Escreva um título e uma descrição mais completos.');
   }
-  return { title, body: text, category, reviewRequired: check.reviewRequired === true };
+  return {
+    title,
+    body: text,
+    category,
+    communitySlug,
+    communityProvided,
+    reviewRequired: check.reviewRequired === true,
+  };
 }
 
 function replyInput(body, current = {}) {
@@ -49,23 +75,49 @@ async function profileName(user) {
   return user.is_minor ? 'Membro protegido' : data?.display_name || 'Membro';
 }
 
+async function communityPermissionsForRequest(req, community) {
+  const user = await currentUser(req);
+  if (!user) return [];
+  if (user.role === 'admin') return permissionsFor(null, true);
+
+  const membership = await membershipFor(community.id, user.id);
+  if (membership?.status !== 'active' || membership?.moderation_status !== 'clear') return [];
+  return permissionsFor(membership.role);
+}
+
+async function requireDiscussionCommunityAccess(req, discussionId) {
+  const context = await communityLinkForContent('discussion', discussionId);
+  if (!context) return null;
+  const permission = context.status === 'hidden' ? 'moderate_content' : 'participate';
+  await requireCommunityPermission(req, context.community.slug, permission);
+  return context.community;
+}
+
 async function createDiscussion(req) {
   const user = await requireUser(req);
   const values = discussionInput(await readJson(req));
+  let community = null;
+  if (values.communitySlug) {
+    const actor = await requireCommunityPermission(req, values.communitySlug, 'participate');
+    community = actor.community;
+  }
+
   const row = {
     id: id('disc'),
     author_id: user.id,
     author_name: await profileName(user),
     title: values.title,
     body: values.body,
-    category: values.category,
+    category: community?.name || values.category,
     status: values.reviewRequired ? 'pending_review' : 'published',
     created_at: now(),
   };
   const { data, error } = await db().from('discussions').insert(row).select('*').single();
   fail(error);
+  if (community) await setContentCommunity('discussion', data.id, community);
   return {
     discussion: S.discussion(data),
+    community,
     message:
       data.status === 'published'
         ? 'Discussão publicada.'
@@ -89,12 +141,30 @@ async function updateDiscussion(req, discussionId) {
   const user = await requireUser(req);
   const current = await ownedDiscussion(user.id, discussionId);
   const values = discussionInput(await readJson(req), current);
+  const currentCommunity = await requireDiscussionCommunityAccess(req, discussionId);
+  let community = currentCommunity;
+
+  if (values.communityProvided) {
+    if (!values.communitySlug && currentCommunity) {
+      throw inputError(
+        'Uma discussão de comunidade deve permanecer vinculada a uma comunidade.',
+        409,
+      );
+    }
+    if (values.communitySlug) {
+      const actor = await requireCommunityPermission(req, values.communitySlug, 'participate');
+      community = actor.community;
+    } else {
+      community = null;
+    }
+  }
+
   const status =
     values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
   const patch = {
     title: values.title,
     body: values.body,
-    category: values.category,
+    category: community?.name || values.category,
     status,
     author_name: await profileName(user),
   };
@@ -106,8 +176,15 @@ async function updateDiscussion(req, discussionId) {
     .select('*')
     .single();
   fail(error);
+
+  if (values.communityProvided) {
+    if (community) await setContentCommunity('discussion', discussionId, community);
+    else await removeContentCommunity('discussion', discussionId);
+  }
+
   return {
     discussion: S.discussion(data),
+    community,
     message: status === 'published' ? 'Discussão atualizada.' : 'Alterações enviadas para revisão.',
   };
 }
@@ -124,19 +201,31 @@ async function deleteDiscussion(req, discussionId) {
     .maybeSingle();
   fail(error);
   if (!data) throw inputError('Discussão não encontrada.', 404);
+  await removeContentCommunity('discussion', discussionId);
   return { ok: true, message: 'Discussão excluída definitivamente.' };
 }
 
-async function getThread(discussionId) {
-  const discussionQ = await db()
-    .from('discussions')
-    .select('*')
-    .eq('id', discussionId)
-    .eq('status', 'published')
-    .maybeSingle();
+async function getThread(req, discussionId) {
+  const [discussionQ, context] = await Promise.all([
+    db()
+      .from('discussions')
+      .select('*')
+      .eq('id', discussionId)
+      .eq('status', 'published')
+      .maybeSingle(),
+    communityLinkForContent('discussion', discussionId),
+  ]);
   fail(discussionQ.error);
   if (!discussionQ.data) throw inputError('Discussão não encontrada.', 404);
-  const [repliesQ, relatedQ] = await Promise.all([
+
+  const communityPermissions = context
+    ? await communityPermissionsForRequest(req, context.community)
+    : [];
+  if (context?.status === 'hidden' && !communityPermissions.includes('moderate_content')) {
+    throw inputError('Discussão não encontrada.', 404);
+  }
+
+  const [repliesQ, relatedQ, hiddenIds] = await Promise.all([
     db()
       .from('replies')
       .select('*')
@@ -150,16 +239,22 @@ async function getThread(discussionId) {
       .neq('id', discussionId)
       .order('created_at', { ascending: false })
       .limit(40),
+    hiddenCommunityContentIds('discussion'),
   ]);
   fail(repliesQ.error);
   fail(relatedQ.error);
 
+  const hiddenDiscussionIds = new Set(hiddenIds);
+  const visibleRelated = relatedQ.data.filter((row) => !hiddenDiscussionIds.has(row.id));
   const discussion = S.discussion(discussionQ.data);
   const replyMap = buildReplyMap(repliesQ.data.map(S.reply));
-  const relatedDiscussions = rankRelatedDiscussions(discussion, relatedQ.data.map(S.discussion));
+  const relatedDiscussions = rankRelatedDiscussions(discussion, visibleRelated.map(S.discussion));
 
   return {
     discussion,
+    community: context?.community || null,
+    communityPermissions,
+    communityHidden: context?.status === 'hidden',
     replies: replyMap.replies,
     replyMap: {
       total: replyMap.total,
@@ -180,6 +275,8 @@ async function createReply(req, discussionId) {
     .maybeSingle();
   fail(discussionError);
   if (!discussion) throw inputError('Discussão não encontrada.', 404);
+  await requireDiscussionCommunityAccess(req, discussionId);
+
   const values = replyInput(await readJson(req));
   const row = {
     id: id('reply'),
@@ -213,6 +310,7 @@ async function ownedReply(userId, replyId) {
 async function updateReply(req, replyId) {
   const user = await requireUser(req);
   const current = await ownedReply(user.id, replyId);
+  await requireDiscussionCommunityAccess(req, current.discussion_id);
   const values = replyInput(await readJson(req), current);
   const status =
     values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';

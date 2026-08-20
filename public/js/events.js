@@ -9,6 +9,7 @@ import {
   handleCommunityInput,
   handleCommunitySubmit,
 } from './events/community.js';
+import { handleCommunitiesClick, handleCommunitiesSubmit } from './events/communities.js';
 import { handleFilterSubmit } from './events/filters.js';
 import { handleNavigationClick } from './events/navigation.js';
 import { handleNotificationClick } from './events/notifications.js';
@@ -31,6 +32,7 @@ const clickHandlers = [
   handleOwnedContentClick,
   handlePublicationClick,
   handleProjectClick,
+  handleCommunitiesClick,
   handleCommunityClick,
   handleAdminClick,
   handleNewsClick,
@@ -41,6 +43,7 @@ const submitHandlers = [
   handleFilterSubmit,
   handleAdminSubmit,
   handleAccountSubmit,
+  handleCommunitiesSubmit,
   handleCommunitySubmit,
   handleNewsSubmit,
 ];

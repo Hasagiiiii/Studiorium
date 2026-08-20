@@ -26,6 +26,7 @@ export {
   resetPassword,
   cadastro,
 } from './views/community.js';
+export { comunidades, comunidadeDetalhe } from './views/communities.js';
 export { noticias, newsDetail, redacao } from './views/news.js';
 export { templateStudio } from './views/template-studio-private-v329.js';
 export { templateEditor, publicCustomTemplate } from './views/template-studio.js';

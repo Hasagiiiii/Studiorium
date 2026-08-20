@@ -84,7 +84,7 @@ test('identidade visual recupera a nomenclatura acadêmica sem loop de mutação
   const identity = read('public/js/features/academic-identity.js');
   for (const name of [
     'Bibliotheca',
-    'Colloquium',
+    'Communitates',
     'Scriptorium',
     'Officina',
     'Laboratorium',

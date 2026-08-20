@@ -7,14 +7,16 @@ const navigationNames = new Map([
   ['/oficina', 'Officina Technica'],
   ['/acervo', 'Catalogus'],
   ['/atelie', 'Officina Scientifica'],
-  ['/coloquio', 'Colloquium'],
+  ['/comunidades', 'Communitates'],
+  ['/coloquio', 'Communitates'],
   ['/escrivaninha', 'Scriptorium'],
 ]);
 
 const pageNames = [
   ['/biblioteca', () => ['Bibliotheca', 'Biblioteca acadêmica e Armarium Librorum']],
   ['/acervo', () => ['Catalogus', 'Acervo de modelos e documentos']],
-  ['/coloquio', () => ['Colloquium', 'Comunidade de discussões acadêmicas']],
+  ['/comunidades', () => ['Communitates', 'Comunidades de conhecimento do Studiorium']],
+  ['/coloquio', () => ['Communitates', 'Comunidades de conhecimento do Studiorium']],
   [
     '/escrivaninha',
     () => [

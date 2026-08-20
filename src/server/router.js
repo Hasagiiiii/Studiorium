@@ -5,6 +5,7 @@ const profileRoutes = require('./routes/profile');
 const projectRoutes = require('./routes/projects');
 const publicationRoutes = require('./routes/publications');
 const discussionRoutes = require('./routes/discussions');
+const communityRoutes = require('./routes/communities');
 const reportRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
 const techRoutes = require('./routes/tech');
@@ -65,6 +66,64 @@ async function handle(req, res) {
     return send(res, 200, await profileRoutes.updateProfile(req));
   if (method === 'POST' && pathname === '/profile/verification')
     return send(res, 201, await verificationRoutes.submitVerification(req));
+
+  if (method === 'GET' && pathname === '/communities')
+    return send(res, 200, await communityRoutes.list(req));
+  const communityMembership = pathname.match(/^\/communities\/([^/]+)\/membership$/);
+  if (communityMembership && method === 'POST')
+    return send(
+      res,
+      200,
+      await communityRoutes.join(req, decodeURIComponent(communityMembership[1])),
+    );
+  if (communityMembership && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await communityRoutes.leave(req, decodeURIComponent(communityMembership[1])),
+    );
+  const communityMembers = pathname.match(/^\/communities\/([^/]+)\/members$/);
+  if (communityMembers && method === 'GET')
+    return send(
+      res,
+      200,
+      await communityRoutes.members(req, decodeURIComponent(communityMembers[1])),
+    );
+  const communityMember = pathname.match(/^\/communities\/([^/]+)\/members\/([^/]+)$/);
+  if (communityMember && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.updateMember(
+        req,
+        decodeURIComponent(communityMember[1]),
+        decodeURIComponent(communityMember[2]),
+      ),
+    );
+  const communityContent = pathname.match(
+    /^\/communities\/([^/]+)\/content\/([^/]+)\/([^/]+)\/moderation$/,
+  );
+  if (communityContent && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.moderateContent(
+        req,
+        decodeURIComponent(communityContent[1]),
+        decodeURIComponent(communityContent[2]),
+        decodeURIComponent(communityContent[3]),
+      ),
+    );
+  const communitySettings = pathname.match(/^\/communities\/([^/]+)\/settings$/);
+  if (communitySettings && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.updateCommunity(req, decodeURIComponent(communitySettings[1])),
+    );
+  const community = pathname.match(/^\/communities\/([^/]+)$/);
+  if (community && method === 'GET')
+    return send(res, 200, await communityRoutes.detail(req, decodeURIComponent(community[1])));
 
   if (method === 'GET' && pathname === '/notifications')
     return send(res, 200, await notificationRoutes.listNotifications(req));
@@ -249,7 +308,7 @@ async function handle(req, res) {
     return send(res, 201, await discussionRoutes.createDiscussion(req));
   const replies = pathname.match(/^\/discussions\/([^/]+)\/replies$/);
   if (replies && method === 'GET')
-    return send(res, 200, await discussionRoutes.getThread(decodeURIComponent(replies[1])));
+    return send(res, 200, await discussionRoutes.getThread(req, decodeURIComponent(replies[1])));
   if (replies && method === 'POST')
     return send(res, 201, await discussionRoutes.createReply(req, decodeURIComponent(replies[1])));
   const discussion = pathname.match(/^\/discussions\/([^/]+)$/);
