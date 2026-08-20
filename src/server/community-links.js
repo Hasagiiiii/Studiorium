@@ -85,6 +85,23 @@ async function setContentCommunity(contentType, contentId, community) {
   fail(insertion.error);
 }
 
+async function hiddenCommunityContentIds(contentType) {
+  const type = String(contentType || '').trim();
+  if (!type) return [];
+
+  const query = await db()
+    .from('community_content_links')
+    .select('content_id')
+    .eq('content_type', type)
+    .eq('status', 'hidden');
+
+  if (query.error) {
+    if (isMissingCommunitySchema(query.error)) return [];
+    fail(query.error);
+  }
+  return query.data.map((row) => row.content_id);
+}
+
 async function communityLinkForContent(contentType, contentId) {
   const link = await db()
     .from('community_content_links')
@@ -131,6 +148,7 @@ module.exports = {
   resolveCommunity,
   removeContentCommunity,
   setContentCommunity,
+  hiddenCommunityContentIds,
   communityLinkForContent,
   communityForContent,
 };
