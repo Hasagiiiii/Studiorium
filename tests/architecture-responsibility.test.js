@@ -33,6 +33,22 @@ test('estilos responsivos e animações ficam separados por responsabilidade', (
   }
 });
 
+test('features de interface possuem módulos próprios e enhancements apenas orquestra', () => {
+  for (const file of [
+    'public/js/features/academic-identity.js',
+    'public/js/features/armarium.js',
+    'public/js/animations/motion.js',
+  ]) {
+    assert.equal(fs.existsSync(path.join(root, file)), true, `módulo ausente: ${file}`);
+  }
+
+  const enhancements = read('public/js/enhancements.js');
+  assert.match(enhancements, /features\/academic-identity\.js/);
+  assert.match(enhancements, /features\/armarium\.js/);
+  assert.doesNotMatch(enhancements, /const navigationNames/);
+  assert.doesNotMatch(enhancements, /function armariumPanel/);
+});
+
 test('Home possui quatro colunas amplas e reflow 2x2 antes do mobile', () => {
   const css = read('public/css/responsive/home.css');
   assert.match(css, /repeat\(4, minmax\(0, 1fr\)\)/);
