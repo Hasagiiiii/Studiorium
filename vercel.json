@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx prettier --write public/js/events/communities.js public/js/views/communities.js src/server/community-catalog.js src/server/router.js src/server/routes/communities.js vercel.json && git diff -- public/js/events/communities.js public/js/views/communities.js src/server/community-catalog.js src/server/router.js src/server/routes/communities.js vercel.json && exit 1",
+  "buildCommand": "npx prettier --write . && git diff && exit 1",
   "functions": {
     "api/index.js": { "maxDuration": 20 }
   },
