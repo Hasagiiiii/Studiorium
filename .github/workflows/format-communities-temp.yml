@@ -1,0 +1,49 @@
+name: Temporary Communities Format
+
+on:
+  push:
+    branches:
+      - agent/communities-foundation-v341
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: agent/communities-foundation-v341
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Format Communities files
+        run: >-
+          npx prettier --write
+          public/js/events/communities.js
+          public/js/views/communities.js
+          src/server/community-catalog.js
+          src/server/router.js
+          src/server/routes/communities.js
+
+      - name: Commit formatter output
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- public/js/events/communities.js public/js/views/communities.js src/server/community-catalog.js src/server/router.js src/server/routes/communities.js
+          git commit -m "Formata fundação de Comunidades"
+          git push origin HEAD:agent/communities-foundation-v341
