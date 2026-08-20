@@ -10,8 +10,13 @@ const roleLabels = {
   leader: 'Líder',
 };
 
-const statusLabels = {
-  active: 'Ativo',
+const membershipStatusLabels = {
+  active: 'Participando',
+  left: 'Saiu',
+};
+
+const moderationStatusLabels = {
+  clear: 'Liberado',
   muted: 'Silenciado',
   removed: 'Removido',
 };
@@ -43,8 +48,12 @@ function managementMarkup(data, slug) {
       const protectedLeader = member.role === 'leader' && !isAdmin;
       const moderatorLimit = !canRoles && member.role !== 'member';
       const selfProtected = member.userId === state.me?.id && !isAdmin;
-      const roleControl = canRoles && !protectedLeader && !selfProtected;
-      const statusControl = canModerate && !protectedLeader && !moderatorLimit && !selfProtected;
+      const trustedRoleEligible =
+        member.status === 'active' && member.moderationStatus === 'clear';
+      const roleControl =
+        canRoles && !protectedLeader && !selfProtected && trustedRoleEligible;
+      const moderationControl =
+        canModerate && !protectedLeader && !moderatorLimit && !selfProtected;
 
       return html`<form
         class="community-member-row"
@@ -79,25 +88,37 @@ function managementMarkup(data, slug) {
                   disabled
                 />
               </label>`}
-          ${statusControl
+          <label>
+            <span>Participação</span>
+            <input
+              class="field"
+              value="${E(membershipStatusLabels[member.status] || member.status)}"
+              disabled
+            />
+          </label>
+          ${moderationControl
             ? html`<label>
-                <span>Participação</span>
-                <select class="select" name="status">
-                  ${Object.keys(statusLabels)
-                    .map((status) => option(status, member.status, statusLabels[status]))
+                <span>Moderação</span>
+                <select class="select" name="moderationStatus">
+                  ${Object.keys(moderationStatusLabels)
+                    .map((status) =>
+                      option(status, member.moderationStatus, moderationStatusLabels[status]),
+                    )
                     .join('')}
                 </select>
               </label>`
             : html`<label>
-                <span>Participação</span>
+                <span>Moderação</span>
                 <input
                   class="field"
-                  value="${E(statusLabels[member.status] || member.status)}"
+                  value="${E(
+                    moderationStatusLabels[member.moderationStatus] || member.moderationStatus,
+                  )}"
                   disabled
                 />
               </label>`}
         </div>
-        ${roleControl || statusControl ? '<button class="soft">Salvar</button>' : ''}
+        ${roleControl || moderationControl ? '<button class="soft">Salvar</button>' : ''}
       </form>`;
     })
     .join('');
@@ -203,6 +224,35 @@ export async function handleCommunitiesClick(event) {
     return true;
   }
 
+  const contentModeration = event.target.closest('[data-community-content-status]');
+  if (contentModeration) {
+    const nextStatus = contentModeration.dataset.communityContentStatus;
+    if (nextStatus === 'hidden') {
+      const confirmed = await confirmAction('Ocultar este conteúdo desta comunidade?', {
+        title: 'Moderação local',
+        confirmLabel: 'Ocultar',
+      });
+      if (!confirmed) return true;
+    }
+
+    const slug = contentModeration.dataset.communitySlug;
+    const type = contentModeration.dataset.communityContentType;
+    const id = contentModeration.dataset.communityContentId;
+    await withBusyControl(
+      contentModeration,
+      nextStatus === 'hidden' ? 'Ocultando…' : 'Restaurando…',
+      async () => {
+        const data = await api(
+          `/api/communities/${encodeURIComponent(slug)}/content/${encodeURIComponent(type)}/${encodeURIComponent(id)}/moderation`,
+          { method: 'PATCH', body: JSON.stringify({ status: nextStatus }) },
+        );
+        toast(data.message || 'Moderação local atualizada.');
+        await render();
+      },
+    );
+    return true;
+  }
+
   const manage = event.target.closest('[data-community-manage]');
   if (manage) {
     await loadManagement(manage.dataset.communityManage);
@@ -250,7 +300,9 @@ export async function handleCommunitiesSubmit(event) {
     const values = new FormData(form);
     const payload = {};
     if (values.has('role')) payload.role = values.get('role');
-    if (values.has('status')) payload.status = values.get('status');
+    if (values.has('moderationStatus')) {
+      payload.moderationStatus = values.get('moderationStatus');
+    }
     const button = form.querySelector('[type="submit"], button:not([type])');
     await withBusyControl(button, 'Salvando…', async () => {
       const data = await api(
