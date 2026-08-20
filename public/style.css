@@ -11,14 +11,21 @@
 @import url('/css/editorial-studio.css');
 @import url('/css/comment-intelligence.css');
 @import url('/css/content-discovery.css');
-@import url('/css/nav-v323.css');
-@import url('/css/mobile-polish-v325.css');
-@import url('/css/home-feature-align.css');
-@import url('/css/adaptive-headings.css');
-@import url('/css/responsive.css');
-@import url('/css/interactions-v326.css');
+
+/* Responsividade e navegação */
+@import url('/css/responsive/navigation.css');
+@import url('/css/responsive/mobile.css');
+@import url('/css/responsive/home.css');
+@import url('/css/responsive/headings.css');
+@import url('/css/responsive/global.css');
+
+/* Interações e movimento */
+@import url('/css/animations/interactions.css');
+@import url('/css/animations/motion.css');
+
+/* Polimentos específicos */
 @import url('/css/library-polish.css');
 @import url('/css/book-catalog.css');
 
 /* Última camada: proteção global contra regressões de layout. */
-@import url('/css/layout-hardening-v328.css');
+@import url('/css/responsive/hardening.css');

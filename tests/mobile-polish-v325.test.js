@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const root = path.join(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
-const polish = read('public/css/mobile-polish-v325.css');
+const polish = read('public/css/responsive/mobile.css');
 const style = read('public/style.css');
 
 test('subtítulo acadêmico não usa margem negativa e preserva separação do título', () => {
@@ -23,11 +23,11 @@ test('Scriptorium organiza atalhos e estante vazia progressivamente no mobile', 
 });
 
 test('acabamento mobile precede a responsividade e o endurecimento final', () => {
-  const responsiveIndex = style.indexOf("@import url('/css/responsive.css')");
-  const polishIndex = style.indexOf("@import url('/css/mobile-polish-v325.css')");
-  const hardeningIndex = style.indexOf("@import url('/css/layout-hardening-v328.css')");
+  const responsiveIndex = style.indexOf("@import url('/css/responsive/global.css')");
+  const polishIndex = style.indexOf("@import url('/css/responsive/mobile.css')");
+  const hardeningIndex = style.indexOf("@import url('/css/responsive/hardening.css')");
   assert.ok(polishIndex >= 0);
   assert.ok(responsiveIndex > polishIndex);
   assert.ok(hardeningIndex > responsiveIndex);
-  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/layout-hardening-v328.css');");
+  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/responsive/hardening.css');");
 });

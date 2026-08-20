@@ -36,7 +36,7 @@ test('botões de ação com data atributo não submetem formulário por acidente
 
 test('modal interno é acessível e permanece dentro da interface', () => {
   const feedback = read('public/js/ui-feedback.js');
-  const css = read('public/css/interactions-v326.css');
+  const css = read('public/css/animations/interactions.css');
   assert.match(feedback, /aria-modal/);
   assert.match(feedback, /role', 'dialog/);
   assert.match(feedback, /event\.key === 'Escape'/);
@@ -47,7 +47,7 @@ test('modal interno é acessível e permanece dentro da interface', () => {
 });
 
 test('acabamento de ações não redefine grids ou estrutura das páginas existentes', () => {
-  const css = read('public/css/interactions-v326.css');
+  const css = read('public/css/animations/interactions.css');
   for (const forbidden of [
     /\n\.shell\b/,
     /\n\.card\b/,
@@ -66,10 +66,10 @@ test('acabamento de ações não redefine grids ou estrutura das páginas existe
 
 test('folha de interações fica entre responsividade e polimentos já existentes', () => {
   const style = read('public/style.css');
-  const responsive = style.indexOf("@import url('/css/responsive.css')");
-  const interactions = style.indexOf("@import url('/css/interactions-v326.css')");
+  const responsive = style.indexOf("@import url('/css/responsive/global.css')");
+  const interactions = style.indexOf("@import url('/css/animations/interactions.css')");
   const library = style.indexOf("@import url('/css/library-polish.css')");
-  const hardening = style.indexOf("@import url('/css/layout-hardening-v328.css')");
+  const hardening = style.indexOf("@import url('/css/responsive/hardening.css')");
   assert.ok(responsive >= 0 && interactions > responsive);
   assert.ok(library > interactions);
   assert.ok(hardening > library);

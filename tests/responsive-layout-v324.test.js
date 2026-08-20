@@ -8,15 +8,15 @@ const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'u
 
 test('responsividade global precede apenas o endurecimento final', () => {
   const style = read('public/style.css').trim().split('\n');
-  const responsive = style.indexOf("@import url('/css/responsive.css');");
-  const hardening = style.indexOf("@import url('/css/layout-hardening-v328.css');");
+  const responsive = style.indexOf("@import url('/css/responsive/global.css');");
+  const hardening = style.indexOf("@import url('/css/responsive/hardening.css');");
   assert.ok(responsive >= 0);
   assert.ok(hardening > responsive);
-  assert.equal(style.at(-1), "@import url('/css/layout-hardening-v328.css');");
+  assert.equal(style.at(-1), "@import url('/css/responsive/hardening.css');");
 });
 
 test('layout possui guardas contra overflow horizontal e componentes espremidos', () => {
-  const css = read('public/css/responsive.css');
+  const css = read('public/css/responsive/global.css');
   for (const marker of [
     'overflow-x: clip;',
     'min-width: 0;',
@@ -33,7 +33,7 @@ test('layout possui guardas contra overflow horizontal e componentes espremidos'
 });
 
 test('layout cobre notebook tablet celular pequeno landscape e toque', () => {
-  const css = read('public/css/responsive.css');
+  const css = read('public/css/responsive/global.css');
   for (const breakpoint of [
     '@media (max-width: 1180px)',
     '@media (max-width: 1024px)',
@@ -49,7 +49,7 @@ test('layout cobre notebook tablet celular pequeno landscape e toque', () => {
 });
 
 test('biblioteca e áreas complexas reduzem colunas progressivamente', () => {
-  const css = read('public/css/responsive.css');
+  const css = read('public/css/responsive/global.css');
   assert.ok(css.includes('grid-template-columns: repeat(5, minmax(0, 1fr));'));
   assert.ok(css.includes('.library-filters'));
   assert.ok(css.includes('.editorwrap'));
@@ -60,7 +60,7 @@ test('biblioteca e áreas complexas reduzem colunas progressivamente', () => {
 });
 
 test('estilos base do administrador ficam no módulo administrativo', () => {
-  const responsive = read('public/css/responsive.css');
+  const responsive = read('public/css/responsive/global.css');
   const admin = read('public/css/admin-tech.css');
   assert.equal(responsive.includes('/* Painel administrativo v2.2 */'), false);
   assert.ok(admin.includes('.admin-stats'));

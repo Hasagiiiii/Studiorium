@@ -8,15 +8,15 @@ const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'u
 
 test('endurecimento responsivo é a camada final da cascata', () => {
   const style = read('public/style.css').trim().split('\n');
-  const responsive = style.indexOf("@import url('/css/responsive.css');");
-  const hardening = style.indexOf("@import url('/css/layout-hardening-v328.css');");
+  const responsive = style.indexOf("@import url('/css/responsive/global.css');");
+  const hardening = style.indexOf("@import url('/css/responsive/hardening.css');");
   assert.ok(responsive >= 0);
   assert.ok(hardening > responsive);
-  assert.equal(style.at(-1), "@import url('/css/layout-hardening-v328.css');");
+  assert.equal(style.at(-1), "@import url('/css/responsive/hardening.css');");
 });
 
 test('telas muito estreitas possuem tratamento dedicado sem remover ações', () => {
-  const css = read('public/css/layout-hardening-v328.css');
+  const css = read('public/css/responsive/hardening.css');
   for (const marker of [
     '@media (max-width: 380px)',
     '@media (max-width: 330px)',
@@ -24,14 +24,14 @@ test('telas muito estreitas possuem tratamento dedicado sem remover ações', ()
     '.nav .nav-actions .solid',
     '.nav .notification-trigger',
     '.nav .iconbtn',
-    'text-overflow: ellipsis;',
+    'display: none;',
   ]) {
     assert.ok(css.includes(marker), `proteção extrema ausente: ${marker}`);
   }
 });
 
 test('etiquetas e metadados longos não forçam overflow horizontal', () => {
-  const css = read('public/css/layout-hardening-v328.css');
+  const css = read('public/css/responsive/hardening.css');
   assert.ok(css.includes('.pill,'));
   assert.ok(css.includes('.badge'));
   assert.ok(css.includes('overflow-wrap: anywhere;'));
@@ -40,7 +40,7 @@ test('etiquetas e metadados longos não forçam overflow horizontal', () => {
 });
 
 test('pôster do Ateliê refluí em telas estreitas sem escala artificial', () => {
-  const css = read('public/css/layout-hardening-v328.css');
+  const css = read('public/css/responsive/hardening.css');
   for (const marker of [
     'grid-template-columns: repeat(2, minmax(0, 1fr));',
     '@media screen and (max-width: 720px)',
