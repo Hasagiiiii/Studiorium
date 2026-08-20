@@ -5,6 +5,7 @@ const profileRoutes = require('./routes/profile');
 const projectRoutes = require('./routes/projects');
 const publicationRoutes = require('./routes/publications');
 const discussionRoutes = require('./routes/discussions');
+const communityRoutes = require('./routes/communities');
 const reportRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
 const techRoutes = require('./routes/tech');
@@ -65,6 +66,25 @@ async function handle(req, res) {
     return send(res, 200, await profileRoutes.updateProfile(req));
   if (method === 'POST' && pathname === '/profile/verification')
     return send(res, 201, await verificationRoutes.submitVerification(req));
+
+  if (method === 'GET' && pathname === '/communities')
+    return send(res, 200, await communityRoutes.list(req));
+  const communityMembership = pathname.match(/^\/communities\/([^/]+)\/membership$/);
+  if (communityMembership && method === 'POST')
+    return send(
+      res,
+      200,
+      await communityRoutes.join(req, decodeURIComponent(communityMembership[1])),
+    );
+  if (communityMembership && method === 'DELETE')
+    return send(
+      res,
+      200,
+      await communityRoutes.leave(req, decodeURIComponent(communityMembership[1])),
+    );
+  const community = pathname.match(/^\/communities\/([^/]+)$/);
+  if (community && method === 'GET')
+    return send(res, 200, await communityRoutes.detail(req, decodeURIComponent(community[1])));
 
   if (method === 'GET' && pathname === '/notifications')
     return send(res, 200, await notificationRoutes.listNotifications(req));
