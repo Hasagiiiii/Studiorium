@@ -252,8 +252,9 @@ function publicationCard(p) {
   </article>`;
 }
 
-function discussionRow(d, i) {
-  return html`<a href="/coloquio/${encodeURIComponent(d.id)}" data-link class="discussion-row"
+function discussionRow(d, i, basePath = '/coloquio') {
+  const href = `${String(basePath || '/coloquio').replace(/\/$/, '')}/${encodeURIComponent(d.id)}`;
+  return html`<a href="${href}" data-link class="discussion-row"
     ><span
       ><span class="catno">${String(i + 1).padStart(2, '0')}</span> &nbsp;
       <strong>${E(d.title)}</strong></span
