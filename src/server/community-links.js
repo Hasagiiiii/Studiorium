@@ -1,0 +1,110 @@
+const { db, fail } = require('./db');
+const { communityFromCatalog, normalizeSlug } = require('./community-catalog');
+
+function inputError(message, statusCode = 400) {
+  return Object.assign(new Error(message), { statusCode });
+}
+
+function isMissingCommunitySchema(error) {
+  const code = String(error?.code || '');
+  const message = String(error?.message || '');
+  return code === '42P01' || /community_(members|content_links)|communities.*does not exist/i.test(message);
+}
+
+function serializeCommunity(row, extra = {}) {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    area: row.area || 'Geral',
+    description: row.description || '',
+    visibility: row.visibility || 'public',
+    status: row.status || 'active',
+    official: row.is_official !== false,
+    rules: Array.isArray(row.rules) ? row.rules : [],
+    createdAt: row.created_at || null,
+    ...extra,
+  };
+}
+
+async function resolveCommunity(slug) {
+  const normalized = normalizeSlug(slug);
+  if (!normalized) return null;
+  const query = await db()
+    .from('communities')
+    .select('*')
+    .eq('slug', normalized)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (query.error) {
+    if (!isMissingCommunitySchema(query.error)) fail(query.error);
+    const fallback = communityFromCatalog(normalized);
+    if (!fallback) throw inputError('Comunidade não encontrada.', 404);
+    return serializeCommunity(fallback, { storageReady: false });
+  }
+
+  if (!query.data) throw inputError('Comunidade não encontrada.', 404);
+  return serializeCommunity(query.data, { storageReady: true });
+}
+
+async function setContentCommunity(contentType, contentId, community) {
+  if (!community) return;
+  if (community.storageReady === false) {
+    throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
+  }
+
+  const cleanType = String(contentType || '').trim();
+  const cleanId = String(contentId || '').trim();
+  if (!cleanType || !cleanId) throw inputError('Vínculo de comunidade inválido.');
+
+  const removal = await db()
+    .from('community_content_links')
+    .delete()
+    .eq('content_type', cleanType)
+    .eq('content_id', cleanId);
+  fail(removal.error);
+
+  const insertion = await db().from('community_content_links').insert({
+    community_id: community.id,
+    content_type: cleanType,
+    content_id: cleanId,
+  });
+  fail(insertion.error);
+}
+
+async function communityForContent(contentType, contentId) {
+  const link = await db()
+    .from('community_content_links')
+    .select('community_id')
+    .eq('content_type', contentType)
+    .eq('content_id', contentId)
+    .maybeSingle();
+
+  if (link.error) {
+    if (isMissingCommunitySchema(link.error)) return null;
+    fail(link.error);
+  }
+  if (!link.data) return null;
+
+  const community = await db()
+    .from('communities')
+    .select('*')
+    .eq('id', link.data.community_id)
+    .eq('status', 'active')
+    .maybeSingle();
+  if (community.error) {
+    if (isMissingCommunitySchema(community.error)) return null;
+    fail(community.error);
+  }
+  return community.data ? serializeCommunity(community.data, { storageReady: true }) : null;
+}
+
+module.exports = {
+  inputError,
+  isMissingCommunitySchema,
+  serializeCommunity,
+  resolveCommunity,
+  setContentCommunity,
+  communityForContent,
+};
