@@ -1,8 +1,8 @@
 {
   "name": "studiorium-online",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "private": true,
-  "description": "Studiorium — plataforma acadêmica dark academia com redação certificada, templates livres, biblioteca e comunidade na Vercel + Supabase.",
+  "description": "Studiorium — plataforma acadêmica dark academia com redação certificada, templates livres, biblioteca e comunidades na Vercel + Supabase.",
   "type": "commonjs",
   "scripts": {
     "check": "node scripts/check-project.js && prettier --check .",
