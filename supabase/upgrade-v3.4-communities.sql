@@ -61,6 +61,8 @@ create table if not exists public.community_content_links (
   created_at timestamptz not null default now(),
   primary key (community_id, content_type, content_id)
 );
+create unique index if not exists community_content_single_parent_idx
+  on public.community_content_links(content_type, content_id);
 create index if not exists community_content_lookup_idx
   on public.community_content_links(content_type, content_id);
 create index if not exists community_content_recent_idx
