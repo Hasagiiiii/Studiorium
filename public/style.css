@@ -1,8 +1,11 @@
+/* Base e estrutura */
 @import url('/css/base.css');
 @import url('/css/layout-a.css');
 @import url('/css/layout-b1.css');
 @import url('/css/layout-b2.css');
 @import url('/css/components.css');
+
+/* Recursos e áreas da plataforma */
 @import url('/css/armarium-v32.css');
 @import url('/css/admin-tech.css');
 @import url('/css/editorial-studio.css');
@@ -15,5 +18,7 @@
 @import url('/css/responsive.css');
 @import url('/css/interactions-v326.css');
 @import url('/css/library-polish.css');
-@import url('/css/book-catalog-v331.css');
+@import url('/css/book-catalog.css');
+
+/* Última camada: proteção global contra regressões de layout. */
 @import url('/css/layout-hardening-v328.css');
