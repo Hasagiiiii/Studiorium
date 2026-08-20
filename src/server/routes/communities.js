@@ -1,5 +1,6 @@
 const { db, fail } = require('../db');
 const { currentUser, requireUser } = require('../auth');
+const { readJson } = require('../http');
 const S = require('../serializers');
 const { OFFICIAL_COMMUNITIES, communityFromCatalog, normalizeSlug } = require('../community-catalog');
 const {
@@ -8,6 +9,12 @@ const {
   serializeCommunity,
   resolveCommunity,
 } = require('../community-links');
+const {
+  permissionsFor,
+  membershipFor,
+  communityActor,
+  requireCommunityPermission,
+} = require('../community-permissions');
 
 function countByCommunity(rows = []) {
   return rows.reduce((counts, row) => {
@@ -80,12 +87,17 @@ async function detail(req, slug) {
       community: { ...community, memberCount: 0, joined: false, memberRole: null },
       discussions: [],
       techResources: [],
+      permissions: [],
       storageReady: false,
     };
   }
 
   const [membersQ, mineQ, linksQ] = await Promise.all([
-    db().from('community_members').select('user_id').eq('community_id', community.id).eq('status', 'active'),
+    db()
+      .from('community_members')
+      .select('user_id')
+      .eq('community_id', community.id)
+      .eq('status', 'active'),
     user
       ? db()
           .from('community_members')
@@ -124,7 +136,9 @@ async function detail(req, slug) {
   const techQ = legacyHubs.length
     ? await db()
         .from('tech_resources')
-        .select('id,owner_id,author_name,title,slug,summary,hub,category,tags,status,featured,created_at,updated_at')
+        .select(
+          'id,owner_id,author_name,title,slug,summary,hub,category,tags,status,featured,created_at,updated_at',
+        )
         .in('hub', legacyHubs)
         .eq('status', 'published')
         .order('featured', { ascending: false })
@@ -133,14 +147,16 @@ async function detail(req, slug) {
     : { data: [], error: null };
   fail(techQ.error);
 
+  const memberRole = mineQ.data?.role || null;
   return {
     storageReady: true,
     community: {
       ...community,
       memberCount: membersQ.data.length,
       joined: Boolean(mineQ.data),
-      memberRole: mineQ.data?.role || null,
+      memberRole,
     },
+    permissions: permissionsFor(memberRole, user?.role === 'admin'),
     discussions: discussionsQ.data.map(S.discussion),
     techResources: techQ.data.map(S.techResource),
   };
@@ -153,13 +169,16 @@ async function join(req, slug) {
     throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
   }
 
+  const existing = await membershipFor(community.id, user.id);
+  const role = existing?.role || 'member';
   const { error } = await db().from('community_members').upsert(
     {
       community_id: community.id,
       user_id: user.id,
-      role: 'member',
+      role,
       status: 'active',
-      joined_at: new Date().toISOString(),
+      joined_at: existing?.joined_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
     { onConflict: 'community_id,user_id' },
   );
@@ -175,15 +194,9 @@ async function leave(req, slug) {
     throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
   }
 
-  const membership = await db()
-    .from('community_members')
-    .select('role')
-    .eq('community_id', community.id)
-    .eq('user_id', user.id)
-    .maybeSingle();
-  fail(membership.error);
-  if (!membership.data) return { ok: true, message: 'Você já não participava desta comunidade.' };
-  if (membership.data.role !== 'member') {
+  const membership = await membershipFor(community.id, user.id);
+  if (!membership) return { ok: true, message: 'Você já não participava desta comunidade.' };
+  if (membership.role !== 'member') {
     throw inputError('Membros com função de comunidade precisam transferir a função antes de sair.', 409);
   }
 
@@ -196,4 +209,123 @@ async function leave(req, slug) {
   return { ok: true, message: `Você saiu de ${community.name}.` };
 }
 
-module.exports = { list, detail, join, leave };
+async function members(req, slug) {
+  const actor = await communityActor(req, slug);
+  if (
+    !actor.permissions.includes('moderate_members') &&
+    !actor.permissions.includes('manage_roles')
+  ) {
+    throw inputError('A lista de gestão é restrita à liderança e moderação da comunidade.', 403);
+  }
+
+  const memberships = await db()
+    .from('community_members')
+    .select('user_id,role,status,joined_at,updated_at')
+    .eq('community_id', actor.community.id)
+    .order('joined_at', { ascending: true });
+  fail(memberships.error);
+
+  const ids = memberships.data.map((item) => item.user_id);
+  const profiles = ids.length
+    ? await db()
+        .from('profiles')
+        .select('user_id,display_name,username,verification_status,verified_specialty')
+        .in('user_id', ids)
+    : { data: [], error: null };
+  fail(profiles.error);
+  const profileMap = new Map(profiles.data.map((profile) => [profile.user_id, profile]));
+
+  return {
+    community: actor.community,
+    permissions: actor.permissions,
+    members: memberships.data.map((membership) => {
+      const profile = profileMap.get(membership.user_id) || {};
+      return {
+        userId: membership.user_id,
+        displayName: profile.display_name || profile.username || 'Membro',
+        role: membership.role,
+        status: membership.status,
+        joinedAt: membership.joined_at,
+        verificationStatus: profile.verification_status || 'unverified',
+        verifiedSpecialty: profile.verified_specialty || '',
+      };
+    }),
+  };
+}
+
+async function updateMember(req, slug, targetUserId) {
+  const actor = await communityActor(req, slug);
+  const target = await membershipFor(actor.community.id, targetUserId);
+  if (!target) throw inputError('Membro não encontrado nesta comunidade.', 404);
+  if (target.user_id === actor.user.id && !actor.isAdmin) {
+    throw inputError('Sua própria função deve ser transferida por outro responsável.', 409);
+  }
+  if (target.role === 'leader' && !actor.isAdmin) {
+    throw inputError('Somente a administração do Studiorium pode alterar outro líder.', 403);
+  }
+
+  const body = await readJson(req);
+  const patch = { updated_at: new Date().toISOString() };
+
+  if (Object.prototype.hasOwnProperty.call(body, 'role')) {
+    if (!actor.permissions.includes('manage_roles')) {
+      throw inputError('Somente a liderança pode distribuir funções locais.', 403);
+    }
+    const role = String(body.role || '').trim();
+    const allowed = actor.isAdmin
+      ? ['member', 'moderator', 'curator', 'leader']
+      : ['member', 'moderator', 'curator'];
+    if (!allowed.includes(role)) throw inputError('Função de comunidade inválida.');
+    patch.role = role;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, 'status')) {
+    if (!actor.permissions.includes('moderate_members')) {
+      throw inputError('Você não pode moderar participantes desta comunidade.', 403);
+    }
+    const status = String(body.status || '').trim();
+    if (!['active', 'muted', 'removed'].includes(status)) {
+      throw inputError('Estado de participação inválido.');
+    }
+    if (actor.role === 'moderator' && target.role !== 'member' && !actor.isAdmin) {
+      throw inputError('Moderadores só podem agir sobre membros comuns.', 403);
+    }
+    patch.status = status;
+  }
+
+  if (Object.keys(patch).length === 1) throw inputError('Nenhuma alteração válida foi enviada.');
+
+  const updated = await db()
+    .from('community_members')
+    .update(patch)
+    .eq('community_id', actor.community.id)
+    .eq('user_id', targetUserId)
+    .select('user_id,role,status,joined_at')
+    .single();
+  fail(updated.error);
+  return { member: updated.data, message: 'Permissões da comunidade atualizadas.' };
+}
+
+async function updateCommunity(req, slug) {
+  const actor = await requireCommunityPermission(req, slug, 'manage_rules');
+  const body = await readJson(req);
+  if (!Array.isArray(body.rules)) throw inputError('Envie as regras da comunidade em uma lista.');
+  const rules = body.rules
+    .map((rule) => String(rule || '').trim().slice(0, 220))
+    .filter(Boolean)
+    .slice(0, 12);
+
+  const updated = await db()
+    .from('communities')
+    .update({ rules, updated_at: new Date().toISOString() })
+    .eq('id', actor.community.id)
+    .select('*')
+    .single();
+  fail(updated.error);
+  return {
+    community: serializeCommunity(updated.data, { storageReady: true }),
+    message: 'Regras locais atualizadas.',
+  };
+}
+
+module.exports = { list, detail, join, leave, members, updateMember, updateCommunity };
