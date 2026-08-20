@@ -3,6 +3,23 @@
 Este arquivo reúne o histórico técnico que antes ficava espalhado em vários `CHANGELOG-v*.md`.
 As migrações de banco continuam versionadas separadamente em `supabase/upgrade-*.sql`.
 
+## 3.4.0 — Fundação de Comunidades
+
+- transforma Comunidades na camada principal de organização por assunto;
+- mantém o Colóquio como espaço de conversas dentro de cada comunidade e preserva links antigos;
+- cria 15 comunidades oficiais iniciais nas áreas de tecnologia, automotivo, academia, criação e
+  leitura;
+- separa participação voluntária de sanções locais para impedir reentrada que contorne moderação;
+- introduz papéis locais de Membro, Curador, Moderador e Líder sem conceder poderes globais de ADM;
+- permite que Líderes administrem funções e regras somente da própria comunidade;
+- permite moderação local de membros e conteúdos, sem apagar o conteúdo da plataforma;
+- liga discussões e materiais da Oficina às comunidades por relacionamento, sem duplicar registros;
+- exige participação ativa e liberada para criar, responder ou editar conteúdo comunitário;
+- estabelece uma comunidade principal por conteúdo nesta primeira versão;
+- adiciona catálogo, busca, filtros, páginas internas e gestão responsiva de Comunidades;
+- adiciona a migração `supabase/upgrade-v3.4-communities.sql`, com RLS e acesso apenas pela API;
+- amplia testes de regressão para permissões, vínculos, navegação, moderação e responsividade.
+
 ## 3.3.1 — Consolidação e manutenção
 
 - sincroniza `package.json` e `package-lock.json` na versão 3.3.1;
