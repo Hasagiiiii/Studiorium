@@ -20,6 +20,19 @@ test('Comunidades possui modelo relacional próprio sem duplicar conteúdos', ()
   );
 });
 
+test('participação voluntária e moderação local são estados distintos', () => {
+  const migration = read('supabase/upgrade-v3.4-communities.sql');
+  const permissions = read('src/server/community-permissions.js');
+  const routes = read('src/server/routes/communities.js');
+
+  assert.match(migration, /status in \('active', 'left'\)/);
+  assert.match(migration, /moderation_status in \('clear', 'muted', 'removed'\)/);
+  assert.match(permissions, /membership\?\.status === 'active'/);
+  assert.match(permissions, /membership\?\.moderation_status === 'clear'/);
+  assert.match(routes, /moderation_status === 'removed'/);
+  assert.match(routes, /status: 'left'/);
+});
+
 test('catálogo oficial começa controlado e tutorial não vira comunidade isolada', () => {
   const catalog = read('src/server/community-catalog.js');
   for (const slug of [
@@ -37,13 +50,29 @@ test('catálogo oficial começa controlado e tutorial não vira comunidade isola
   assert.doesNotMatch(catalog, /slug: 'tutoriais'/);
 });
 
-test('Colóquio pode ser vinculado a uma comunidade sem mudar tabela de discussões', () => {
+test('Colóquio usa vínculo comunitário e exige participação ativa', () => {
   const discussions = read('src/server/routes/discussions.js');
   const links = read('src/server/community-links.js');
+
   assert.match(discussions, /communitySlug/);
   assert.match(discussions, /setContentCommunity\('discussion'/);
   assert.match(discussions, /removeContentCommunity\('discussion'/);
+  assert.match(discussions, /requireCommunityPermission/);
+  assert.match(discussions, /'participate'/);
+  assert.match(discussions, /requireDiscussionCommunityAccess/);
   assert.match(links, /community_content_links/);
+});
+
+test('Oficina pode pertencer à comunidade sem duplicar o conteúdo', () => {
+  const tech = read('src/server/routes/tech.js');
+  const composer = read('public/js/events/composers.js');
+
+  assert.match(tech, /setContentCommunity\('tech_resource'/);
+  assert.match(tech, /removeContentCommunity\('tech_resource'/);
+  assert.match(tech, /communityForContent\('tech_resource'/);
+  assert.match(tech, /requireCommunityPermission/);
+  assert.match(composer, /name="communitySlug"/);
+  assert.match(composer, /query\.get\('comunidade'\)/);
 });
 
 test('papéis locais limitam poderes à comunidade e líder não equivale a ADM', () => {
@@ -63,6 +92,20 @@ test('papéis locais limitam poderes à comunidade e líder não equivale a ADM'
   assert.match(router, /communityRoutes\.updateCommunity/);
 });
 
+test('moderação local oculta vínculo sem apagar conteúdo global da Oficina', () => {
+  const migration = read('supabase/upgrade-v3.4-communities.sql');
+  const routes = read('src/server/routes/communities.js');
+  const events = read('public/js/events/communities.js');
+  const views = read('public/js/views/communities.js');
+
+  assert.match(migration, /status in \('visible', 'hidden'\)/);
+  assert.match(routes, /moderateContent/);
+  assert.match(routes, /moderated_by/);
+  assert.match(events, /data-community-content-status/);
+  assert.match(views, /Ocultar da comunidade/);
+  assert.match(views, /Restaurar na comunidade/);
+});
+
 test('interface oferece gestão local apenas quando a API entrega permissões', () => {
   const view = read('public/js/views/communities.js');
   const events = read('public/js/events/communities.js');
@@ -75,9 +118,10 @@ test('interface oferece gestão local apenas quando a API entrega permissões', 
   assert.match(events, /Somente o ADM pode criar ou substituir outro Líder/);
 });
 
-test('rotas públicas de Comunidades coexistem com compatibilidade do Colóquio antigo', () => {
+test('navegação usa Comunidades e mantém Colóquio antigo apenas por compatibilidade', () => {
   const serverRouter = read('src/server/router.js');
   const clientRouter = read('public/js/router.js');
+  const core = read('public/js/views/core.js');
 
   assert.match(serverRouter, /pathname === '\/communities'/);
   assert.match(serverRouter, /communityRoutes\.detail/);
@@ -85,6 +129,8 @@ test('rotas públicas de Comunidades coexistem com compatibilidade do Colóquio 
   assert.match(clientRouter, /history\.replaceState\(\{\}, '', '\/comunidades'\)/);
   assert.match(clientRouter, /\/comunidades\\\/\(\[\^\/\]\+\)\\\/coloquio/);
   assert.match(clientRouter, /p\.startsWith\('\/coloquio\/'\)/);
+  assert.match(core, /\['\/comunidades', 'Comunidades'\]/);
+  assert.doesNotMatch(core, /\['\/coloquio', 'Colóquio'\]/);
 });
 
 test('interface de Comunidades possui reflow 3, 2 e 1 colunas sem escala artificial', () => {
@@ -94,6 +140,7 @@ test('interface de Comunidades possui reflow 3, 2 e 1 colunas sem escala artific
   assert.match(css, /repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(css, /@media \(max-width: 720px\)/);
   assert.match(css, /community-member-row/);
+  assert.match(css, /community-discussion-item/);
   assert.doesNotMatch(css, /\bzoom\s*:/);
   assert.doesNotMatch(css, /transform:\s*scale/);
 });
