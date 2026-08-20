@@ -1,5 +1,5 @@
 const { db, fail } = require('../db');
-const { requireUser } = require('../auth');
+const { currentUser, requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now } = require('../security');
 const { moderate } = require('../moderation');
@@ -7,9 +7,13 @@ const { buildReplyMap, rankRelatedDiscussions } = require('../comment-intelligen
 const {
   setContentCommunity,
   removeContentCommunity,
-  communityForContent,
+  communityLinkForContent,
 } = require('../community-links');
-const { requireCommunityPermission } = require('../community-permissions');
+const {
+  requireCommunityPermission,
+  membershipFor,
+  permissionsFor,
+} = require('../community-permissions');
 const S = require('../serializers');
 
 function inputError(message, statusCode = 400) {
@@ -70,11 +74,22 @@ async function profileName(user) {
   return user.is_minor ? 'Membro protegido' : data?.display_name || 'Membro';
 }
 
+async function canModerateCommunityContent(req, community) {
+  const user = await currentUser(req);
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+
+  const membership = await membershipFor(community.id, user.id);
+  if (membership?.status !== 'active' || membership?.moderation_status !== 'clear') return false;
+  return permissionsFor(membership.role).includes('moderate_content');
+}
+
 async function requireDiscussionCommunityAccess(req, discussionId) {
-  const community = await communityForContent('discussion', discussionId);
-  if (!community) return null;
-  await requireCommunityPermission(req, community.slug, 'participate');
-  return community;
+  const context = await communityLinkForContent('discussion', discussionId);
+  if (!context) return null;
+  const permission = context.status === 'hidden' ? 'moderate_content' : 'participate';
+  await requireCommunityPermission(req, context.community.slug, permission);
+  return context.community;
 }
 
 async function createDiscussion(req) {
@@ -186,16 +201,26 @@ async function deleteDiscussion(req, discussionId) {
   return { ok: true, message: 'Discussão excluída definitivamente.' };
 }
 
-async function getThread(discussionId) {
-  const discussionQ = await db()
-    .from('discussions')
-    .select('*')
-    .eq('id', discussionId)
-    .eq('status', 'published')
-    .maybeSingle();
+async function getThread(req, discussionId) {
+  const [discussionQ, context] = await Promise.all([
+    db()
+      .from('discussions')
+      .select('*')
+      .eq('id', discussionId)
+      .eq('status', 'published')
+      .maybeSingle(),
+    communityLinkForContent('discussion', discussionId),
+  ]);
   fail(discussionQ.error);
   if (!discussionQ.data) throw inputError('Discussão não encontrada.', 404);
-  const [repliesQ, relatedQ, community] = await Promise.all([
+  if (
+    context?.status === 'hidden' &&
+    !(await canModerateCommunityContent(req, context.community))
+  ) {
+    throw inputError('Discussão não encontrada.', 404);
+  }
+
+  const [repliesQ, relatedQ] = await Promise.all([
     db()
       .from('replies')
       .select('*')
@@ -209,7 +234,6 @@ async function getThread(discussionId) {
       .neq('id', discussionId)
       .order('created_at', { ascending: false })
       .limit(40),
-    communityForContent('discussion', discussionId),
   ]);
   fail(repliesQ.error);
   fail(relatedQ.error);
@@ -220,7 +244,8 @@ async function getThread(discussionId) {
 
   return {
     discussion,
-    community,
+    community: context?.community || null,
+    communityHidden: context?.status === 'hidden',
     replies: replyMap.replies,
     replyMap: {
       total: replyMap.total,
