@@ -9,6 +9,7 @@ const PUBLICATION_LIST_FIELDS = [
   'title',
   'slug',
   'abstract',
+  'content',
   'area',
   'level',
   'keywords',
