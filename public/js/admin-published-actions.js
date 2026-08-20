@@ -230,11 +230,11 @@ function replyRow(reply) {
 
 function enhanceReplies(replies) {
   const shell = document.querySelector('.admin-page .shell');
-  if (!shell || shell.querySelector('[data-admin-replies-v329]')) return;
+  if (!shell || shell.querySelector('[data-admin-replies]')) return;
 
   shell.insertAdjacentHTML(
     'beforeend',
-    html`<details class="card trash-panel section-gap" data-admin-replies-v329>
+    html`<details class="card trash-panel section-gap" data-admin-replies>
       <summary>Respostas do Colloquium (${replies.length})</summary>
       <p class="muted small">Área administrativa recolhida para não ocupar a fila principal.</p>
       ${replies.map(replyRow).join('') || '<div class="empty">Nenhuma resposta encontrada.</div>'}

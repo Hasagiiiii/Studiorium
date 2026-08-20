@@ -4,11 +4,11 @@ const fs = require('node:fs');
 
 const read = (path) => fs.readFileSync(path, 'utf8');
 
-const catalog = read('public/js/book-catalog-v331.js');
-const detail = read('public/js/views/books-v331.js');
+const catalog = read('public/js/book-catalog.js');
+const detail = read('public/js/views/books.js');
 const router = read('public/js/router.js');
 const main = read('public/js/main.js');
-const css = read('public/css/book-catalog-v331.css');
+const css = read('public/css/book-catalog.css');
 const style = read('public/style.css');
 
 test('estante transforma cards longos em itens compactos clicáveis', () => {
@@ -35,7 +35,7 @@ test('livro possui página própria com resumo reviews e ações de leitura', ()
 });
 
 test('catálogo é instalado sem substituir melhorias existentes', () => {
-  assert.ok(main.includes("import { installBookCatalog } from './book-catalog-v331.js';"));
+  assert.ok(main.includes("import { installBookCatalog } from './book-catalog.js';"));
   assert.ok(main.includes('installEnhancements();'));
   assert.ok(main.includes('installLibraryPolish();'));
   assert.ok(main.includes('installBookCatalog();'));
@@ -50,7 +50,7 @@ test('layout da estante é compacto e responsivo sem ocupar a largura toda', () 
 });
 
 test('nova camada não ultrapassa o hardening global', () => {
-  const catalogIndex = style.indexOf("@import url('/css/book-catalog-v331.css');");
+  const catalogIndex = style.indexOf("@import url('/css/book-catalog.css');");
   const hardeningIndex = style.indexOf("@import url('/css/layout-hardening-v328.css');");
   assert.ok(catalogIndex >= 0);
   assert.ok(hardeningIndex > catalogIndex);

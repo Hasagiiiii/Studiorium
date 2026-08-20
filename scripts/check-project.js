@@ -92,8 +92,37 @@ for (const file of [...serverFiles, ...readableFiles, ...maintenanceFiles, ...da
   });
 }
 
-JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
-JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const lockfile = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
+void vercel;
+
+if (manifest.version !== lockfile.version || manifest.version !== lockfile.packages?.['']?.version) {
+  throw new Error('Versão divergente entre package.json e package-lock.json.');
+}
+
+const supabaseVersion = manifest.dependencies?.['@supabase/supabase-js'];
+const lockedSupabaseVersion = lockfile.packages?.['']?.dependencies?.['@supabase/supabase-js'];
+const installedSupabaseVersion = lockfile.packages?.['node_modules/@supabase/supabase-js']?.version;
+if (!supabaseVersion || supabaseVersion !== lockedSupabaseVersion || supabaseVersion !== installedSupabaseVersion) {
+  throw new Error('Versão do @supabase/supabase-js divergente entre manifesto e lockfile.');
+}
+
+if (lockfile.packages?.['node_modules/@supabase/node-fetch']) {
+  throw new Error('Lockfile voltou a incluir @supabase/node-fetch legado.');
+}
+
+const styleSource = fs.readFileSync(path.join(root, 'public/style.css'), 'utf8');
+const styleImports = [...styleSource.matchAll(/@import\s+url\(['"]([^'"]+)['"]\);/g)].map(
+  (match) => match[1],
+);
+if (new Set(styleImports).size !== styleImports.length) {
+  throw new Error('public/style.css contém imports CSS duplicados.');
+}
+if (styleImports.at(-1) !== '/css/layout-hardening-v328.css') {
+  throw new Error('layout-hardening-v328.css deve permanecer como última camada CSS.');
+}
+
 console.log(
   `OK — ${serverFiles.length} módulos de servidor, ${publicJs.length} módulos de interface ` +
     `e ${readableFiles.length} arquivos legíveis verificados.`,

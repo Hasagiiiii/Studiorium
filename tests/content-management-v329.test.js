@@ -45,7 +45,7 @@ test('ADM tem edição e exclusão global sem conceder esses poderes à moderaç
   const admin = read('src/server/routes/admin.js');
   const adminNews = read('src/server/routes/admin-news.js');
   const router = read('src/server/router.js');
-  const ui = read('public/js/admin-published-actions-v329.js');
+  const ui = read('public/js/admin-published-actions.js');
 
   assert.match(admin, /async function updateContentDetails[\s\S]*requireAdmin\(req\)/);
   assert.match(admin, /async function deleteContent[\s\S]*requireAdmin\(req\)/);
