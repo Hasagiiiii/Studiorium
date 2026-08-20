@@ -2,7 +2,9 @@ name: Studiorium CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'maintenance/**'
   pull_request:
     branches: [main]
 
