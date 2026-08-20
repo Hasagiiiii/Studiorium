@@ -82,6 +82,27 @@ async function handle(req, res) {
       200,
       await communityRoutes.leave(req, decodeURIComponent(communityMembership[1])),
     );
+  const communityMembers = pathname.match(/^\/communities\/([^/]+)\/members$/);
+  if (communityMembers && method === 'GET')
+    return send(res, 200, await communityRoutes.members(req, decodeURIComponent(communityMembers[1])));
+  const communityMember = pathname.match(/^\/communities\/([^/]+)\/members\/([^/]+)$/);
+  if (communityMember && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.updateMember(
+        req,
+        decodeURIComponent(communityMember[1]),
+        decodeURIComponent(communityMember[2]),
+      ),
+    );
+  const communitySettings = pathname.match(/^\/communities\/([^/]+)\/settings$/);
+  if (communitySettings && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.updateCommunity(req, decodeURIComponent(communitySettings[1])),
+    );
   const community = pathname.match(/^\/communities\/([^/]+)$/);
   if (community && method === 'GET')
     return send(res, 200, await communityRoutes.detail(req, decodeURIComponent(community[1])));
