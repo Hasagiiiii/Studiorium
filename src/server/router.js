@@ -100,6 +100,20 @@ async function handle(req, res) {
         decodeURIComponent(communityMember[2]),
       ),
     );
+  const communityContent = pathname.match(
+    /^\/communities\/([^/]+)\/content\/([^/]+)\/([^/]+)\/moderation$/,
+  );
+  if (communityContent && method === 'PATCH')
+    return send(
+      res,
+      200,
+      await communityRoutes.moderateContent(
+        req,
+        decodeURIComponent(communityContent[1]),
+        decodeURIComponent(communityContent[2]),
+        decodeURIComponent(communityContent[3]),
+      ),
+    );
   const communitySettings = pathname.match(/^\/communities\/([^/]+)\/settings$/);
   if (communitySettings && method === 'PATCH')
     return send(
@@ -294,7 +308,7 @@ async function handle(req, res) {
     return send(res, 201, await discussionRoutes.createDiscussion(req));
   const replies = pathname.match(/^\/discussions\/([^/]+)\/replies$/);
   if (replies && method === 'GET')
-    return send(res, 200, await discussionRoutes.getThread(decodeURIComponent(replies[1])));
+    return send(res, 200, await discussionRoutes.getThread(req, decodeURIComponent(replies[1])));
   if (replies && method === 'POST')
     return send(res, 201, await discussionRoutes.createReply(req, decodeURIComponent(replies[1])));
   const discussion = pathname.match(/^\/discussions\/([^/]+)$/);
