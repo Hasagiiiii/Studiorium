@@ -31,6 +31,28 @@ A ordem de `public/style.css` é parte da arquitetura. `responsive/hardening.css
 Leitura pública e operações do proprietário devem ser diferenciadas pela autorização, não pelo acaso de um objeto já ter vindo no bootstrap.
 Conteúdo privado nunca pode se tornar público apenas porque o usuário não está autenticado.
 
+## Comunidades
+
+Comunidades são uma camada de organização e permissão, não um segundo sistema de publicações.
+Discussões continuam em `discussions`, materiais práticos continuam em `tech_resources` e os demais domínios mantêm suas tabelas próprias.
+
+- `communities`: identidade, área, regras locais e estado da comunidade.
+- `community_members`: participação e papel local do usuário.
+- `community_content_links`: relação entre uma comunidade e um conteúdo já existente.
+- `src/server/community-links.js`: resolução e vínculo entre conteúdos e comunidade.
+- `src/server/community-permissions.js`: papéis e permissões locais.
+- `src/server/routes/communities.js`: descoberta, participação, liderança, regras e moderação local.
+
+A versão 3.4 trabalha com uma comunidade principal por conteúdo. Essa restrição é garantida também no banco para que a API não dependa apenas de convenção.
+
+Participação voluntária e sanções não são o mesmo estado. `status` registra se a pessoa participa ou saiu; `moderation_status` registra se está liberada, silenciada ou removida pela moderação. Um usuário silenciado ou removido não recebe a permissão `participate`.
+
+A hierarquia local é `member`, `curator`, `moderator` e `leader`. O administrador do Studiorium permanece acima da hierarquia local. Líderes podem administrar funções de confiança e regras da própria comunidade, mas não transformam a função local em poder global.
+
+Colóquio é a área de conversa de cada comunidade. A rota antiga `/coloquio` existe somente para compatibilidade; a navegação principal aponta para `/comunidades`.
+
+Oficina permanece um domínio próprio. Um tutorial ou projeto pode ser ligado a uma comunidade por `community_content_links` e continua existindo apenas uma vez na plataforma.
+
 ## Responsividade
 
 O layout deve funcionar por reflow real, sem `zoom:` ou `transform: scale()` para consertar viewport.
@@ -45,3 +67,5 @@ As faixas atuais cobrem desktop, notebook, tablet, celular, telas abaixo de 380/
 5. Alterações de movimento devem respeitar `prefers-reduced-motion`.
 6. Rotas públicas devem validar explicitamente o estado público do recurso.
 7. Mudanças estruturais precisam manter `npm run check` e `npm test` verdes antes de integração.
+8. Novos tipos de conteúdo comunitário devem reutilizar `community_content_links` em vez de criar tabelas de posts paralelas.
+9. Permissões locais devem ser verificadas no servidor; esconder um botão na interface nunca substitui autorização da API.
