@@ -30,9 +30,11 @@ Editor visual em blocos para criar modelos do zero, inserir fotos, ajustar cores
 
 Espaço voltado à publicação de trabalhos e projetos, com perfis de autores, áreas de conhecimento, palavras-chave e organização por nível acadêmico.
 
-### Colóquio
+### Comunidades
 
-Comunidade de discussão com um **filtro vivo de dúvidas**. Os núcleos são recalculados a partir do texto real dos comentários: perguntas semelhantes ficam próximas, os rótulos surgem do vocabulário da conversa e não existem categorias de resposta pré-cadastradas. Cada tópico também oferece busca local, ordenação, sinalização de perguntas, orientação para escrever melhor e conversas relacionadas.
+Camada de organização do conhecimento por assunto. Cada comunidade reúne pessoas, regras locais, seu **Colóquio** de perguntas e debates e conteúdos estruturados de outras áreas do Studiorium sem criar cópias. O Colóquio continua sendo a identidade das conversas, mas deixa de competir como uma rede paralela.
+
+A fundação começa com comunidades oficiais de tecnologia, automotivo, áreas acadêmicas, criação e literatura. Membros podem participar ou sair, enquanto Líderes, Moderadores e Curadores possuem permissões locais separadas da administração global do Studiorium.
 
 ### Escrivaninha
 
@@ -54,9 +56,25 @@ Ferramentas e referências voltadas à criação e organização de materiais ci
 - montagem, compatibilidade e custo-benefício de hardware;
 - conteúdos educativos sobre carros e motos.
 
+Materiais da Oficina podem ser ligados a uma comunidade específica sem serem duplicados. O mesmo conteúdo continua tendo uma única fonte e pode ser descoberto pela Oficina e pelo contexto comunitário correspondente.
+
 ### Studiorium Lab
 
 Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, visualizar o resultado no navegador e compartilhar projetos com a comunidade. A prévia isolada possui atualização automática, console, captura de erros e aviso de alterações ainda não salvas.
+
+## Comunidades 3.4
+
+- catálogo inicial de comunidades oficiais por área;
+- participação e saída sem apagar o histórico local do membro;
+- Colóquio incorporado às comunidades, com compatibilidade para links antigos;
+- papéis locais de Membro, Curador, Moderador e Líder;
+- regras locais administradas pela liderança, sempre subordinadas às Diretrizes gerais;
+- moderação local de membros separada do estado voluntário de participação;
+- conteúdos podem ser ocultados de uma comunidade sem serem apagados da plataforma;
+- discussões e materiais da Oficina são ligados à comunidade por relação, não por cópia;
+- um conteúdo possui uma comunidade principal nesta versão;
+- autorização das ações comunitárias é validada na API, não apenas pela interface;
+- layout próprio responsivo sem correções artificiais de escala.
 
 ## Refinamento 3.0
 
@@ -78,7 +96,7 @@ Ambiente de experimentação para criar projetos em **HTML, CSS e JavaScript**, 
 - fotos opcionais em publicações, mantendo o cartão clássico quando nenhuma imagem é enviada;
 - impulso único por usuário para destacar trabalhos relevantes sem substituir a curadoria;
 - central de notificações responsiva dentro do site para decisões de moderação, selos e funções;
-- bloqueio de reenvio no cadastro enquanto a criação da conta está em andamento.
+- bloqueio de reenvio no cadastro enquanto a criação da conta está em andamento;
 - projetos acadêmicos com compartilhamento opcional e exibição no perfil público;
 - moderação local com bloqueio de risco grave, fila para casos duvidosos e revisão humana.
 
@@ -95,7 +113,7 @@ O Studiorium foi pensado para:
 
 ## Comunidade
 
-A plataforma foi projetada para permitir participação da comunidade com autoria, publicação de projetos, discussões e colaboração. Conteúdos passam por mecanismos de moderação e ferramentas de denúncia para ajudar a manter o ambiente adequado para diferentes públicos.
+A plataforma foi projetada para permitir participação com autoria, publicação de projetos, discussões, colaboração e organização por interesses. Conteúdos passam por mecanismos de moderação e ferramentas de denúncia para ajudar a manter o ambiente adequado para diferentes públicos.
 
 ## Identidade
 
