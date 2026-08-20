@@ -14,7 +14,10 @@ test('Comunidades possui modelo relacional próprio sem duplicar conteúdos', ()
   assert.match(migration, /content_type in \(/);
   assert.doesNotMatch(migration, /create table if not exists public\.community_posts/);
   assert.match(migration, /enable row level security/);
-  assert.match(migration, /revoke all on table public\.community_members from public, anon, authenticated/);
+  assert.match(
+    migration,
+    /revoke all on table public\.community_members from public, anon, authenticated/,
+  );
 });
 
 test('catálogo oficial começa controlado e tutorial não vira comunidade isolada', () => {
@@ -46,6 +49,7 @@ test('Colóquio pode ser vinculado a uma comunidade sem mudar tabela de discuss�
 test('papéis locais limitam poderes à comunidade e líder não equivale a ADM', () => {
   const permissions = read('src/server/community-permissions.js');
   const routes = read('src/server/routes/communities.js');
+  const router = read('src/server/router.js');
   const migration = read('supabase/upgrade-v3.4-communities.sql');
 
   assert.match(migration, /'member', 'moderator', 'curator', 'leader'/);
@@ -54,6 +58,21 @@ test('papéis locais limitam poderes à comunidade e líder não equivale a ADM'
   assert.match(permissions, /manage_rules/);
   assert.match(routes, /Somente a administração do Studiorium pode alterar outro líder/);
   assert.match(routes, /\['member', 'moderator', 'curator'\]/);
+  assert.match(router, /communityRoutes\.members/);
+  assert.match(router, /communityRoutes\.updateMember/);
+  assert.match(router, /communityRoutes\.updateCommunity/);
+});
+
+test('interface oferece gestão local apenas quando a API entrega permissões', () => {
+  const view = read('public/js/views/communities.js');
+  const events = read('public/js/events/communities.js');
+
+  assert.match(view, /data-community-manage/);
+  assert.match(view, /manage_roles/);
+  assert.match(view, /manage_rules/);
+  assert.match(events, /data-community-member-form/);
+  assert.match(events, /data-community-rules-form/);
+  assert.match(events, /Somente o ADM pode criar ou substituir outro Líder/);
 });
 
 test('rotas públicas de Comunidades coexistem com compatibilidade do Colóquio antigo', () => {
@@ -74,6 +93,7 @@ test('interface de Comunidades possui reflow 3, 2 e 1 colunas sem escala artific
   assert.match(css, /@media \(max-width: 980px\)/);
   assert.match(css, /repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(css, /@media \(max-width: 720px\)/);
+  assert.match(css, /community-member-row/);
   assert.doesNotMatch(css, /\bzoom\s*:/);
   assert.doesNotMatch(css, /transform:\s*scale/);
 });
