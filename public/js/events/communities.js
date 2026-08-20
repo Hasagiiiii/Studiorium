@@ -23,7 +23,9 @@ async function refreshCommunityState() {
 }
 
 function option(value, current, label) {
-  return html`<option value="${E(value)}" ${value === current ? 'selected' : ''}>${E(label)}</option>`;
+  return html`<option value="${E(value)}" ${value === current ? 'selected' : ''}>
+    ${E(label)}
+  </option>`;
 }
 
 function managementMarkup(data, slug) {
@@ -32,7 +34,9 @@ function managementMarkup(data, slug) {
   const canModerate = permissions.includes('moderate_members');
   const canRules = permissions.includes('manage_rules');
   const isAdmin = state.me?.role === 'admin';
-  const roles = isAdmin ? ['member', 'curator', 'moderator', 'leader'] : ['member', 'curator', 'moderator'];
+  const roles = isAdmin
+    ? ['member', 'curator', 'moderator', 'leader']
+    : ['member', 'curator', 'moderator'];
 
   const members = (data.members || [])
     .map((member) => {
@@ -52,7 +56,11 @@ function managementMarkup(data, slug) {
           <strong>${E(member.displayName)}</strong>
           <span>${E(roleLabels[member.role] || member.role)}</span>
           ${member.verificationStatus === 'verified'
-            ? html`<small>Verificado${member.verifiedSpecialty ? ` · ${E(member.verifiedSpecialty)}` : ''}</small>`
+            ? html`<small
+                >Verificado${member.verifiedSpecialty
+                  ? ` · ${E(member.verifiedSpecialty)}`
+                  : ''}</small
+              >`
             : ''}
         </div>
         <div class="community-member-controls">
@@ -65,7 +73,11 @@ function managementMarkup(data, slug) {
               </label>`
             : html`<label>
                 <span>Função</span>
-                <input class="field" value="${E(roleLabels[member.role] || member.role)}" disabled />
+                <input
+                  class="field"
+                  value="${E(roleLabels[member.role] || member.role)}"
+                  disabled
+                />
               </label>`}
           ${statusControl
             ? html`<label>
@@ -78,7 +90,11 @@ function managementMarkup(data, slug) {
               </label>`
             : html`<label>
                 <span>Participação</span>
-                <input class="field" value="${E(statusLabels[member.status] || member.status)}" disabled />
+                <input
+                  class="field"
+                  value="${E(statusLabels[member.status] || member.status)}"
+                  disabled
+                />
               </label>`}
         </div>
         ${roleControl || statusControl ? '<button class="soft">Salvar</button>' : ''}
@@ -96,9 +112,13 @@ function managementMarkup(data, slug) {
           <div>
             <div class="eyebrow">Regras locais</div>
             <h3>Orientações desta comunidade</h3>
-            <p class="small muted">Uma regra por linha, até 12 regras. As Diretrizes gerais continuam acima delas.</p>
+            <p class="small muted">
+              Uma regra por linha, até 12 regras. As Diretrizes gerais continuam acima delas.
+            </p>
           </div>
-          <textarea class="textarea" name="rules" rows="6">${E((data.community.rules || []).join('\n'))}</textarea>
+          <textarea class="textarea" name="rules" rows="6">
+${E((data.community.rules || []).join('\n'))}</textarea
+          >
           <button class="solid">Salvar regras</button>
         </form>`
       : ''}
