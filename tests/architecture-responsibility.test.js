@@ -29,7 +29,11 @@ test('estilos responsivos e animações ficam separados por responsabilidade', (
     'public/css/layout-hardening-v328.css',
     'public/css/interactions-v326.css',
   ]) {
-    assert.equal(fs.existsSync(path.join(root, obsolete)), false, `caminho antigo voltou: ${obsolete}`);
+    assert.equal(
+      fs.existsSync(path.join(root, obsolete)),
+      false,
+      `caminho antigo voltou: ${obsolete}`,
+    );
   }
 });
 
