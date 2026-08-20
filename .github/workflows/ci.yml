@@ -28,11 +28,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Show required Prettier formatting
-        run: |
-          npx prettier --write public/js/features/armarium.js scripts/check-project.js tests/architecture-responsibility.test.js
-          git diff -- public/js/features/armarium.js scripts/check-project.js tests/architecture-responsibility.test.js
-          git diff --exit-code -- public/js/features/armarium.js scripts/check-project.js tests/architecture-responsibility.test.js
+      - name: Validate project structure and syntax
+        run: npm run check
 
       - name: Run tests
         run: npm test
