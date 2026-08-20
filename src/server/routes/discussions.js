@@ -8,6 +8,7 @@ const {
   setContentCommunity,
   removeContentCommunity,
   communityLinkForContent,
+  hiddenCommunityContentIds,
 } = require('../community-links');
 const {
   requireCommunityPermission,
@@ -74,14 +75,14 @@ async function profileName(user) {
   return user.is_minor ? 'Membro protegido' : data?.display_name || 'Membro';
 }
 
-async function canModerateCommunityContent(req, community) {
+async function communityPermissionsForRequest(req, community) {
   const user = await currentUser(req);
-  if (!user) return false;
-  if (user.role === 'admin') return true;
+  if (!user) return [];
+  if (user.role === 'admin') return permissionsFor(null, true);
 
   const membership = await membershipFor(community.id, user.id);
-  if (membership?.status !== 'active' || membership?.moderation_status !== 'clear') return false;
-  return permissionsFor(membership.role).includes('moderate_content');
+  if (membership?.status !== 'active' || membership?.moderation_status !== 'clear') return [];
+  return permissionsFor(membership.role);
 }
 
 async function requireDiscussionCommunityAccess(req, discussionId) {
@@ -213,14 +214,15 @@ async function getThread(req, discussionId) {
   ]);
   fail(discussionQ.error);
   if (!discussionQ.data) throw inputError('Discussão não encontrada.', 404);
-  if (
-    context?.status === 'hidden' &&
-    !(await canModerateCommunityContent(req, context.community))
-  ) {
+
+  const communityPermissions = context
+    ? await communityPermissionsForRequest(req, context.community)
+    : [];
+  if (context?.status === 'hidden' && !communityPermissions.includes('moderate_content')) {
     throw inputError('Discussão não encontrada.', 404);
   }
 
-  const [repliesQ, relatedQ] = await Promise.all([
+  const [repliesQ, relatedQ, hiddenIds] = await Promise.all([
     db()
       .from('replies')
       .select('*')
@@ -234,17 +236,21 @@ async function getThread(req, discussionId) {
       .neq('id', discussionId)
       .order('created_at', { ascending: false })
       .limit(40),
+    hiddenCommunityContentIds('discussion'),
   ]);
   fail(repliesQ.error);
   fail(relatedQ.error);
 
+  const hiddenDiscussionIds = new Set(hiddenIds);
+  const visibleRelated = relatedQ.data.filter((row) => !hiddenDiscussionIds.has(row.id));
   const discussion = S.discussion(discussionQ.data);
   const replyMap = buildReplyMap(repliesQ.data.map(S.reply));
-  const relatedDiscussions = rankRelatedDiscussions(discussion, relatedQ.data.map(S.discussion));
+  const relatedDiscussions = rankRelatedDiscussions(discussion, visibleRelated.map(S.discussion));
 
   return {
     discussion,
     community: context?.community || null,
+    communityPermissions,
     communityHidden: context?.status === 'hidden',
     replies: replyMap.replies,
     replyMap: {
