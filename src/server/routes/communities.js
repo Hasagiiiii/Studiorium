@@ -18,6 +18,15 @@ const {
 
 const TECH_RESOURCE_FIELDS =
   'id,owner_id,author_name,title,slug,summary,hub,category,tags,status,featured,created_at,updated_at';
+const COMMUNITY_CONTENT_TYPES = new Set([
+  'discussion',
+  'tech_resource',
+  'project',
+  'code_project',
+  'publication',
+  'custom_template',
+  'book',
+]);
 
 function countByCommunity(rows = []) {
   return rows.reduce((counts, row) => {
@@ -123,7 +132,7 @@ async function detail(req, slug) {
       : Promise.resolve({ data: null, error: null }),
     db()
       .from('community_content_links')
-      .select('content_type,content_id,created_at')
+      .select('content_type,content_id,status,created_at')
       .eq('community_id', community.id)
       .order('created_at', { ascending: false }),
   ]);
@@ -131,11 +140,20 @@ async function detail(req, slug) {
   fail(mineQ.error);
   fail(linksQ.error);
 
-  const discussionIds = linksQ.data
+  const joined = mineQ.data?.status === 'active';
+  const moderationStatus = mineQ.data?.moderation_status || null;
+  const permissionRole = joined && moderationStatus === 'clear' ? mineQ.data?.role : null;
+  const permissions = permissionsFor(permissionRole, user?.role === 'admin');
+  const canModerateContent = permissions.includes('moderate_content');
+  const visibleLinks = canModerateContent
+    ? linksQ.data
+    : linksQ.data.filter((link) => link.status !== 'hidden');
+
+  const discussionIds = visibleLinks
     .filter((link) => link.content_type === 'discussion')
     .map((link) => link.content_id)
     .slice(0, 40);
-  const techResourceIds = linksQ.data
+  const techResourceIds = visibleLinks
     .filter((link) => link.content_type === 'tech_resource')
     .map((link) => link.content_id)
     .slice(0, 40);
@@ -163,9 +181,17 @@ async function detail(req, slug) {
   fail(discussionsQ.error);
   fail(techQ.error);
 
-  const joined = mineQ.data?.status === 'active';
-  const moderationStatus = mineQ.data?.moderation_status || null;
-  const permissionRole = joined && moderationStatus === 'clear' ? mineQ.data?.role : null;
+  const hiddenDiscussionIds = new Set(
+    linksQ.data
+      .filter((link) => link.content_type === 'discussion' && link.status === 'hidden')
+      .map((link) => link.content_id),
+  );
+  const hiddenTechIds = new Set(
+    linksQ.data
+      .filter((link) => link.content_type === 'tech_resource' && link.status === 'hidden')
+      .map((link) => link.content_id),
+  );
+
   return {
     storageReady: true,
     community: {
@@ -175,9 +201,15 @@ async function detail(req, slug) {
       memberRole: joined ? mineQ.data?.role || null : null,
       memberModerationStatus: moderationStatus,
     },
-    permissions: permissionsFor(permissionRole, user?.role === 'admin'),
-    discussions: discussionsQ.data.map(S.discussion),
-    techResources: techQ.data.map(S.techResource),
+    permissions,
+    discussions: discussionsQ.data.map((row) => ({
+      ...S.discussion(row),
+      communityHidden: hiddenDiscussionIds.has(row.id),
+    })),
+    techResources: techQ.data.map((row) => ({
+      ...S.techResource(row),
+      communityHidden: hiddenTechIds.has(row.id),
+    })),
   };
 }
 
@@ -358,6 +390,52 @@ async function updateMember(req, slug, targetUserId) {
   return { member: updated.data, message: 'Permissões da comunidade atualizadas.' };
 }
 
+async function moderateContent(req, slug, contentType, contentId) {
+  const actor = await requireCommunityPermission(req, slug, 'moderate_content');
+  const type = String(contentType || '').trim();
+  const targetId = String(contentId || '').trim();
+  if (!COMMUNITY_CONTENT_TYPES.has(type) || !targetId) {
+    throw inputError('Conteúdo comunitário inválido.');
+  }
+
+  const existing = await db()
+    .from('community_content_links')
+    .select('content_id,status')
+    .eq('community_id', actor.community.id)
+    .eq('content_type', type)
+    .eq('content_id', targetId)
+    .maybeSingle();
+  fail(existing.error);
+  if (!existing.data) throw inputError('Conteúdo não encontrado nesta comunidade.', 404);
+
+  const body = await readJson(req);
+  const status = String(body.status || '').trim();
+  if (!['visible', 'hidden'].includes(status)) {
+    throw inputError('Estado local do conteúdo inválido.');
+  }
+
+  const updated = await db()
+    .from('community_content_links')
+    .update({
+      status,
+      moderated_by: actor.user.id,
+      moderated_at: new Date().toISOString(),
+    })
+    .eq('community_id', actor.community.id)
+    .eq('content_type', type)
+    .eq('content_id', targetId)
+    .select('content_id,status,moderated_by,moderated_at')
+    .single();
+  fail(updated.error);
+  return {
+    link: updated.data,
+    message:
+      status === 'hidden'
+        ? 'Conteúdo ocultado nesta comunidade.'
+        : 'Conteúdo restaurado nesta comunidade.',
+  };
+}
+
 async function updateCommunity(req, slug) {
   const actor = await requireCommunityPermission(req, slug, 'manage_rules');
   const body = await readJson(req);
@@ -384,4 +462,13 @@ async function updateCommunity(req, slug) {
   };
 }
 
-module.exports = { list, detail, join, leave, members, updateMember, updateCommunity };
+module.exports = {
+  list,
+  detail,
+  join,
+  leave,
+  members,
+  updateMember,
+  moderateContent,
+  updateCommunity,
+};
