@@ -21,11 +21,25 @@ function selectOptions(options, selected) {
     .join('');
 }
 
+function routeCommunityContext() {
+  if (typeof location === 'undefined') return { slug: '', name: '' };
+  const query = new URLSearchParams(location.search);
+  return {
+    slug: String(query.get('comunidade') || '').trim(),
+    name: String(query.get('comunidadeNome') || '').trim(),
+  };
+}
+
 export function techResourceForm(resource = {}, context = {}) {
   const editing = Boolean(resource.id);
   const tags = Array.isArray(resource.tags) ? resource.tags.join(', ') : resource.tags || '';
-  const communitySlug = String(context.communitySlug || context.slug || '').trim();
-  const communityName = String(context.communityName || context.name || '').trim();
+  const routeContext = routeCommunityContext();
+  const communitySlug = String(
+    context.communitySlug || context.slug || routeContext.slug || '',
+  ).trim();
+  const communityName = String(
+    context.communityName || context.name || routeContext.name || '',
+  ).trim();
 
   return html`
     <form class="card" data-tech-resource="${E(resource.id || '')}">
