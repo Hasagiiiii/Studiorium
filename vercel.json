@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/format-preview.js",
   "functions": {
     "api/index.js": { "maxDuration": 20 }
   },
