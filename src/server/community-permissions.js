@@ -58,7 +58,11 @@ async function communityActor(req, slug) {
 async function requireCommunityPermission(req, slug, permission) {
   const actor = await communityActor(req, slug);
   if (!actor.permissions.includes(permission)) {
-    throw inputError('Você não tem permissão para administrar esta comunidade.', 403);
+    const message =
+      permission === 'participate'
+        ? 'Você precisa estar com participação ativa e liberada nesta comunidade.'
+        : 'Você não tem permissão para administrar esta comunidade.';
+    throw inputError(message, 403);
   }
   return actor;
 }
