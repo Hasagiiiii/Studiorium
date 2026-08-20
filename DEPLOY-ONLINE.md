@@ -17,6 +17,13 @@ O projeto foi preparado para **Vercel + Supabase**.
   métricas da estante real.
 - Depois aplique `supabase/upgrade-v3.2.1-armarium-indexes.sql` para os índices recomendados pelo
   Performance Advisor.
+- Para ativar **Comunidades 3.4**, aplique `supabase/upgrade-v3.4-communities.sql` antes de publicar
+  o código correspondente. A migração cria comunidades oficiais, membros, papéis locais e vínculos
+  entre a comunidade e conteúdos existentes sem duplicar discussões ou materiais da Oficina.
+- Em Comunidades, participação voluntária (`active`/`left`) e moderação (`clear`/`muted`/`removed`)
+  são estados separados. Não altere esses campos manualmente para contornar a API.
+- Cada conteúdo possui uma comunidade principal nessa versão. O índice
+  `community_content_single_parent_idx` protege esse contrato no banco.
 - Confirme que o bucket privado `publications` existe e que as tabelas não concedem acesso a
   `anon` ou `authenticated`.
 - Copie `Project URL` e `secret key` em Settings/API.
