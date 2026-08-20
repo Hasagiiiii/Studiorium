@@ -27,15 +27,17 @@ create table if not exists public.community_members (
   role text not null default 'member'
     check (role in ('member', 'moderator', 'curator', 'leader')),
   status text not null default 'active'
-    check (status in ('active', 'muted', 'removed')),
+    check (status in ('active', 'left')),
+  moderation_status text not null default 'clear'
+    check (moderation_status in ('clear', 'muted', 'removed')),
   joined_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (community_id, user_id)
 );
 create index if not exists community_members_user_idx
-  on public.community_members(user_id, status, joined_at desc);
+  on public.community_members(user_id, status, moderation_status, joined_at desc);
 create index if not exists community_members_community_idx
-  on public.community_members(community_id, status, joined_at desc);
+  on public.community_members(community_id, status, moderation_status, joined_at desc);
 
 create table if not exists public.community_content_links (
   community_id text not null references public.communities(id) on delete cascade,
