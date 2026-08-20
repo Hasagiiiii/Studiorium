@@ -32,6 +32,7 @@ function fallbackCommunities() {
       memberCount: 0,
       joined: false,
       memberRole: null,
+      memberModerationStatus: null,
       storageReady: false,
     }),
   );
@@ -52,11 +53,15 @@ async function list(req) {
   }
 
   const [membersQ, mineQ] = await Promise.all([
-    db().from('community_members').select('community_id').eq('status', 'active'),
+    db()
+      .from('community_members')
+      .select('community_id')
+      .eq('status', 'active')
+      .neq('moderation_status', 'removed'),
     user
       ? db()
           .from('community_members')
-          .select('community_id,role,status')
+          .select('community_id,role,status,moderation_status')
           .eq('user_id', user.id)
           .eq('status', 'active')
       : Promise.resolve({ data: [], error: null }),
@@ -74,6 +79,7 @@ async function list(req) {
         memberCount: counts[row.id] || 0,
         joined: Boolean(membership),
         memberRole: membership?.role || null,
+        memberModerationStatus: membership?.moderation_status || null,
         storageReady: true,
       });
     }),
@@ -86,7 +92,13 @@ async function detail(req, slug) {
 
   if (community.storageReady === false) {
     return {
-      community: { ...community, memberCount: 0, joined: false, memberRole: null },
+      community: {
+        ...community,
+        memberCount: 0,
+        joined: false,
+        memberRole: null,
+        memberModerationStatus: null,
+      },
       discussions: [],
       techResources: [],
       permissions: [],
@@ -99,14 +111,14 @@ async function detail(req, slug) {
       .from('community_members')
       .select('user_id')
       .eq('community_id', community.id)
-      .eq('status', 'active'),
+      .eq('status', 'active')
+      .neq('moderation_status', 'removed'),
     user
       ? db()
           .from('community_members')
-          .select('role,status')
+          .select('role,status,moderation_status')
           .eq('community_id', community.id)
           .eq('user_id', user.id)
-          .eq('status', 'active')
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     db()
@@ -151,16 +163,19 @@ async function detail(req, slug) {
   fail(discussionsQ.error);
   fail(techQ.error);
 
-  const memberRole = mineQ.data?.role || null;
+  const joined = mineQ.data?.status === 'active';
+  const moderationStatus = mineQ.data?.moderation_status || null;
+  const permissionRole = joined && moderationStatus === 'clear' ? mineQ.data?.role : null;
   return {
     storageReady: true,
     community: {
       ...community,
       memberCount: membersQ.data.length,
-      joined: Boolean(mineQ.data),
-      memberRole,
+      joined,
+      memberRole: joined ? mineQ.data?.role || null : null,
+      memberModerationStatus: moderationStatus,
     },
-    permissions: permissionsFor(memberRole, user?.role === 'admin'),
+    permissions: permissionsFor(permissionRole, user?.role === 'admin'),
     discussions: discussionsQ.data.map(S.discussion),
     techResources: techQ.data.map(S.techResource),
   };
@@ -174,20 +189,35 @@ async function join(req, slug) {
   }
 
   const existing = await membershipFor(community.id, user.id);
-  const role = existing?.role || 'member';
+  if (existing?.moderation_status === 'removed') {
+    throw inputError('Sua participação nesta comunidade foi removida pela moderação.', 403);
+  }
+  if (existing?.status === 'active') {
+    return {
+      ok: true,
+      message:
+        existing.moderation_status === 'muted'
+          ? 'Você já participa, mas está temporariamente silenciado nesta comunidade.'
+          : `Você já participa de ${community.name}.`,
+    };
+  }
+  if (existing?.moderation_status === 'muted') {
+    throw inputError('Aguarde a liberação da moderação antes de participar novamente.', 409);
+  }
+
+  const timestamp = new Date().toISOString();
+  const membership = {
+    community_id: community.id,
+    user_id: user.id,
+    role: 'member',
+    status: 'active',
+    moderation_status: 'clear',
+    joined_at: existing?.joined_at || timestamp,
+    updated_at: timestamp,
+  };
   const { error } = await db()
     .from('community_members')
-    .upsert(
-      {
-        community_id: community.id,
-        user_id: user.id,
-        role,
-        status: 'active',
-        joined_at: existing?.joined_at || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'community_id,user_id' },
-    );
+    .upsert(membership, { onConflict: 'community_id,user_id' });
   fail(error);
   return { ok: true, message: `Você agora participa de ${community.name}.` };
 }
@@ -201,7 +231,9 @@ async function leave(req, slug) {
   }
 
   const membership = await membershipFor(community.id, user.id);
-  if (!membership) return { ok: true, message: 'Você já não participava desta comunidade.' };
+  if (!membership || membership.status === 'left') {
+    return { ok: true, message: 'Você já não participava desta comunidade.' };
+  }
   if (membership.role !== 'member') {
     throw inputError(
       'Membros com função de comunidade precisam transferir a função antes de sair.',
@@ -209,12 +241,12 @@ async function leave(req, slug) {
     );
   }
 
-  const removal = await db()
+  const leaving = await db()
     .from('community_members')
-    .delete()
+    .update({ status: 'left', updated_at: new Date().toISOString() })
     .eq('community_id', community.id)
     .eq('user_id', user.id);
-  fail(removal.error);
+  fail(leaving.error);
   return { ok: true, message: `Você saiu de ${community.name}.` };
 }
 
@@ -229,7 +261,7 @@ async function members(req, slug) {
 
   const memberships = await db()
     .from('community_members')
-    .select('user_id,role,status,joined_at,updated_at')
+    .select('user_id,role,status,moderation_status,joined_at,updated_at')
     .eq('community_id', actor.community.id)
     .order('joined_at', { ascending: true });
   fail(memberships.error);
@@ -254,6 +286,7 @@ async function members(req, slug) {
         displayName: profile.display_name || profile.username || 'Membro',
         role: membership.role,
         status: membership.status,
+        moderationStatus: membership.moderation_status,
         joinedAt: membership.joined_at,
         verificationStatus: profile.verification_status || 'unverified',
         verifiedSpecialty: profile.verified_specialty || '',
@@ -285,21 +318,31 @@ async function updateMember(req, slug, targetUserId) {
       ? ['member', 'moderator', 'curator', 'leader']
       : ['member', 'moderator', 'curator'];
     if (!allowed.includes(role)) throw inputError('Função de comunidade inválida.');
+    if (
+      role !== 'member' &&
+      (target.status !== 'active' || target.moderation_status !== 'clear')
+    ) {
+      throw inputError('Ative e libere o membro antes de atribuir uma função de confiança.', 409);
+    }
     patch.role = role;
   }
 
-  if (Object.prototype.hasOwnProperty.call(body, 'status')) {
+  if (Object.prototype.hasOwnProperty.call(body, 'moderationStatus')) {
     if (!actor.permissions.includes('moderate_members')) {
       throw inputError('Você não pode moderar participantes desta comunidade.', 403);
     }
-    const status = String(body.status || '').trim();
-    if (!['active', 'muted', 'removed'].includes(status)) {
-      throw inputError('Estado de participação inválido.');
+    const moderationStatus = String(body.moderationStatus || '').trim();
+    if (!['clear', 'muted', 'removed'].includes(moderationStatus)) {
+      throw inputError('Estado de moderação inválido.');
     }
     if (actor.role === 'moderator' && target.role !== 'member' && !actor.isAdmin) {
       throw inputError('Moderadores só podem agir sobre membros comuns.', 403);
     }
-    patch.status = status;
+    patch.moderation_status = moderationStatus;
+    if (moderationStatus === 'removed') {
+      patch.status = 'left';
+      patch.role = 'member';
+    }
   }
 
   if (Object.keys(patch).length === 1) throw inputError('Nenhuma alteração válida foi enviada.');
@@ -309,7 +352,7 @@ async function updateMember(req, slug, targetUserId) {
     .update(patch)
     .eq('community_id', actor.community.id)
     .eq('user_id', targetUserId)
-    .select('user_id,role,status,joined_at')
+    .select('user_id,role,status,moderation_status,joined_at')
     .single();
   fail(updated.error);
   return { member: updated.data, message: 'Permissões da comunidade atualizadas.' };
