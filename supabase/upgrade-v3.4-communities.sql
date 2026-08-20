@@ -25,7 +25,7 @@ create table if not exists public.community_members (
   community_id text not null references public.communities(id) on delete cascade,
   user_id text not null references public.users(id) on delete cascade,
   role text not null default 'member'
-    check (role in ('member', 'moderator', 'curator', 'manager')),
+    check (role in ('member', 'moderator', 'curator', 'leader')),
   status text not null default 'active'
     check (status in ('active', 'muted', 'removed')),
   joined_at timestamptz not null default now(),
