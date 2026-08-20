@@ -51,8 +51,8 @@ test('layout da estante é compacto e responsivo sem ocupar a largura toda', () 
 
 test('nova camada não ultrapassa o hardening global', () => {
   const catalogIndex = style.indexOf("@import url('/css/book-catalog.css');");
-  const hardeningIndex = style.indexOf("@import url('/css/layout-hardening-v328.css');");
+  const hardeningIndex = style.indexOf("@import url('/css/responsive/hardening.css');");
   assert.ok(catalogIndex >= 0);
   assert.ok(hardeningIndex > catalogIndex);
-  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/layout-hardening-v328.css');");
+  assert.equal(style.trim().split('\n').at(-1), "@import url('/css/responsive/hardening.css');");
 });
