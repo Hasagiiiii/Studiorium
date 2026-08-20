@@ -5,11 +5,11 @@ const { id, now } = require('../security');
 const { moderate } = require('../moderation');
 const { buildReplyMap, rankRelatedDiscussions } = require('../comment-intelligence');
 const {
-  resolveCommunity,
   setContentCommunity,
   removeContentCommunity,
   communityForContent,
 } = require('../community-links');
+const { requireCommunityPermission } = require('../community-permissions');
 const S = require('../serializers');
 
 function inputError(message, statusCode = 400) {
@@ -70,12 +70,20 @@ async function profileName(user) {
   return user.is_minor ? 'Membro protegido' : data?.display_name || 'Membro';
 }
 
+async function requireDiscussionCommunityAccess(req, discussionId) {
+  const community = await communityForContent('discussion', discussionId);
+  if (!community) return null;
+  await requireCommunityPermission(req, community.slug, 'participate');
+  return community;
+}
+
 async function createDiscussion(req) {
   const user = await requireUser(req);
   const values = discussionInput(await readJson(req));
-  const community = values.communitySlug ? await resolveCommunity(values.communitySlug) : null;
-  if (community?.storageReady === false) {
-    throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
+  let community = null;
+  if (values.communitySlug) {
+    const actor = await requireCommunityPermission(req, values.communitySlug, 'participate');
+    community = actor.community;
   }
 
   const row = {
@@ -117,11 +125,18 @@ async function updateDiscussion(req, discussionId) {
   const user = await requireUser(req);
   const current = await ownedDiscussion(user.id, discussionId);
   const values = discussionInput(await readJson(req), current);
-  let community = null;
-  if (values.communityProvided && values.communitySlug) {
-    community = await resolveCommunity(values.communitySlug);
-    if (community.storageReady === false) {
-      throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
+  const currentCommunity = await requireDiscussionCommunityAccess(req, discussionId);
+  let community = currentCommunity;
+
+  if (values.communityProvided) {
+    if (!values.communitySlug && currentCommunity) {
+      throw inputError('Uma discussão de comunidade deve permanecer vinculada a uma comunidade.', 409);
+    }
+    if (values.communitySlug) {
+      const actor = await requireCommunityPermission(req, values.communitySlug, 'participate');
+      community = actor.community;
+    } else {
+      community = null;
     }
   }
 
@@ -150,7 +165,7 @@ async function updateDiscussion(req, discussionId) {
 
   return {
     discussion: S.discussion(data),
-    community: community || (await communityForContent('discussion', discussionId)),
+    community,
     message: status === 'published' ? 'Discussão atualizada.' : 'Alterações enviadas para revisão.',
   };
 }
@@ -226,6 +241,8 @@ async function createReply(req, discussionId) {
     .maybeSingle();
   fail(discussionError);
   if (!discussion) throw inputError('Discussão não encontrada.', 404);
+  await requireDiscussionCommunityAccess(req, discussionId);
+
   const values = replyInput(await readJson(req));
   const row = {
     id: id('reply'),
@@ -259,6 +276,7 @@ async function ownedReply(userId, replyId) {
 async function updateReply(req, replyId) {
   const user = await requireUser(req);
   const current = await ownedReply(user.id, replyId);
+  await requireDiscussionCommunityAccess(req, current.discussion_id);
   const values = replyInput(await readJson(req), current);
   const status =
     values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
