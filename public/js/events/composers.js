@@ -21,14 +21,23 @@ function selectOptions(options, selected) {
     .join('');
 }
 
-export function techResourceForm(resource = {}) {
+export function techResourceForm(resource = {}, context = {}) {
   const editing = Boolean(resource.id);
   const tags = Array.isArray(resource.tags) ? resource.tags.join(', ') : resource.tags || '';
+  const communitySlug = String(context.communitySlug || context.slug || '').trim();
+  const communityName = String(context.communityName || context.name || '').trim();
 
   return html`
     <form class="card" data-tech-resource="${E(resource.id || '')}">
       <div class="eyebrow">${editing ? 'Reaproveitar envio' : 'Contribuição da comunidade'}</div>
       <h3>${editing ? 'Editar conteúdo enviado' : 'Publicar na Tech & Oficina'}</h3>
+      ${communitySlug
+        ? html`<input type="hidden" name="communitySlug" value="${E(communitySlug)}" />
+            <div class="notice discussion-community-context">
+              Este conteúdo ficará vinculado à comunidade
+              <strong>${E(communityName || communitySlug)}</strong>.
+            </div>`
+        : ''}
       ${editing
         ? html`<p class="notice">
             Salve as alterações para devolver este conteúdo à fila de revisão.
