@@ -85,19 +85,34 @@ ${E(resource.body || '')}</textarea
   `;
 }
 
-export function discussionForm() {
+export function discussionForm(options = {}) {
+  const communitySlug = String(options.communitySlug || '').trim();
+  const communityName = String(options.communityName || '').trim();
+
   return html`
-    <form class="card" data-new-discussion-form style="margin-top: 20px">
+    <form class="card discussion-composer" data-new-discussion-form style="margin-top: 20px">
       <div class="eyebrow">Nova mesa</div>
-      <h3>Abrir discussão</h3>
+      <h3>Abrir discussão${communityName ? ` em ${E(communityName)}` : ''}</h3>
+      ${communitySlug
+        ? html`<input type="hidden" name="communitySlug" value="${E(communitySlug)}" />
+            <div class="notice discussion-community-context">
+              Este Colóquio ficará vinculado à comunidade <strong>${E(communityName)}</strong>.
+            </div>`
+        : ''}
       <div class="formrow">
         <label class="label">Título</label>
         <input class="field" name="title" required minlength="6" />
       </div>
-      <div class="formrow">
-        <label class="label">Categoria</label>
-        <input class="field" name="category" placeholder="Ex.: Matemática, Educação, Tecnologia" />
-      </div>
+      ${communitySlug
+        ? ''
+        : html`<div class="formrow">
+            <label class="label">Categoria</label>
+            <input
+              class="field"
+              name="category"
+              placeholder="Ex.: Matemática, Educação, Tecnologia"
+            />
+          </div>`}
       <div class="formrow">
         <label class="label">Contexto da discussão</label>
         <textarea class="textarea" name="body" required minlength="10"></textarea>
