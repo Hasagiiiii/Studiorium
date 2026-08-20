@@ -2,7 +2,11 @@ const { db, fail } = require('../db');
 const { currentUser, requireUser } = require('../auth');
 const { readJson } = require('../http');
 const S = require('../serializers');
-const { OFFICIAL_COMMUNITIES, communityFromCatalog, normalizeSlug } = require('../community-catalog');
+const {
+  OFFICIAL_COMMUNITIES,
+  communityFromCatalog,
+  normalizeSlug,
+} = require('../community-catalog');
 const {
   inputError,
   isMissingCommunitySchema,
@@ -171,17 +175,19 @@ async function join(req, slug) {
 
   const existing = await membershipFor(community.id, user.id);
   const role = existing?.role || 'member';
-  const { error } = await db().from('community_members').upsert(
-    {
-      community_id: community.id,
-      user_id: user.id,
-      role,
-      status: 'active',
-      joined_at: existing?.joined_at || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'community_id,user_id' },
-  );
+  const { error } = await db()
+    .from('community_members')
+    .upsert(
+      {
+        community_id: community.id,
+        user_id: user.id,
+        role,
+        status: 'active',
+        joined_at: existing?.joined_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'community_id,user_id' },
+    );
   fail(error);
   return { ok: true, message: `Você agora participa de ${community.name}.` };
 }
@@ -197,7 +203,10 @@ async function leave(req, slug) {
   const membership = await membershipFor(community.id, user.id);
   if (!membership) return { ok: true, message: 'Você já não participava desta comunidade.' };
   if (membership.role !== 'member') {
-    throw inputError('Membros com função de comunidade precisam transferir a função antes de sair.', 409);
+    throw inputError(
+      'Membros com função de comunidade precisam transferir a função antes de sair.',
+      409,
+    );
   }
 
   const removal = await db()
@@ -311,7 +320,11 @@ async function updateCommunity(req, slug) {
   const body = await readJson(req);
   if (!Array.isArray(body.rules)) throw inputError('Envie as regras da comunidade em uma lista.');
   const rules = body.rules
-    .map((rule) => String(rule || '').trim().slice(0, 220))
+    .map((rule) =>
+      String(rule || '')
+        .trim()
+        .slice(0, 220),
+    )
     .filter(Boolean)
     .slice(0, 12);
 

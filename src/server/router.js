@@ -84,7 +84,11 @@ async function handle(req, res) {
     );
   const communityMembers = pathname.match(/^\/communities\/([^/]+)\/members$/);
   if (communityMembers && method === 'GET')
-    return send(res, 200, await communityRoutes.members(req, decodeURIComponent(communityMembers[1])));
+    return send(
+      res,
+      200,
+      await communityRoutes.members(req, decodeURIComponent(communityMembers[1])),
+    );
   const communityMember = pathname.match(/^\/communities\/([^/]+)\/members\/([^/]+)$/);
   if (communityMember && method === 'PATCH')
     return send(
