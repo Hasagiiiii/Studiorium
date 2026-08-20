@@ -3,6 +3,12 @@ const { requireUser } = require('../auth');
 const { readJson } = require('../http');
 const { id, now, slugify } = require('../security');
 const { safePublicName } = require('../public-identity');
+const {
+  communityForContent,
+  removeContentCommunity,
+  setContentCommunity,
+} = require('../community-links');
+const { requireCommunityPermission } = require('../community-permissions');
 const S = require('../serializers');
 
 const hubs = new Set(['Tecnologia', 'Jogos', 'PC & Hardware', 'Carros', 'Motos']);
@@ -43,6 +49,20 @@ function resourceInput(body, current = {}) {
   };
 }
 
+function communityInput(body) {
+  const provided = Object.prototype.hasOwnProperty.call(body, 'communitySlug');
+  return {
+    provided,
+    slug: provided
+      ? String(body.communitySlug || '')
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '')
+          .slice(0, 80)
+      : '',
+  };
+}
+
 function createSlug(title) {
   return `${slugify(title).slice(0, 70)}-${Date.now().toString(36)}`;
 }
@@ -75,10 +95,20 @@ function ensureEditable(resource) {
   }
 }
 
+async function participatingCommunity(req, slug) {
+  if (!slug) return null;
+  const actor = await requireCommunityPermission(req, slug, 'participate');
+  return actor.community;
+}
+
 async function create(req) {
   const user = await requireUser(req);
   const body = await readJson(req);
   const values = resourceInput(body);
+  const communitySelection = communityInput(body);
+  const community = communitySelection.slug
+    ? await participatingCommunity(req, communitySelection.slug)
+    : null;
   const profile = await profileFor(user.id);
   const timestamp = now();
   const row = {
@@ -93,14 +123,22 @@ async function create(req) {
   };
   const { data, error } = await db().from('tech_resources').insert(row).select('*').single();
   fail(error);
-  return { resource: S.techResource(data), message: 'Enviado para revisão.' };
+  if (community) await setContentCommunity('tech_resource', data.id, community);
+  return {
+    resource: S.techResource(data),
+    community,
+    message: community
+      ? `Enviado para revisão em ${community.name}.`
+      : 'Enviado para revisão.',
+  };
 }
 
 async function getMine(req, resourceId) {
   const user = await requireUser(req);
   const resource = await ownedResource(user.id, resourceId);
   ensureEditable(resource);
-  return { resource: S.techResource(resource) };
+  const community = await communityForContent('tech_resource', resourceId);
+  return { resource: S.techResource(resource), community };
 }
 
 async function update(req, resourceId) {
@@ -108,8 +146,21 @@ async function update(req, resourceId) {
   const current = await ownedResource(user.id, resourceId);
   ensureEditable(current);
 
+  const currentCommunity = await communityForContent('tech_resource', resourceId);
+  if (currentCommunity) {
+    await requireCommunityPermission(req, currentCommunity.slug, 'participate');
+  }
+
   const body = await readJson(req);
   const values = resourceInput(body, current);
+  const communitySelection = communityInput(body);
+  let community = currentCommunity;
+  if (communitySelection.provided) {
+    community = communitySelection.slug
+      ? await participatingCommunity(req, communitySelection.slug)
+      : null;
+  }
+
   const profile = await profileFor(user.id);
   const patch = {
     ...values,
@@ -128,8 +179,15 @@ async function update(req, resourceId) {
     .maybeSingle();
   fail(error);
   if (!data) throw inputError('Conteúdo da Oficina não encontrado.', 404);
+
+  if (communitySelection.provided) {
+    if (community) await setContentCommunity('tech_resource', resourceId, community);
+    else await removeContentCommunity('tech_resource', resourceId);
+  }
+
   return {
     resource: S.techResource(data),
+    community,
     message:
       current.status === 'published'
         ? 'Alterações salvas. O conteúdo saiu do ar e voltou para revisão.'
@@ -151,6 +209,7 @@ async function remove(req, resourceId) {
     .maybeSingle();
   fail(error);
   if (!data) throw inputError('Conteúdo da Oficina não encontrado.', 404);
+  await removeContentCommunity('tech_resource', resourceId);
   return { ok: true, message: 'Conteúdo apagado definitivamente.' };
 }
 
@@ -165,7 +224,8 @@ async function getPublic(slug) {
   if (!data) {
     throw inputError('Conteúdo da Oficina não encontrado.', 404);
   }
-  return { resource: S.techResource(data) };
+  const community = await communityForContent('tech_resource', data.id);
+  return { resource: S.techResource(data), community };
 }
 
 module.exports = {
