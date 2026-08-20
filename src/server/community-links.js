@@ -80,14 +80,15 @@ async function setContentCommunity(contentType, contentId, community) {
     community_id: community.id,
     content_type: cleanType,
     content_id: cleanId,
+    status: 'visible',
   });
   fail(insertion.error);
 }
 
-async function communityForContent(contentType, contentId) {
+async function communityLinkForContent(contentType, contentId) {
   const link = await db()
     .from('community_content_links')
-    .select('community_id')
+    .select('community_id,status,moderated_by,moderated_at')
     .eq('content_type', contentType)
     .eq('content_id', contentId)
     .maybeSingle();
@@ -108,7 +109,19 @@ async function communityForContent(contentType, contentId) {
     if (isMissingCommunitySchema(community.error)) return null;
     fail(community.error);
   }
-  return community.data ? serializeCommunity(community.data, { storageReady: true }) : null;
+  if (!community.data) return null;
+
+  return {
+    community: serializeCommunity(community.data, { storageReady: true }),
+    status: link.data.status || 'visible',
+    moderatedBy: link.data.moderated_by || null,
+    moderatedAt: link.data.moderated_at || null,
+  };
+}
+
+async function communityForContent(contentType, contentId) {
+  const context = await communityLinkForContent(contentType, contentId);
+  return context?.community || null;
 }
 
 module.exports = {
@@ -118,5 +131,6 @@ module.exports = {
   resolveCommunity,
   removeContentCommunity,
   setContentCommunity,
+  communityLinkForContent,
   communityForContent,
 };
