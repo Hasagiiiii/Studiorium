@@ -4,7 +4,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'pc-hardware',
     name: 'PC & Hardware',
     area: 'Tecnologia',
-    description: 'Montagem, compatibilidade, diagnóstico, upgrades, desempenho e manutenção de computadores.',
+    description:
+      'Montagem, compatibilidade, diagnóstico, upgrades, desempenho e manutenção de computadores.',
     legacyHubs: ['PC & Hardware'],
   },
   {
@@ -12,7 +13,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'programacao',
     name: 'Programação',
     area: 'Tecnologia',
-    description: 'Desenvolvimento de software, web, automação, ferramentas, estudos e projetos de código.',
+    description:
+      'Desenvolvimento de software, web, automação, ferramentas, estudos e projetos de código.',
     legacyHubs: ['Tecnologia'],
   },
   {
@@ -20,7 +22,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'desenvolvimento-jogos',
     name: 'Desenvolvimento de Jogos',
     area: 'Tecnologia',
-    description: 'Programação, design, prototipagem, ferramentas e projetos voltados à criação de jogos.',
+    description:
+      'Programação, design, prototipagem, ferramentas e projetos voltados à criação de jogos.',
     legacyHubs: ['Jogos'],
   },
   {
@@ -36,7 +39,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'linux-redes',
     name: 'Linux & Redes',
     area: 'Tecnologia',
-    description: 'Sistemas Linux, redes, servidores, diagnóstico, segurança e infraestrutura doméstica ou acadêmica.',
+    description:
+      'Sistemas Linux, redes, servidores, diagnóstico, segurança e infraestrutura doméstica ou acadêmica.',
     legacyHubs: [],
   },
   {
@@ -44,7 +48,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'ia-automacao',
     name: 'IA & Automação',
     area: 'Tecnologia',
-    description: 'Inteligência artificial, automações, agentes, integrações e aplicações responsáveis.',
+    description:
+      'Inteligência artificial, automações, agentes, integrações e aplicações responsáveis.',
     legacyHubs: [],
   },
   {
@@ -52,7 +57,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'motos',
     name: 'Motos',
     area: 'Automotivo',
-    description: 'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre motocicletas.',
+    description:
+      'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre motocicletas.',
     legacyHubs: ['Motos'],
   },
   {
@@ -60,7 +66,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'carros',
     name: 'Carros',
     area: 'Automotivo',
-    description: 'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre automóveis.',
+    description:
+      'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre automóveis.',
     legacyHubs: ['Carros'],
   },
   {
@@ -68,7 +75,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'mecanica',
     name: 'Mecânica',
     area: 'Automotivo',
-    description: 'Fundamentos mecânicos, manutenção preventiva, diagnóstico e práticas de oficina com segurança.',
+    description:
+      'Fundamentos mecânicos, manutenção preventiva, diagnóstico e práticas de oficina com segurança.',
     legacyHubs: [],
   },
   {
@@ -76,7 +84,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'matematica',
     name: 'Matemática',
     area: 'Acadêmico',
-    description: 'Dúvidas, métodos de estudo, resolução comentada e discussão de conceitos matemáticos.',
+    description:
+      'Dúvidas, métodos de estudo, resolução comentada e discussão de conceitos matemáticos.',
     legacyHubs: [],
   },
   {
@@ -84,7 +93,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'ciencias-natureza',
     name: 'Ciências da Natureza',
     area: 'Acadêmico',
-    description: 'Biologia, Química, Física e conexões entre investigação científica e aprendizagem.',
+    description:
+      'Biologia, Química, Física e conexões entre investigação científica e aprendizagem.',
     legacyHubs: [],
   },
   {
@@ -92,7 +102,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'pesquisa-cientifica',
     name: 'Pesquisa Científica',
     area: 'Acadêmico',
-    description: 'Metodologia, fontes, escrita, apresentação, revisão e desenvolvimento de pesquisas.',
+    description:
+      'Metodologia, fontes, escrita, apresentação, revisão e desenvolvimento de pesquisas.',
     legacyHubs: [],
   },
   {
@@ -100,7 +111,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'educacao',
     name: 'Educação',
     area: 'Acadêmico',
-    description: 'Ensino, aprendizagem, práticas pedagógicas, recursos didáticos e experiências educacionais.',
+    description:
+      'Ensino, aprendizagem, práticas pedagógicas, recursos didáticos e experiências educacionais.',
     legacyHubs: [],
   },
   {
@@ -108,7 +120,8 @@ const OFFICIAL_COMMUNITIES = [
     slug: 'design-templates',
     name: 'Design & Templates',
     area: 'Criação',
-    description: 'Design acadêmico, apresentações, banners, modelos, organização visual e recursos reutilizáveis.',
+    description:
+      'Design acadêmico, apresentações, banners, modelos, organização visual e recursos reutilizáveis.',
     legacyHubs: [],
   },
   {
