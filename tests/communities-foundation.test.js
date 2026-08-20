@@ -12,6 +12,7 @@ test('Comunidades possui modelo relacional próprio sem duplicar conteúdos', ()
   assert.match(migration, /create table if not exists public\.community_members/);
   assert.match(migration, /create table if not exists public\.community_content_links/);
   assert.match(migration, /content_type in \(/);
+  assert.match(migration, /create unique index if not exists community_content_single_parent_idx/);
   assert.doesNotMatch(migration, /create table if not exists public\.community_posts/);
   assert.match(migration, /enable row level security/);
   assert.match(
