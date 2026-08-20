@@ -133,7 +133,9 @@ function armariumPanel() {
       ? ''
       : html`<div class="armarium-empty">
           <strong>A estante começa vazia de propósito.</strong>
-          <span>O primeiro livro aparecerá quando a comunidade publicar uma recomendação real.</span>
+          <span
+            >O primeiro livro aparecerá quando a comunidade publicar uma recomendação real.</span
+          >
         </div>`}
   </section>`;
 }
@@ -202,7 +204,8 @@ function enhanceBookCard(card) {
               href="${E(book.purchaseUrl)}"
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
-            >${E(book.purchaseLabel || 'Ver edição / comprar')} ↗</a>`
+              >${E(book.purchaseLabel || 'Ver edição / comprar')} ↗</a
+            >`
           : ''}
       </div>
       ${book.purchaseUrl
