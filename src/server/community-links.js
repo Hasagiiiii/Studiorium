@@ -8,7 +8,11 @@ function inputError(message, statusCode = 400) {
 function isMissingCommunitySchema(error) {
   const code = String(error?.code || '');
   const message = String(error?.message || '');
-  return code === '42P01' || /community_(members|content_links)|communities.*does not exist/i.test(message);
+  return (
+    code === '42P01' ||
+    code === 'PGRST205' ||
+    /community_(members|content_links)|communities.*does not exist/i.test(message)
+  );
 }
 
 function serializeCommunity(row, extra = {}) {
@@ -48,6 +52,19 @@ async function resolveCommunity(slug) {
   return serializeCommunity(query.data, { storageReady: true });
 }
 
+async function removeContentCommunity(contentType, contentId) {
+  const removal = await db()
+    .from('community_content_links')
+    .delete()
+    .eq('content_type', String(contentType || '').trim())
+    .eq('content_id', String(contentId || '').trim());
+
+  if (removal.error) {
+    if (isMissingCommunitySchema(removal.error)) return;
+    fail(removal.error);
+  }
+}
+
 async function setContentCommunity(contentType, contentId, community) {
   if (!community) return;
   if (community.storageReady === false) {
@@ -58,13 +75,7 @@ async function setContentCommunity(contentType, contentId, community) {
   const cleanId = String(contentId || '').trim();
   if (!cleanType || !cleanId) throw inputError('Vínculo de comunidade inválido.');
 
-  const removal = await db()
-    .from('community_content_links')
-    .delete()
-    .eq('content_type', cleanType)
-    .eq('content_id', cleanId);
-  fail(removal.error);
-
+  await removeContentCommunity(cleanType, cleanId);
   const insertion = await db().from('community_content_links').insert({
     community_id: community.id,
     content_type: cleanType,
@@ -105,6 +116,7 @@ module.exports = {
   isMissingCommunitySchema,
   serializeCommunity,
   resolveCommunity,
+  removeContentCommunity,
   setContentCommunity,
   communityForContent,
 };
