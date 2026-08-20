@@ -2,11 +2,7 @@ const { db, fail } = require('../db');
 const { currentUser, requireUser } = require('../auth');
 const { readJson } = require('../http');
 const S = require('../serializers');
-const {
-  OFFICIAL_COMMUNITIES,
-  communityFromCatalog,
-  normalizeSlug,
-} = require('../community-catalog');
+const { OFFICIAL_COMMUNITIES, normalizeSlug } = require('../community-catalog');
 const {
   inputError,
   isMissingCommunitySchema,
@@ -19,6 +15,9 @@ const {
   communityActor,
   requireCommunityPermission,
 } = require('../community-permissions');
+
+const TECH_RESOURCE_FIELDS =
+  'id,owner_id,author_name,title,slug,summary,hub,category,tags,status,featured,created_at,updated_at';
 
 function countByCommunity(rows = []) {
   return rows.reduce((counts, row) => {
@@ -84,7 +83,6 @@ async function list(req) {
 async function detail(req, slug) {
   const user = await currentUser(req);
   const community = await resolveCommunity(slug);
-  const fallback = communityFromCatalog(slug);
 
   if (community.storageReady === false) {
     return {
@@ -125,30 +123,32 @@ async function detail(req, slug) {
     .filter((link) => link.content_type === 'discussion')
     .map((link) => link.content_id)
     .slice(0, 40);
+  const techResourceIds = linksQ.data
+    .filter((link) => link.content_type === 'tech_resource')
+    .map((link) => link.content_id)
+    .slice(0, 40);
 
-  const discussionsQ = discussionIds.length
-    ? await db()
-        .from('discussions')
-        .select('*')
-        .in('id', discussionIds)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-    : { data: [], error: null };
+  const [discussionsQ, techQ] = await Promise.all([
+    discussionIds.length
+      ? db()
+          .from('discussions')
+          .select('*')
+          .in('id', discussionIds)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+    techResourceIds.length
+      ? db()
+          .from('tech_resources')
+          .select(TECH_RESOURCE_FIELDS)
+          .in('id', techResourceIds)
+          .eq('status', 'published')
+          .order('featured', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(16)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
   fail(discussionsQ.error);
-
-  const legacyHubs = fallback?.legacyHubs || [];
-  const techQ = legacyHubs.length
-    ? await db()
-        .from('tech_resources')
-        .select(
-          'id,owner_id,author_name,title,slug,summary,hub,category,tags,status,featured,created_at,updated_at',
-        )
-        .in('hub', legacyHubs)
-        .eq('status', 'published')
-        .order('featured', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(16)
-    : { data: [], error: null };
   fail(techQ.error);
 
   const memberRole = mineQ.data?.role || null;
