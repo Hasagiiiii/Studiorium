@@ -4,6 +4,12 @@ const { readJson } = require('../http');
 const { id, now } = require('../security');
 const { moderate } = require('../moderation');
 const { buildReplyMap, rankRelatedDiscussions } = require('../comment-intelligence');
+const {
+  resolveCommunity,
+  setContentCommunity,
+  removeContentCommunity,
+  communityForContent,
+} = require('../community-links');
 const S = require('../serializers');
 
 function inputError(message, statusCode = 400) {
@@ -21,12 +27,27 @@ function discussionInput(body, current = {}) {
     String(body.category ?? current.category ?? 'Geral')
       .trim()
       .slice(0, 60) || 'Geral';
+  const communityProvided = Object.prototype.hasOwnProperty.call(body, 'communitySlug');
+  const communitySlug = communityProvided
+    ? String(body.communitySlug || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '')
+        .slice(0, 80)
+    : '';
   const check = moderate(`${title}\n${text}`);
   if (!check.ok) throw inputError(check.message, 422);
   if (title.length < 6 || text.length < 10) {
     throw inputError('Escreva um título e uma descrição mais completos.');
   }
-  return { title, body: text, category, reviewRequired: check.reviewRequired === true };
+  return {
+    title,
+    body: text,
+    category,
+    communitySlug,
+    communityProvided,
+    reviewRequired: check.reviewRequired === true,
+  };
 }
 
 function replyInput(body, current = {}) {
@@ -52,20 +73,27 @@ async function profileName(user) {
 async function createDiscussion(req) {
   const user = await requireUser(req);
   const values = discussionInput(await readJson(req));
+  const community = values.communitySlug ? await resolveCommunity(values.communitySlug) : null;
+  if (community?.storageReady === false) {
+    throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
+  }
+
   const row = {
     id: id('disc'),
     author_id: user.id,
     author_name: await profileName(user),
     title: values.title,
     body: values.body,
-    category: values.category,
+    category: community?.name || values.category,
     status: values.reviewRequired ? 'pending_review' : 'published',
     created_at: now(),
   };
   const { data, error } = await db().from('discussions').insert(row).select('*').single();
   fail(error);
+  if (community) await setContentCommunity('discussion', data.id, community);
   return {
     discussion: S.discussion(data),
+    community,
     message:
       data.status === 'published'
         ? 'Discussão publicada.'
@@ -89,12 +117,20 @@ async function updateDiscussion(req, discussionId) {
   const user = await requireUser(req);
   const current = await ownedDiscussion(user.id, discussionId);
   const values = discussionInput(await readJson(req), current);
+  let community = null;
+  if (values.communityProvided && values.communitySlug) {
+    community = await resolveCommunity(values.communitySlug);
+    if (community.storageReady === false) {
+      throw inputError('As comunidades ainda não estão ativas no banco deste ambiente.', 503);
+    }
+  }
+
   const status =
     values.reviewRequired || current.status !== 'published' ? 'pending_review' : 'published';
   const patch = {
     title: values.title,
     body: values.body,
-    category: values.category,
+    category: community?.name || values.category,
     status,
     author_name: await profileName(user),
   };
@@ -106,8 +142,15 @@ async function updateDiscussion(req, discussionId) {
     .select('*')
     .single();
   fail(error);
+
+  if (values.communityProvided) {
+    if (community) await setContentCommunity('discussion', discussionId, community);
+    else await removeContentCommunity('discussion', discussionId);
+  }
+
   return {
     discussion: S.discussion(data),
+    community: community || (await communityForContent('discussion', discussionId)),
     message: status === 'published' ? 'Discussão atualizada.' : 'Alterações enviadas para revisão.',
   };
 }
@@ -124,6 +167,7 @@ async function deleteDiscussion(req, discussionId) {
     .maybeSingle();
   fail(error);
   if (!data) throw inputError('Discussão não encontrada.', 404);
+  await removeContentCommunity('discussion', discussionId);
   return { ok: true, message: 'Discussão excluída definitivamente.' };
 }
 
@@ -136,7 +180,7 @@ async function getThread(discussionId) {
     .maybeSingle();
   fail(discussionQ.error);
   if (!discussionQ.data) throw inputError('Discussão não encontrada.', 404);
-  const [repliesQ, relatedQ] = await Promise.all([
+  const [repliesQ, relatedQ, community] = await Promise.all([
     db()
       .from('replies')
       .select('*')
@@ -150,6 +194,7 @@ async function getThread(discussionId) {
       .neq('id', discussionId)
       .order('created_at', { ascending: false })
       .limit(40),
+    communityForContent('discussion', discussionId),
   ]);
   fail(repliesQ.error);
   fail(relatedQ.error);
@@ -160,6 +205,7 @@ async function getThread(discussionId) {
 
   return {
     discussion,
+    community,
     replies: replyMap.replies,
     replyMap: {
       total: replyMap.total,
