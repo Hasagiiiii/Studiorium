@@ -91,6 +91,8 @@ async function renderRoute() {
     history.replaceState({}, '', '/comunidades');
     return await comunidades();
   }
+  const communityThread = p.match(/^\/comunidades\/([^/]+)\/coloquio\/([^/]+)$/);
+  if (communityThread) return await thread(decodeURIComponent(communityThread[2]));
   const communityColloquium = p.match(/^\/comunidades\/([^/]+)\/coloquio$/);
   if (communityColloquium)
     return await comunidadeDetalhe(decodeURIComponent(communityColloquium[1]), {
