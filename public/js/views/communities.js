@@ -1,6 +1,13 @@
 import { api, E, html, state, num } from '../runtime.js';
 import { layout, link, empty, discussionRow } from './core.js';
 
+const communityRoleLabels = {
+  member: 'Membro',
+  curator: 'Curador',
+  moderator: 'Moderador',
+  leader: 'Líder',
+};
+
 function communityCard(community) {
   return html`<article class="community-card">
     <div class="community-card-head">
@@ -72,7 +79,12 @@ export async function comunidades() {
       <form class="community-toolbar" data-community-filter>
         <label>
           <span>Pesquisar</span>
-          <input class="field" name="q" value="${E(state.query.get('q') || '')}" placeholder="PC, motos, matemática…" />
+          <input
+            class="field"
+            name="q"
+            value="${E(state.query.get('q') || '')}"
+            placeholder="PC, motos, matemática…"
+          />
         </label>
         <label>
           <span>Área</span>
@@ -99,7 +111,9 @@ export async function comunidades() {
                     <div class="eyebrow">Área</div>
                     <h2>${E(group)}</h2>
                   </div>
-                  <span class="muted small">${items.length} comunidade${items.length === 1 ? '' : 's'}</span>
+                  <span class="muted small"
+                    >${items.length} comunidade${items.length === 1 ? '' : 's'}</span
+                  >
                 </div>
                 <div class="community-grid">${items.map(communityCard).join('')}</div>
               </section>`,
@@ -124,12 +138,28 @@ function techResourceCard(resource) {
   </article>`;
 }
 
+function rulesBlock(community) {
+  const rules = Array.isArray(community.rules) ? community.rules : [];
+  return rules.length
+    ? html`<ol class="community-rules-list">
+        ${rules.map((rule) => html`<li>${E(rule)}</li>`).join('')}
+      </ol>`
+    : html`<div class="empty">
+        Esta comunidade ainda não possui regras locais adicionais. As Diretrizes do Studiorium
+        continuam valendo integralmente.
+      </div>`;
+}
+
 export async function comunidadeDetalhe(slug, options = {}) {
   const data = await api(`/api/communities/${encodeURIComponent(slug)}`);
   const community = data.community;
   const focus = options.focus || '';
   const discussions = data.discussions || [];
   const resources = data.techResources || [];
+  const permissions = data.permissions || [];
+  const canManage = permissions.some((permission) =>
+    ['manage_roles', 'manage_rules', 'moderate_members'].includes(permission),
+  );
   const canonical = `/comunidades/${encodeURIComponent(community.slug)}`;
 
   layout(html`<section class="pagehero community-detail">
@@ -151,7 +181,9 @@ export async function comunidadeDetalhe(slug, options = {}) {
           ${community.joined
             ? html`<span class="community-status">Participando</span>
                 ${community.memberRole && community.memberRole !== 'member'
-                  ? html`<small>Função: ${E(community.memberRole)}</small>`
+                  ? html`<small
+                      >Função: ${E(communityRoleLabels[community.memberRole] || community.memberRole)}</small
+                    >`
                   : ''}
                 <button
                   class="outline"
@@ -169,6 +201,15 @@ export async function comunidadeDetalhe(slug, options = {}) {
               >
                 ${state.me ? 'Participar' : 'Entrar para participar'}
               </button>`}
+          ${canManage
+            ? html`<button
+                class="soft"
+                type="button"
+                data-community-manage="${E(community.slug)}"
+              >
+                Gestão da comunidade
+              </button>`
+            : ''}
         </div>
       </header>
 
@@ -181,11 +222,18 @@ export async function comunidadeDetalhe(slug, options = {}) {
 
       <nav class="community-tabs" aria-label="Áreas da comunidade">
         <a href="${canonical}" data-link class="${focus ? '' : 'active'}">Visão geral</a>
-        <a href="${canonical}/coloquio" data-link class="${focus === 'coloquio' ? 'active' : ''}">Colóquio</a>
-        <a href="${canonical}#oficina" class="">Oficina</a>
+        <a href="${canonical}/coloquio" data-link class="${focus === 'coloquio' ? 'active' : ''}"
+          >Colóquio</a
+        >
+        <a href="${canonical}#oficina">Oficina</a>
+        <a href="${canonical}#regras">Regras</a>
+        ${canManage ? '<a href="#gestao">Gestão</a>' : ''}
       </nav>
 
-      <section class="community-section ${focus === 'coloquio' ? 'community-focus' : ''}" id="coloquio">
+      <section
+        class="community-section ${focus === 'coloquio' ? 'community-focus' : ''}"
+        id="coloquio"
+      >
         <div class="sectionhead">
           <div>
             <div class="eyebrow">Colloquium</div>
@@ -229,6 +277,44 @@ export async function comunidadeDetalhe(slug, options = {}) {
           ? html`<div class="community-resource-grid">${resources.map(techResourceCard).join('')}</div>`
           : empty('Ainda não há recursos da Oficina associados a esta comunidade.')}
       </section>
+
+      <section class="community-section" id="regras">
+        <div class="sectionhead">
+          <div>
+            <div class="eyebrow">Normae</div>
+            <h2>Regras locais</h2>
+          </div>
+          ${link('/diretrizes', 'Diretrizes gerais', 'outline')}
+        </div>
+        <p class="community-section-copy">
+          Regras locais podem complementar as Diretrizes do Studiorium, mas nunca substituí-las ou
+          contradizê-las.
+        </p>
+        ${rulesBlock(community)}
+      </section>
+
+      ${canManage
+        ? html`<section class="community-section" id="gestao">
+            <div class="sectionhead">
+              <div>
+                <div class="eyebrow">Curia</div>
+                <h2>Gestão local</h2>
+              </div>
+              <button
+                class="solid"
+                type="button"
+                data-community-manage="${E(community.slug)}"
+              >
+                Abrir painel
+              </button>
+            </div>
+            <p class="community-section-copy">
+              Líderes administram funções e regras somente desta comunidade. A administração do
+              Studiorium permanece responsável pelas regras gerais e pode intervir quando necessário.
+            </p>
+            <div id="communityManagement"></div>
+          </section>`
+        : ''}
     </div>
   </section>`);
 }
