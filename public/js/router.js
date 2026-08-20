@@ -1,5 +1,5 @@
 import { app, state, bootstrap, E, html } from './runtime.js';
-import { bookDetail } from './views/books-v331.js';
+import { bookDetail } from './views/books.js';
 import {
   home,
   biblioteca,
