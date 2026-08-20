@@ -146,7 +146,10 @@ async function updateDiscussion(req, discussionId) {
 
   if (values.communityProvided) {
     if (!values.communitySlug && currentCommunity) {
-      throw inputError('Uma discussão de comunidade deve permanecer vinculada a uma comunidade.', 409);
+      throw inputError(
+        'Uma discussão de comunidade deve permanecer vinculada a uma comunidade.',
+        409,
+      );
     }
     if (values.communitySlug) {
       const actor = await requireCommunityPermission(req, values.communitySlug, 'participate');

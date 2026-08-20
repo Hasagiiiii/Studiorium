@@ -48,10 +48,8 @@ function managementMarkup(data, slug) {
       const protectedLeader = member.role === 'leader' && !isAdmin;
       const moderatorLimit = !canRoles && member.role !== 'member';
       const selfProtected = member.userId === state.me?.id && !isAdmin;
-      const trustedRoleEligible =
-        member.status === 'active' && member.moderationStatus === 'clear';
-      const roleControl =
-        canRoles && !protectedLeader && !selfProtected && trustedRoleEligible;
+      const trustedRoleEligible = member.status === 'active' && member.moderationStatus === 'clear';
+      const roleControl = canRoles && !protectedLeader && !selfProtected && trustedRoleEligible;
       const moderationControl =
         canModerate && !protectedLeader && !moderatorLimit && !selfProtected;
 

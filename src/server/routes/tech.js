@@ -127,9 +127,7 @@ async function create(req) {
   return {
     resource: S.techResource(data),
     community,
-    message: community
-      ? `Enviado para revisão em ${community.name}.`
-      : 'Enviado para revisão.',
+    message: community ? `Enviado para revisão em ${community.name}.` : 'Enviado para revisão.',
   };
 }
 

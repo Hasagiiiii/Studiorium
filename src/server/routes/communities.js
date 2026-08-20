@@ -350,10 +350,7 @@ async function updateMember(req, slug, targetUserId) {
       ? ['member', 'moderator', 'curator', 'leader']
       : ['member', 'moderator', 'curator'];
     if (!allowed.includes(role)) throw inputError('Função de comunidade inválida.');
-    if (
-      role !== 'member' &&
-      (target.status !== 'active' || target.moderation_status !== 'clear')
-    ) {
+    if (role !== 'member' && (target.status !== 'active' || target.moderation_status !== 'clear')) {
       throw inputError('Ative e libere o membro antes de atribuir uma função de confiança.', 409);
     }
     patch.role = role;

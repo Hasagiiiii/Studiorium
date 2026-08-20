@@ -152,9 +152,13 @@ function moderationButton(community, type, item) {
 }
 
 function techResourceCard(resource, community, canModerateContent) {
-  return html`<article class="community-resource-card ${resource.communityHidden ? 'is-hidden' : ''}">
+  return html`<article
+    class="community-resource-card ${resource.communityHidden ? 'is-hidden' : ''}"
+  >
     <span class="eyebrow">${E(resource.category || 'Oficina')}</span>
-    ${resource.communityHidden ? '<span class="community-hidden-label">Oculto localmente</span>' : ''}
+    ${resource.communityHidden
+      ? '<span class="community-hidden-label">Oculto localmente</span>'
+      : ''}
     <h3>${link(`/oficina/${encodeURIComponent(resource.slug)}`, E(resource.title))}</h3>
     <p>${E(resource.summary || '')}</p>
     <div class="pills">
@@ -168,8 +172,12 @@ function techResourceCard(resource, community, canModerateContent) {
 }
 
 function communityDiscussionItem(discussion, index, community, canModerateContent) {
-  return html`<div class="community-discussion-item ${discussion.communityHidden ? 'is-hidden' : ''}">
-    ${discussion.communityHidden ? '<span class="community-hidden-label">Oculto localmente</span>' : ''}
+  return html`<div
+    class="community-discussion-item ${discussion.communityHidden ? 'is-hidden' : ''}"
+  >
+    ${discussion.communityHidden
+      ? '<span class="community-hidden-label">Oculto localmente</span>'
+      : ''}
     ${discussionRow(discussion, index)}
     ${canModerateContent ? moderationButton(community, 'discussion', discussion) : ''}
   </div>`;
@@ -203,8 +211,7 @@ export async function comunidadeDetalhe(slug, options = {}) {
   const officeCreatePath = `/oficina?novo=1&comunidade=${encodeURIComponent(
     community.slug,
   )}&comunidadeNome=${encodeURIComponent(community.name)}`;
-  const discussionDisabled =
-    data.storageReady === false || (Boolean(state.me) && !canParticipate);
+  const discussionDisabled = data.storageReady === false || (Boolean(state.me) && !canParticipate);
 
   layout(
     html`<section class="pagehero community-detail">
@@ -310,12 +317,7 @@ export async function comunidadeDetalhe(slug, options = {}) {
             ${discussions.length
               ? discussions
                   .map((discussion, index) =>
-                    communityDiscussionItem(
-                      discussion,
-                      index,
-                      community,
-                      canModerateContent,
-                    ),
+                    communityDiscussionItem(discussion, index, community, canModerateContent),
                   )
                   .join('')
               : empty('Ainda não há discussões vinculadas a esta comunidade.')}
@@ -341,9 +343,7 @@ export async function comunidadeDetalhe(slug, options = {}) {
           ${resources.length
             ? html`<div class="community-resource-grid">
                 ${resources
-                  .map((resource) =>
-                    techResourceCard(resource, community, canModerateContent),
-                  )
+                  .map((resource) => techResourceCard(resource, community, canModerateContent))
                   .join('')}
               </div>`
             : empty('Ainda não há recursos da Oficina associados a esta comunidade.')}
