@@ -72,23 +72,135 @@ grant select, insert, update, delete on table public.communities to service_role
 grant select, insert, update, delete on table public.community_members to service_role;
 grant select, insert, update, delete on table public.community_content_links to service_role;
 
-insert into public.communities (id, slug, name, area, description, is_official)
+insert into public.communities (
+  id,
+  slug,
+  name,
+  area,
+  description,
+  is_official
+)
 values
-  ('comm_pc_hardware', 'pc-hardware', 'PC & Hardware', 'Tecnologia', 'Montagem, compatibilidade, diagnóstico, upgrades, desempenho e manutenção de computadores.', true),
-  ('comm_programacao', 'programacao', 'Programação', 'Tecnologia', 'Desenvolvimento de software, web, automação, ferramentas, estudos e projetos de código.', true),
-  ('comm_dev_jogos', 'desenvolvimento-jogos', 'Desenvolvimento de Jogos', 'Tecnologia', 'Programação, design, prototipagem, ferramentas e projetos voltados à criação de jogos.', true),
-  ('comm_eletronica', 'eletronica', 'Eletrônica', 'Tecnologia', 'Circuitos, componentes, reparos, medições, projetos e fundamentos de eletrônica.', true),
-  ('comm_linux_redes', 'linux-redes', 'Linux & Redes', 'Tecnologia', 'Sistemas Linux, redes, servidores, diagnóstico, segurança e infraestrutura doméstica ou acadêmica.', true),
-  ('comm_ia_automacao', 'ia-automacao', 'IA & Automação', 'Tecnologia', 'Inteligência artificial, automações, agentes, integrações e aplicações responsáveis.', true),
-  ('comm_motos', 'motos', 'Motos', 'Automotivo', 'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre motocicletas.', true),
-  ('comm_carros', 'carros', 'Carros', 'Automotivo', 'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre automóveis.', true),
-  ('comm_mecanica', 'mecanica', 'Mecânica', 'Automotivo', 'Fundamentos mecânicos, manutenção preventiva, diagnóstico e práticas de oficina com segurança.', true),
-  ('comm_matematica', 'matematica', 'Matemática', 'Acadêmico', 'Dúvidas, métodos de estudo, resolução comentada e discussão de conceitos matemáticos.', true),
-  ('comm_ciencias_natureza', 'ciencias-natureza', 'Ciências da Natureza', 'Acadêmico', 'Biologia, Química, Física e conexões entre investigação científica e aprendizagem.', true),
-  ('comm_pesquisa_cientifica', 'pesquisa-cientifica', 'Pesquisa Científica', 'Acadêmico', 'Metodologia, fontes, escrita, apresentação, revisão e desenvolvimento de pesquisas.', true),
-  ('comm_educacao', 'educacao', 'Educação', 'Acadêmico', 'Ensino, aprendizagem, práticas pedagógicas, recursos didáticos e experiências educacionais.', true),
-  ('comm_design_templates', 'design-templates', 'Design & Templates', 'Criação', 'Design acadêmico, apresentações, banners, modelos, organização visual e recursos reutilizáveis.', true),
-  ('comm_literatura', 'literatura', 'Literatura', 'Leitura', 'Livros, leituras, autores, gêneros, clubes de leitura e discussão literária.', true)
+  (
+    'comm_pc_hardware',
+    'pc-hardware',
+    'PC & Hardware',
+    'Tecnologia',
+    'Montagem, compatibilidade, diagnóstico, upgrades, desempenho e manutenção de computadores.',
+    true
+  ),
+  (
+    'comm_programacao',
+    'programacao',
+    'Programação',
+    'Tecnologia',
+    'Desenvolvimento de software, web, automação, ferramentas, estudos e projetos de código.',
+    true
+  ),
+  (
+    'comm_dev_jogos',
+    'desenvolvimento-jogos',
+    'Desenvolvimento de Jogos',
+    'Tecnologia',
+    'Programação, design, prototipagem, ferramentas e projetos voltados à criação de jogos.',
+    true
+  ),
+  (
+    'comm_eletronica',
+    'eletronica',
+    'Eletrônica',
+    'Tecnologia',
+    'Circuitos, componentes, reparos, medições, projetos e fundamentos de eletrônica.',
+    true
+  ),
+  (
+    'comm_linux_redes',
+    'linux-redes',
+    'Linux & Redes',
+    'Tecnologia',
+    'Sistemas Linux, redes, servidores, diagnóstico, segurança e infraestrutura doméstica ou acadêmica.',
+    true
+  ),
+  (
+    'comm_ia_automacao',
+    'ia-automacao',
+    'IA & Automação',
+    'Tecnologia',
+    'Inteligência artificial, automações, agentes, integrações e aplicações responsáveis.',
+    true
+  ),
+  (
+    'comm_motos',
+    'motos',
+    'Motos',
+    'Automotivo',
+    'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre motocicletas.',
+    true
+  ),
+  (
+    'comm_carros',
+    'carros',
+    'Carros',
+    'Automotivo',
+    'Manutenção, diagnóstico, projetos, peças, mecânica e conhecimento técnico sobre automóveis.',
+    true
+  ),
+  (
+    'comm_mecanica',
+    'mecanica',
+    'Mecânica',
+    'Automotivo',
+    'Fundamentos mecânicos, manutenção preventiva, diagnóstico e práticas de oficina com segurança.',
+    true
+  ),
+  (
+    'comm_matematica',
+    'matematica',
+    'Matemática',
+    'Acadêmico',
+    'Dúvidas, métodos de estudo, resolução comentada e discussão de conceitos matemáticos.',
+    true
+  ),
+  (
+    'comm_ciencias_natureza',
+    'ciencias-natureza',
+    'Ciências da Natureza',
+    'Acadêmico',
+    'Biologia, Química, Física e conexões entre investigação científica e aprendizagem.',
+    true
+  ),
+  (
+    'comm_pesquisa_cientifica',
+    'pesquisa-cientifica',
+    'Pesquisa Científica',
+    'Acadêmico',
+    'Metodologia, fontes, escrita, apresentação, revisão e desenvolvimento de pesquisas.',
+    true
+  ),
+  (
+    'comm_educacao',
+    'educacao',
+    'Educação',
+    'Acadêmico',
+    'Ensino, aprendizagem, práticas pedagógicas, recursos didáticos e experiências educacionais.',
+    true
+  ),
+  (
+    'comm_design_templates',
+    'design-templates',
+    'Design & Templates',
+    'Criação',
+    'Design acadêmico, apresentações, banners, modelos, organização visual e recursos reutilizáveis.',
+    true
+  ),
+  (
+    'comm_literatura',
+    'literatura',
+    'Literatura',
+    'Leitura',
+    'Livros, leituras, autores, gêneros, clubes de leitura e discussão literária.',
+    true
+  )
 on conflict (slug) do update
 set
   name = excluded.name,
@@ -105,10 +217,26 @@ from public.discussions d
 join public.communities c
   on (
     lower(trim(d.category)) = lower(c.name)
-    or (c.slug = 'matematica' and lower(trim(d.category)) in ('matematica', 'matemática'))
-    or (c.slug = 'educacao' and lower(trim(d.category)) in ('educacao', 'educação'))
-    or (c.slug = 'pesquisa-cientifica' and lower(trim(d.category)) in ('pesquisa', 'pesquisa cientifica', 'pesquisa científica'))
-    or (c.slug = 'literatura' and lower(trim(d.category)) = 'literatura')
+    or (
+      c.slug = 'matematica'
+      and lower(trim(d.category)) in ('matematica', 'matemática')
+    )
+    or (
+      c.slug = 'educacao'
+      and lower(trim(d.category)) in ('educacao', 'educação')
+    )
+    or (
+      c.slug = 'pesquisa-cientifica'
+      and lower(trim(d.category)) in (
+        'pesquisa',
+        'pesquisa cientifica',
+        'pesquisa científica'
+      )
+    )
+    or (
+      c.slug = 'literatura'
+      and lower(trim(d.category)) = 'literatura'
+    )
   )
 on conflict do nothing;
 
@@ -120,6 +248,9 @@ join public.communities c
     (c.slug = 'pc-hardware' and lower(trim(t.hub)) = 'pc & hardware')
     or (c.slug = 'motos' and lower(trim(t.hub)) = 'motos')
     or (c.slug = 'carros' and lower(trim(t.hub)) = 'carros')
-    or (c.slug = 'desenvolvimento-jogos' and lower(trim(t.hub)) = 'jogos')
+    or (
+      c.slug = 'desenvolvimento-jogos'
+      and lower(trim(t.hub)) = 'jogos'
+    )
   )
 on conflict do nothing;
