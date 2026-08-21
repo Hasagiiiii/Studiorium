@@ -19,6 +19,24 @@
   max-width: 100%;
 }
 
+/*
+ * Ações da interface podem quebrar entre palavras, mas nunca no meio delas.
+ * O reflow do contêiner deve resolver falta de espaço sem produzir rótulos mutilados.
+ */
+button,
+.outline,
+.solid,
+.soft,
+.dangerbtn,
+.tab,
+.admin-tab,
+.social-action {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
 /* O pôster do Ateliê precisa refluír sem alterar a composição de impressão. */
 .postergrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
