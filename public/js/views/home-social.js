@@ -1,4 +1,4 @@
-import { state, E, date, num, html } from '../runtime.js';
+import { state, E, date, num, html as markup } from '../runtime.js';
 import { link, layout, empty } from './core.js';
 
 function profileFor(id, fallback = '') {
@@ -15,7 +15,7 @@ function authorLine(item) {
     profile?.verificationStatus === 'verified' || profile?.verificationStatus === 'approved';
   const itemDate = item.createdAt || item.publishedAt || item.updatedAt;
 
-  return html`<div class="social-author">
+  return markup`<div class="social-author">
     <span class="social-avatar">${E((name || 'S').slice(0, 1).toUpperCase())}</span>
     <span>
       <strong>${E(name)}</strong>
@@ -28,13 +28,13 @@ function authorLine(item) {
 function publicationPost(publication) {
   const keywords = (publication.keywords || [])
     .slice(0, 4)
-    .map((tag) => html`<span>${E(tag)}</span>`)
+    .map((tag) => markup`<span>${E(tag)}</span>`)
     .join('');
   const abstract = publication.abstract || '';
   const summary = `${abstract.slice(0, 330)}${abstract.length > 330 ? '…' : ''}`;
   const detailPath = `/pesquisas/${encodeURIComponent(publication.slug)}`;
   const cover = publication.coverName
-    ? html`<a href="${detailPath}" data-link class="social-media">
+    ? markup`<a href="${detailPath}" data-link class="social-media">
         <img
           src="/api/publications/${encodeURIComponent(publication.id)}/cover"
           alt="Capa de ${E(publication.title)}"
@@ -43,7 +43,7 @@ function publicationPost(publication) {
       </a>`
     : '';
 
-  return html`<article class="social-post publication-card">
+  return markup`<article class="social-post publication-card">
     ${authorLine(publication)}
     <div class="social-kicker">Pesquisa · ${E(publication.area || 'Geral')}</div>
     <h2>${link(detailPath, E(publication.title))}</h2>
@@ -70,7 +70,7 @@ function discussionPost(discussion) {
   const summary = `${body.slice(0, 360)}${body.length > 360 ? '…' : ''}`;
   const detailPath = `/coloquio/${encodeURIComponent(discussion.id)}`;
 
-  return html`<article class="social-post discussion-card">
+  return markup`<article class="social-post discussion-card">
     ${authorLine(discussion)}
     <div class="social-kicker">Discussão · ${E(discussion.category || 'Geral')}</div>
     <h2>${link(detailPath, E(discussion.title))}</h2>
@@ -85,11 +85,11 @@ function discussionPost(discussion) {
 function techPost(resource) {
   const tags = (resource.tags || [])
     .slice(0, 4)
-    .map((tag) => html`<span>${E(tag)}</span>`)
+    .map((tag) => markup`<span>${E(tag)}</span>`)
     .join('');
   const detailPath = `/oficina/${encodeURIComponent(resource.slug)}`;
 
-  return html`<article class="social-post project-card">
+  return markup`<article class="social-post project-card">
     ${authorLine(resource)}
     <div class="social-kicker">
       ${E(resource.hub || 'Tecnologia')} · ${E(resource.category || 'Tutorial')}
@@ -106,7 +106,7 @@ function techPost(resource) {
 function newsPost(news) {
   const detailPath = `/noticias/${encodeURIComponent(news.slug)}`;
 
-  return html`<article class="social-post">
+  return markup`<article class="social-post">
     ${authorLine(news)}
     <div class="social-kicker">Notícia certificada · ${E(news.category || 'Atualizações')}</div>
     <h2>${link(detailPath, E(news.title))}</h2>
@@ -194,7 +194,7 @@ function renderCommunities(communities) {
   return communities
     .map(
       (community) =>
-        html`<a
+        markup`<a
           class="community-spot"
           href="/comunidades/${encodeURIComponent(community.slug)}"
           data-link
@@ -218,7 +218,7 @@ function renderTopics(topics) {
   return topics
     .map(
       (topic) =>
-        html`<a href="/biblioteca?q=${encodeURIComponent(topic)}" data-link>#${E(topic)}</a>`,
+        markup`<a href="/biblioteca?q=${encodeURIComponent(topic)}" data-link>#${E(topic)}</a>`,
     )
     .join('');
 }
@@ -231,7 +231,7 @@ function renderProjects(projects) {
   return projects
     .map(
       (project) =>
-        html`<a class="social-list-item" href="${projectHref(project)}" data-link>
+        markup`<a class="social-list-item" href="${projectHref(project)}" data-link>
           <span class="project-mini">⌘</span>
           <span>
             <strong>${E(project.title)}</strong>
@@ -252,7 +252,7 @@ function renderBooks(books) {
   return books
     .map(
       (book) =>
-        html`<a
+        markup`<a
           class="social-list-item"
           href="/livros/${encodeURIComponent(book.id)}"
           data-link
@@ -280,7 +280,7 @@ function renderExperts(profiles) {
       const specialty = profile.verifiedSpecialty || profile.profileType || 'Membro';
       const name = profile.displayName || profile.username;
 
-      return html`<a
+      return markup`<a
         class="social-list-item"
         href="/autores/${encodeURIComponent(profile.username)}"
         data-link
@@ -297,7 +297,7 @@ function renderExperts(profiles) {
 
 function renderComposer() {
   if (!state.me) {
-    return html`<div class="social-composer guest">
+    return markup`<div class="social-composer guest">
       <div>
         <strong>Entre para fazer parte da conversa.</strong>
         <p>Siga comunidades, publique conhecimento e participe das discussões.</p>
@@ -308,7 +308,7 @@ function renderComposer() {
     </div>`;
   }
 
-  return html`<div class="social-composer">
+  return markup`<div class="social-composer">
     <span class="social-avatar">${E((state.me.displayName || 'S').slice(0, 1))}</span>
     <div>
       <strong>Compartilhe algo com a comunidade</strong>
@@ -344,7 +344,7 @@ function home() {
     'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.';
 
   layout(
-    html`<section class="social-hero">
+    markup`<section class="social-hero">
       <div class="shell social-hero-grid">
         <div class="social-hero-brand">
           <img src="/favicon.svg" alt="" class="social-brand-mark" />
