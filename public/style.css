@@ -36,5 +36,8 @@
 /* Linguagem social compartilhada nas áreas públicas da plataforma. */
 @import url('/css/social-system.css');
 
+/* Acabamento da experiência social. */
+@import url('/css/social-final-polish.css');
+
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');
