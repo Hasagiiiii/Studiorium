@@ -1,0 +1,84 @@
+/* Oficina — acabamento específico sem interferir na Biblioteca ou nos toolbars globais. */
+
+/* O nome do núcleo já é o título do card; repetir o mesmo texto como eyebrow cria ruído visual. */
+.tech-hub > .eyebrow {
+  display: none;
+}
+
+/* A busca da Oficina possui somente campo + botão, diferente da busca da Biblioteca. */
+[data-tech-filter] .library-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+[data-tech-filter] .library-search > * {
+  min-width: 0;
+}
+
+[data-tech-filter] .library-search .field {
+  width: 100%;
+  min-height: 46px;
+}
+
+[data-tech-filter] .library-search .solid {
+  width: auto;
+  min-width: 112px;
+  min-height: 46px;
+  padding-inline: 20px;
+}
+
+/* Separa claramente a ferramenta de busca do bloco de conteúdo comunitário. */
+[data-tech-filter] {
+  margin-bottom: 0;
+}
+
+[data-tech-filter] ~ .sectionhead {
+  margin-top: clamp(34px, 5vw, 52px);
+}
+
+/* O compositor vazio não deve reservar espaço entre a busca e o conteúdo. */
+#techComposer:empty {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .tech-hub {
+    min-height: 0;
+    padding-block: 24px;
+  }
+
+  .tech-hub h3 {
+    margin-top: 0;
+  }
+
+  [data-tech-filter] {
+    padding: 14px;
+  }
+
+  [data-tech-filter] .library-search {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+
+  [data-tech-filter] .library-search .solid {
+    min-width: 94px;
+    padding-inline: 14px;
+  }
+
+  [data-tech-filter] ~ .sectionhead {
+    margin-top: 38px;
+  }
+}
+
+@media (max-width: 350px) {
+  [data-tech-filter] .library-search {
+    grid-template-columns: 1fr;
+  }
+
+  [data-tech-filter] .library-search .solid {
+    width: 100%;
+  }
+}

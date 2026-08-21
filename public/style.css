@@ -27,6 +27,7 @@
 /* Polimentos específicos */
 @import url('/css/library-polish.css');
 @import url('/css/book-catalog.css');
+@import url('/css/tech-polish.css');
 
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');
