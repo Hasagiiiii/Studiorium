@@ -1,4 +1,4 @@
-import { state, E, html as markup } from '../runtime.js';
+import { state, E } from '../runtime.js';
 import { link } from './core.js';
 
 function isVerified(profile) {
@@ -18,7 +18,9 @@ function trendingTopics() {
     add(publication.area);
     (publication.keywords || []).forEach(add);
   });
-  (state.boot.discussions || []).forEach((discussion) => add(discussion.category));
+  (state.boot.discussions || []).forEach((discussion) => {
+    add(discussion.category);
+  });
   (state.boot.techResources || []).forEach((resource) => {
     add(resource.category);
     (resource.tags || []).forEach(add);
@@ -44,15 +46,20 @@ function renderCommunities(communities) {
   return communities
     .map((community) => {
       const href = `/comunidades/${encodeURIComponent(community.slug)}`;
-      const description = community.description || 'Comunidade do Studiorium.';
-      return markup`<a class="community-spot" href="${href}" data-link>
-        <span class="community-icon">${E(community.name.slice(0, 1))}</span>
-        <span>
-          <strong>${E(community.name)}</strong>
-          <small>${E(description)}</small>
-        </span>
-        <b>+</b>
-      </a>`;
+      const description = E(community.description || 'Comunidade do Studiorium.');
+      const initial = E(community.name.slice(0, 1));
+      const name = E(community.name);
+
+      return [
+        `<a class="community-spot" href="${href}" data-link>`,
+        `<span class="community-icon">${initial}</span>`,
+        '<span>',
+        `<strong>${name}</strong>`,
+        `<small>${description}</small>`,
+        '</span>',
+        '<b>+</b>',
+        '</a>',
+      ].join('');
     })
     .join('');
 }
@@ -65,7 +72,7 @@ function renderTopics(topics) {
   return topics
     .map((topic) => {
       const href = `/biblioteca?q=${encodeURIComponent(topic)}`;
-      return markup`<a href="${href}" data-link>#${E(topic)}</a>`;
+      return `<a href="${href}" data-link>#${E(topic)}</a>`;
     })
     .join('');
 }
@@ -82,15 +89,20 @@ function renderProjects(projects) {
 
   return projects
     .map((project) => {
-      const description =
-        project.description || project.type || 'Projeto da comunidade';
-      return markup`<a class="social-list-item" href="${projectHref(project)}" data-link>
-        <span class="project-mini">⌘</span>
-        <span>
-          <strong>${E(project.title)}</strong>
-          <small>${E(description.slice(0, 70))}</small>
-        </span>
-      </a>`;
+      const description = project.description || project.type || 'Projeto da comunidade';
+      const href = projectHref(project);
+      const title = E(project.title);
+      const summary = E(description.slice(0, 70));
+
+      return [
+        `<a class="social-list-item" href="${href}" data-link>`,
+        '<span class="project-mini">⌘</span>',
+        '<span>',
+        `<strong>${title}</strong>`,
+        `<small>${summary}</small>`,
+        '</span>',
+        '</a>',
+      ].join('');
     })
     .join('');
 }
@@ -104,13 +116,17 @@ function renderBooks(books) {
     .map((book) => {
       const href = `/livros/${encodeURIComponent(book.id)}`;
       const description = book.author || book.category || 'Livro recomendado';
-      return markup`<a class="social-list-item" href="${href}" data-link>
-        <span class="project-mini">▤</span>
-        <span>
-          <strong>${E(book.title)}</strong>
-          <small>${E(description)}</small>
-        </span>
-      </a>`;
+      const title = E(book.title);
+
+      return [
+        `<a class="social-list-item" href="${href}" data-link>`,
+        '<span class="project-mini">▤</span>',
+        '<span>',
+        `<strong>${title}</strong>`,
+        `<small>${E(description)}</small>`,
+        '</span>',
+        '</a>',
+      ].join('');
     })
     .join('');
 }
@@ -124,44 +140,59 @@ function renderExperts(profiles) {
     .filter((profile) => profile.username)
     .map((profile) => {
       const name = profile.displayName || profile.username;
-      const specialty =
-        profile.verifiedSpecialty || profile.profileType || 'Membro';
+      const specialty = profile.verifiedSpecialty || profile.profileType || 'Membro';
       const badge = isVerified(profile) ? '✓ ' : '';
       const href = `/autores/${encodeURIComponent(profile.username)}`;
-      return markup`<a class="social-list-item" href="${href}" data-link>
-        <span class="social-avatar">${E((name || 'S').slice(0, 1))}</span>
-        <span>
-          <strong>${E(name)}</strong>
-          <small>${badge}${E(specialty)}</small>
-        </span>
-      </a>`;
+      const initial = E((name || 'S').slice(0, 1));
+
+      return [
+        `<a class="social-list-item" href="${href}" data-link>`,
+        `<span class="social-avatar">${initial}</span>`,
+        '<span>',
+        `<strong>${E(name)}</strong>`,
+        `<small>${badge}${E(specialty)}</small>`,
+        '</span>',
+        '</a>',
+      ].join('');
     })
     .join('');
 }
 
-function renderComposer() {
-  if (!state.me) {
-    return markup`<div class="social-composer guest">
-      <div>
-        <strong>Entre para fazer parte da conversa.</strong>
-        <p>Siga comunidades, publique conhecimento e participe das discussões.</p>
-      </div>
-      <div class="actions">
-        ${link('/cadastro', 'Criar conta', 'solid')}${link('/login', 'Entrar', 'outline')}
-      </div>
-    </div>`;
-  }
+function guestComposer() {
+  return [
+    '<div class="social-composer guest">',
+    '<div>',
+    '<strong>Entre para fazer parte da conversa.</strong>',
+    '<p>Siga comunidades, publique conhecimento e participe das discussões.</p>',
+    '</div>',
+    '<div class="actions">',
+    link('/cadastro', 'Criar conta', 'solid'),
+    link('/login', 'Entrar', 'outline'),
+    '</div>',
+    '</div>',
+  ].join('');
+}
 
-  return markup`<div class="social-composer">
-    <span class="social-avatar">${E((state.me.displayName || 'S').slice(0, 1))}</span>
-    <div>
-      <strong>Compartilhe algo com a comunidade</strong>
-      <p>Publique uma pesquisa, abra uma discussão ou mostre um projeto.</p>
-    </div>
-    <div class="actions">
-      ${link('/publicar', 'Publicar', 'solid')}${link('/comunidades', 'Discutir', 'soft')}
-    </div>
-  </div>`;
+function memberComposer() {
+  const initial = E((state.me.displayName || 'S').slice(0, 1));
+
+  return [
+    '<div class="social-composer">',
+    `<span class="social-avatar">${initial}</span>`,
+    '<div>',
+    '<strong>Compartilhe algo com a comunidade</strong>',
+    '<p>Publique uma pesquisa, abra uma discussão ou mostre um projeto.</p>',
+    '</div>',
+    '<div class="actions">',
+    link('/publicar', 'Publicar', 'solid'),
+    link('/comunidades', 'Discutir', 'soft'),
+    '</div>',
+    '</div>',
+  ].join('');
+}
+
+function renderComposer() {
+  return state.me ? memberComposer() : guestComposer();
 }
 
 function socialData() {
