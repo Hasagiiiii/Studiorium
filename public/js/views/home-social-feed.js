@@ -9,7 +9,8 @@ function profileFor(id, fallback = '') {
 
 function isVerified(profile) {
   return (
-    profile?.verificationStatus === 'verified' || profile?.verificationStatus === 'approved'
+    profile?.verificationStatus === 'verified' ||
+    profile?.verificationStatus === 'approved'
   );
 }
 
