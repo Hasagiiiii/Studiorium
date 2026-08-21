@@ -1,4 +1,4 @@
-import { state, E, date, num, html as markup } from '../runtime.js';
+import { state, E, date, num } from '../runtime.js';
 import { link } from './core.js';
 
 function profileFor(id, fallback = '') {
@@ -15,115 +15,137 @@ function isVerified(profile) {
 function authorLine(item) {
   const ownerId = item.ownerId || item.authorId || item.contributorId;
   const profile = profileFor(ownerId, item.authorName);
-  const name =
-    profile?.displayName || item.authorName || 'Comunidade Studiorium';
-  const itemDate = item.createdAt || item.publishedAt || item.updatedAt;
+  const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
+  const initial = E((name || 'S').slice(0, 1).toUpperCase());
+  const itemDate = date(item.createdAt || item.publishedAt || item.updatedAt);
   const badge = isVerified(profile)
     ? '<small class="social-verified">✓ Verificado</small>'
     : '';
 
-  return markup`<div class="social-author">
-    <span class="social-avatar">${E((name || 'S').slice(0, 1).toUpperCase())}</span>
-    <span>
-      <strong>${E(name)}</strong>
-      ${badge}
-      <small>${date(itemDate)}</small>
-    </span>
-  </div>`;
+  return [
+    '<div class="social-author">',
+    `<span class="social-avatar">${initial}</span>`,
+    '<span>',
+    `<strong>${E(name)}</strong>`,
+    badge,
+    `<small>${itemDate}</small>`,
+    '</span>',
+    '</div>',
+  ].join('');
+}
+
+function tagList(tags) {
+  return (tags || [])
+    .slice(0, 4)
+    .map((tag) => `<span>${E(tag)}</span>`)
+    .join('');
+}
+
+function publicationCover(publication, detailPath) {
+  if (!publication.coverName) return '';
+  const id = encodeURIComponent(publication.id);
+  const title = E(publication.title);
+
+  return [
+    `<a href="${detailPath}" data-link class="social-media">`,
+    `<img src="/api/publications/${id}/cover"`,
+    ` alt="Capa de ${title}" loading="lazy" />`,
+    '</a>',
+  ].join('');
 }
 
 function publicationPost(publication) {
-  const keywords = (publication.keywords || [])
-    .slice(0, 4)
-    .map((tag) => markup`<span>${E(tag)}</span>`)
-    .join('');
   const abstract = publication.abstract || '';
   const suffix = abstract.length > 330 ? '…' : '';
-  const summary = `${abstract.slice(0, 330)}${suffix}`;
+  const summary = E(`${abstract.slice(0, 330)}${suffix}`);
   const detailPath = `/pesquisas/${encodeURIComponent(publication.slug)}`;
-  const cover = publication.coverName
-    ? markup`<a href="${detailPath}" data-link class="social-media">
-        <img
-          src="/api/publications/${encodeURIComponent(publication.id)}/cover"
-          alt="Capa de ${E(publication.title)}"
-          loading="lazy"
-        />
-      </a>`
-    : '';
+  const area = E(publication.area || 'Geral');
+  const title = E(publication.title);
+  const id = E(publication.id);
+  const boosts = num(publication.boosts);
+  const views = num(publication.views);
 
-  return markup`<article class="social-post publication-card">
-    ${authorLine(publication)}
-    <div class="social-kicker">Pesquisa · ${E(publication.area || 'Geral')}</div>
-    <h2>${link(detailPath, E(publication.title))}</h2>
-    <p>${E(summary)}</p>
-    ${cover}
-    <div class="social-tags">${keywords}</div>
-    <div class="social-actions">
-      <button
-        class="social-action"
-        type="button"
-        data-publication-boost="${E(publication.id)}"
-      >
-        ✦ <strong data-boost-count="${E(publication.id)}">${num(publication.boosts)}</strong>
-        impulsos
-      </button>
-      ${link(detailPath, '◌ Abrir pesquisa', 'social-action')}
-      <span class="social-stat">${num(publication.views)} leituras</span>
-    </div>
-  </article>`;
+  return [
+    '<article class="social-post publication-card">',
+    authorLine(publication),
+    `<div class="social-kicker">Pesquisa · ${area}</div>`,
+    `<h2>${link(detailPath, title)}</h2>`,
+    `<p>${summary}</p>`,
+    publicationCover(publication, detailPath),
+    `<div class="social-tags">${tagList(publication.keywords)}</div>`,
+    '<div class="social-actions">',
+    '<button class="social-action" type="button"',
+    ` data-publication-boost="${id}">`,
+    `✦ <strong data-boost-count="${id}">${boosts}</strong> impulsos`,
+    '</button>',
+    link(detailPath, '◌ Abrir pesquisa', 'social-action'),
+    `<span class="social-stat">${views} leituras</span>`,
+    '</div>',
+    '</article>',
+  ].join('');
 }
 
 function discussionPost(discussion) {
   const body = discussion.body || '';
-  const summary = `${body.slice(0, 360)}${body.length > 360 ? '…' : ''}`;
+  const suffix = body.length > 360 ? '…' : '';
+  const summary = E(`${body.slice(0, 360)}${suffix}`);
   const detailPath = `/coloquio/${encodeURIComponent(discussion.id)}`;
+  const category = E(discussion.category || 'Geral');
+  const title = E(discussion.title);
 
-  return markup`<article class="social-post discussion-card">
-    ${authorLine(discussion)}
-    <div class="social-kicker">Discussão · ${E(discussion.category || 'Geral')}</div>
-    <h2>${link(detailPath, E(discussion.title))}</h2>
-    <p>${E(summary)}</p>
-    <div class="social-actions">
-      ${link(detailPath, '💬 Entrar na discussão', 'social-action')}
-      ${link('/comunidades', '♧ Ver comunidades', 'social-action')}
-    </div>
-  </article>`;
+  return [
+    '<article class="social-post discussion-card">',
+    authorLine(discussion),
+    `<div class="social-kicker">Discussão · ${category}</div>`,
+    `<h2>${link(detailPath, title)}</h2>`,
+    `<p>${summary}</p>`,
+    '<div class="social-actions">',
+    link(detailPath, '💬 Entrar na discussão', 'social-action'),
+    link('/comunidades', '♧ Ver comunidades', 'social-action'),
+    '</div>',
+    '</article>',
+  ].join('');
 }
 
 function techPost(resource) {
-  const tags = (resource.tags || [])
-    .slice(0, 4)
-    .map((tag) => markup`<span>${E(tag)}</span>`)
-    .join('');
   const detailPath = `/oficina/${encodeURIComponent(resource.slug)}`;
+  const hub = E(resource.hub || 'Tecnologia');
+  const category = E(resource.category || 'Tutorial');
+  const title = E(resource.title);
+  const summary = E((resource.summary || '').slice(0, 340));
 
-  return markup`<article class="social-post project-card">
-    ${authorLine(resource)}
-    <div class="social-kicker">
-      ${E(resource.hub || 'Tecnologia')} · ${E(resource.category || 'Tutorial')}
-    </div>
-    <h2>${link(detailPath, E(resource.title))}</h2>
-    <p>${E((resource.summary || '').slice(0, 340))}</p>
-    <div class="social-tags">${tags}</div>
-    <div class="social-actions">
-      ${link(detailPath, '⚙ Abrir tutorial', 'social-action')}
-    </div>
-  </article>`;
+  return [
+    '<article class="social-post project-card">',
+    authorLine(resource),
+    `<div class="social-kicker">${hub} · ${category}</div>`,
+    `<h2>${link(detailPath, title)}</h2>`,
+    `<p>${summary}</p>`,
+    `<div class="social-tags">${tagList(resource.tags)}</div>`,
+    '<div class="social-actions">',
+    link(detailPath, '⚙ Abrir tutorial', 'social-action'),
+    '</div>',
+    '</article>',
+  ].join('');
 }
 
 function newsPost(news) {
   const detailPath = `/noticias/${encodeURIComponent(news.slug)}`;
+  const category = E(news.category || 'Atualizações');
+  const title = E(news.title);
+  const summary = E((news.summary || '').slice(0, 340));
 
-  return markup`<article class="social-post">
-    ${authorLine(news)}
-    <div class="social-kicker">Notícia certificada · ${E(news.category || 'Atualizações')}</div>
-    <h2>${link(detailPath, E(news.title))}</h2>
-    <p>${E((news.summary || '').slice(0, 340))}</p>
-    <div class="social-actions">
-      ${link(detailPath, '✦ Ler matéria', 'social-action')}
-      <span class="social-stat">✓ Fontes e revisão editorial</span>
-    </div>
-  </article>`;
+  return [
+    '<article class="social-post">',
+    authorLine(news),
+    `<div class="social-kicker">Notícia certificada · ${category}</div>`,
+    `<h2>${link(detailPath, title)}</h2>`,
+    `<p>${summary}</p>`,
+    '<div class="social-actions">',
+    link(detailPath, '✦ Ler matéria', 'social-action'),
+    '<span class="social-stat">✓ Fontes e revisão editorial</span>',
+    '</div>',
+    '</article>',
+  ].join('');
 }
 
 function buildFeed() {
