@@ -22,11 +22,8 @@ const BUILT_IN_ROLES = new Set(Object.keys(LEGACY_ROLE_PERMISSIONS));
 
 function legacyAuthorization(user) {
   const role = user?.role || 'user';
-  return {
-    roles: [role],
-    permissions: [...(LEGACY_ROLE_PERMISSIONS[role] || LEGACY_ROLE_PERMISSIONS.user)],
-    source: 'legacy',
-  };
+  const permissions = LEGACY_ROLE_PERMISSIONS[role] || LEGACY_ROLE_PERMISSIONS.user;
+  return { roles: [role], permissions: [...permissions], source: 'legacy' };
 }
 
 function isMissingRbacTable(error) {
@@ -47,7 +44,8 @@ async function authorizationFor(user) {
   if (!user?.id) return { roles: [], permissions: [], source: 'none' };
 
   const fallback = legacyAuthorization(user);
-  const assignments = await db().from('user_roles').select('role_id').eq('user_id', user.id);
+  const client = db();
+  const assignments = await client.from('user_roles').select('role_id').eq('user_id', user.id);
 
   if (assignments.error) {
     if (!isMissingRbacTable(assignments.error)) {
@@ -57,7 +55,7 @@ async function authorizationFor(user) {
   }
 
   const roleIds = effectiveRoleIds(user, assignments.data || []);
-  const grants = await db()
+  const grants = await client
     .from('role_permissions')
     .select('permission_id')
     .in('role_id', roleIds);
@@ -69,11 +67,8 @@ async function authorizationFor(user) {
     return fallback;
   }
 
-  return {
-    roles: roleIds,
-    permissions: [...new Set((grants.data || []).map((row) => row.permission_id).filter(Boolean))],
-    source: 'rbac',
-  };
+  const permissionIds = (grants.data || []).map((row) => row.permission_id).filter(Boolean);
+  return { roles: roleIds, permissions: [...new Set(permissionIds)], source: 'rbac' };
 }
 
 async function hasPermission(user, permission) {
@@ -88,11 +83,8 @@ async function hasAnyRole(user, allowedRoles = []) {
 
 async function syncLegacyPrimaryRole(userId, roleId, grantedBy = null) {
   const managedRoles = [...BUILT_IN_ROLES];
-  const remove = await db()
-    .from('user_roles')
-    .delete()
-    .eq('user_id', userId)
-    .in('role_id', managedRoles);
+  const roleTable = db().from('user_roles');
+  const remove = await roleTable.delete().eq('user_id', userId).in('role_id', managedRoles);
 
   if (remove.error) {
     if (!isMissingRbacTable(remove.error)) {
@@ -101,9 +93,12 @@ async function syncLegacyPrimaryRole(userId, roleId, grantedBy = null) {
     return false;
   }
 
-  const insert = await db()
-    .from('user_roles')
-    .insert({ user_id: userId, role_id: roleId, granted_by: grantedBy || null });
+  const assignment = {
+    user_id: userId,
+    role_id: roleId,
+    granted_by: grantedBy || null,
+  };
+  const insert = await roleTable.insert(assignment);
 
   if (insert.error) {
     if (!isMissingRbacTable(insert.error)) {
