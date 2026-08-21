@@ -33,5 +33,8 @@
 /* Tema visual: dark academia suave + light academia, mantendo a marca original. */
 @import url('/css/theme-system.css');
 
+/* Linguagem social compartilhada nas áreas públicas da plataforma. */
+@import url('/css/social-system.css');
+
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');
