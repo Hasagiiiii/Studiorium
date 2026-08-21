@@ -5,8 +5,10 @@ import { installLibraryPolish } from './library-polish.js';
 import { installBookCatalog } from './book-catalog.js';
 import { installAdminNewsFeature } from './admin-news-feature.js';
 import { installAdminPublishedActions } from './admin-published-actions.js';
+import { installThemeSystem } from './theme.js';
 import { render } from './router.js';
 
+installThemeSystem();
 installMotionPreferences();
 bindEvents();
 installEnhancements();
