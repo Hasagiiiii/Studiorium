@@ -18,9 +18,7 @@ function authorLine(item) {
   const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
   const initial = E((name || 'S').slice(0, 1).toUpperCase());
   const itemDate = date(item.createdAt || item.publishedAt || item.updatedAt);
-  const badge = isVerified(profile)
-    ? '<small class="social-verified">✓ Verificado</small>'
-    : '';
+  const badge = isVerified(profile) ? '<small class="social-verified">✓ Verificado</small>' : '';
 
   return [
     '<div class="social-author">',
