@@ -2,10 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const {
-  legacyAuthorization,
-  effectiveRoleIds,
-} = require('../src/server/authorization');
+const { legacyAuthorization, effectiveRoleIds } = require('../src/server/authorization');
 
 test('RBAC mantém o cargo nativo atual como autoridade durante a migração', () => {
   const roles = effectiveRoleIds(
@@ -31,9 +28,8 @@ test('migração v3.5 é aditiva e cria a fundação de governança', () => {
   assert.match(sql, /create table if not exists public\.permissions/i);
   assert.match(sql, /create table if not exists public\.user_roles/i);
   assert.match(sql, /publications add column if not exists deleted_at/i);
-  assert.match(
-    sql,
-    /revoke all on table public\.user_roles from public, anon, authenticated/i,
-  );
+  assert.match(sql, /revoke all on table public\.user_roles from public, anon, authenticated/i);
+  assert.match(sql, /communities_created_by_idx/i);
+  assert.match(sql, /community_content_links_moderated_by_idx/i);
   assert.doesNotMatch(sql, /drop table/i);
 });
