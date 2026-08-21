@@ -8,7 +8,8 @@ function profileFor(id, fallback = '') {
 }
 
 function authorLine(item) {
-  const profile = profileFor(item.ownerId || item.authorId || item.contributorId, item.authorName);
+  const ownerId = item.ownerId || item.authorId || item.contributorId;
+  const profile = profileFor(ownerId, item.authorName);
   const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
   const verified =
     profile?.verificationStatus === 'verified' || profile?.verificationStatus === 'approved';
@@ -29,31 +30,25 @@ function publicationPost(publication) {
     .slice(0, 4)
     .map((tag) => html`<span>${E(tag)}</span>`)
     .join('');
+  const abstract = publication.abstract || '';
+  const summary = `${abstract.slice(0, 330)}${abstract.length > 330 ? '…' : ''}`;
+  const detailPath = `/pesquisas/${encodeURIComponent(publication.slug)}`;
+  const cover = publication.coverName
+    ? html`<a href="${detailPath}" data-link class="social-media">
+        <img
+          src="/api/publications/${encodeURIComponent(publication.id)}/cover"
+          alt="Capa de ${E(publication.title)}"
+          loading="lazy"
+        />
+      </a>`
+    : '';
 
   return html`<article class="social-post publication-card">
     ${authorLine(publication)}
     <div class="social-kicker">Pesquisa · ${E(publication.area || 'Geral')}</div>
-    <h2>
-      ${link('/pesquisas/' + encodeURIComponent(publication.slug), E(publication.title))}
-    </h2>
-    <p>
-      ${E((publication.abstract || '').slice(0, 330))}${(publication.abstract || '').length > 330
-        ? '…'
-        : ''}
-    </p>
-    ${publication.coverName
-      ? html`<a
-          href="/pesquisas/${encodeURIComponent(publication.slug)}"
-          data-link
-          class="social-media"
-        >
-          <img
-            src="/api/publications/${encodeURIComponent(publication.id)}/cover"
-            alt="Capa de ${E(publication.title)}"
-            loading="lazy"
-          />
-        </a>`
-      : ''}
+    <h2>${link(detailPath, E(publication.title))}</h2>
+    <p>${E(summary)}</p>
+    ${cover}
     <div class="social-tags">${keywords}</div>
     <div class="social-actions">
       <button
@@ -64,32 +59,24 @@ function publicationPost(publication) {
         ✦ <strong data-boost-count="${E(publication.id)}">${num(publication.boosts)}</strong>
         impulsos
       </button>
-      ${link(
-        '/pesquisas/' + encodeURIComponent(publication.slug),
-        '◌ Abrir pesquisa',
-        'social-action',
-      )}
+      ${link(detailPath, '◌ Abrir pesquisa', 'social-action')}
       <span class="social-stat">${num(publication.views)} leituras</span>
     </div>
   </article>`;
 }
 
 function discussionPost(discussion) {
+  const body = discussion.body || '';
+  const summary = `${body.slice(0, 360)}${body.length > 360 ? '…' : ''}`;
+  const detailPath = `/coloquio/${encodeURIComponent(discussion.id)}`;
+
   return html`<article class="social-post discussion-card">
     ${authorLine(discussion)}
     <div class="social-kicker">Discussão · ${E(discussion.category || 'Geral')}</div>
-    <h2>${link('/coloquio/' + encodeURIComponent(discussion.id), E(discussion.title))}</h2>
-    <p>
-      ${E((discussion.body || '').slice(0, 360))}${(discussion.body || '').length > 360
-        ? '…'
-        : ''}
-    </p>
+    <h2>${link(detailPath, E(discussion.title))}</h2>
+    <p>${E(summary)}</p>
     <div class="social-actions">
-      ${link(
-        '/coloquio/' + encodeURIComponent(discussion.id),
-        '💬 Entrar na discussão',
-        'social-action',
-      )}
+      ${link(detailPath, '💬 Entrar na discussão', 'social-action')}
       ${link('/comunidades', '♧ Ver comunidades', 'social-action')}
     </div>
   </article>`;
@@ -100,29 +87,32 @@ function techPost(resource) {
     .slice(0, 4)
     .map((tag) => html`<span>${E(tag)}</span>`)
     .join('');
+  const detailPath = `/oficina/${encodeURIComponent(resource.slug)}`;
 
   return html`<article class="social-post project-card">
     ${authorLine(resource)}
     <div class="social-kicker">
       ${E(resource.hub || 'Tecnologia')} · ${E(resource.category || 'Tutorial')}
     </div>
-    <h2>${link('/oficina/' + encodeURIComponent(resource.slug), E(resource.title))}</h2>
+    <h2>${link(detailPath, E(resource.title))}</h2>
     <p>${E((resource.summary || '').slice(0, 340))}</p>
     <div class="social-tags">${tags}</div>
     <div class="social-actions">
-      ${link('/oficina/' + encodeURIComponent(resource.slug), '⚙ Abrir tutorial', 'social-action')}
+      ${link(detailPath, '⚙ Abrir tutorial', 'social-action')}
     </div>
   </article>`;
 }
 
 function newsPost(news) {
+  const detailPath = `/noticias/${encodeURIComponent(news.slug)}`;
+
   return html`<article class="social-post">
     ${authorLine(news)}
     <div class="social-kicker">Notícia certificada · ${E(news.category || 'Atualizações')}</div>
-    <h2>${link('/noticias/' + encodeURIComponent(news.slug), E(news.title))}</h2>
+    <h2>${link(detailPath, E(news.title))}</h2>
     <p>${E((news.summary || '').slice(0, 340))}</p>
     <div class="social-actions">
-      ${link('/noticias/' + encodeURIComponent(news.slug), '✦ Ler matéria', 'social-action')}
+      ${link(detailPath, '✦ Ler matéria', 'social-action')}
       <span class="social-stat">✓ Fontes e revisão editorial</span>
     </div>
   </article>`;
@@ -196,6 +186,140 @@ function projectHref(project) {
   return project?.id ? `/projetos/${encodeURIComponent(project.id)}` : '/projetos';
 }
 
+function renderCommunities(communities) {
+  if (!communities.length) {
+    return '<p class="muted small">As primeiras comunidades aparecerão aqui.</p>';
+  }
+
+  return communities
+    .map(
+      (community) =>
+        html`<a
+          class="community-spot"
+          href="/comunidades/${encodeURIComponent(community.slug)}"
+          data-link
+        >
+          <span class="community-icon">${E(community.name.slice(0, 1))}</span>
+          <span>
+            <strong>${E(community.name)}</strong>
+            <small>${E(community.description || 'Comunidade do Studiorium.')}</small>
+          </span>
+          <b>+</b>
+        </a>`,
+    )
+    .join('');
+}
+
+function renderTopics(topics) {
+  if (!topics.length) {
+    return '<span class="muted small">Os assuntos aparecem conforme a comunidade publica.</span>';
+  }
+
+  return topics
+    .map(
+      (topic) =>
+        html`<a href="/biblioteca?q=${encodeURIComponent(topic)}" data-link>#${E(topic)}</a>`,
+    )
+    .join('');
+}
+
+function renderProjects(projects) {
+  if (!projects.length) {
+    return '<p class="muted">Os primeiros projetos vão aparecer aqui.</p>';
+  }
+
+  return projects
+    .map(
+      (project) =>
+        html`<a class="social-list-item" href="${projectHref(project)}" data-link>
+          <span class="project-mini">⌘</span>
+          <span>
+            <strong>${E(project.title)}</strong>
+            <small>
+              ${E((project.description || project.type || 'Projeto da comunidade').slice(0, 70))}
+            </small>
+          </span>
+        </a>`,
+    )
+    .join('');
+}
+
+function renderBooks(books) {
+  if (!books.length) {
+    return '<p class="muted">As recomendações de livros aparecerão aqui.</p>';
+  }
+
+  return books
+    .map(
+      (book) =>
+        html`<a
+          class="social-list-item"
+          href="/livros/${encodeURIComponent(book.id)}"
+          data-link
+        >
+          <span class="project-mini">▤</span>
+          <span>
+            <strong>${E(book.title)}</strong>
+            <small>${E(book.author || book.category || 'Livro recomendado')}</small>
+          </span>
+        </a>`,
+    )
+    .join('');
+}
+
+function renderExperts(profiles) {
+  if (!profiles.length) {
+    return '<p class="muted">Perfis públicos aparecerão aqui.</p>';
+  }
+
+  return profiles
+    .filter((profile) => profile.username)
+    .map((profile) => {
+      const isVerified =
+        profile.verificationStatus === 'verified' || profile.verificationStatus === 'approved';
+      const specialty = profile.verifiedSpecialty || profile.profileType || 'Membro';
+      const name = profile.displayName || profile.username;
+
+      return html`<a
+        class="social-list-item"
+        href="/autores/${encodeURIComponent(profile.username)}"
+        data-link
+      >
+        <span class="social-avatar">${E((name || 'S').slice(0, 1))}</span>
+        <span>
+          <strong>${E(name)}</strong>
+          <small>${isVerified ? '✓ ' : ''}${E(specialty)}</small>
+        </span>
+      </a>`;
+    })
+    .join('');
+}
+
+function renderComposer() {
+  if (!state.me) {
+    return html`<div class="social-composer guest">
+      <div>
+        <strong>Entre para fazer parte da conversa.</strong>
+        <p>Siga comunidades, publique conhecimento e participe das discussões.</p>
+      </div>
+      <div class="actions">
+        ${link('/cadastro', 'Criar conta', 'solid')}${link('/login', 'Entrar', 'outline')}
+      </div>
+    </div>`;
+  }
+
+  return html`<div class="social-composer">
+    <span class="social-avatar">${E((state.me.displayName || 'S').slice(0, 1))}</span>
+    <div>
+      <strong>Compartilhe algo com a comunidade</strong>
+      <p>Publique uma pesquisa, abra uma discussão ou mostre um projeto.</p>
+    </div>
+    <div class="actions">
+      ${link('/publicar', 'Publicar', 'solid')}${link('/comunidades', 'Discutir', 'soft')}
+    </div>
+  </div>`;
+}
+
 function home() {
   const settings = state.boot.settings || {};
   const feed = buildFeed();
@@ -210,24 +334,24 @@ function home() {
         profile.verificationStatus === 'verified' || profile.verificationStatus === 'approved',
     )
     .slice(0, 4);
+  const expertProfiles = verified.length ? verified : profiles;
   const books = (state.boot.books || []).slice(0, 4);
-  const topics = trendingTopics();
   const communities = communitySpotlight();
+  const topics = trendingTopics();
+  const heroTitle = settings.hero_title || 'Aprenda. Construa. Compartilhe.';
+  const heroText =
+    settings.hero_text ||
+    'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.';
 
-  layout(html`
-    <section class="social-hero">
+  layout(
+    html`<section class="social-hero">
       <div class="shell social-hero-grid">
         <div class="social-hero-brand">
           <img src="/favicon.svg" alt="" class="social-brand-mark" />
           <div>
             <div class="eyebrow">Conhecimento · comunidade · criação</div>
-            <h1>${E(settings.hero_title || 'Aprenda. Construa. Compartilhe.')}</h1>
-            <p>
-              ${E(
-                settings.hero_text ||
-                  'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.',
-              )}
-            </p>
+            <h1>${E(heroTitle)}</h1>
+            <p>${E(heroText)}</p>
           </div>
         </div>
         <form class="searchbar social-search" data-global-search>
@@ -260,24 +384,7 @@ function home() {
             <h3>Comunidades</h3>
             ${link('/comunidades', 'Ver todas')}
           </div>
-          ${communities.length
-            ? communities
-                .map(
-                  (community) => html`<a
-                    class="community-spot"
-                    href="/comunidades/${encodeURIComponent(community.slug)}"
-                    data-link
-                  >
-                    <span class="community-icon">${E(community.name.slice(0, 1))}</span>
-                    <span>
-                      <strong>${E(community.name)}</strong>
-                      <small>${E(community.description || 'Comunidade do Studiorium.')}</small>
-                    </span>
-                    <b>+</b>
-                  </a>`,
-                )
-                .join('')
-            : '<p class="muted small">As primeiras comunidades aparecerão aqui.</p>'}
+          ${renderCommunities(communities)}
         </div>
 
         <div class="social-panel">
@@ -285,19 +392,7 @@ function home() {
             <h3>Assuntos em alta</h3>
             ${link('/biblioteca', 'Pesquisar')}
           </div>
-          <div class="social-topic-cloud">
-            ${topics.length
-              ? topics
-                  .map(
-                    (topic) => html`<a
-                      href="/biblioteca?q=${encodeURIComponent(topic)}"
-                      data-link
-                      >#${E(topic)}</a
-                    >`,
-                  )
-                  .join('')
-              : '<span class="muted small">Os assuntos aparecem conforme a comunidade publica.</span>'}
-          </div>
+          <div class="social-topic-cloud">${renderTopics(topics)}</div>
         </div>
       </aside>
 
@@ -316,30 +411,7 @@ function home() {
           )}
         </div>
 
-        ${state.me
-          ? html`<div class="social-composer">
-              <span class="social-avatar">${E((state.me.displayName || 'S').slice(0, 1))}</span>
-              <div>
-                <strong>Compartilhe algo com a comunidade</strong>
-                <p>Publique uma pesquisa, abra uma discussão ou mostre um projeto.</p>
-              </div>
-              <div class="actions">
-                ${link('/publicar', 'Publicar', 'solid')}${link(
-                  '/comunidades',
-                  'Discutir',
-                  'soft',
-                )}
-              </div>
-            </div>`
-          : html`<div class="social-composer guest">
-              <div>
-                <strong>Entre para fazer parte da conversa.</strong>
-                <p>Siga comunidades, publique conhecimento e participe das discussões.</p>
-              </div>
-              <div class="actions">
-                ${link('/cadastro', 'Criar conta', 'solid')}${link('/login', 'Entrar', 'outline')}
-              </div>
-            </div>`}
+        ${renderComposer()}
 
         <div class="social-feed-list">
           ${feed.length
@@ -356,30 +428,7 @@ function home() {
             <h3>Projetos em alta</h3>
             ${link('/projetos', 'Ver todos')}
           </div>
-          ${projects.length
-            ? projects
-                .map(
-                  (project) => html`<a
-                    class="social-list-item"
-                    href="${projectHref(project)}"
-                    data-link
-                  >
-                    <span class="project-mini">⌘</span>
-                    <span>
-                      <strong>${E(project.title)}</strong>
-                      <small>
-                        ${E(
-                          (project.description || project.type || 'Projeto da comunidade').slice(
-                            0,
-                            70,
-                          ),
-                        )}
-                      </small>
-                    </span>
-                  </a>`,
-                )
-                .join('')
-            : '<p class="muted">Os primeiros projetos vão aparecer aqui.</p>'}
+          ${renderProjects(projects)}
         </div>
 
         <div class="social-panel">
@@ -387,23 +436,7 @@ function home() {
             <h3>Leituras da comunidade</h3>
             ${link('/biblioteca', 'Biblioteca')}
           </div>
-          ${books.length
-            ? books
-                .map(
-                  (book) => html`<a
-                    class="social-list-item"
-                    href="/livros/${encodeURIComponent(book.id)}"
-                    data-link
-                  >
-                    <span class="project-mini">▤</span>
-                    <span>
-                      <strong>${E(book.title)}</strong>
-                      <small>${E(book.author || book.category || 'Livro recomendado')}</small>
-                    </span>
-                  </a>`,
-                )
-                .join('')
-            : '<p class="muted">As recomendações de livros aparecerão aqui.</p>'}
+          ${renderBooks(books)}
         </div>
 
         <div class="social-panel">
@@ -411,28 +444,7 @@ function home() {
             <h3>Especialistas verificados</h3>
             ${link('/autores', 'Pessoas')}
           </div>
-          ${(verified.length ? verified : profiles)
-            .map(
-              (profile) => html`<a
-                class="social-list-item"
-                href="/autores/${encodeURIComponent(profile.username)}"
-                data-link
-              >
-                <span class="social-avatar">
-                  ${E((profile.displayName || profile.username || 'S').slice(0, 1))}
-                </span>
-                <span>
-                  <strong>${E(profile.displayName || profile.username)}</strong>
-                  <small>
-                    ${profile.verificationStatus === 'verified' ||
-                    profile.verificationStatus === 'approved'
-                      ? '✓ '
-                      : ''}${E(profile.verifiedSpecialty || profile.profileType || 'Membro')}
-                  </small>
-                </span>
-              </a>`,
-            )
-            .join('')}
+          ${renderExperts(expertProfiles)}
         </div>
 
         <div class="social-panel social-quote">
@@ -441,8 +453,8 @@ function home() {
           <small>Studiorium</small>
         </div>
       </aside>
-    </section>
-  `);
+    </section>`,
+  );
 }
 
 export { home };
