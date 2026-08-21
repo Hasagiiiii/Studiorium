@@ -34,7 +34,11 @@ async function requireUser(req) {
   return user;
 }
 
-async function requirePermission(req, permission, message = 'Você não tem permissão para esta ação.') {
+async function requirePermission(
+  req,
+  permission,
+  message = 'Você não tem permissão para esta ação.',
+) {
   const user = await requireUser(req);
   const authorization = await authorizationFor(user);
   if (!authorization.permissions.includes(permission)) {
