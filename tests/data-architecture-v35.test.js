@@ -12,11 +12,14 @@ test('RBAC mantém o cargo nativo atual como autoridade durante a migração', (
   assert.deepEqual(roles, ['user', 'research_reviewer']);
 });
 
-test('fallback legado preserva permissões administrativas enquanto o schema novo não existe', () => {
-  const authorization = legacyAuthorization({ id: 'u1', role: 'admin' });
-  assert.ok(authorization.permissions.includes('admin.full'));
-  assert.ok(authorization.permissions.includes('roles.manage'));
-});
+test(
+  'fallback legado preserva permissões administrativas enquanto o schema novo não existe',
+  () => {
+    const authorization = legacyAuthorization({ id: 'u1', role: 'admin' });
+    assert.ok(authorization.permissions.includes('admin.full'));
+    assert.ok(authorization.permissions.includes('roles.manage'));
+  },
+);
 
 test('migração v3.5 é aditiva e cria a fundação de governança', () => {
   const sql = readFileSync(
