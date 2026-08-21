@@ -74,9 +74,7 @@ async function authorizationFor(user) {
 
   return {
     roles: roleIds,
-    permissions: [
-      ...new Set((grants.data || []).map((row) => row.permission_id).filter(Boolean)),
-    ],
+    permissions: [...new Set((grants.data || []).map((row) => row.permission_id).filter(Boolean))],
     source: 'rbac',
   };
 }
