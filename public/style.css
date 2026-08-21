@@ -12,6 +12,7 @@
 @import url('/css/comment-intelligence.css');
 @import url('/css/content-discovery.css');
 @import url('/css/communities.css');
+@import url('/css/social-home.css');
 
 /* Responsividade e navegação */
 @import url('/css/responsive/navigation.css');
@@ -31,6 +32,9 @@
 
 /* Tema visual: dark academia suave + light academia, mantendo a marca original. */
 @import url('/css/theme-system.css');
+
+/* Linguagem social compartilhada nas áreas públicas da plataforma. */
+@import url('/css/social-system.css');
 
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');

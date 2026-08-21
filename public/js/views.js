@@ -9,7 +9,8 @@ export {
   publicationCard,
   discussionRow,
 } from './views/core.js';
-export { home, biblioteca, acervo, templateDetail } from './views/home-library.js';
+export { home } from './views/home-social.js';
+export { biblioteca, acervo, templateDetail } from './views/home-library.js';
 export {
   pesquisas,
   researchDetail,
