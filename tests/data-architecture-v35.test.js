@@ -2,10 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const {
-  legacyAuthorization,
-  effectiveRoleIds,
-} = require('../src/server/authorization');
+const { legacyAuthorization, effectiveRoleIds } = require('../src/server/authorization');
 
 test('RBAC mantém o cargo nativo atual como autoridade durante a migração', () => {
   const roles = effectiveRoleIds(
