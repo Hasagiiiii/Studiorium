@@ -138,6 +138,12 @@ create index if not exists communities_active_area_name_idx
   on public.communities(area, name)
   where status = 'active' and deleted_at is null;
 
+-- Índices de cobertura para FKs apontadas pelo advisor de performance.
+create index if not exists communities_created_by_idx on public.communities(created_by);
+create index if not exists community_content_links_moderated_by_idx
+  on public.community_content_links(moderated_by)
+  where moderated_by is not null;
+
 -- Não expor as tabelas de autorização pelo Data API do navegador.
 alter table public.roles enable row level security;
 alter table public.permissions enable row level security;
