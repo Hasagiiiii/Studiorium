@@ -1,0 +1,475 @@
+.social-hero {
+  padding: 46px 0 26px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--panel2) 62%, transparent),
+    transparent
+  );
+}
+
+.social-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+  gap: 28px;
+  align-items: end;
+}
+
+.social-hero-brand {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.social-brand-mark {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.18));
+}
+
+.social-hero h1 {
+  margin: 0.25rem 0 0.45rem;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.social-hero p {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.social-search {
+  margin: 0;
+}
+
+.social-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 270px;
+  gap: 22px;
+  padding-top: 24px;
+  padding-bottom: 56px;
+  align-items: start;
+}
+
+.social-left,
+.social-right {
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: 88px;
+}
+
+.social-feed {
+  min-width: 0;
+}
+
+.social-panel,
+.social-composer,
+.social-feed-tabs,
+.social-post {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+  box-shadow: 0 16px 44px color-mix(in srgb, var(--bg) 78%, transparent);
+}
+
+.social-panel {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.social-panel h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+}
+
+.social-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.social-panel-head > a {
+  font-size: 0.75rem;
+  color: var(--brass2);
+}
+
+.social-menu {
+  display: grid;
+  gap: 4px;
+}
+
+.social-menu > a {
+  padding: 10px 11px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.social-menu > a:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.community-spot,
+.social-list-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  color: var(--ink);
+  border-top: 1px solid color-mix(in srgb, var(--line) 66%, transparent);
+}
+
+.community-spot:first-of-type,
+.social-list-item:first-of-type {
+  border-top: 0;
+}
+
+.community-spot small,
+.social-list-item small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.73rem;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.community-spot b {
+  color: var(--brass2);
+  font-size: 1.2rem;
+}
+
+.community-icon,
+.project-mini {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--brass) 12%, var(--panel2));
+  border: 1px solid color-mix(in srgb, var(--brass) 25%, var(--line));
+  font-family: var(--serif);
+  color: var(--brass2);
+}
+
+.social-feed-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  overflow: auto;
+}
+
+.social-feed-tabs button,
+.social-feed-tabs a {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 13px;
+  border-radius: 9px;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.social-feed-tabs .active {
+  background: color-mix(in srgb, var(--brass) 14%, transparent);
+  color: var(--brass2);
+}
+
+.social-composer {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 15px 16px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+
+.social-composer.guest {
+  grid-template-columns: 1fr auto;
+}
+
+.social-composer strong {
+  font-size: 0.9rem;
+}
+
+.social-composer p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.social-composer .actions {
+  margin: 0;
+}
+
+.social-feed-list {
+  display: grid;
+  gap: 14px;
+}
+
+.social-post {
+  padding: 18px 20px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+}
+
+.social-post::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: linear-gradient(var(--brass), transparent);
+  opacity: 0.45;
+}
+
+.social-post h2 {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 10px 0 9px;
+}
+
+.social-post h2 a {
+  color: var(--ink);
+}
+
+.social-post > p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0 0 13px;
+}
+
+.social-author {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.social-author > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.social-author strong {
+  font-size: 0.88rem;
+}
+
+.social-author small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.social-verified {
+  color: var(--brass2) !important;
+}
+
+.social-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--wine) 50%, var(--panel2)),
+    color-mix(in srgb, var(--brass) 22%, var(--panel))
+  );
+  border: 1px solid var(--line);
+  font-family: var(--serif);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.social-kicker {
+  margin-top: 12px;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.11em;
+  color: var(--brass2);
+}
+
+.social-media {
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin: 13px 0;
+}
+
+.social-media img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+}
+
+.social-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.social-tags span {
+  font-size: 0.68rem;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  color: var(--muted);
+}
+
+.social-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.social-action {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.social-action:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.social-stat {
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+
+.social-quote {
+  text-align: center;
+  padding: 22px;
+}
+
+.social-quote > span {
+  font-family: var(--serif);
+  font-size: 2.5rem;
+  color: var(--brass2);
+  line-height: 0.6;
+}
+
+.social-quote p {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.social-quote small {
+  color: var(--muted);
+}
+
+/* Usa o símbolo original já criado como marca também na navegação. */
+.brand .seal {
+  font-size: 0 !important;
+  background: url('/favicon.svg') center / contain no-repeat !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1080px) {
+  .social-shell {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+
+  .social-right {
+    display: none;
+  }
+
+  .social-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .social-hero {
+    padding-top: 26px;
+  }
+
+  .social-brand-mark {
+    width: 54px;
+    height: 54px;
+  }
+
+  .social-shell {
+    display: block;
+    padding-top: 14px;
+  }
+
+  .social-left {
+    position: static;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .social-menu {
+    display: flex;
+    overflow: auto;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .social-menu h3 {
+    display: none;
+  }
+
+  .social-menu > a {
+    white-space: nowrap;
+  }
+
+  .social-left > .social-panel:not(.social-menu) {
+    display: none;
+  }
+
+  .social-composer {
+    grid-template-columns: auto 1fr;
+  }
+
+  .social-composer .actions {
+    grid-column: 1 / -1;
+  }
+
+  .social-composer.guest {
+    grid-template-columns: 1fr;
+  }
+
+  .social-post {
+    padding: 16px;
+  }
+
+  .social-stat {
+    margin-left: 0;
+    width: 100%;
+  }
+}
