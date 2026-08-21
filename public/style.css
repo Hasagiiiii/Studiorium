@@ -29,5 +29,8 @@
 @import url('/css/book-catalog.css');
 @import url('/css/tech-polish.css');
 
+/* Tema visual: dark academia suave + light academia, mantendo a marca original. */
+@import url('/css/theme-system.css');
+
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');
