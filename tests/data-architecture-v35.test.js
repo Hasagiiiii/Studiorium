@@ -4,28 +4,27 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { legacyAuthorization, effectiveRoleIds } = require('../src/server/authorization');
 
-test('RBAC mantém o cargo nativo atual como autoridade durante a migração', () => {
-  const roles = effectiveRoleIds(
-    { id: 'u1', role: 'user' },
-    [{ role_id: 'admin' }, { role_id: 'research_reviewer' }],
-  );
+const migrationPath = join(
+  __dirname,
+  '..',
+  'supabase',
+  'upgrade-v3.5-data-architecture.sql',
+);
+
+test('RBAC usa o cargo primário atual', () => {
+  const assignments = [{ role_id: 'admin' }, { role_id: 'research_reviewer' }];
+  const roles = effectiveRoleIds({ id: 'u1', role: 'user' }, assignments);
   assert.deepEqual(roles, ['user', 'research_reviewer']);
 });
 
-test(
-  'fallback legado preserva permissões administrativas enquanto o schema novo não existe',
-  () => {
-    const authorization = legacyAuthorization({ id: 'u1', role: 'admin' });
-    assert.ok(authorization.permissions.includes('admin.full'));
-    assert.ok(authorization.permissions.includes('roles.manage'));
-  },
-);
+test('fallback legado preserva o administrador', () => {
+  const authorization = legacyAuthorization({ id: 'u1', role: 'admin' });
+  assert.ok(authorization.permissions.includes('admin.full'));
+  assert.ok(authorization.permissions.includes('roles.manage'));
+});
 
-test('migração v3.5 é aditiva e cria a fundação de governança', () => {
-  const sql = readFileSync(
-    join(__dirname, '..', 'supabase', 'upgrade-v3.5-data-architecture.sql'),
-    'utf8',
-  );
+test('migração v3.5 cria a fundação aditiva', () => {
+  const sql = readFileSync(migrationPath, 'utf8');
 
   assert.match(sql, /create table if not exists public\.roles/i);
   assert.match(sql, /create table if not exists public\.permissions/i);
