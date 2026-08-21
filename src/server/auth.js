@@ -1,6 +1,7 @@
 const { db } = require('./db');
 const { parseCookies } = require('./http');
 const { tokenHash } = require('./security');
+const { authorizationFor } = require('./authorization');
 
 async function currentUser(req) {
   const rawToken = parseCookies(req).studiorium_session;
@@ -33,19 +34,27 @@ async function requireUser(req) {
   return user;
 }
 
-async function requireAdmin(req) {
+async function requirePermission(req, permission, message = 'Você não tem permissão para esta ação.') {
   const user = await requireUser(req);
-  if (user.role !== 'admin') {
-    const err = new Error('Acesso restrito à administração.');
+  const authorization = await authorizationFor(user);
+  if (!authorization.permissions.includes(permission)) {
+    const err = new Error(message);
     err.statusCode = 403;
     throw err;
   }
   return user;
 }
 
+async function requireAdmin(req) {
+  return requirePermission(req, 'admin.full', 'Acesso restrito à administração.');
+}
+
 async function requireStaff(req, allowedRoles = ['moderator', 'curator', 'editor', 'admin']) {
   const user = await requireUser(req);
-  if (!allowedRoles.includes(user.role)) {
+  const authorization = await authorizationFor(user);
+  const allowedByRole = authorization.roles.some((role) => allowedRoles.includes(role));
+  const allowedByPermission = authorization.permissions.includes('moderation.queue');
+  if (!allowedByRole && !allowedByPermission) {
     const err = new Error('Acesso restrito à equipe de moderação.');
     err.statusCode = 403;
     throw err;
@@ -81,4 +90,11 @@ async function publicUser(user) {
   };
 }
 
-module.exports = { currentUser, requireUser, requireAdmin, requireStaff, publicUser };
+module.exports = {
+  currentUser,
+  requireUser,
+  requirePermission,
+  requireAdmin,
+  requireStaff,
+  publicUser,
+};
