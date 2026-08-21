@@ -18,6 +18,8 @@ const LEGACY_ROLE_PERMISSIONS = Object.freeze({
   ],
 });
 
+const BUILT_IN_ROLES = new Set(Object.keys(LEGACY_ROLE_PERMISSIONS));
+
 function legacyAuthorization(user) {
   const role = user?.role || 'user';
   return {
@@ -31,6 +33,14 @@ function isMissingRbacTable(error) {
   const code = String(error?.code || '');
   const message = String(error?.message || '');
   return code === '42P01' || /user_roles|role_permissions|schema cache/i.test(message);
+}
+
+function effectiveRoleIds(user, assignments = []) {
+  const primaryRole = user?.role || 'user';
+  const customRoles = assignments
+    .map((row) => row.role_id)
+    .filter((roleId) => roleId && !BUILT_IN_ROLES.has(roleId));
+  return [...new Set([primaryRole, ...customRoles])];
 }
 
 async function authorizationFor(user) {
@@ -49,9 +59,7 @@ async function authorizationFor(user) {
     return fallback;
   }
 
-  const roleIds = [...new Set((assignments.data || []).map((row) => row.role_id).filter(Boolean))];
-  if (!roleIds.length) return fallback;
-
+  const roleIds = effectiveRoleIds(user, assignments.data || []);
   const grants = await db()
     .from('role_permissions')
     .select('permission_id')
@@ -82,7 +90,7 @@ async function hasAnyRole(user, allowedRoles = []) {
 }
 
 async function syncLegacyPrimaryRole(userId, roleId, grantedBy = null) {
-  const managedRoles = Object.keys(LEGACY_ROLE_PERMISSIONS);
+  const managedRoles = [...BUILT_IN_ROLES];
   const remove = await db()
     .from('user_roles')
     .delete()
@@ -113,6 +121,7 @@ async function syncLegacyPrimaryRole(userId, roleId, grantedBy = null) {
 module.exports = {
   LEGACY_ROLE_PERMISSIONS,
   legacyAuthorization,
+  effectiveRoleIds,
   authorizationFor,
   hasPermission,
   hasAnyRole,
