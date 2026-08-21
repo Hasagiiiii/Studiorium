@@ -4,12 +4,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { legacyAuthorization, effectiveRoleIds } = require('../src/server/authorization');
 
-const migrationPath = join(
-  __dirname,
-  '..',
-  'supabase',
-  'upgrade-v3.5-data-architecture.sql',
-);
+const migrationPath = join(__dirname, '..', 'supabase', 'upgrade-v3.5-data-architecture.sql');
 
 test('RBAC usa o cargo primário atual', () => {
   const assignments = [{ role_id: 'admin' }, { role_id: 'research_reviewer' }];
