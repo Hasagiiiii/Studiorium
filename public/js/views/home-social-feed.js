@@ -15,7 +15,8 @@ function isVerified(profile) {
 function authorLine(item) {
   const ownerId = item.ownerId || item.authorId || item.contributorId;
   const profile = profileFor(ownerId, item.authorName);
-  const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
+  const name =
+    profile?.displayName || item.authorName || 'Comunidade Studiorium';
   const initial = E((name || 'S').slice(0, 1).toUpperCase());
   const itemDate = date(item.createdAt || item.publishedAt || item.updatedAt);
   const badge = isVerified(profile)
