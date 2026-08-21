@@ -47,10 +47,7 @@ async function authorizationFor(user) {
   if (!user?.id) return { roles: [], permissions: [], source: 'none' };
 
   const fallback = legacyAuthorization(user);
-  const assignments = await db()
-    .from('user_roles')
-    .select('role_id')
-    .eq('user_id', user.id);
+  const assignments = await db().from('user_roles').select('role_id').eq('user_id', user.id);
 
   if (assignments.error) {
     if (!isMissingRbacTable(assignments.error)) {
