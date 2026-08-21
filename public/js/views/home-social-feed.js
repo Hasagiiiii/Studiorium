@@ -8,16 +8,15 @@ function profileFor(id, fallback = '') {
 }
 
 function isVerified(profile) {
-  return (
-    profile?.verificationStatus === 'verified' ||
-    profile?.verificationStatus === 'approved'
-  );
+  const status = profile?.verificationStatus;
+  return status === 'verified' || status === 'approved';
 }
 
 function authorLine(item) {
   const ownerId = item.ownerId || item.authorId || item.contributorId;
   const profile = profileFor(ownerId, item.authorName);
-  const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
+  const name =
+    profile?.displayName || item.authorName || 'Comunidade Studiorium';
   const itemDate = item.createdAt || item.publishedAt || item.updatedAt;
   const badge = isVerified(profile)
     ? '<small class="social-verified">✓ Verificado</small>'
@@ -39,7 +38,8 @@ function publicationPost(publication) {
     .map((tag) => markup`<span>${E(tag)}</span>`)
     .join('');
   const abstract = publication.abstract || '';
-  const summary = `${abstract.slice(0, 330)}${abstract.length > 330 ? '…' : ''}`;
+  const suffix = abstract.length > 330 ? '…' : '';
+  const summary = `${abstract.slice(0, 330)}${suffix}`;
   const detailPath = `/pesquisas/${encodeURIComponent(publication.slug)}`;
   const cover = publication.coverName
     ? markup`<a href="${detailPath}" data-link class="social-media">
