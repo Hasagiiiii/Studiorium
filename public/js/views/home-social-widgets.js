@@ -2,10 +2,8 @@ import { state, E, html as markup } from '../runtime.js';
 import { link } from './core.js';
 
 function isVerified(profile) {
-  return (
-    profile?.verificationStatus === 'verified' ||
-    profile?.verificationStatus === 'approved'
-  );
+  const status = profile?.verificationStatus;
+  return status === 'verified' || status === 'approved';
 }
 
 function trendingTopics() {
@@ -73,7 +71,8 @@ function renderTopics(topics) {
 }
 
 function projectHref(project) {
-  return project?.id ? `/projetos/${encodeURIComponent(project.id)}` : '/projetos';
+  if (!project?.id) return '/projetos';
+  return `/projetos/${encodeURIComponent(project.id)}`;
 }
 
 function renderProjects(projects) {
@@ -125,7 +124,8 @@ function renderExperts(profiles) {
     .filter((profile) => profile.username)
     .map((profile) => {
       const name = profile.displayName || profile.username;
-      const specialty = profile.verifiedSpecialty || profile.profileType || 'Membro';
+      const specialty =
+        profile.verifiedSpecialty || profile.profileType || 'Membro';
       const badge = isVerified(profile) ? '✓ ' : '';
       const href = `/autores/${encodeURIComponent(profile.username)}`;
       return markup`<a class="social-list-item" href="${href}" data-link>
