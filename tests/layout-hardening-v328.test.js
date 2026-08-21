@@ -57,3 +57,32 @@ test('pôster do Ateliê refluí em telas estreitas sem escala artificial', () =
   assert.equal(css.includes('transform: scale('), false);
   assert.equal(css.includes('zoom:'), false);
 });
+
+test('rótulos de ações preservam palavras inteiras no reflow', () => {
+  const css = read('public/css/responsive/hardening.css');
+  for (const marker of [
+    'button,',
+    '.social-action {',
+    'white-space: normal;',
+    'overflow-wrap: normal;',
+    'word-break: normal;',
+    'hyphens: none;',
+  ]) {
+    assert.ok(css.includes(marker), `proteção de rótulo ausente: ${marker}`);
+  }
+});
+
+test('cabeçalho social move a ação inteira quando faltar espaço', () => {
+  const css = read('public/css/social-final-polish.css');
+  for (const marker of [
+    '.social-panel-head {',
+    'flex-wrap: wrap;',
+    '.social-panel-head > a {',
+    'flex: 0 0 auto;',
+    'white-space: nowrap;',
+    'overflow-wrap: normal;',
+    'word-break: normal;',
+  ]) {
+    assert.ok(css.includes(marker), `reflow social ausente: ${marker}`);
+  }
+});
