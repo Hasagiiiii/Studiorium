@@ -3,7 +3,8 @@ import { link } from './core.js';
 
 function isVerified(profile) {
   return (
-    profile?.verificationStatus === 'verified' || profile?.verificationStatus === 'approved'
+    profile?.verificationStatus === 'verified' ||
+    profile?.verificationStatus === 'approved'
   );
 }
 
@@ -82,7 +83,8 @@ function renderProjects(projects) {
 
   return projects
     .map((project) => {
-      const description = project.description || project.type || 'Projeto da comunidade';
+      const description =
+        project.description || project.type || 'Projeto da comunidade';
       return markup`<a class="social-list-item" href="${projectHref(project)}" data-link>
         <span class="project-mini">⌘</span>
         <span>
