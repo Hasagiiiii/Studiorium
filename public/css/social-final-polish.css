@@ -57,9 +57,25 @@
   color: var(--brass2);
 }
 
+.social-panel-head {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
 .social-panel-head h3 {
+  flex: 1 1 8rem;
+  min-width: 0;
   font-family: var(--serif);
   font-size: 1rem;
+}
+
+.social-panel-head > a {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .social-list-item:hover,
