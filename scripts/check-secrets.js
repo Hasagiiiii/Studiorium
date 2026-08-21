@@ -57,7 +57,9 @@ function assertNoSecrets(source, location) {
   for (const { label, pattern } of secretPatterns) {
     pattern.lastIndex = 0;
     if (pattern.test(normalized)) {
-      throw new Error(`Possível ${label} detectada em ${location}. Remova e rotacione a credencial.`);
+      throw new Error(
+        `Possível ${label} detectada em ${location}. Remova e rotacione a credencial.`,
+      );
     }
   }
 }
