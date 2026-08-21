@@ -6,6 +6,10 @@ function escapeHtml(value) {
   );
 }
 
+function isEmailDeliveryConfigured() {
+  return Boolean(process.env.RESEND_API_KEY && process.env.STUDIORIUM_EMAIL_FROM);
+}
+
 function resetEmailHtml(resetUrl) {
   const safeUrl = escapeHtml(resetUrl);
   return `
@@ -36,7 +40,7 @@ async function sendPasswordResetEmail({ to, resetUrl }) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.STUDIORIUM_EMAIL_FROM;
 
-  if (!apiKey || !from) {
+  if (!isEmailDeliveryConfigured()) {
     const error = new Error('O envio de e-mail ainda não está configurado.');
     error.code = 'EMAIL_NOT_CONFIGURED';
     throw error;
@@ -64,4 +68,4 @@ async function sendPasswordResetEmail({ to, resetUrl }) {
   }
 }
 
-module.exports = { sendPasswordResetEmail, resetEmailHtml };
+module.exports = { isEmailDeliveryConfigured, sendPasswordResetEmail, resetEmailHtml };

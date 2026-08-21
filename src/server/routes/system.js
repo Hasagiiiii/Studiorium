@@ -1,5 +1,6 @@
 const { db } = require('../db');
 const { config } = require('../config');
+const { isEmailDeliveryConfigured } = require('../email');
 
 async function health() {
   const startedAt = Date.now();
@@ -15,10 +16,7 @@ async function health() {
         mode: 'online',
         database: 'connected',
         moderation: 'local_rules_and_human_review',
-        emailDelivery:
-          process.env.RESEND_API_KEY && process.env.STUDIORIUM_EMAIL_FROM
-            ? 'configured'
-            : 'unavailable',
+        emailDelivery: isEmailDeliveryConfigured() ? 'configured' : 'not_configured',
         latencyMs: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
       },

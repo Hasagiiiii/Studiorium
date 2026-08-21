@@ -76,6 +76,14 @@ export async function handleAccountSubmit(event) {
 
   if (form.matches('[data-password-reset-request]')) {
     event.preventDefault();
+    const health = await api('/api/health');
+    if (health.emailDelivery !== 'configured') {
+      toast(
+        'A recuperação por e-mail está temporariamente indisponível. Nenhum link foi gerado.',
+        true,
+      );
+      return true;
+    }
     const result = await api('/api/auth/password-reset/request', {
       method: 'POST',
       body: JSON.stringify(formObj(form)),
