@@ -343,118 +343,118 @@ function home() {
     settings.hero_text ||
     'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.';
 
-  layout(
-    markup`<section class="social-hero">
-      <div class="shell social-hero-grid">
-        <div class="social-hero-brand">
-          <img src="/favicon.svg" alt="" class="social-brand-mark" />
-          <div>
-            <div class="eyebrow">Conhecimento · comunidade · criação</div>
-            <h1>${E(heroTitle)}</h1>
-            <p>${E(heroText)}</p>
-          </div>
+  const content = markup`<section class="social-hero">
+    <div class="shell social-hero-grid">
+      <div class="social-hero-brand">
+        <img src="/favicon.svg" alt="" class="social-brand-mark" />
+        <div>
+          <div class="eyebrow">Conhecimento · comunidade · criação</div>
+          <h1>${E(heroTitle)}</h1>
+          <p>${E(heroText)}</p>
         </div>
-        <form class="searchbar social-search" data-global-search>
-          <span>⌕</span>
-          <input
-            name="q"
-            aria-label="Pesquisar"
-            placeholder="Pesquisar discussões, pessoas, projetos e temas…"
-          />
-          <button class="solid">Pesquisar</button>
-        </form>
       </div>
-    </section>
+      <form class="searchbar social-search" data-global-search>
+        <span>⌕</span>
+        <input
+          name="q"
+          aria-label="Pesquisar"
+          placeholder="Pesquisar discussões, pessoas, projetos e temas…"
+        />
+        <button class="solid">Pesquisar</button>
+      </form>
+    </div>
+  </section>
 
-    <section class="social-shell shell">
-      <aside class="social-left">
-        <div class="social-panel social-menu">
-          <h3>Explorar</h3>
-          ${link('/comunidades', '♧ Comunidades')}${link('/projetos', '⌘ Projetos')}${link(
-            '/biblioteca',
-            '▤ Biblioteca',
-          )}${link('/coloquio', '◌ Discussões')}${link('/oficina', '⚙ Tecnologia')}${link(
-            '/autores',
-            '◎ Pessoas',
-          )}${link('/noticias', '✦ Notícias')}
-        </div>
+  <section class="social-shell shell">
+    <aside class="social-left">
+      <div class="social-panel social-menu">
+        <h3>Explorar</h3>
+        ${link('/comunidades', '♧ Comunidades')}${link('/projetos', '⌘ Projetos')}${link(
+          '/biblioteca',
+          '▤ Biblioteca',
+        )}${link('/coloquio', '◌ Discussões')}${link('/oficina', '⚙ Tecnologia')}${link(
+          '/autores',
+          '◎ Pessoas',
+        )}${link('/noticias', '✦ Notícias')}
+      </div>
 
-        <div class="social-panel">
-          <div class="social-panel-head">
-            <h3>Comunidades</h3>
-            ${link('/comunidades', 'Ver todas')}
-          </div>
-          ${renderCommunities(communities)}
+      <div class="social-panel">
+        <div class="social-panel-head">
+          <h3>Comunidades</h3>
+          ${link('/comunidades', 'Ver todas')}
         </div>
+        ${renderCommunities(communities)}
+      </div>
 
-        <div class="social-panel">
-          <div class="social-panel-head">
-            <h3>Assuntos em alta</h3>
-            ${link('/biblioteca', 'Pesquisar')}
-          </div>
-          <div class="social-topic-cloud">${renderTopics(topics)}</div>
+      <div class="social-panel">
+        <div class="social-panel-head">
+          <h3>Assuntos em alta</h3>
+          ${link('/biblioteca', 'Pesquisar')}
         </div>
-      </aside>
+        <div class="social-topic-cloud">${renderTopics(topics)}</div>
+      </div>
+    </aside>
 
-      <main class="social-feed">
-        <div class="social-discovery-strip">
-          ${link('/coloquio', '<strong>Discussões</strong>Entre na conversa')}
-          ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}
-          ${link('/biblioteca', '<strong>Biblioteca</strong>Livros e pesquisas')}
-          ${link('/oficina', '<strong>Tutoriais</strong>Aprenda fazendo')}
-        </div>
-        <div class="social-feed-tabs">
-          <button class="active" type="button">Para você</button>
-          ${link('/comunidades', 'Comunidades')}${link('/pesquisas', 'Em alta')}${link(
-            '/coloquio',
-            'Novos',
-          )}
-        </div>
+    <main class="social-feed">
+      <div class="social-discovery-strip">
+        ${link('/coloquio', '<strong>Discussões</strong>Entre na conversa')}
+        ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}
+        ${link('/biblioteca', '<strong>Biblioteca</strong>Livros e pesquisas')}
+        ${link('/oficina', '<strong>Tutoriais</strong>Aprenda fazendo')}
+      </div>
+      <div class="social-feed-tabs">
+        <button class="active" type="button">Para você</button>
+        ${link('/comunidades', 'Comunidades')}${link('/pesquisas', 'Em alta')}${link(
+          '/coloquio',
+          'Novos',
+        )}
+      </div>
 
-        ${renderComposer()}
+      ${renderComposer()}
 
-        <div class="social-feed-list">
-          ${feed.length
-            ? feed.map(feedPost).join('')
-            : empty(
-                'A timeline ainda não tem publicações. Seja a primeira pessoa a iniciar uma conversa.',
-              )}
-        </div>
-      </main>
+      <div class="social-feed-list">
+        ${feed.length
+          ? feed.map(feedPost).join('')
+          : empty(
+              'A timeline ainda não tem publicações. Seja a primeira pessoa a iniciar uma conversa.',
+            )}
+      </div>
+    </main>
 
-      <aside class="social-right">
-        <div class="social-panel">
-          <div class="social-panel-head">
-            <h3>Projetos em alta</h3>
-            ${link('/projetos', 'Ver todos')}
-          </div>
-          ${renderProjects(projects)}
+    <aside class="social-right">
+      <div class="social-panel">
+        <div class="social-panel-head">
+          <h3>Projetos em alta</h3>
+          ${link('/projetos', 'Ver todos')}
         </div>
+        ${renderProjects(projects)}
+      </div>
 
-        <div class="social-panel">
-          <div class="social-panel-head">
-            <h3>Leituras da comunidade</h3>
-            ${link('/biblioteca', 'Biblioteca')}
-          </div>
-          ${renderBooks(books)}
+      <div class="social-panel">
+        <div class="social-panel-head">
+          <h3>Leituras da comunidade</h3>
+          ${link('/biblioteca', 'Biblioteca')}
         </div>
+        ${renderBooks(books)}
+      </div>
 
-        <div class="social-panel">
-          <div class="social-panel-head">
-            <h3>Especialistas verificados</h3>
-            ${link('/autores', 'Pessoas')}
-          </div>
-          ${renderExperts(expertProfiles)}
+      <div class="social-panel">
+        <div class="social-panel-head">
+          <h3>Especialistas verificados</h3>
+          ${link('/autores', 'Pessoas')}
         </div>
+        ${renderExperts(expertProfiles)}
+      </div>
 
-        <div class="social-panel social-quote">
-          <span>“</span>
-          <p>Grandes ideias começam com boas discussões.</p>
-          <small>Studiorium</small>
-        </div>
-      </aside>
-    </section>`,
-  );
+      <div class="social-panel social-quote">
+        <span>“</span>
+        <p>Grandes ideias começam com boas discussões.</p>
+        <small>Studiorium</small>
+      </div>
+    </aside>
+  </section>`;
+
+  layout(content);
 }
 
 export { home };
