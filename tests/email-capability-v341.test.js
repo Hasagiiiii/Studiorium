@@ -13,7 +13,9 @@ test('health distingue e-mail não configurado sem expor segredos', () => {
   assert.ok(email.includes('function isEmailDeliveryConfigured()'));
   assert.ok(email.includes('process.env.RESEND_API_KEY'));
   assert.ok(email.includes('process.env.STUDIORIUM_EMAIL_FROM'));
-  assert.ok(system.includes("emailDelivery: isEmailDeliveryConfigured() ? 'configured' : 'not_configured'"));
+  assert.ok(
+    system.includes("emailDelivery: isEmailDeliveryConfigured() ? 'configured' : 'not_configured'"),
+  );
   assert.equal(system.includes('RESEND_API_KEY'), false);
   assert.equal(system.includes('STUDIORIUM_EMAIL_FROM'), false);
 });
@@ -24,5 +26,8 @@ test('interface não gera token quando entrega de e-mail está indisponível', (
   assert.ok(account.includes("const health = await api('/api/health')"));
   assert.ok(account.includes("health.emailDelivery !== 'configured'"));
   assert.ok(account.includes('Nenhum link foi gerado.'));
-  assert.ok(account.indexOf("api('/api/health')") < account.indexOf("api('/api/auth/password-reset/request'"));
+  assert.ok(
+    account.indexOf("api('/api/health')") <
+      account.indexOf("api('/api/auth/password-reset/request'"),
+  );
 });
