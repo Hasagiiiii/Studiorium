@@ -1,0 +1,187 @@
+/* Studiorium theme system — preserva a identidade e o favicon/logo existentes. */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #111512;
+  --bg2: #171b18;
+  --panel: #1c211d;
+  --panel2: #242a25;
+  --paper: #e7dcc5;
+  --paper2: #d8c9aa;
+  --ink: #eee8dc;
+  --muted: #b1aa9d;
+  --faint: #7f786d;
+  --line: #3b413a;
+  --brass: #b8945f;
+  --brass2: #d0ae76;
+  --wine: #743c45;
+  --moss: #70806b;
+  --danger: #c47770;
+  --ok: #8da184;
+  --surface-raised: #202620;
+  --surface-soft: rgba(255, 255, 255, 0.035);
+  --focus-ring: rgba(208, 174, 118, 0.36);
+  --shadow: 0 24px 72px rgba(0, 0, 0, 0.32);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #e9e4d9;
+  --bg2: #dfd8ca;
+  --panel: #f2ede3;
+  --panel2: #e7dfd1;
+  --paper: #302b24;
+  --paper2: #463e32;
+  --ink: #292720;
+  --muted: #696257;
+  --faint: #8a8173;
+  --line: #c8bead;
+  --brass: #84653f;
+  --brass2: #6f5231;
+  --wine: #74454a;
+  --moss: #5f715b;
+  --danger: #954f4a;
+  --ok: #5d7659;
+  --surface-raised: #f6f1e8;
+  --surface-soft: rgba(60, 50, 38, 0.045);
+  --focus-ring: rgba(132, 101, 63, 0.26);
+  --shadow: 0 20px 55px rgba(57, 48, 37, 0.12);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at 20% -10%,
+      color-mix(in srgb, var(--brass) 7%, transparent),
+      transparent 34%
+    ),
+    var(--bg);
+  color: var(--ink);
+}
+
+/* Mais profundidade sem brilho agressivo. */
+.card,
+.panel,
+.modal,
+.dropdown,
+.popover,
+[class*='card'],
+[class*='panel'] {
+  border-color: color-mix(in srgb, var(--line) 82%, transparent);
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.theme-switcher {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 80;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.theme-switcher button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.theme-switcher button:hover {
+  color: var(--ink);
+  background: var(--surface-soft);
+  transform: translateY(-1px);
+}
+
+.theme-switcher button[aria-pressed='true'] {
+  color: var(--brass2);
+  background: color-mix(in srgb, var(--brass) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 30%, transparent);
+}
+
+/* Tratamento social: cards ficam mais convidativos sem virar neon. */
+.community-card,
+.discussion-card,
+.publication-card,
+.project-card,
+.book-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.community-card::before,
+.discussion-card::before,
+.publication-card::before,
+.project-card::before,
+.book-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--brass), transparent 75%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.community-card:hover,
+.discussion-card:hover,
+.publication-card:hover,
+.project-card:hover,
+.book-card:hover {
+  border-color: color-mix(in srgb, var(--brass) 42%, var(--line));
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--bg) 75%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .theme-switcher {
+    right: 10px;
+    bottom: 10px;
+  }
+}
