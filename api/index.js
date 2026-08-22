@@ -1,4 +1,5 @@
 const { handle } = require('../src/server/router');
+const { handleProfileMedia } = require('../src/server/profile-media-router');
 const { send } = require('../src/server/http');
 
 function logRequestError(error, status) {
@@ -17,6 +18,7 @@ function logRequestError(error, status) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (await handleProfileMedia(req, res)) return null;
     return await handle(req, res);
   } catch (error) {
     const status = Number(error.statusCode || 500);
