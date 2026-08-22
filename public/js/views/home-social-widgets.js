@@ -189,7 +189,8 @@ function renderCommunityPulse(pulse) {
 }
 
 function renderCreationHub() {
-  const templateCount = (state.boot.templates || []).length + (state.boot.customTemplates || []).length;
+  const templateCount =
+    (state.boot.templates || []).length + (state.boot.customTemplates || []).length;
   const primaryAction = state.me
     ? link('/estudio-templates', 'Criar agora', 'solid')
     : link('/cadastro', 'Entrar para criar', 'solid');
