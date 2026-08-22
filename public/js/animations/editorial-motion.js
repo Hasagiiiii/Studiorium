@@ -77,7 +77,7 @@ function reveal(element, index = 0) {
     duration: theme === 'creation' ? 560 : 430,
     delay: Math.min(index * 34, 220),
     easing: 'cubic-bezier(.2,.82,.22,1)',
-    fill: 'both',
+    fill: 'backwards',
   });
 }
 
@@ -141,8 +141,9 @@ export function installEditorialMotion() {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const observer = new MutationObserver(() => requestAnimationFrame(() => enhance(app)));
-  observer.observe(app, { childList: true, subtree: true });
+  document.addEventListener('studiorium:rendered', () => {
+    requestAnimationFrame(() => enhance(app));
+  });
 
   addEventListener(
     'click',
@@ -158,5 +159,5 @@ export function installEditorialMotion() {
     true,
   );
 
-  enhance(app);
+  if (app.childElementCount) enhance(app);
 }
