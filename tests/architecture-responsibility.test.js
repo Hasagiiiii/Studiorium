@@ -53,13 +53,20 @@ test('features de interface possuem módulos próprios e enhancements apenas orq
   assert.doesNotMatch(enhancements, /function armariumPanel/);
 });
 
-test('Home possui quatro colunas amplas e reflow 2x2 antes do mobile', () => {
-  const css = read('public/css/responsive/home.css');
-  assert.match(css, /repeat\(4, minmax\(0, 1fr\)\)/);
-  assert.match(css, /@media \(max-width: 1100px\) and \(min-width: 721px\)/);
-  assert.match(css, /repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.match(css, /@media \(max-width: 720px\)/);
-  assert.match(css, /grid-template-columns: 1fr !important/);
+test('Home social usa app shell responsivo e o CSS antigo não protege mais quatro cards', () => {
+  const home = read('public/js/views/home-social.js');
+  const socialCss = read('public/css/social-home.css');
+  const legacyHomeCss = read('public/css/responsive/home.css');
+
+  assert.match(home, /class="social-shell shell"/);
+  assert.match(home, /social-left/);
+  assert.match(home, /social-feed/);
+  assert.match(home, /social-right/);
+  assert.match(socialCss, /grid-template-columns: 220px minmax\(0, 1fr\) 270px/);
+  assert.match(socialCss, /@media \(max-width: 1080px\)/);
+  assert.match(socialCss, /@media \(max-width: 760px\)/);
+  assert.doesNotMatch(legacyHomeCss, /feature:nth-child\(4\)/);
+  assert.doesNotMatch(legacyHomeCss, /!important/);
 });
 
 test('movimento tem módulo próprio e respeita preferência de acessibilidade', () => {
