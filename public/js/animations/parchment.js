@@ -32,7 +32,11 @@ function makeStage(source) {
 
   const sheet = document.createElement('div');
   sheet.className = 'parchment-transition-sheet';
-  sheet.innerHTML = '<span class="parchment-roll parchment-roll-left"></span><span class="parchment-roll parchment-roll-right"></span><span class="parchment-seal">S</span>';
+  sheet.innerHTML = [
+    '<span class="parchment-roll parchment-roll-left"></span>',
+    '<span class="parchment-roll parchment-roll-right"></span>',
+    '<span class="parchment-seal">S</span>',
+  ].join('');
 
   stage.append(sheet);
   document.body.append(stage);
