@@ -65,19 +65,19 @@
   .notification-panel,
   #mobileMenu:not(.hidden) {
     transform-origin: top right;
-    animation: studiorium-panel-in 220ms cubic-bezier(.2,.8,.2,1) both;
+    animation: studiorium-panel-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .toast.show,
   .site-alert {
-    animation: studiorium-soft-rise 240ms cubic-bezier(.2,.8,.2,1) both;
+    animation: studiorium-soft-rise 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 }
 
 @keyframes studiorium-panel-in {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(.985);
+    transform: translateY(-8px) scale(0.985);
     filter: blur(2px);
   }
   to {
