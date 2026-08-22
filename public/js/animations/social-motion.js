@@ -17,10 +17,14 @@ function prefersReducedMotion() {
 }
 
 function enterMotion(element, index = 0) {
-  if (element.dataset.socialMotionReady === 'true') return;
+  if (element.dataset.socialMotionReady === 'true') {
+    return;
+  }
   element.dataset.socialMotionReady = 'true';
 
-  if (prefersReducedMotion() || typeof element.animate !== 'function') return;
+  if (prefersReducedMotion() || typeof element.animate !== 'function') {
+    return;
+  }
 
   const delay = Math.min(index * 34, 180);
   element.animate(
@@ -37,13 +41,22 @@ function enterMotion(element, index = 0) {
   );
 }
 
-function observeSocialSurfaces(root, observer) {
-  const targets = root.matches?.(SOCIAL_TARGETS)
-    ? [root, ...root.querySelectorAll(SOCIAL_TARGETS)]
-    : [...root.querySelectorAll(SOCIAL_TARGETS)];
+function socialTargetsInside(root) {
+  const targets = [];
+  if (root.matches && root.matches(SOCIAL_TARGETS)) {
+    targets.push(root);
+  }
+  root.querySelectorAll(SOCIAL_TARGETS).forEach((element) => {
+    targets.push(element);
+  });
+  return targets;
+}
 
-  targets.forEach((element, index) => {
-    if (element.dataset.socialMotionObserved === 'true') return;
+function observeSocialSurfaces(root, observer) {
+  socialTargetsInside(root).forEach((element, index) => {
+    if (element.dataset.socialMotionObserved === 'true') {
+      return;
+    }
     element.dataset.socialMotionObserved = 'true';
 
     if (!observer) {
@@ -61,7 +74,9 @@ function installPressFeedback() {
     const control = event.target.closest(
       '.social-action, .social-feed-tabs button, .social-panel a, .social-discovery-strip a',
     );
-    if (!control || prefersReducedMotion() || typeof control.animate !== 'function') return;
+    if (!control || prefersReducedMotion() || typeof control.animate !== 'function') {
+      return;
+    }
 
     control.animate(
       [
@@ -77,31 +92,43 @@ function installPressFeedback() {
   });
 }
 
-export function installSocialMotion() {
-  const app = document.querySelector('#app');
-  if (!app) return;
-
-  let intersection = null;
-  if ('IntersectionObserver' in window) {
-    intersection = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const index = Number(entry.target.dataset.socialMotionIndex || 0);
-          enterMotion(entry.target, index);
-          intersection.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -5% 0px', threshold: 0.08 },
-    );
+function createIntersectionObserver() {
+  if (!('IntersectionObserver' in window)) {
+    return null;
   }
 
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        const index = Number(entry.target.dataset.socialMotionIndex || 0);
+        enterMotion(entry.target, index);
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: '0px 0px -5% 0px', threshold: 0.08 },
+  );
+
+  return observer;
+}
+
+export function installSocialMotion() {
+  const app = document.querySelector('#app');
+  if (!app) {
+    return;
+  }
+
+  const intersection = createIntersectionObserver();
   observeSocialSurfaces(app, intersection);
 
   const mutations = new MutationObserver((records) => {
     records.forEach((record) => {
       record.addedNodes.forEach((node) => {
-        if (!(node instanceof Element)) return;
+        if (!(node instanceof Element)) {
+          return;
+        }
         observeSocialSurfaces(node, intersection);
       });
     });
