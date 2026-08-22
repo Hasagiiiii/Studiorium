@@ -1,5 +1,5 @@
-import { E, html, initials, state } from '../runtime.js';
-import { link } from './core.js';
+import { api, E, date, html, initials, state } from '../runtime.js';
+import { empty, link } from './core.js';
 import { escrivaninha as currentEscrivaninha } from './workspace-personal-v329.js';
 
 function cardByEyebrow(label) {
@@ -128,8 +128,77 @@ function consolidateProfileCenter(user) {
   moveCardContents(securityCard, center.querySelector('[data-profile-security-slot]'));
 }
 
+function templateRow(template, options = {}) {
+  return html`<div class="project">
+    <div class="min-width-zero">
+      <h3>${E(template.title)}</h3>
+      <p>${E(template.status)} · atualizado ${date(template.updatedAt)}</p>
+    </div>
+    <div class="actions">
+      ${options.public
+        ? link(`/modelos-livres/${encodeURIComponent(template.id)}`, 'Abrir', 'outline')
+        : ''}
+      ${!template.deletedAt
+        ? link(`/estudio-templates/${encodeURIComponent(template.id)}`, 'Editar', 'outline')
+        : ''}
+      ${template.deletedAt
+        ? html`<button class="outline" type="button" data-restore-template="${E(template.id)}">
+              Restaurar
+            </button>
+            <button class="dangerbtn" type="button" data-purge-template="${E(template.id)}">
+              Excluir definitivamente
+            </button>`
+        : html`<button class="dangerbtn" type="button" data-trash-template="${E(template.id)}">
+            Excluir
+          </button>`}
+    </div>
+  </div>`;
+}
+
+async function installTemplateCollection() {
+  if (document.querySelector('[data-workspace-templates]')) return;
+  const { templates = [] } = await api('/api/custom-templates/mine');
+  const active = templates.filter((template) => !template.deletedAt);
+  const working = active.filter((template) => template.status !== 'published');
+  const published = active.filter((template) => template.status === 'published');
+  const trashed = templates.filter((template) => template.deletedAt);
+  const section = document.createElement('section');
+  section.className = 'card';
+  section.dataset.workspaceTemplates = '';
+  section.innerHTML = html`<div class="sectionhead compact-head">
+      <div>
+        <div class="eyebrow">Criações</div>
+        <h2>Seus templates</h2>
+        <p>Gerencie aqui. Novas criações começam somente na Comunidade de Criação.</p>
+      </div>
+      ${link('/comunidades/design-templates', 'Ir para Criação', 'outline')}
+    </div>
+    ${working.map((template) => templateRow(template)).join('') ||
+    empty('Nenhum template em edição ou revisão.')}
+    <details class="trash-panel workspace-published-vault">
+      <summary>Publicados (${published.length})</summary>
+      ${published.map((template) => templateRow(template, { public: true })).join('') ||
+      empty('Nenhum template publicado.')}
+    </details>
+    ${trashed.length
+      ? html`<details class="trash-panel">
+          <summary>Lixeira (${trashed.length})</summary>
+          ${trashed.map((template) => templateRow(template)).join('')}
+        </details>`
+      : ''}`;
+
+  const shelf = document.querySelector('.personal-shelf');
+  if (shelf) shelf.before(section);
+  else document.querySelector('.pagehero .shell')?.append(section);
+}
+
 export async function escrivaninha() {
   await currentEscrivaninha();
   if (!state.me || location.pathname.replace(/\/+$/, '') !== '/escrivaninha') return;
   consolidateProfileCenter(state.me);
+  try {
+    await installTemplateCollection();
+  } catch {
+    // A Escrivaninha continua funcional caso a coleção de templates não responda.
+  }
 }
