@@ -75,10 +75,10 @@ test('folha de interações fica entre responsividade e polimentos já existente
   assert.ok(hardening > library);
 });
 
-test('notícias publicadas podem ser destacadas sem recertificação e ganham prioridade na home', () => {
+test('notícias publicadas podem ser destacadas sem recertificação e ganham prioridade na home social', () => {
   const adminNews = read('src/server/routes/admin-news.js');
   const bootstrap = read('src/server/routes/bootstrap.js');
-  const home = read('public/js/views/home-library.js');
+  const feed = read('public/js/views/home-social-feed.js');
   const featureUi = read('public/js/admin-news-feature.js');
   const main = read('public/js/main.js');
 
@@ -86,8 +86,10 @@ test('notícias publicadas podem ser destacadas sem recertificação e ganham pr
   assert.match(adminNews, /Somente notícias publicadas e certificadas podem receber destaque/);
   assert.match(adminNews, /news\.article\.feature/);
   assert.match(bootstrap, /from\('news_articles'\)[\s\S]*?order\('featured'/);
-  assert.match(home, /const news = \(b\.news \|\| \[\]\)\.slice\(0, 3\)/);
-  assert.match(home, /news-home-grid/);
+  assert.match(feed, /\(state\.boot\.news \|\| \[\]\)\.slice\(0, 6\)/);
+  assert.match(feed, /const featured = entry\.item\.featured === true \? 48 : 0/);
+  assert.match(feed, /Math\.log10\(hypes \+ 1\) \* 8/);
+  assert.match(feed, /Destaque editorial/);
   assert.match(featureUi, /data-news-manager-action="feature:/);
   assert.match(featureUi, /Destacar/);
   assert.match(main, /installAdminNewsFeature/);
