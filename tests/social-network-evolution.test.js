@@ -14,7 +14,7 @@ test('movimento social é progressivo, leve e respeita redução de movimento', 
 
   assert.match(main, /installSocialMotion/);
   assert.match(motion, /control\.animate/);
-  assert.match(motion, /data\.motion !== 'reduced'/);
+  assert.match(motion, /dataset\.motion !== 'reduced'/);
   assert.match(css, /@keyframes social-enter/);
   assert.match(css, /data-motion='full'/);
   assert.match(policy, /prefers-reduced-motion: reduce/);
