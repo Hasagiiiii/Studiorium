@@ -7,14 +7,18 @@ const root = path.join(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
 
 test('Oficina não herda o grid de busca da Biblioteca', () => {
+  const view = read('public/js/views/tech.js');
   const css = read('public/css/tech-polish.css');
   const style = read('public/style.css');
 
   assert.ok(style.includes("@import url('/css/tech-polish.css');"));
-  assert.ok(css.includes('[data-tech-filter] .library-search'));
+  assert.ok(view.includes('class="tech-search"'));
+  assert.equal(view.includes('class="library-search"'), false);
+  assert.ok(css.includes('.tech-search'));
   assert.ok(css.includes('grid-template-columns: minmax(0, 1fr) auto'));
-  assert.ok(css.includes('[data-tech-filter] .library-search .field'));
-  assert.ok(css.includes('[data-tech-filter] .library-search .solid'));
+  assert.ok(css.includes('.tech-search .field'));
+  assert.ok(css.includes('.tech-search .solid'));
+  assert.equal(css.includes('[data-tech-filter] .library-search'), false);
 });
 
 test('cards técnicos não repetem visualmente o nome do núcleo', () => {
