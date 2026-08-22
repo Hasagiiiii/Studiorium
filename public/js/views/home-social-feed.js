@@ -133,11 +133,12 @@ function newsPost(news) {
   const category = E(news.category || 'Atualizações');
   const title = E(news.title);
   const summary = E((news.summary || '').slice(0, 340));
+  const featuredLabel = news.featured ? ' · Destaque editorial' : '';
 
   return [
     '<article class="social-post">',
     authorLine(news),
-    `<div class="social-kicker">Notícia certificada · ${category}</div>`,
+    `<div class="social-kicker">Notícia certificada${featuredLabel} · ${category}</div>`,
     `<h2>${link(detailPath, title)}</h2>`,
     `<p>${summary}</p>`,
     '<div class="social-actions">',
@@ -177,7 +178,9 @@ function activityScore(entry) {
     return 18;
   }
   if (entry.type === 'news') {
-    return 14;
+    const hypes = numeric(entry.item.hypes);
+    const featured = entry.item.featured === true ? 48 : 0;
+    return 14 + featured + Math.log10(hypes + 1) * 8;
   }
   return 10;
 }
