@@ -47,6 +47,7 @@ test('ferramentas continuam acessíveis sem virarem hubs paralelos', () => {
   assert.match(router, /p === '\/laboratorio'[\s\S]*laboratorio/);
   assert.match(router, /\['\/atelie', '\/banner-cientifico'\]/);
   assert.match(router, /p === '\/redacao'[\s\S]*redacao/);
+  assert.match(router, /\['\/oficina', '\/tech'\][\s\S]*return await oficina\(\)/);
 });
 
 test('Modelos não voltam para a Biblioteca nem para um Estúdio-lista', () => {
@@ -61,7 +62,7 @@ test('Modelos não voltam para a Biblioteca nem para um Estúdio-lista', () => {
   );
 });
 
-test('hubs redundantes de projetos e oficina não voltam ao menu', () => {
+test('hubs redundantes não voltam ao menu, mas Oficina continua acessível como ferramenta', () => {
   const router = read('public/js/router.js');
   const core = read('public/js/views/core.js');
   const research = read('public/js/views/research.js');
@@ -72,5 +73,6 @@ test('hubs redundantes de projetos e oficina não voltam ao menu', () => {
   assert.doesNotMatch(research, /Opera communitatis/);
   assert.doesNotMatch(research, /function projetos\(/);
   assert.match(router, /p === '\/projetos'[\s\S]*\/comunidades/);
-  assert.match(router, /\['\/oficina', '\/tech'\][\s\S]*state\.query\.get\('novo'\)/);
+  assert.match(router, /\['\/oficina', '\/tech'\][\s\S]*return await oficina\(\)/);
+  assert.doesNotMatch(router, /\['\/oficina', '\/tech'\][\s\S]{0,500}state\.query\.get\('novo'\)/);
 });
