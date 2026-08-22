@@ -156,6 +156,12 @@ html[data-motion='full'] .social-left > .social-panel:nth-child(3n) {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--brass) 14%, transparent);
 }
 
+html[data-motion='full'] .social-action:active,
+html[data-motion='full'] .social-feed-tabs button:active,
+html[data-motion='full'] .social-discovery-strip > a:active {
+  transform: scale(0.975);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .social-discovery-strip > a,
   .social-panel a,
