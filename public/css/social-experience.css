@@ -55,6 +55,62 @@
   gap: 12px;
 }
 
+.social-pulse-overview {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--panel2) 72%, transparent);
+}
+
+.social-pulse-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.social-pulse-total strong {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.social-pulse-total span {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.social-pulse-distribution {
+  display: flex;
+  gap: 3px;
+  min-height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 62%, transparent);
+}
+
+.social-pulse-segment {
+  flex: var(--share, 1) 1 0;
+  min-width: 4px;
+  border-radius: 999px;
+  background: var(--brass2);
+}
+
+.social-pulse-segment.projects {
+  opacity: 0.78;
+}
+
+.social-pulse-segment.publications {
+  opacity: 0.62;
+}
+
+.social-pulse-segment.creations {
+  opacity: 0.46;
+}
+
 .social-pulse-row {
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr);
