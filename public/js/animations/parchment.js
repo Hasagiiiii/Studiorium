@@ -1,6 +1,12 @@
 import { goto } from '../router.js';
 
-const PARCHMENT_ROUTES = [/^\/pesquisas\//, /^\/projetos\//];
+const PARCHMENT_ROUTES = [
+  /^\/pesquisas\//,
+  /^\/projetos\//,
+  /^\/templates\//,
+  /^\/modelos-livres\//,
+  /^\/noticias\//,
+];
 
 function prefersReducedMotion() {
   return (
