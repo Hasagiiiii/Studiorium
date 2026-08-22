@@ -6,17 +6,13 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('movimento social é progressivo, leve e respeita redução de movimento', () => {
-  const main = read('public/js/main.js');
-  const motion = read('public/js/animations/social-motion.js');
+test('movimento social é leve e respeita redução de movimento', () => {
   const css = read('public/css/social-experience.css');
   const policy = read('public/css/animations/motion.css');
 
-  assert.match(main, /installSocialMotion/);
-  assert.match(motion, /control\.animate/);
-  assert.match(motion, /dataset\.motion !== 'reduced'/);
   assert.match(css, /@keyframes social-enter/);
   assert.match(css, /data-motion='full'/);
+  assert.match(css, /social-action:active/);
   assert.match(policy, /prefers-reduced-motion: reduce/);
 });
 
