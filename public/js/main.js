@@ -1,6 +1,7 @@
 import { installMotionPreferences } from './animations/motion.js';
 import { installParchmentTransitions } from './animations/parchment.js';
 import { installStudioMotion } from './animations/studio-motion.js';
+import { installEditorialMotion } from './animations/editorial-motion.js';
 import { bindEvents } from './events.js';
 import { installEnhancements } from './enhancements.js';
 import { installLibraryPolish } from './library-polish.js';
@@ -15,6 +16,7 @@ installThemeSystem();
 installMotionPreferences();
 installParchmentTransitions();
 installStudioMotion();
+installEditorialMotion();
 installCreativeAssistant();
 bindEvents();
 installEnhancements();
