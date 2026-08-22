@@ -1,19 +1,7 @@
-import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
-import { goto } from '../router.js';
+import { state, api, E, date, html } from '../runtime.js';
 import { rankRelated } from '../content-intelligence.js';
 import { techResourceForm } from '../events/composers.js';
-import {
-  link,
-  nav,
-  footer,
-  layout,
-  empty,
-  requireLogin,
-  notFound,
-  templateCard,
-  publicationCard,
-  discussionRow,
-} from './core.js';
+import { link, layout, empty, requireLogin, notFound } from './core.js';
 
 async function oficina() {
   const editId = state.query.get('editar') || '';
@@ -76,7 +64,7 @@ async function oficina() {
               .join('')}
           </div>
           <form class="library-filter" data-tech-filter>
-            <div class="library-search">
+            <div class="tech-search">
               <input
                 class="field"
                 name="q"
@@ -199,7 +187,7 @@ async function laboratorio(projectId = '') {
   if (projectId) {
     try {
       project = (await api('/api/code-projects/' + encodeURIComponent(projectId))).project;
-    } catch (e) {
+    } catch {
       return notFound();
     }
   }
@@ -298,7 +286,7 @@ function runCodePreview() {
   const h = document.querySelector('[name=codeHtml]')?.value || '',
     c = document.querySelector('[name=codeCss]')?.value || '',
     j = document.querySelector('[name=codeJs]')?.value || '';
-  const safeJs = j.split('</script').join('<\/script');
+  const safeJs = j.split('</script').join('<\\/script');
   const runId = `run-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const consoleList = document.querySelector('[data-lab-console-list]');
   const runStatus = document.querySelector('[data-lab-run-status]');
@@ -358,4 +346,4 @@ function runCodePreview() {
     </html>`;
 }
 
-export { oficina, oficinaDetail, laboratorio, runCodePreview, notFound };
+export { oficina, oficinaDetail, laboratorio, runCodePreview };

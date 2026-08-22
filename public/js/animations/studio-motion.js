@@ -4,9 +4,19 @@ const MOTION_TARGETS = [
   '.card',
   '.community-spot',
   '.social-list-item',
-  '.social-composer',
-  '.social-creation-hub',
   '.social-pulse-row',
+].join(',');
+
+const SPECIALIZED_MOTION_TARGETS = [
+  '.library-card',
+  '.book-card',
+  '.news-card',
+  '.community-resource-card',
+  '.community-discussion-item',
+  '.studio-card',
+  '.studio-guided-option',
+  '.profile-social-card',
+  '.workspace-profile-center',
 ].join(',');
 
 const TILT_TARGETS = '.card.hover, .community-spot, .social-list-item, .featurelink';
@@ -18,10 +28,14 @@ function reducedMotion() {
   );
 }
 
+function genericMotionTarget(item) {
+  return !item.matches(SPECIALIZED_MOTION_TARGETS);
+}
+
 function revealVisible(root = document) {
   if (reducedMotion()) return;
   const items = [...root.querySelectorAll(MOTION_TARGETS)].filter(
-    (item) => !item.dataset.studioMotionReady,
+    (item) => !item.dataset.studioMotionReady && genericMotionTarget(item),
   );
 
   items.slice(0, 36).forEach((item, index) => {
@@ -35,7 +49,7 @@ function revealVisible(root = document) {
         duration: 420,
         delay: Math.min(index * 26, 260),
         easing: 'cubic-bezier(.2,.8,.2,1)',
-        fill: 'both',
+        fill: 'backwards',
       },
     );
   });
@@ -51,7 +65,7 @@ function animatePulse(root = document) {
         { transform: 'scaleX(0)', transformOrigin: 'left center', opacity: 0.35 },
         { transform: 'scaleX(1)', transformOrigin: 'left center', opacity: 1 },
       ],
-      { duration: 720, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' },
+      { duration: 720, easing: 'cubic-bezier(.16,1,.3,1)' },
     );
   });
 
@@ -67,7 +81,7 @@ function animatePulse(root = document) {
         duration: 520,
         delay: index * 70,
         easing: 'cubic-bezier(.22,.9,.22,1)',
-        fill: 'both',
+        fill: 'backwards',
       },
     );
   });
@@ -118,8 +132,7 @@ export function installStudioMotion() {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const observer = new MutationObserver(() => enhance(app));
-  observer.observe(app, { childList: true, subtree: true });
+  document.addEventListener('studiorium:rendered', () => enhance(app));
 
   addEventListener('pointermove', updateTilt, { passive: true });
   addEventListener('pointerout', clearTilt, { passive: true });
@@ -132,5 +145,5 @@ export function installStudioMotion() {
     true,
   );
 
-  enhance(app);
+  if (app.childElementCount) enhance(app);
 }

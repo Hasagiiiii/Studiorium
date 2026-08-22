@@ -1,172 +1,6 @@
-import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
-import { goto } from '../router.js';
+import { state, E, date, num, initials, html } from '../runtime.js';
 import { emergentTopics, rankRelated } from '../content-intelligence.js';
-import {
-  link,
-  nav,
-  footer,
-  layout,
-  empty,
-  notFound,
-  templateCard,
-  publicationCard,
-  discussionRow,
-} from './core.js';
-
-function home() {
-  const b = state.boot;
-  const settings = b.settings || {};
-  const templates = b.templates.filter((t) => t.featured).slice(0, 3);
-  const discussions = b.discussions.slice(0, 3);
-  const pubs = b.publications.slice(0, 3);
-  const news = (b.news || []).slice(0, 3);
-  layout(
-    html` <section class="hero">
-        <div class="shell">
-          <div class="eyebrow">Bibliotheca digitalis para mentes curiosas</div>
-          <h1>${E(settings.hero_title || 'Conhecimento que deixa vestígios.')}</h1>
-          <p class="lead">
-            ${E(
-              settings.hero_text ||
-                'Crie trabalhos, encontre modelos, publique descobertas e participe ' +
-                  'de conversas acadêmicas em um espaço que valoriza autoria, rigor e repertório.',
-            )}
-          </p>
-          <form class="searchbar" data-global-search>
-            <span>⌕</span
-            ><input
-              name="q"
-              aria-label="Pesquisar"
-              placeholder="Procure autores, pesquisas, temas ou modelos…"
-            /><button class="solid">Consultar</button>
-          </form>
-          <div class="quicklinks">
-            ${link('/publicar', 'Publicar trabalho')}<span>✦</span>${link(
-              '/atelie',
-              'Criar banner científico',
-            )}<span>✦</span>${link('/coloquio', 'Entrar no colóquio')}
-          </div>
-        </div>
-      </section>
-      <section class="section">
-        <div class="shell">
-          <div class="featuregrid">
-            <a href="/biblioteca" data-link class="feature featurelink"
-              ><div class="glyph">⌘</div>
-              <h3>Biblioteca</h3>
-              <p>
-                Pesquise trabalhos, artigos, autores, áreas e palavras-chave em um catálogo
-                acadêmico central.
-              </p></a
-            ><a href="/acervo" data-link class="feature featurelink"
-              ><div class="glyph">▤</div>
-              <h3>Acervo</h3>
-              <p>
-                Templates para escola, faculdade, pesquisa, banners e documentos acadêmicos,
-                organizados para adaptação e estudo.
-              </p></a
-            ><a href="/noticias" data-link class="feature featurelink"
-              ><div class="glyph">✦</div>
-              <h3>Notícias</h3>
-              <p>
-                Matérias de estudantes e novos autores, com fontes declaradas, triagem automática
-                local e certificação editorial humana.
-              </p></a
-            ><a href="/coloquio" data-link class="feature featurelink"
-              ><div class="glyph">⌂</div>
-              <h3>Colóquio</h3>
-              <p>
-                Abra discussões por área e tema, responda outros membros e denuncie conteúdos que
-                violem as diretrizes.
-              </p></a
-            >
-          </div>
-        </div>
-      </section>
-      <section class="section compact editorial-home">
-        <div class="shell">
-          <div class="sectionhead">
-            <div>
-              <div class="eyebrow">Nuntii certificati</div>
-              <h2>Notícias da comunidade</h2>
-              <p>Informação com fontes visíveis e decisão editorial humana.</p>
-            </div>
-            ${link('/noticias', 'Abrir redação →', 'linkbtn')}
-          </div>
-          <div class="grid news-home-grid">
-            ${news
-              .map(
-                (article) =>
-                  html`<article class="card news-card">
-                    <div class="news-card-top">
-                      <span class="eyebrow">${E(article.category)}</span>
-                      <span class="badge certified">✓ Certificada</span>
-                    </div>
-                    <h3>
-                      ${link(
-                        `/noticias/${encodeURIComponent(article.slug)}`,
-                        E(article.title),
-                        'library-title',
-                      )}
-                    </h3>
-                    <p>${E(article.summary)}</p>
-                    <div class="meta">
-                      <span>${E(article.authorName)}</span><span>${date(article.publishedAt)}</span>
-                    </div>
-                  </article>`,
-              )
-              .join('') || empty('A redação está preparando as primeiras notícias.')}
-          </div>
-        </div>
-      </section>
-      <section class="section compact">
-        <div class="shell">
-          <div class="sectionhead">
-            <div>
-              <div class="eyebrow">Exemplaria selecta</div>
-              <h2>Modelos em destaque</h2>
-            </div>
-            ${link('/acervo', 'Ver acervo →', 'linkbtn')}
-          </div>
-          <div class="grid grid3">
-            ${templates.map(templateCard).join('') || empty('O acervo ainda está vazio.')}
-          </div>
-        </div>
-      </section>
-      <section class="section compact">
-        <div class="shell">
-          <div class="split">
-            <div>
-              <div class="eyebrow">Colloquium</div>
-              <h2 class="pagetitle">Conversas que continuam depois da aula.</h2>
-              <p class="muted" style="line-height:1.7">
-                Discussões públicas organizadas por tema, com moderação, referências, contrapontos e
-                perguntas bem formuladas.
-              </p>
-              <span class="badge">◇ Ambiente moderado</span>
-            </div>
-            <div>
-              ${discussions.map(discussionRow).join('') || empty('Nenhuma discussão publicada.')}
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="section compact">
-        <div class="shell">
-          <div class="sectionhead">
-            <div>
-              <div class="eyebrow">Scriptorium</div>
-              <h2>Pesquisas recentes</h2>
-            </div>
-            ${link('/pesquisas', 'Abrir pesquisas →', 'linkbtn')}
-          </div>
-          <div class="grid grid3">
-            ${pubs.map(publicationCard).join('') || empty('Nenhuma pesquisa publicada.')}
-          </div>
-        </div>
-      </section>`,
-  );
-}
+import { link, layout, empty, notFound, templateCard } from './core.js';
 
 function libraryPublicationCard(p) {
   const profile = state.boot.profiles.find(
@@ -206,27 +40,6 @@ function libraryPublicationCard(p) {
         : ''}<button class="soft" type="button" data-publication-boost="${E(p.id)}">
         Impulsionar
       </button>
-    </div>
-  </article>`;
-}
-
-function libraryTemplateCard(t, i = 0) {
-  return html`<article class="card library-card">
-    <div class="catno">MODELO ${String(i + 1).padStart(2, '0')}</div>
-    <h3>${link('/templates/' + encodeURIComponent(t.slug), E(t.title), 'library-title')}</h3>
-    <p>${E(t.description || 'Modelo acadêmico pronto para adaptar.')}</p>
-    <div class="pills">
-      <span class="pill">${E(t.category)}</span><span class="pill">${E(t.docType)}</span
-      ><span class="pill">${E(t.style || 'Clássico')}</span>
-    </div>
-    <div class="rule"></div>
-    <div class="meta"><span>${num(t.downloads)} consultas</span><span>Acervo de modelos</span></div>
-    <div class="actions" style="margin-top:18px">
-      ${link('/templates/' + encodeURIComponent(t.slug), 'Abrir modelo', 'outline')}${link(
-        '/acervo',
-        'Ver acervo',
-        'soft',
-      )}
     </div>
   </article>`;
 }
@@ -272,7 +85,7 @@ function biblioteca() {
   const autores = [...new Set(boot.publications.map((p) => p.authorName).filter(Boolean))].sort(
     (a, b) => a.localeCompare(b, 'pt-BR'),
   );
-  let pubs =
+  const pubs =
     tipo === 'livros'
       ? []
       : boot.publications.filter(
@@ -283,7 +96,7 @@ function biblioteca() {
             (!autor || p.authorName === autor) &&
             (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
         );
-  let books =
+  const books =
     tipo === 'pesquisas'
       ? []
       : (boot.books || []).filter(
@@ -461,82 +274,16 @@ function biblioteca() {
   );
 }
 
-function acervo() {
-  let q = state.query.get('q') || '';
-  let cat = state.query.get('categoria') || '';
-  const cats = [...new Set(state.boot.templates.map((t) => t.category))];
-  let list = state.boot.templates.filter(
-    (t) =>
-      (!q || JSON.stringify(t).toLowerCase().includes(q.toLowerCase())) &&
-      (!cat || t.category === cat),
-  );
-  const communityTemplates = (state.boot.customTemplates || []).filter(
-    (template) => !q || JSON.stringify(template).toLowerCase().includes(q.toLowerCase()),
-  );
-  layout(
-    html`<section class="pagehero">
-      <div class="shell">
-        <div class="eyebrow">Catalogus</div>
-        <h1 class="pagetitle">Acervo de modelos</h1>
-        <p>
-          Use modelos prontos ou crie livremente com blocos, fotos, cores e arquivos importados.
-        </p>
-        <div class="actions space-top space-bottom">
-          ${link('/estudio-templates', 'Criar template livre', 'solid')}
-          <span class="small muted">Importe JSON, PNG, JPG, WebP ou PDF como referência.</span>
-        </div>
-        <form class="toolbar" data-acervo-filter>
-          <input class="field" name="q" value="${E(q)}" placeholder="Pesquisar no acervo" /><select
-            class="select"
-            name="categoria"
-          >
-            <option value="">Todas as categorias</option>
-            ${cats
-              .map((c) => html`<option ${c === cat ? 'selected' : ''}>${E(c)}</option>`)
-              .join('')}</select
-          ><button class="solid">Filtrar</button>
-        </form>
-        <div class="grid grid3">
-          ${list.map(templateCard).join('') || empty('Nenhum modelo encontrado com esses filtros.')}
-        </div>
-        ${communityTemplates.length
-          ? html`<div class="sectionhead section-gap">
-                <div>
-                  <div class="eyebrow">Modelos da comunidade</div>
-                  <h2>Templates livres publicados</h2>
-                </div>
-              </div>
-              <div class="grid grid3">
-                ${communityTemplates
-                  .map(
-                    (template) =>
-                      html`<article class="card studio-card">
-                        <span class="badge">Modelo editável</span>
-                        <h3>${E(template.title)}</h3>
-                        <p>${E(template.description || 'Template publicado pela comunidade.')}</p>
-                        ${link(
-                          `/modelos-livres/${encodeURIComponent(template.id)}`,
-                          'Visualizar modelo',
-                          'outline',
-                        )}
-                      </article>`,
-                  )
-                  .join('')}
-              </div>`
-          : ''}
-      </div>
-    </section>`,
-  );
-}
-
 function templateDetail(slug) {
   const t = state.boot.templates.find((x) => x.slug === slug);
   if (!t) return notFound();
   const relatedTemplates = rankRelated(t, state.boot.templates);
+  const creationHome = link('/comunidades/design-templates', 'Criação e modelos');
+  const breadcrumb = `${creationHome} / ${E(t.title)}`;
   layout(
     html`<section class="pagehero">
       <div class="shell">
-        <div class="crumbs">${link('/acervo', 'Acervo')} / ${E(t.title)}</div>
+        <div class="crumbs">${breadcrumb}</div>
         <div class="grid grid2">
           <div>
             <div class="eyebrow">${E(t.category)} · ${E(t.docType)}</div>
@@ -583,12 +330,4 @@ function templateDetail(slug) {
   );
 }
 
-export {
-  home,
-  libraryPublicationCard,
-  libraryTemplateCard,
-  bookCard,
-  biblioteca,
-  acervo,
-  templateDetail,
-};
+export { biblioteca, templateDetail };

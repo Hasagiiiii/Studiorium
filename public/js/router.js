@@ -8,7 +8,6 @@ import {
   publicProjectDetail,
   autores,
   authorDetail,
-  coloquio,
   thread,
   comunidades,
   comunidadeDetalhe,
@@ -76,11 +75,10 @@ async function renderRoute() {
     return bookDetail(decodeURIComponent(p.split('/')[2] || ''));
   }
   if (['/oficina', '/tech'].includes(p)) {
-    if (state.query.get('novo') === '1' || state.query.get('editar')) {
-      return await oficina();
+    if (p === '/tech') {
+      history.replaceState({}, '', `/oficina${location.search}`);
     }
-    history.replaceState({}, '', '/comunidades');
-    return await comunidades();
+    return await oficina();
   }
   if (p.startsWith('/oficina/')) {
     return await oficinaDetail(decodeURIComponent(p.split('/')[2] || ''));
@@ -255,11 +253,21 @@ async function renderRoute() {
   return notFound();
 }
 
+function announceRendered() {
+  document.dispatchEvent(
+    new CustomEvent('studiorium:rendered', {
+      detail: { path: location.pathname },
+    }),
+  );
+}
+
 export async function render() {
   try {
     await renderRoute();
   } catch (error) {
     showRenderError(error);
+  } finally {
+    announceRendered();
   }
 }
 

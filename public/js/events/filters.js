@@ -25,20 +25,6 @@ export async function handleFilterSubmit(event) {
     return true;
   }
 
-  if (form.matches('[data-acervo-filter]')) {
-    event.preventDefault();
-    const values = formObj(form);
-    updateQuery({ q: values.q, categoria: values.categoria });
-    return true;
-  }
-
-  if (form.matches('[data-research-filter]')) {
-    event.preventDefault();
-    const values = formObj(form);
-    updateQuery({ q: values.q, area: values.area });
-    return true;
-  }
-
   if (form.matches('[data-author-filter]')) {
     event.preventDefault();
     const values = formObj(form);
@@ -49,13 +35,6 @@ export async function handleFilterSubmit(event) {
   if (form.matches('[data-project-filter]')) {
     event.preventDefault();
     updateQuery({ q: formObj(form).q });
-    return true;
-  }
-
-  if (form.matches('[data-discussion-filter]')) {
-    event.preventDefault();
-    const values = formObj(form);
-    updateQuery({ q: values.q, categoria: values.categoria });
     return true;
   }
 

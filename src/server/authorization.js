@@ -26,6 +26,10 @@ function legacyAuthorization(user) {
   return { roles: [role], permissions: [...permissions], source: 'legacy' };
 }
 
+function deniedAuthorization(source = 'error') {
+  return { roles: [], permissions: [], source };
+}
+
 function isMissingRbacTable(error) {
   const code = String(error?.code || '');
   const message = String(error?.message || '');
@@ -41,17 +45,16 @@ function effectiveRoleIds(user, assignments = []) {
 }
 
 async function authorizationFor(user) {
-  if (!user?.id) return { roles: [], permissions: [], source: 'none' };
+  if (!user?.id) return deniedAuthorization('none');
 
   const fallback = legacyAuthorization(user);
   const client = db();
   const assignments = await client.from('user_roles').select('role_id').eq('user_id', user.id);
 
   if (assignments.error) {
-    if (!isMissingRbacTable(assignments.error)) {
-      console.warn('[Studiorium RBAC assignments]', assignments.error.message);
-    }
-    return fallback;
+    if (isMissingRbacTable(assignments.error)) return fallback;
+    console.warn('[Studiorium RBAC assignments]', assignments.error.message);
+    return deniedAuthorization();
   }
 
   const roleIds = effectiveRoleIds(user, assignments.data || []);
@@ -61,10 +64,9 @@ async function authorizationFor(user) {
     .in('role_id', roleIds);
 
   if (grants.error) {
-    if (!isMissingRbacTable(grants.error)) {
-      console.warn('[Studiorium RBAC grants]', grants.error.message);
-    }
-    return fallback;
+    if (isMissingRbacTable(grants.error)) return fallback;
+    console.warn('[Studiorium RBAC grants]', grants.error.message);
+    return deniedAuthorization();
   }
 
   const permissionIds = (grants.data || []).map((row) => row.permission_id).filter(Boolean);

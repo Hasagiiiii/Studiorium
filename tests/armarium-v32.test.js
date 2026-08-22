@@ -47,7 +47,7 @@ test('interface mostra Armarium com formulário real, review, compra e três est
   const events = read('public/js/events/books.js');
   for (const marker of [
     'Armarium Librorum',
-    'Adicionar livro que eu li',
+    'Adicionar livro lido',
     'Minha review',
     'nofollow sponsored',
     '<form class="book-review-form hidden"',
