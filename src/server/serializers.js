@@ -233,7 +233,7 @@ function newsArticle(row) {
     category: row.category,
     status: row.status,
     featured: row.featured === true,
-    hypes: row.hypes || 0,
+    hypes: Number(row.hypes || 0),
     certifiedBy: row.certified_by || null,
     certifiedAt: row.certified_at || null,
     publishedAt: row.published_at || null,
