@@ -1,8 +1,9 @@
 import { api, bootstrap, formObj, state, toast } from '../runtime.js';
 import { goto, render } from '../router.js';
 
-const PROFILE_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const PROFILE_IMAGE_LIMIT = 3 * 1024 * 1024;
+const PROFILE_IMAGE_LIMIT = 12 * 1024 * 1024;
+const PROFILE_IMAGE_MAX_SIDE = 1800;
+const PROFILE_IMAGE_OUTPUT_QUALITY = 0.86;
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -13,17 +14,75 @@ function fileToBase64(file) {
   });
 }
 
-async function profileImagePayload(file) {
-  if (!file || !PROFILE_IMAGE_TYPES.has(file.type)) {
-    throw new Error('Use uma imagem JPG, PNG ou WebP.');
+function loadLocalImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('O navegador não conseguiu abrir esta foto. Tente outra imagem.'));
+    };
+    image.src = url;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Não foi possível preparar a foto para envio.'));
+      },
+      type,
+      quality,
+    );
+  });
+}
+
+async function normalizeProfileImage(file) {
+  if (!file || !String(file.type || '').startsWith('image/')) {
+    throw new Error('Escolha uma foto válida.');
   }
   if (file.size > PROFILE_IMAGE_LIMIT) {
-    throw new Error('A imagem precisa ter até 3 MB.');
+    throw new Error('A foto original precisa ter até 12 MB.');
   }
+
+  const image = await loadLocalImage(file);
+  const naturalWidth = Number(image.naturalWidth || image.width || 0);
+  const naturalHeight = Number(image.naturalHeight || image.height || 0);
+  if (!naturalWidth || !naturalHeight) {
+    throw new Error('Não foi possível identificar o tamanho desta foto.');
+  }
+
+  const scale = Math.min(1, PROFILE_IMAGE_MAX_SIDE / Math.max(naturalWidth, naturalHeight));
+  const width = Math.max(1, Math.round(naturalWidth * scale));
+  const height = Math.max(1, Math.round(naturalHeight * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', { alpha: false });
+  if (!context) throw new Error('Não foi possível preparar esta foto.');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, width, height);
+  context.drawImage(image, 0, 0, width, height);
+
+  const blob = await canvasToBlob(canvas, 'image/jpeg', PROFILE_IMAGE_OUTPUT_QUALITY);
+  if (blob.size > 3 * 1024 * 1024) {
+    throw new Error('A foto continuou muito grande após a otimização. Escolha outra imagem.');
+  }
+  return new File([blob], 'perfil.jpg', { type: 'image/jpeg' });
+}
+
+async function profileImagePayload(file) {
+  const normalized = await normalizeProfileImage(file);
   return {
-    name: file.name,
-    mime: file.type,
-    dataBase64: await fileToBase64(file),
+    name: normalized.name,
+    mime: normalized.type,
+    dataBase64: await fileToBase64(normalized),
   };
 }
 
@@ -143,11 +202,25 @@ export async function handleAccountSubmit(event) {
       toast('Escolha uma imagem primeiro.', true);
       return true;
     }
-    const result = await api('/api/profile/media', {
-      method: 'POST',
-      body: JSON.stringify({ kind, file: await profileImagePayload(file) }),
-    });
-    await refreshAccount(result.message || 'Imagem atualizada.');
+
+    const submit = event.submitter;
+    const originalLabel = submit?.textContent;
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = 'Preparando foto…';
+    }
+    try {
+      const result = await api('/api/profile/media', {
+        method: 'POST',
+        body: JSON.stringify({ kind, file: await profileImagePayload(file) }),
+      });
+      await refreshAccount(result.message || 'Imagem atualizada.');
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = originalLabel;
+      }
+    }
     return true;
   }
 
