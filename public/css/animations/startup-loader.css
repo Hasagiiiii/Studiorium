@@ -152,14 +152,18 @@ html.startup-loading body {
 .loader-seal-letter {
   fill: #c28e72;
   opacity: 0;
-  font: 700 18px Georgia, serif;
+  font:
+    700 18px Georgia,
+    serif;
   animation: loader-seal-letter 240ms 950ms ease-out forwards;
 }
 
 .studiorium-loader-caption {
   margin-top: -2px;
   color: #d8c39d;
-  font: 600 15px/1.1 Georgia, serif;
+  font:
+    600 15px/1.1 Georgia,
+    serif;
   letter-spacing: 0.32em;
   text-indent: 0.32em;
 }
