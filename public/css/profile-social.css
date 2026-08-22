@@ -261,7 +261,7 @@
 
 .profile-social-name-row h1 {
   margin: 0;
-  font: 600 clamp(30px, 4vw, 50px)/1 var(--serif);
+  font: 600 clamp(30px, 4vw, 50px) / 1 var(--serif);
   letter-spacing: -0.02em;
 }
 
