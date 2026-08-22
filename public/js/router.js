@@ -100,7 +100,9 @@ async function renderRoute() {
   }
 
   if (p === '/pesquisas') {
-    return pesquisas();
+    history.replaceState({}, '', '/biblioteca?tipo=pesquisas');
+    state.query = new URLSearchParams('tipo=pesquisas');
+    return biblioteca();
   }
   if (p.startsWith('/pesquisas/')) {
     return researchDetail(decodeURIComponent(p.split('/')[2] || ''));
@@ -168,7 +170,8 @@ async function renderRoute() {
     return await redacao(decodeURIComponent(p.split('/')[2] || ''));
   }
   if (p === '/estudio-templates') {
-    return await templateStudio();
+    history.replaceState({}, '', '/comunidades/design-templates');
+    return await comunidadeDetalhe('design-templates');
   }
   if (p.startsWith('/estudio-templates/')) {
     return await templateEditor(decodeURIComponent(p.split('/')[2] || ''));

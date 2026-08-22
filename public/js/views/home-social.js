@@ -51,7 +51,7 @@ function leftSidebar(data) {
       ${link('/comunidades/design-templates', '✦ Criação')}
       ${link('/projetos', '⌘ Projetos')}
       ${link('/biblioteca', '▤ Biblioteca')}
-      ${link('/coloquio', '◌ Discussões')}
+      ${link('/comunidades', '◌ Discussões')}
       ${link('/oficina', '⚙ Tecnologia')}
       ${link('/autores', '◎ Pessoas')}
       ${link('/noticias', '✦ Notícias')}
@@ -77,7 +77,7 @@ function leftSidebar(data) {
 
 function discoveryStrip() {
   return markup`<div class="social-discovery-strip">
-    ${link('/coloquio', '<strong>Discussões</strong>Entre na conversa')}
+    ${link('/comunidades', '<strong>Discussões</strong>Entre na conversa')}
     ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}
     ${link('/comunidades/design-templates', '<strong>Criação</strong>Templates, materiais e ideias')}
     ${link('/biblioteca', '<strong>Biblioteca</strong>Livros e pesquisas')}

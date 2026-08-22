@@ -80,11 +80,13 @@ async function uploadProfileMedia(req) {
   const { ext, mime, bytes } = validateCoverImage(body.file, 3 * 1024 * 1024);
   const storagePath = `${user.id}/${kind}${ext}`;
   const previousPath = current[column] || null;
-  const { error: uploadError } = await db().storage.from(PROFILE_MEDIA_BUCKET).upload(storagePath, bytes, {
-    contentType: mime,
-    cacheControl: '3600',
-    upsert: true,
-  });
+  const { error: uploadError } = await db()
+    .storage.from(PROFILE_MEDIA_BUCKET)
+    .upload(storagePath, bytes, {
+      contentType: mime,
+      cacheControl: '3600',
+      upsert: true,
+    });
   fail(uploadError);
 
   const { error: updateError } = await db()
@@ -97,11 +99,17 @@ async function uploadProfileMedia(req) {
   }
 
   if (previousPath && previousPath !== storagePath) {
-    const { error: cleanupError } = await db().storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
-    if (cleanupError) console.warn('[Studiorium profile media cleanup]', cleanupError.message || cleanupError);
+    const { error: cleanupError } = await db()
+      .storage.from(PROFILE_MEDIA_BUCKET)
+      .remove([previousPath]);
+    if (cleanupError)
+      console.warn('[Studiorium profile media cleanup]', cleanupError.message || cleanupError);
   }
 
-  return { user: await publicUser(user), message: kind === 'avatar' ? 'Foto de perfil atualizada.' : 'Foto de capa atualizada.' };
+  return {
+    user: await publicUser(user),
+    message: kind === 'avatar' ? 'Foto de perfil atualizada.' : 'Foto de capa atualizada.',
+  };
 }
 
 async function removeProfileMedia(req, kind) {
@@ -123,8 +131,11 @@ async function removeProfileMedia(req, kind) {
   fail(updateError);
 
   if (currentPath) {
-    const { error: removeError } = await db().storage.from(PROFILE_MEDIA_BUCKET).remove([currentPath]);
-    if (removeError) console.warn('[Studiorium profile media remove]', removeError.message || removeError);
+    const { error: removeError } = await db()
+      .storage.from(PROFILE_MEDIA_BUCKET)
+      .remove([currentPath]);
+    if (removeError)
+      console.warn('[Studiorium profile media remove]', removeError.message || removeError);
   }
 
   return { user: await publicUser(user), message: 'Imagem removida.' };

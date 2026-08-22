@@ -57,12 +57,13 @@ function profileStats(profile) {
 
 function avatar(profile, className = '') {
   if (profile.hasAvatar) {
-    return html`<span class="profile-photo ${E(className)}"><img src="${mediaUrl(
-      profile,
-      'avatar',
-    )}" alt="Foto de ${E(profile.displayName)}" /></span>`;
+    return html`<span class="profile-photo ${E(className)}"
+      ><img src="${mediaUrl(profile, 'avatar')}" alt="Foto de ${E(profile.displayName)}"
+    /></span>`;
   }
-  return html`<span class="profile-photo ${E(className)}">${E(initials(profile.displayName))}</span>`;
+  return html`<span class="profile-photo ${E(className)}"
+    >${E(initials(profile.displayName))}</span
+  >`;
 }
 
 function authorCard(profile) {
@@ -174,9 +175,7 @@ function discussionCard(discussion) {
 
 function contentPanel(label, count, content, emptyText) {
   return html`<details class="profile-content-panel">
-    <summary>
-      <span>${E(label)}</span><strong>${num(count)}</strong>
-    </summary>
+    <summary><span>${E(label)}</span><strong>${num(count)}</strong></summary>
     <div class="profile-content-panel-body">
       <div class="grid grid2">${content || empty(emptyText)}</div>
     </div>
@@ -206,9 +205,10 @@ function authorDetail(username) {
         <article class="profile-social-hero">
           <div class="profile-social-cover">
             ${profile.hasCover
-              ? html`<img src="${mediaUrl(profile, 'cover')}" alt="Capa de ${E(
-                  profile.displayName,
-                )}" />`
+              ? html`<img
+                  src="${mediaUrl(profile, 'cover')}"
+                  alt="Capa de ${E(profile.displayName)}"
+                />`
               : '<span class="profile-cover-fallback large">Studiorium</span>'}
           </div>
           <div class="profile-social-header compact">
@@ -223,9 +223,9 @@ function authorDetail(username) {
               <div class="profile-social-handle">
                 @${E(profile.username)} · ${E(typeLabel(profile.profileType))}
               </div>
-              <p class="profile-social-bio">${E(
-                profile.bio || 'Este membro ainda não adicionou uma biografia.',
-              )}</p>
+              <p class="profile-social-bio">
+                ${E(profile.bio || 'Este membro ainda não adicionou uma biografia.')}
+              </p>
               <div class="profile-social-meta">
                 ${profile.course ? `<span>${E(profile.course)}</span>` : ''}
                 ${profile.institution ? `<span>${E(profile.institution)}</span>` : ''}

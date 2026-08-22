@@ -126,7 +126,7 @@ export async function handleTemplateClick(event) {
           sourceType: 'editor',
         }),
       });
-      toast('Cópia criada no seu estúdio.');
+      toast('Cópia criada na sua coleção.');
       goto(`/estudio-templates/${encodeURIComponent(result.template.id)}`);
     });
     return true;
@@ -173,7 +173,7 @@ export async function handleTemplateClick(event) {
         body: JSON.stringify(editorPayload(submit)),
       });
       toast(submit ? 'Template enviado para revisão.' : 'Template salvo.');
-      if (submit) goto('/estudio-templates');
+      if (submit) goto('/comunidades/design-templates');
     });
     return true;
   }

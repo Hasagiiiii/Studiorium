@@ -192,7 +192,7 @@ function renderCreationHub() {
   const templateCount =
     (state.boot.templates || []).length + (state.boot.customTemplates || []).length;
   const primaryAction = state.me
-    ? link('/estudio-templates', 'Criar agora', 'solid')
+    ? link('/comunidades/design-templates', 'Criar agora', 'solid')
     : link('/cadastro', 'Entrar para criar', 'solid');
 
   return [
@@ -238,7 +238,7 @@ function memberComposer() {
     '</div>',
     '<div class="actions">',
     link('/publicar', 'Publicar', 'solid'),
-    link('/estudio-templates', 'Criar', 'soft'),
+    link('/comunidades/design-templates', 'Criar', 'soft'),
     link('/comunidades', 'Discutir', 'soft'),
     '</div>',
     '</div>',
