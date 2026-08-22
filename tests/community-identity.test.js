@@ -100,6 +100,7 @@ test('projetos acadêmicos podem ser compartilhados sem expor notas privadas', (
   const serializers = read('src/server/serializers.js');
   const research = read('public/js/views/research.js');
   const profile = read('public/js/views/profile-social.js');
+  const router = read('public/js/router.js');
   assert.ok(migration.includes("visibility in ('private', 'public')"));
   assert.ok(projects.includes("['private', 'public'].includes(body.visibility)"));
   assert.ok(serializers.includes('function publicProject'));
@@ -112,7 +113,8 @@ test('projetos acadêmicos podem ser compartilhados sem expor notas privadas', (
       .includes('notes:'),
     false,
   );
-  assert.ok(research.includes('Projetos da comunidade'));
+  assert.ok(research.includes('function publicProjectDetail'));
+  assert.ok(router.includes("p.startsWith('/projetos/')"));
   assert.ok(profile.includes("'Projetos'"));
   assert.ok(profile.includes('stats.projects.map(projectCard)'));
 });
