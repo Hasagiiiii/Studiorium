@@ -40,7 +40,13 @@
   border: 1px solid color-mix(in srgb, var(--brass2) 46%, #5f4930);
   border-radius: 8px;
   background:
-    linear-gradient(90deg, rgb(72 42 20 / 0.16), transparent 4%, transparent 96%, rgb(72 42 20 / 0.16)),
+    linear-gradient(
+      90deg,
+      rgb(72 42 20 / 0.16),
+      transparent 4%,
+      transparent 96%,
+      rgb(72 42 20 / 0.16)
+    ),
     radial-gradient(circle at 24% 18%, rgb(255 255 255 / 0.16), transparent 29%),
     radial-gradient(circle at 79% 73%, rgb(92 57 28 / 0.14), transparent 35%),
     repeating-linear-gradient(2deg, rgb(104 72 38 / 0.026) 0 1px, transparent 1px 7px),
@@ -67,12 +73,22 @@
 
 .parchment-transition-paper::before {
   left: 0;
-  background: linear-gradient(90deg, rgb(64 37 18 / 0.72), rgb(111 78 42 / 0.18), transparent);
+  background: linear-gradient(
+    90deg,
+    rgb(64 37 18 / 0.72),
+    rgb(111 78 42 / 0.18),
+    transparent
+  );
 }
 
 .parchment-transition-paper::after {
   right: 0;
-  background: linear-gradient(270deg, rgb(64 37 18 / 0.72), rgb(111 78 42 / 0.18), transparent);
+  background: linear-gradient(
+    270deg,
+    rgb(64 37 18 / 0.72),
+    rgb(111 78 42 / 0.18),
+    transparent
+  );
 }
 
 .parchment-watermark {
