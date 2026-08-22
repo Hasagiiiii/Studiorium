@@ -7,7 +7,7 @@ const root = path.join(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
 
 test('biblioteca usa texto curto e profissional na estante comunitária', () => {
-  const polish = read('public/js/library-polish.js');
+  const armarium = read('public/js/features/armarium.js');
   for (const marker of [
     'Leituras da comunidade',
     'Inclua livros que você leu, publique reviews e abra discussões',
@@ -15,7 +15,7 @@ test('biblioteca usa texto curto e profissional na estante comunitária', () => 
     'Nenhum livro adicionado ainda.',
     'Inclua uma leitura para começar a estante da comunidade.',
   ]) {
-    assert.ok(polish.includes(marker), `texto da estante ausente: ${marker}`);
+    assert.ok(armarium.includes(marker), `texto da estante ausente: ${marker}`);
   }
 });
 
@@ -65,8 +65,11 @@ test('estante de livros não cria colunas vazias nem estica a capa pela review',
   }
 });
 
-test('main instala o acabamento da biblioteca junto das melhorias existentes', () => {
+test('Armarium é instalado pela camada de enhancements sem módulo JS de polish posterior', () => {
   const main = read('public/js/main.js');
-  assert.ok(main.includes("import { installLibraryPolish } from './library-polish.js';"));
-  assert.ok(main.includes('installLibraryPolish();'));
+  const enhancements = read('public/js/enhancements.js');
+  assert.ok(main.includes('installEnhancements();'));
+  assert.ok(enhancements.includes('enhanceArmarium();'));
+  assert.equal(fs.existsSync(path.join(root, 'public/js/library-polish.js')), false);
+  assert.doesNotMatch(main, /installLibraryPolish|library-polish\.js/);
 });
