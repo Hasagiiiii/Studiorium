@@ -1,8 +1,10 @@
 import { api, bootstrap, formObj, state, toast } from '../runtime.js';
 import { goto, render } from '../router.js';
 
-const PROFILE_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const PROFILE_IMAGE_LIMIT = 3 * 1024 * 1024;
+const PROFILE_IMAGE_SOURCE_LIMIT = 25 * 1024 * 1024;
+const PROFILE_IMAGE_MAX_EDGE = 1800;
+const PROFILE_IMAGE_QUALITY = 0.85;
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -13,17 +15,84 @@ function fileToBase64(file) {
   });
 }
 
+function canvasToBlob(canvas, mime, quality) {
+  return new Promise((resolve) => canvas.toBlob(resolve, mime, quality));
+}
+
+async function decodeImage(file) {
+  if ('createImageBitmap' in window) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch {
+      // Safari/iOS pode exigir o caminho via <img> para alguns formatos da câmera.
+    }
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = 'async';
+    image.src = url;
+    await image.decode();
+    return image;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function optimizeProfileImage(file) {
+  if (!file || !String(file.type || '').startsWith('image/')) {
+    throw new Error('Escolha uma foto válida.');
+  }
+  if (file.size > PROFILE_IMAGE_SOURCE_LIMIT) {
+    throw new Error('A foto original é muito grande. Escolha uma imagem de até 25 MB.');
+  }
+
+  let image;
+  try {
+    image = await decodeImage(file);
+  } catch {
+    throw new Error('Não foi possível abrir esta foto. No iPhone, tente compartilhar como JPEG.');
+  }
+
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+  const scale = Math.min(1, PROFILE_IMAGE_MAX_EDGE / Math.max(sourceWidth, sourceHeight));
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', { alpha: false });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(image, 0, 0, width, height);
+  image.close?.();
+
+  let blob = await canvasToBlob(canvas, 'image/webp', PROFILE_IMAGE_QUALITY);
+  let mime = 'image/webp';
+  if (!blob) {
+    blob = await canvasToBlob(canvas, 'image/jpeg', PROFILE_IMAGE_QUALITY);
+    mime = 'image/jpeg';
+  }
+  if (!blob) throw new Error('Não foi possível otimizar a foto.');
+
+  if (blob.size > PROFILE_IMAGE_LIMIT) {
+    blob = await canvasToBlob(canvas, mime, 0.72);
+  }
+  if (!blob || blob.size > PROFILE_IMAGE_LIMIT) {
+    throw new Error('A foto ainda ficou grande demais após a otimização.');
+  }
+
+  const extension = mime === 'image/webp' ? 'webp' : 'jpg';
+  return new File([blob], `perfil-${Date.now()}.${extension}`, { type: mime });
+}
+
 async function profileImagePayload(file) {
-  if (!file || !PROFILE_IMAGE_TYPES.has(file.type)) {
-    throw new Error('Use uma imagem JPG, PNG ou WebP.');
-  }
-  if (file.size > PROFILE_IMAGE_LIMIT) {
-    throw new Error('A imagem precisa ter até 3 MB.');
-  }
+  const optimized = await optimizeProfileImage(file);
   return {
-    name: file.name,
-    mime: file.type,
-    dataBase64: await fileToBase64(file),
+    name: optimized.name,
+    mime: optimized.type,
+    dataBase64: await fileToBase64(optimized),
   };
 }
 
@@ -143,11 +212,24 @@ export async function handleAccountSubmit(event) {
       toast('Escolha uma imagem primeiro.', true);
       return true;
     }
-    const result = await api('/api/profile/media', {
-      method: 'POST',
-      body: JSON.stringify({ kind, file: await profileImagePayload(file) }),
-    });
-    await refreshAccount(result.message || 'Imagem atualizada.');
+    const button = event.submitter;
+    const originalLabel = button?.textContent;
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Otimizando…';
+    }
+    try {
+      const result = await api('/api/profile/media', {
+        method: 'POST',
+        body: JSON.stringify({ kind, file: await profileImagePayload(file) }),
+      });
+      await refreshAccount(result.message || 'Imagem atualizada.');
+    } finally {
+      if (button?.isConnected) {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
     return true;
   }
 
