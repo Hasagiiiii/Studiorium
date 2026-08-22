@@ -1,0 +1,112 @@
+name: Remove redundant hubs
+
+on:
+  push:
+    branches:
+      - fix/private-own-profile
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/private-own-profile
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Consolidate project and workshop hubs
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          function edit(path, transform) {
+            const before = fs.readFileSync(path, 'utf8');
+            const after = transform(before);
+            if (after !== before) fs.writeFileSync(path, after);
+          }
+
+          edit('public/js/router.js', (text) => {
+            text = text.replace('  projetos,\n', '');
+            text = text.replace(
+              "  if (['/oficina', '/tech'].includes(p)) {\n    return await oficina();\n  }",
+              "  if (['/oficina', '/tech'].includes(p)) {\n    if (state.query.get('novo') === '1' || state.query.get('editar')) {\n      return await oficina();\n    }\n    history.replaceState({}, '', '/comunidades');\n    return await comunidades();\n  }",
+            );
+            text = text.replace(
+              "  if (p === '/projetos') {\n    return projetos();\n  }",
+              "  if (p === '/projetos') {\n    history.replaceState({}, '', '/comunidades');\n    return await comunidades();\n  }",
+            );
+            return text;
+          });
+
+          edit('public/js/views.js', (text) =>
+            text.replace(
+              "export { researchDetail, projetos, publicProjectDetail } from './views/research.js';",
+              "export { researchDetail, publicProjectDetail } from './views/research.js';",
+            ),
+          );
+
+          edit('public/js/views/research.js', (text) => {
+            const start = text.indexOf('function projectCard(project) {');
+            const end = text.indexOf('function publicProjectDetail', start);
+            if (start >= 0 && end > start) text = text.slice(0, start) + text.slice(end);
+            return text.replace(
+              'export { researchDetail, projetos, publicProjectDetail };',
+              'export { researchDetail, publicProjectDetail };',
+            );
+          });
+
+          edit('public/js/views/core.js', (text) => {
+            text = text.replace("  if (route.startsWith('/laboratorio')) return '/oficina';", "  if (route.startsWith('/oficina') || route.startsWith('/laboratorio')) return '/comunidades';");
+            text = text.replace("    ['/oficina', 'Oficina'],\n", '');
+            text = text.replace("    link('/biblioteca?tipo=projetos', 'Projetos'),\n", '');
+            text = text.replace("    link('/oficina', 'Oficina'),\n", '');
+            return text;
+          });
+
+          edit('public/js/views/home-social.js', (text) => {
+            text = text.replace("      ${link('/projetos', '⌘ Projetos')}\n", '');
+            text = text.replace("      ${link('/oficina', '⚙ Tecnologia')}\n", '');
+            text = text.replace("    ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}\n", '');
+            text = text.replace("    ${link('/oficina', '<strong>Tutoriais</strong>Aprenda fazendo')}\n", '');
+            text = text.replace("        ${link('/projetos', 'Ver todos')}\n", '');
+            return text;
+          });
+
+          edit('public/js/views/home-social-widgets.js', (text) =>
+            text.replace("  if (!project?.id) return '/projetos';", "  if (!project?.id) return '/comunidades';"),
+          );
+
+          edit('tests/ui-responsibility.test.js', (text) => {
+            if (!text.includes('hubs redundantes de projetos e oficina')) {
+              text += `\ntest('hubs redundantes de projetos e oficina não voltam ao menu', () => {\n  const router = read('public/js/router.js');\n  const core = read('public/js/views/core.js');\n  const research = read('public/js/views/research.js');\n  const home = read('public/js/views/home-social.js');\n\n  assert.doesNotMatch(core, /\\['\\/oficina', 'Oficina'\\]/);\n  assert.doesNotMatch(home, /href=\\"\\/oficina\\"/);\n  assert.doesNotMatch(research, /Opera communitatis/);\n  assert.doesNotMatch(research, /function projetos\\(/);\n  assert.match(router, /p === '\\/projetos'[\\s\\S]*\\/comunidades/);\n  assert.match(router, /\\['\\/oficina', '\\/tech'\\][\\s\\S]*state\\.query\\.get\\('novo'\\)/);\n});\n`;
+            }
+            return text;
+          });
+          NODE
+      - name: Format touched files
+        run: >-
+          npx prettier --write
+          public/js/router.js
+          public/js/views.js
+          public/js/views/research.js
+          public/js/views/core.js
+          public/js/views/home-social.js
+          public/js/views/home-social-widgets.js
+          tests/ui-responsibility.test.js
+      - name: Commit refactor
+        shell: bash
+        run: |
+          git add public/js tests/ui-responsibility.test.js
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor(nav): absorb projects and workshop into existing hubs"
+          git push origin HEAD:fix/private-own-profile
