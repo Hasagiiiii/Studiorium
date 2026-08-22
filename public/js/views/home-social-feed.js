@@ -157,6 +157,11 @@ function timestamp(entry) {
   return Number.isFinite(value) ? value : 0;
 }
 
+function numeric(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function freshnessScore(entry) {
   const ageHours = Math.max(0, (Date.now() - timestamp(entry)) / 36e5);
   return 120 / (1 + ageHours / 24);
@@ -164,7 +169,9 @@ function freshnessScore(entry) {
 
 function activityScore(entry) {
   if (entry.type === 'publication') {
-    return num(entry.item.boosts) * 8 + Math.log10(num(entry.item.views) + 1) * 16;
+    const boosts = numeric(entry.item.boosts);
+    const views = numeric(entry.item.views);
+    return boosts * 8 + Math.log10(views + 1) * 16;
   }
   if (entry.type === 'discussion') {
     return 18;
