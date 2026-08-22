@@ -11,6 +11,8 @@ const feed = read('public/js/views/home-social-feed.js');
 const widgets = read('public/js/views/home-social-widgets.js');
 const views = read('public/js/views.js');
 const library = read('public/js/views/home-library.js');
+const community = read('public/js/views/community.js');
+const filters = read('public/js/events/filters.js');
 const main = read('public/js/main.js');
 const enhancements = read('public/js/enhancements.js');
 const catalog = read('public/js/book-catalog.js');
@@ -57,13 +59,22 @@ test('motion genérico não disputa cards pertencentes ao motion editorial', () 
   assert.match(editorialMotion, /fill: 'backwards'/);
 });
 
-test('barrel e Biblioteca não mantêm telas legadas já consolidadas em Comunidades', () => {
+test('barrel e views não mantêm telas legadas já consolidadas em Comunidades', () => {
   assert.doesNotMatch(views, /\bacervo\b/);
   assert.doesNotMatch(views, /\bcoloquio\b/);
   assert.doesNotMatch(library, /function home\(/);
   assert.doesNotMatch(library, /function acervo\(/);
   assert.doesNotMatch(library, /libraryTemplateCard/);
+  assert.doesNotMatch(community, /function coloquio\(/);
   assert.doesNotMatch(main, /library-polish|LibraryPolish/);
+});
+
+test('handlers de filtros removidos junto com as telas antigas', () => {
+  assert.doesNotMatch(filters, /data-acervo-filter/);
+  assert.doesNotMatch(filters, /data-research-filter/);
+  assert.doesNotMatch(filters, /data-discussion-filter/);
+  assert.match(filters, /data-library-filter/);
+  assert.match(filters, /data-tech-filter/);
 });
 
 test('RBAC falha fechado em erro operacional e mantém legado apenas para schema ausente', () => {
