@@ -7,9 +7,12 @@ export function installSocialMotion() {
     const control = event.target.closest('.social-action, .social-feed-tabs button');
     if (!control || !motionAllowed() || typeof control.animate !== 'function') return;
 
-    control.animate([{ transform: 'scale(0.975)' }, { transform: 'scale(1)' }], {
-      duration: 180,
-      easing: 'ease-out',
-    });
+    control.animate(
+      [{ transform: 'scale(0.975)' }, { transform: 'scale(1)' }],
+      {
+        duration: 180,
+        easing: 'ease-out',
+      },
+    );
   });
 }
