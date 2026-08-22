@@ -5,8 +5,8 @@
   display: none;
 }
 
-/* A busca da Oficina possui somente campo + botão, diferente da busca da Biblioteca. */
-[data-tech-filter] .library-search {
+/* A busca da Oficina possui somente campo + botão e não herda a grade da Biblioteca. */
+.tech-search {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
@@ -14,16 +14,16 @@
   min-width: 0;
 }
 
-[data-tech-filter] .library-search > * {
+.tech-search > * {
   min-width: 0;
 }
 
-[data-tech-filter] .library-search .field {
+.tech-search .field {
   width: 100%;
   min-height: 46px;
 }
 
-[data-tech-filter] .library-search .solid {
+.tech-search .solid {
   width: auto;
   min-width: 112px;
   min-height: 46px;
@@ -58,12 +58,12 @@
     padding: 14px;
   }
 
-  [data-tech-filter] .library-search {
+  .tech-search {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 9px;
   }
 
-  [data-tech-filter] .library-search .solid {
+  .tech-search .solid {
     min-width: 94px;
     padding-inline: 14px;
   }
@@ -74,11 +74,11 @@
 }
 
 @media (max-width: 350px) {
-  [data-tech-filter] .library-search {
+  .tech-search {
     grid-template-columns: 1fr;
   }
 
-  [data-tech-filter] .library-search .solid {
+  .tech-search .solid {
     width: 100%;
   }
 }
