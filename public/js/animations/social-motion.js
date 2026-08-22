@@ -81,20 +81,20 @@ export function installSocialMotion() {
   const app = document.querySelector('#app');
   if (!app) return;
 
-  const intersection =
-    'IntersectionObserver' in window
-      ? new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const index = Number(entry.target.dataset.socialMotionIndex || 0);
-              enterMotion(entry.target, index);
-              intersection.unobserve(entry.target);
-            });
-          },
-          { rootMargin: '0px 0px -5% 0px', threshold: 0.08 },
-        )
-      : null;
+  let intersection = null;
+  if ('IntersectionObserver' in window) {
+    intersection = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const index = Number(entry.target.dataset.socialMotionIndex || 0);
+          enterMotion(entry.target, index);
+          intersection.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -5% 0px', threshold: 0.08 },
+    );
+  }
 
   observeSocialSurfaces(app, intersection);
 
