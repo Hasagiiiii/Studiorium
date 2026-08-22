@@ -278,12 +278,12 @@ function templateDetail(slug) {
   const t = state.boot.templates.find((x) => x.slug === slug);
   if (!t) return notFound();
   const relatedTemplates = rankRelated(t, state.boot.templates);
+  const creationHome = link('/comunidades/design-templates', 'Criação e modelos');
+  const breadcrumb = `${creationHome} / ${E(t.title)}`;
   layout(
     html`<section class="pagehero">
       <div class="shell">
-        <div class="crumbs">${link('/comunidades/design-templates', 'Criação e modelos')} / ${E(
-          t.title,
-        )}</div>
+        <div class="crumbs">${breadcrumb}</div>
         <div class="grid grid2">
           <div>
             <div class="eyebrow">${E(t.category)} · ${E(t.docType)}</div>
