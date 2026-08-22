@@ -19,10 +19,7 @@ test('Comunidade de Criação é o único hub de modelos e criação', () => {
   const socialWidgets = read('public/js/views/home-social-widgets.js');
 
   assert.match(router, /\['\/acervo', '\/explorar', '\/templates'\]/);
-  assert.match(
-    router,
-    /p === '\/estudio-templates'[\s\S]*\/comunidades\/design-templates/,
-  );
+  assert.match(router, /p === '\/estudio-templates'[\s\S]*\/comunidades\/design-templates/);
   assert.match(communities, /function creationCommunityHub/);
   assert.match(communities, /Este é o único hub de criação do Studiorium/);
   assert.match(communities, /data-new-custom-template/);
@@ -36,10 +33,7 @@ test('Colóquio de comunidade usa rota canônica contextual', () => {
   const communities = read('public/js/views/communities.js');
   const home = read('public/js/views/home-social.js');
 
-  assert.match(
-    router,
-    /p === '\/coloquio' \|\| p === '\/comunidade'[\s\S]*\/comunidades/,
-  );
+  assert.match(router, /p === '\/coloquio' \|\| p === '\/comunidade'[\s\S]*\/comunidades/);
   assert.match(
     communities,
     /`\/comunidades\/\$\{encodeURIComponent\(community\.slug\)\}\/coloquio`/,
