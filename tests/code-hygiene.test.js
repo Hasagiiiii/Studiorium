@@ -18,6 +18,8 @@ const enhancements = read('public/js/enhancements.js');
 const catalog = read('public/js/book-catalog.js');
 const studioMotion = read('public/js/animations/studio-motion.js');
 const editorialMotion = read('public/js/animations/editorial-motion.js');
+const adminNews = read('public/js/admin-news-feature.js');
+const adminPublished = read('public/js/admin-published-actions.js');
 const authorization = read('src/server/authorization.js');
 
 test('Oficina mantém rota própria e busca isolada da Biblioteca', () => {
@@ -46,7 +48,14 @@ test('Pulso conta todos os projetos e não cria links públicos inválidos para 
 
 test('ciclo de render substitui observers globais nos módulos de acabamento', () => {
   assert.match(router, /studiorium:rendered/);
-  for (const source of [enhancements, catalog, studioMotion, editorialMotion]) {
+  for (const source of [
+    enhancements,
+    catalog,
+    studioMotion,
+    editorialMotion,
+    adminNews,
+    adminPublished,
+  ]) {
     assert.match(source, /studiorium:rendered/);
     assert.doesNotMatch(source, /new MutationObserver/);
   }
