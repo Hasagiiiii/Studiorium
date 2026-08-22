@@ -24,7 +24,10 @@ const authorization = read('src/server/authorization.js');
 
 test('Oficina mantém rota própria e busca isolada da Biblioteca', () => {
   assert.match(router, /return await oficina\(\);/);
-  assert.doesNotMatch(router, /\['\/oficina', '\/tech'\][\s\S]{0,500}replaceState\([^)]*\/comunidades/);
+  assert.doesNotMatch(
+    router,
+    /\['\/oficina', '\/tech'\][\s\S]{0,500}replaceState\([^)]*\/comunidades/,
+  );
   assert.match(techView, /class="tech-search"/);
   assert.doesNotMatch(techView, /class="library-search"/);
   assert.match(techCss, /\.tech-search/);
