@@ -13,7 +13,6 @@ function nav() {
     ['/projetos', 'Projetos'],
     ['/noticias', 'Notícias'],
     ['/oficina', 'Oficina'],
-    ['/comunidades/design-templates', 'Criação'],
     ['/atelie', 'Ateliê'],
     ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
