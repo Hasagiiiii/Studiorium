@@ -24,6 +24,7 @@
 /* Interações e movimento */
 @import url('/css/animations/interactions.css');
 @import url('/css/animations/motion.css');
+@import url('/css/animations/parchment.css');
 
 /* Polimentos específicos */
 @import url('/css/library-polish.css');
