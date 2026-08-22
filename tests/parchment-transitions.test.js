@@ -76,5 +76,6 @@ test('pergaminho preserva navegação acessível e fallback de movimento reduzid
   assert.match(motion, /event\.ctrlKey/);
   assert.match(motion, /event\.shiftKey/);
   assert.match(motion, /event\.altKey/);
+  assert.doesNotMatch(motion, /window\.open/);
   assert.match(motion, /finally \{[\s\S]*cleanup\(parts\)[\s\S]*transitionRunning = false/);
 });
