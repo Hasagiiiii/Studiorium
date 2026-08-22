@@ -1,5 +1,7 @@
 import { app, state, E, date, num, html } from '../runtime.js';
 
+const CREATION_COMMUNITY_PATH = '/comunidades/design-templates';
+
 function link(path, label, cls = '') {
   return html`<a href="${path}" data-link class="${cls}">${label}</a>`;
 }
@@ -13,8 +15,7 @@ function nav() {
     ['/projetos', 'Projetos'],
     ['/noticias', 'Notícias'],
     ['/oficina', 'Oficina'],
-    ['/acervo', 'Acervo'],
-    ['/atelie', 'Ateliê'],
+    [CREATION_COMMUNITY_PATH, 'Criação'],
     ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
   ];
@@ -136,20 +137,23 @@ function footer() {
       </div>
       <div>
         <h4>Studiorium</h4>
-        ${link('/biblioteca', 'Biblioteca')}${link('/acervo', 'Acervo')}${link(
-          '/pesquisas',
-          'Pesquisas',
-        )}${link('/autores', 'Autores')}${link('/diretrizes', 'Diretrizes da comunidade')}
+        ${link('/biblioteca', 'Biblioteca')}${link('/pesquisas', 'Pesquisas')}${link(
+          '/autores',
+          'Autores',
+        )}${link('/comunidades', 'Comunidades')}${link(
+          '/diretrizes',
+          'Diretrizes da comunidade',
+        )}
       </div>
       <div>
         <h4>Criar</h4>
-        ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link(
+        ${link(CREATION_COMMUNITY_PATH, 'Comunidade de Criação')}${link(
           '/estudio-templates',
-          'Estúdio de templates',
-        )}${link('/redacao', 'Redação colaborativa')}${link(
-          '/comunidades',
-          'Abrir discussão',
-        )}${link('/sobre', 'Sobre o projeto')}
+          'Estúdio Criativo',
+        )}${link('/atelie', 'Ateliê Científico')}${link(
+          '/publicar',
+          'Publicar pesquisa',
+        )}${link('/redacao', 'Redação colaborativa')}${link('/sobre', 'Sobre o projeto')}
       </div>
     </div>
   </footer>`;
@@ -204,7 +208,7 @@ function notFound() {
 
 function templateCard(t, i = 0) {
   return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover"
-    ><div class="catno">CAT. ${String(i + 1).padStart(2, '0')}</div>
+    ><div class="catno">CRIAÇÃO ${String(i + 1).padStart(2, '0')}</div>
     <h3>${E(t.title)}</h3>
     <p>${E(t.description || 'Modelo acadêmico pronto para adaptar.')}</p>
     <div class="pills">
@@ -213,9 +217,7 @@ function templateCard(t, i = 0) {
     </div>
     <div class="rule"></div>
     <div class="meta">
-      <span>${num(t.downloads)} consultas</span>${t.featured
-        ? '<span class="brass">Destaque</span>'
-        : ''}
+      <span>${num(t.downloads)} usos</span>${t.featured ? '<span class="brass">Destaque</span>' : ''}
     </div></a
   >`;
 }
@@ -263,6 +265,7 @@ function discussionRow(d, i, basePath = '/coloquio') {
 }
 
 export {
+  CREATION_COMMUNITY_PATH,
   link,
   nav,
   footer,
