@@ -9,12 +9,15 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 test('movimento social é progressivo, leve e respeita redução de movimento', () => {
   const main = read('public/js/main.js');
   const motion = read('public/js/animations/social-motion.js');
+  const css = read('public/css/social-experience.css');
+  const policy = read('public/css/animations/motion.css');
 
   assert.match(main, /installSocialMotion/);
-  assert.match(motion, /IntersectionObserver/);
-  assert.match(motion, /MutationObserver/);
-  assert.match(motion, /prefers-reduced-motion: reduce/);
-  assert.match(motion, /element\.animate/);
+  assert.match(motion, /control\.animate/);
+  assert.match(motion, /data\.motion !== 'reduced'/);
+  assert.match(css, /@keyframes social-enter/);
+  assert.match(css, /data-motion='full'/);
+  assert.match(policy, /prefers-reduced-motion: reduce/);
 });
 
 test('home social trata criação como comunidade e expõe pulso de atividade', () => {
