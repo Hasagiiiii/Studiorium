@@ -223,7 +223,12 @@ function buildFeed(mode = 'for-you') {
 
   if (selectedMode === 'trending') {
     return feed
-      .sort((a, b) => activityScore(b) + freshnessScore(b) * 0.35 - (activityScore(a) + freshnessScore(a) * 0.35))
+      .sort(
+        (a, b) =>
+          activityScore(b) +
+          freshnessScore(b) * 0.35 -
+          (activityScore(a) + freshnessScore(a) * 0.35),
+      )
       .slice(0, 14);
   }
 
