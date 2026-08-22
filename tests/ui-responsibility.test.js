@@ -60,3 +60,17 @@ test('Modelos não voltam para a Biblioteca nem para um Estúdio-lista', () => {
     false,
   );
 });
+
+test('hubs redundantes de projetos e oficina não voltam ao menu', () => {
+  const router = read('public/js/router.js');
+  const core = read('public/js/views/core.js');
+  const research = read('public/js/views/research.js');
+  const home = read('public/js/views/home-social.js');
+
+  assert.doesNotMatch(core, /\['\/oficina', 'Oficina'\]/);
+  assert.doesNotMatch(home, /href=\"\/oficina\"/);
+  assert.doesNotMatch(research, /Opera communitatis/);
+  assert.doesNotMatch(research, /function projetos\(/);
+  assert.match(router, /p === '\/projetos'[\s\S]*\/comunidades/);
+  assert.match(router, /\['\/oficina', '\/tech'\][\s\S]*state\.query\.get\('novo'\)/);
+});

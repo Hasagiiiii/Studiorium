@@ -78,7 +78,7 @@ function renderTopics(topics) {
 }
 
 function projectHref(project) {
-  if (!project?.id) return '/projetos';
+  if (!project?.id) return '/comunidades';
   return `/projetos/${encodeURIComponent(project.id)}`;
 }
 

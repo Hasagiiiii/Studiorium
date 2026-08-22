@@ -22,7 +22,7 @@ function navigationSection(route) {
     return '/comunidades';
   }
   if (route.startsWith('/redacao')) return '/noticias';
-  if (route.startsWith('/laboratorio')) return '/oficina';
+  if (route.startsWith('/oficina') || route.startsWith('/laboratorio')) return '/comunidades';
   if (route.startsWith('/admin') || route === '/moderacao') return '/admin';
   return route;
 }
@@ -34,7 +34,6 @@ function nav() {
   const items = [
     ['/biblioteca', 'Biblioteca'],
     ['/noticias', 'Notícias'],
-    ['/oficina', 'Oficina'],
     ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
   ];
@@ -147,10 +146,8 @@ function footer() {
   const exploreLinks = [
     link('/biblioteca', 'Biblioteca'),
     link('/biblioteca?tipo=pesquisas', 'Pesquisas'),
-    link('/biblioteca?tipo=projetos', 'Projetos'),
     link('/biblioteca?tipo=pessoas', 'Pessoas'),
     link('/noticias', 'Notícias'),
-    link('/oficina', 'Oficina'),
   ].join('');
 
   const platformLinks = [

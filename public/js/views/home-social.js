@@ -49,10 +49,8 @@ function leftSidebar(data) {
       <h3>Explorar</h3>
       ${link('/comunidades', '♧ Comunidades')}
       ${link('/comunidades/design-templates', '✦ Criação')}
-      ${link('/projetos', '⌘ Projetos')}
       ${link('/biblioteca', '▤ Biblioteca')}
       ${link('/comunidades', '◌ Discussões')}
-      ${link('/oficina', '⚙ Tecnologia')}
       ${link('/autores', '◎ Pessoas')}
       ${link('/noticias', '✦ Notícias')}
     </div>
@@ -78,10 +76,8 @@ function leftSidebar(data) {
 function discoveryStrip() {
   return markup`<div class="social-discovery-strip">
     ${link('/comunidades', '<strong>Discussões</strong>Entre na conversa')}
-    ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}
     ${link('/comunidades/design-templates', '<strong>Criação</strong>Templates, materiais e ideias')}
     ${link('/biblioteca', '<strong>Biblioteca</strong>Livros e pesquisas')}
-    ${link('/oficina', '<strong>Tutoriais</strong>Aprenda fazendo')}
   </div>`;
 }
 
@@ -124,7 +120,6 @@ function rightSidebar(data) {
     <div class="social-panel">
       <div class="social-panel-head">
         <h3>Projetos em alta</h3>
-        ${link('/projetos', 'Ver todos')}
       </div>
       ${renderProjects(data.projects)}
     </div>

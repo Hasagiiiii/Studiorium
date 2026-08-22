@@ -84,49 +84,6 @@ function researchDetail(slug) {
   );
 }
 
-function projectCard(project) {
-  const profile = state.boot.profiles.find((item) => item.userId === project.ownerId);
-  const excerpt = (project.sections || []).find((section) => section.content)?.content || '';
-  return html`<article class="card hover">
-    <div class="eyebrow">${E(project.type)}</div>
-    <h3>${link('/projetos/' + encodeURIComponent(project.id), E(project.title))}</h3>
-    <p>${E(excerpt.slice(0, 220) || 'Projeto acadêmico compartilhado pela comunidade.')}</p>
-    <div class="meta">
-      <span>${E(profile?.displayName || 'Membro do Studiorium')}</span
-      ><span>Atualizado ${date(project.updatedAt)}</span>
-    </div>
-  </article>`;
-}
-
-function projetos() {
-  const q = (state.query.get('q') || '').trim().toLocaleLowerCase('pt-BR');
-  const projects = (state.boot.communityProjects || []).filter(
-    (project) => !q || JSON.stringify(project).toLocaleLowerCase('pt-BR').includes(q),
-  );
-  layout(
-    html`<section class="pagehero">
-      <div class="shell">
-        <div class="eyebrow">Opera communitatis</div>
-        <h1 class="pagetitle">Projetos da comunidade</h1>
-        <p>Explore projetos acadêmicos que seus autores escolheram compartilhar publicamente.</p>
-        <form class="toolbar" data-project-filter>
-          <input
-            class="field"
-            type="search"
-            name="q"
-            value="${E(state.query.get('q') || '')}"
-            placeholder="Pesquisar projeto, tipo ou conteúdo"
-          />
-          <button class="solid">Pesquisar projetos</button>
-        </form>
-        <div class="grid grid3" style="margin-top:28px">
-          ${projects.map(projectCard).join('') || empty('Nenhum projeto público encontrado.')}
-        </div>
-      </div>
-    </section>`,
-  );
-}
-
 function publicProjectDetail(projectId) {
   const project = (state.boot.communityProjects || []).find((item) => item.id === projectId);
   if (!project) return notFound();
@@ -161,4 +118,4 @@ function publicProjectDetail(projectId) {
   );
 }
 
-export { researchDetail, projetos, publicProjectDetail };
+export { researchDetail, publicProjectDetail };
