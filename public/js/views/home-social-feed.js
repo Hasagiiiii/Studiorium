@@ -1,6 +1,8 @@
 import { state, E, date, num } from '../runtime.js';
 import { link } from './core.js';
 
+const FEED_MODES = new Set(['for-you', 'discussions', 'trending', 'recent']);
+
 function profileFor(id, fallback = '') {
   return (state.boot.profiles || []).find(
     (profile) => profile.userId === id || profile.displayName === fallback,
@@ -146,32 +148,91 @@ function newsPost(news) {
   ].join('');
 }
 
-function buildFeed() {
-  const feed = [
-    ...(state.boot.publications || []).slice(0, 8).map((item) => ({
+function normalizeFeedMode(mode) {
+  return FEED_MODES.has(mode) ? mode : 'for-you';
+}
+
+function timestamp(entry) {
+  const value = new Date(entry.at || 0).getTime();
+  return Number.isFinite(value) ? value : 0;
+}
+
+function freshnessScore(entry) {
+  const ageHours = Math.max(0, (Date.now() - timestamp(entry)) / 36e5);
+  return 120 / (1 + ageHours / 24);
+}
+
+function activityScore(entry) {
+  if (entry.type === 'publication') {
+    return num(entry.item.boosts) * 8 + Math.log10(num(entry.item.views) + 1) * 16;
+  }
+  if (entry.type === 'discussion') {
+    return 18;
+  }
+  if (entry.type === 'news') {
+    return 14;
+  }
+  return 10;
+}
+
+function blendedScore(entry) {
+  const ownerId = entry.item.ownerId || entry.item.authorId || entry.item.contributorId;
+  const verified = isVerified(profileFor(ownerId, entry.item.authorName)) ? 14 : 0;
+  return freshnessScore(entry) + activityScore(entry) + verified;
+}
+
+function sourceFeed() {
+  return [
+    ...(state.boot.publications || []).slice(0, 10).map((item) => ({
       type: 'publication',
       item,
       at: item.createdAt || item.publishedAt,
     })),
-    ...(state.boot.discussions || []).slice(0, 8).map((item) => ({
+    ...(state.boot.discussions || []).slice(0, 10).map((item) => ({
       type: 'discussion',
       item,
       at: item.createdAt,
     })),
-    ...(state.boot.techResources || []).slice(0, 6).map((item) => ({
+    ...(state.boot.techResources || []).slice(0, 8).map((item) => ({
       type: 'tech',
       item,
       at: item.createdAt || item.updatedAt,
     })),
-    ...(state.boot.news || []).slice(0, 5).map((item) => ({
+    ...(state.boot.news || []).slice(0, 6).map((item) => ({
       type: 'news',
       item,
       at: item.publishedAt || item.createdAt,
     })),
   ];
+}
 
-  feed.sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
-  return feed.slice(0, 14);
+function buildFeed(mode = 'for-you') {
+  const selectedMode = normalizeFeedMode(mode);
+  const feed = sourceFeed();
+
+  if (selectedMode === 'discussions') {
+    return feed
+      .filter((entry) => entry.type === 'discussion')
+      .sort((a, b) => timestamp(b) - timestamp(a))
+      .slice(0, 14);
+  }
+
+  if (selectedMode === 'recent') {
+    return feed.sort((a, b) => timestamp(b) - timestamp(a)).slice(0, 14);
+  }
+
+  if (selectedMode === 'trending') {
+    return feed
+      .sort(
+        (a, b) =>
+          activityScore(b) +
+          freshnessScore(b) * 0.35 -
+          (activityScore(a) + freshnessScore(a) * 0.35),
+      )
+      .slice(0, 14);
+  }
+
+  return feed.sort((a, b) => blendedScore(b) - blendedScore(a)).slice(0, 14);
 }
 
 function feedPost(entry) {
@@ -181,4 +242,4 @@ function feedPost(entry) {
   return newsPost(entry.item);
 }
 
-export { buildFeed, feedPost };
+export { buildFeed, feedPost, normalizeFeedMode };

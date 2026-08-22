@@ -1,6 +1,6 @@
 import { state, E, html as markup } from '../runtime.js';
 import { link, layout, empty } from './core.js';
-import { buildFeed, feedPost } from './home-social-feed.js';
+import { buildFeed, feedPost, normalizeFeedMode } from './home-social-feed.js';
 import {
   renderBooks,
   renderCommunities,
@@ -85,21 +85,29 @@ function discoveryStrip() {
   </div>`;
 }
 
-function feedColumn(feed) {
+function feedTabs(mode) {
+  const tab = (value, label) => {
+    const href = value === 'for-you' ? '/' : `/?feed=${value}`;
+    const active = mode === value ? ' active' : '';
+    return link(href, label, `social-feed-tab${active}`);
+  };
+
+  return markup`<nav class="social-feed-tabs" aria-label="Filtros do feed">
+    ${tab('for-you', 'Para você')}
+    ${tab('discussions', 'Conversas')}
+    ${tab('trending', 'Em alta')}
+    ${tab('recent', 'Recentes')}
+  </nav>`;
+}
+
+function feedColumn(feed, mode) {
   const posts = feed.length
     ? feed.map(feedPost).join('')
-    : empty('A timeline ainda não tem publicações. Seja a primeira pessoa a iniciar uma conversa.');
+    : empty('A timeline ainda não tem publicações para este filtro.');
 
   return markup`<main class="social-feed">
-    ${discoveryStrip()}
-    <div class="social-feed-tabs">
-      <button class="active" type="button">Para você</button>
-      ${link('/comunidades', 'Comunidades')}
-      ${link('/pesquisas', 'Em alta')}
-      ${link('/coloquio', 'Novos')}
-    </div>
-    ${renderComposer()} ${renderCreationHub()}
-    <div class="social-feed-list">${posts}</div>
+    ${discoveryStrip()} ${feedTabs(mode)} ${renderComposer()} ${renderCreationHub()}
+    <div class="social-feed-list" aria-live="polite">${posts}</div>
   </main>`;
 }
 
@@ -147,10 +155,11 @@ function rightSidebar(data) {
 
 function home() {
   const data = socialData();
-  const feed = buildFeed();
+  const mode = normalizeFeedMode(state.query?.get('feed') || 'for-you');
+  const feed = buildFeed(mode);
   const content = markup`${hero()}
     <section class="social-shell shell">
-      ${leftSidebar(data)} ${feedColumn(feed)} ${rightSidebar(data)}
+      ${leftSidebar(data)} ${feedColumn(feed, mode)} ${rightSidebar(data)}
     </section>`;
 
   layout(content);
