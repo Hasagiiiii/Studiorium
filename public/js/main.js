@@ -1,5 +1,4 @@
 import { installMotionPreferences } from './animations/motion.js';
-import { installSocialMotion } from './animations/social-motion.js';
 import { bindEvents } from './events.js';
 import { installEnhancements } from './enhancements.js';
 import { installLibraryPolish } from './library-polish.js';
@@ -11,7 +10,6 @@ import { render } from './router.js';
 
 installThemeSystem();
 installMotionPreferences();
-installSocialMotion();
 bindEvents();
 installEnhancements();
 installLibraryPolish();
