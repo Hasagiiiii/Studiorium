@@ -11,7 +11,7 @@ export {
 } from './views/core.js';
 export { home } from './views/home-social.js';
 export { biblioteca, acervo, templateDetail } from './views/home-library.js';
-export { pesquisas, researchDetail, projetos, publicProjectDetail } from './views/research.js';
+export { researchDetail, projetos, publicProjectDetail } from './views/research.js';
 export { autores, authorDetail } from './views/profile-social.js';
 export {
   coloquio,
@@ -23,7 +23,6 @@ export {
 } from './views/community.js';
 export { comunidades, comunidadeDetalhe } from './views/communities.js';
 export { noticias, newsDetail, redacao } from './views/news.js';
-export { templateStudio } from './views/template-studio-private-v329.js';
 export { templateEditor, publicCustomTemplate } from './views/template-studio.js';
 export { escrivaninha } from './views/workspace-personal-v330.js';
 export { editor, publicar } from './views/workspace.js';

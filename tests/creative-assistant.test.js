@@ -7,7 +7,7 @@ const root = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 test('Estúdio oferece criação assistida transparente sem fingir provedor de IA', () => {
-  const studio = read('public/js/views/template-studio-private-v329.js');
+  const studio = read('public/js/views/communities.js');
   const assistant = read('public/js/features/creative-assistant.js');
   const main = read('public/js/main.js');
 

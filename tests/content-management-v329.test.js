@@ -61,7 +61,7 @@ test('ADM tem edição e exclusão global sem conceder esses poderes à moderaç
 
 test('conteúdos já públicos ficam recolhidos nas áreas privadas sem redefinir o layout global', () => {
   const workspace = read('public/js/views/workspace-personal-v329.js');
-  const templates = read('public/js/views/template-studio-private-v329.js');
+  const workspaceTemplates = read('public/js/views/workspace-personal-v330.js');
 
   for (const label of [
     'Projetos públicos',
@@ -73,10 +73,12 @@ test('conteúdos já públicos ficam recolhidos nas áreas privadas sem redefini
   ]) {
     assert.match(workspace, new RegExp(label));
   }
-  assert.match(templates, /Publicados \(\$\{published\.length\}\)/);
+  assert.match(workspaceTemplates, /Seus templates/);
+  assert.match(workspaceTemplates, /Publicados \(\$\{published\.length\}\)/);
+  assert.match(workspaceTemplates, /data-workspace-templates/);
   assert.match(workspace, /workspace-published-vault/);
   assert.doesNotMatch(workspace, /grid-template-columns/);
-  assert.doesNotMatch(templates, /grid-template-columns/);
+  assert.doesNotMatch(workspaceTemplates, /grid-template-columns/);
 });
 
 test('roteador expõe gestão própria de discussões e respostas e área privada recebe os registros', () => {

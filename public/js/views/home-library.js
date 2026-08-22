@@ -262,7 +262,6 @@ function biblioteca() {
     ...new Set(
       [
         ...boot.publications.map((p) => p.area),
-        ...boot.templates.map((t) => t.category),
         ...(boot.books || []).map((book) => book.category),
       ].filter(Boolean),
     ),
@@ -273,47 +272,41 @@ function biblioteca() {
   const autores = [...new Set(boot.publications.map((p) => p.authorName).filter(Boolean))].sort(
     (a, b) => a.localeCompare(b, 'pt-BR'),
   );
-  let pubs = ['modelos', 'livros'].includes(tipo)
-    ? []
-    : boot.publications.filter(
-        (p) =>
-          contains(p, q) &&
-          (!area || p.area === area) &&
-          (!nivel || p.level === nivel) &&
-          (!autor || p.authorName === autor) &&
-          (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
-      );
-  let templates = ['pesquisas', 'livros'].includes(tipo)
-    ? []
-    : boot.templates.filter(
-        (t) => contains(t, q) && (!area || t.category === area) && !nivel && !autor && !palavra,
-      );
-  let books = ['pesquisas', 'modelos'].includes(tipo)
-    ? []
-    : (boot.books || []).filter(
-        (book) =>
-          contains(book, q) && (!area || book.category === area) && !nivel && !autor && !palavra,
-      );
+  let pubs =
+    tipo === 'livros'
+      ? []
+      : boot.publications.filter(
+          (p) =>
+            contains(p, q) &&
+            (!area || p.area === area) &&
+            (!nivel || p.level === nivel) &&
+            (!autor || p.authorName === autor) &&
+            (!palavra || (p.keywords || []).some((k) => norm(k).includes(norm(palavra)))),
+        );
+  let books =
+    tipo === 'pesquisas'
+      ? []
+      : (boot.books || []).filter(
+          (book) =>
+            contains(book, q) && (!area || book.category === area) && !nivel && !autor && !palavra,
+        );
   const authorMatches = boot.profiles.filter(
     (p) => (!q || contains(p, q)) && (!autor || p.displayName === autor),
   );
-  const total = pubs.length + templates.length + books.length;
-  const circulatingTopics = emergentTopics([...boot.publications, ...boot.templates]);
+  const total = pubs.length + books.length;
+  const circulatingTopics = emergentTopics(boot.publications);
   layout(
     html`<section class="pagehero library-hero">
         <div class="shell">
           <div class="eyebrow">Bibliotheca Studiorum</div>
           <h1 class="pagetitle">Biblioteca</h1>
           <p>
-            O catálogo central do Studiorium. Encontre pesquisas, trabalhos acadêmicos, modelos e
+            O catálogo central do Studiorium. Encontre pesquisas, trabalhos acadêmicos, livros e
             autores por tema, área, nível, autoria ou palavras-chave.
           </p>
           <div class="stats library-stats">
             <div class="stat">
               <strong>${boot.publications.length}</strong><span>Trabalhos publicados</span>
-            </div>
-            <div class="stat">
-              <strong>${boot.templates.length}</strong><span>Modelos no acervo</span>
             </div>
             <div class="stat">
               <strong>${(boot.books || []).length}</strong><span>Livros na estante</span>
@@ -338,9 +331,6 @@ function biblioteca() {
                 <option value="">Tudo na biblioteca</option>
                 <option value="pesquisas" ${tipo === 'pesquisas' ? 'selected' : ''}>
                   Pesquisas e trabalhos
-                </option>
-                <option value="modelos" ${tipo === 'modelos' ? 'selected' : ''}>
-                  Modelos do acervo
                 </option>
                 <option value="livros" ${tipo === 'livros' ? 'selected' : ''}>
                   Livros da estante
@@ -393,7 +383,7 @@ function biblioteca() {
             ? html`<div class="discovery-strip">
                 <div>
                   <span class="eyebrow">Índice emergente</span>
-                  <strong>Temas em circulação no acervo</strong>
+                  <strong>Temas em circulação na biblioteca</strong>
                 </div>
                 <div class="discovery-topics">
                   ${circulatingTopics
@@ -434,19 +424,6 @@ function biblioteca() {
                   </div>
                 </div>
                 <div class="book-shelf">${books.map(bookCard).join('')}</div>`
-            : ''}${templates.length
-            ? html`<div class="sectionhead library-section-gap">
-                  <div>
-                    <div class="eyebrow">Catalogus exemplorum</div>
-                    <h2>Modelos do acervo</h2>
-                    <p>
-                      Estruturas prontas para adaptar em atividades escolares, universitárias e
-                      científicas.
-                    </p>
-                  </div>
-                  ${link('/acervo', 'Abrir acervo →', 'linkbtn')}
-                </div>
-                <div class="grid grid3">${templates.map(libraryTemplateCard).join('')}</div>`
             : ''}${!total
             ? empty(
                 'Nenhum item da biblioteca corresponde a esses filtros. Tente remover um filtro ou usar outra palavra.',

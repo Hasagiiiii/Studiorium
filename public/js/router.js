@@ -4,7 +4,6 @@ import {
   home,
   biblioteca,
   templateDetail,
-  pesquisas,
   researchDetail,
   projetos,
   publicProjectDetail,
@@ -34,7 +33,6 @@ import {
   noticias,
   newsDetail,
   redacao,
-  templateStudio,
   templateEditor,
   publicCustomTemplate,
 } from './views.js';

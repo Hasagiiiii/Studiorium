@@ -226,6 +226,33 @@ function creationCommunityHub(community) {
       Este é o único hub de criação do Studiorium. Explore modelos, crie materiais ou abra uma
       ferramenta específica sem manter catálogos paralelos.
     </p>
+    <section class="studio-guided-start" aria-label="Criação assistida">
+      <div>
+        <span class="eyebrow">Criação assistida</span>
+        <h3>Comece pela intenção, não por outra página.</h3>
+        <p>
+          Os roteiros são locais e transparentes: a interface não finge geração por IA nem envia seu
+          conteúdo para um provedor externo.
+        </p>
+      </div>
+      <div class="grid grid3 studio-guided-grid">
+        <article class="studio-guided-option">
+          <h3>Banner científico</h3>
+          <p>Estrutura acadêmica com introdução, metodologia, resultados e referências.</p>
+          <button class="outline" type="button" data-guided-template="banner">Preparar</button>
+        </article>
+        <article class="studio-guided-option">
+          <h3>Apresentação</h3>
+          <p>Contexto, questão central, evidências e síntese em formato de apresentação.</p>
+          <button class="outline" type="button" data-guided-template="slides">Preparar</button>
+        </article>
+        <article class="studio-guided-option">
+          <h3>Material de estudo</h3>
+          <p>Conceitos-chave, resumo, prática e fontes para revisão organizada.</p>
+          <button class="outline" type="button" data-guided-template="estudo">Preparar</button>
+        </article>
+      </div>
+    </section>
     <div class="grid grid3">
       ${templates.slice(0, 9).map(templateCard).join('') || empty('Nenhum modelo-base disponível.')}
     </div>

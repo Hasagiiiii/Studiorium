@@ -48,3 +48,15 @@ test('ferramentas continuam acessíveis sem virarem hubs paralelos', () => {
   assert.match(router, /\['\/atelie', '\/banner-cientifico'\]/);
   assert.match(router, /p === '\/redacao'[\s\S]*redacao/);
 });
+
+test('Modelos não voltam para a Biblioteca nem para um Estúdio-lista', () => {
+  const library = read('public/js/views/home-library.js');
+  const views = read('public/js/views.js');
+  assert.doesNotMatch(library, /<option value="modelos"/);
+  assert.doesNotMatch(library, /<h2>Modelos do acervo<\/h2>/);
+  assert.doesNotMatch(views, /template-studio-private-v329/);
+  assert.equal(
+    fs.existsSync(path.join(root, 'public/js/views/template-studio-private-v329.js')),
+    false,
+  );
+});
