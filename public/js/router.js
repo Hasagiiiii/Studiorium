@@ -3,7 +3,6 @@ import { bookDetail } from './views/books.js';
 import {
   home,
   biblioteca,
-  acervo,
   templateDetail,
   pesquisas,
   researchDetail,
@@ -39,6 +38,8 @@ import {
   templateEditor,
   publicCustomTemplate,
 } from './views.js';
+
+const CREATION_COMMUNITY_PATH = '/comunidades/design-templates';
 
 export function goto(path) {
   history.pushState({}, '', path);
@@ -76,7 +77,10 @@ async function renderRoute() {
   if (p === '/laboratorio') return await laboratorio();
   if (p.startsWith('/laboratorio/'))
     return await laboratorio(decodeURIComponent(p.split('/')[2] || ''));
-  if (['/acervo', '/explorar', '/templates'].includes(p)) return acervo();
+  if (['/acervo', '/explorar', '/templates'].includes(p)) {
+    history.replaceState({}, '', CREATION_COMMUNITY_PATH);
+    return await comunidadeDetalhe('design-templates');
+  }
   if (p.startsWith('/templates/')) return templateDetail(decodeURIComponent(p.split('/')[2] || ''));
   if (p === '/pesquisas') return pesquisas();
   if (p.startsWith('/pesquisas/')) return researchDetail(decodeURIComponent(p.split('/')[2] || ''));
