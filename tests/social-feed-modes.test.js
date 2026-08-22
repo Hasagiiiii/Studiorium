@@ -2,8 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const feedSource = await readFile(new URL('../public/js/views/home-social-feed.js', import.meta.url), 'utf8');
-const homeSource = await readFile(new URL('../public/js/views/home-social.js', import.meta.url), 'utf8');
+const feedSource = await readFile(
+  new URL('../public/js/views/home-social-feed.js', import.meta.url),
+  'utf8',
+);
+const homeSource = await readFile(
+  new URL('../public/js/views/home-social.js', import.meta.url),
+  'utf8',
+);
 
 test('feed exposes explicit supported modes', () => {
   for (const mode of ['for-you', 'discussions', 'trending', 'recent']) {
