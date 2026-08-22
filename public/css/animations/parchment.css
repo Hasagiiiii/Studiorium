@@ -220,7 +220,10 @@
   }
 }
 
-html[data-motion='reduced'] .parchment-transition-layer,
+html[data-motion='reduced'] .parchment-transition-layer {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .parchment-transition-layer {
     display: none;
