@@ -251,6 +251,7 @@ function customTemplate(row) {
     sourceType: row.source_type,
     status: row.status,
     featured: row.featured === true,
+    document: row.document || null,
     payload: row.payload || {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
