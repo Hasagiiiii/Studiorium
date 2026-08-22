@@ -1,11 +1,11 @@
-import { app, state, E, date, num, html } from '../runtime.js';
+import { app, state, E, date, num } from '../runtime.js';
 
 function link(path, label, cls = '') {
-  return html`<a href="${path}" data-link class="${cls}">${label}</a>`;
+  return `<a href="${path}" data-link class="${cls}">${label}</a>`;
 }
 
 function nav() {
-  const r = location.pathname;
+  const route = location.pathname;
   const settings = state.boot?.settings || {};
   const title = String(settings.site_title || 'Studiorium');
   const items = [
@@ -13,134 +13,272 @@ function nav() {
     ['/projetos', 'Projetos'],
     ['/noticias', 'Notícias'],
     ['/oficina', 'Oficina'],
-    ['/comunidades/design-templates', 'Criação'],
     ['/atelie', 'Ateliê'],
     ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
   ];
-  if (state.me?.role === 'admin') items.push(['/admin', 'ADM']);
-  return html`<nav class="nav">
-    <div class="shell navin">
-      <a href="/" data-link class="brand"
-        ><span class="seal">S</span
-        ><span><strong>${E(title)}</strong><small>Ars · Scientia · Disciplina</small></span></a
-      >
-      <div class="navlinks">
-        ${items
-          .map(
-            ([p, l]) =>
-              html`<a href="${p}" data-link class="${r.startsWith(p) ? 'active' : ''}">${l}</a>`,
-          )
-          .join('')}
-      </div>
-      <div class="nav-actions">
-        ${state.me
-          ? html`<button
-                class="notification-trigger"
-                type="button"
-                data-notifications
-                aria-label="Abrir notificações"
-                aria-expanded="false"
-              >
-                <span aria-hidden="true">♢</span>
-                ${state.unreadNotificationCount
-                  ? html`<strong>${Math.min(state.unreadNotificationCount, 99)}</strong>`
-                  : ''}</button
-              ><a href="/escrivaninha" data-link class="outline"
-                >${E(state.me.displayName.split(' ')[0])}</a
-              ><button class="iconbtn mobile" data-menu aria-label="Abrir menu">☰</button>`
-          : html`<a href="/login" data-link class="outline">Entrar</a
-              >${settings.registrations_open === false
-                ? ''
-                : html`<a href="/cadastro" data-link class="solid">Criar conta</a>`}<button
-                class="iconbtn mobile"
-                data-menu
-                aria-label="Abrir menu"
-              >
-                ☰
-              </button>`}
-      </div>
-    </div>
-    <div id="mobileMenu" class="hidden shell" style="padding:0 0 16px">
-      ${items
-        .map(
-          ([p, l]) =>
-            html`<a
-              href="${p}"
-              data-link
-              style="display:block;padding:10px 0;color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.1em"
-              >${l}</a
-            >`,
-        )
-        .join('')}
-    </div>
-    ${state.me ? notificationPanel() : ''}
-  </nav>`;
+
+  if (state.me?.role === 'admin') {
+    items.push(['/admin', 'ADM']);
+  }
+
+  const desktopLinks = items
+    .map(([path, label]) => {
+      const active = route.startsWith(path) ? 'active' : '';
+      return `<a href="${path}" data-link class="${active}">${label}</a>`;
+    })
+    .join('');
+
+  const unreadBadge = state.unreadNotificationCount
+    ? `<strong>${Math.min(state.unreadNotificationCount, 99)}</strong>`
+    : '';
+
+  const accountActions = state.me
+    ? [
+        '<button class="notification-trigger" type="button" data-notifications',
+        ' aria-label="Abrir notificações" aria-expanded="false">',
+        '<span aria-hidden="true">♢</span>',
+        unreadBadge,
+        '</button>',
+        `<a href="/escrivaninha" data-link class="outline">${E(
+          state.me.displayName.split(' ')[0],
+        )}</a>`,
+        '<button class="iconbtn mobile" data-menu aria-label="Abrir menu">☰</button>',
+      ].join('')
+    : [
+        '<a href="/login" data-link class="outline">Entrar</a>',
+        settings.registrations_open === false
+          ? ''
+          : '<a href="/cadastro" data-link class="solid">Criar conta</a>',
+        '<button class="iconbtn mobile" data-menu aria-label="Abrir menu">☰</button>',
+      ].join('');
+
+  const mobileLinks = items
+    .map(([path, label]) => {
+      const style = [
+        'display:block',
+        'padding:10px 0',
+        'color:var(--muted)',
+        'text-transform:uppercase',
+        'font-size:11px',
+        'letter-spacing:.1em',
+      ].join(';');
+      return `<a href="${path}" data-link style="${style}">${label}</a>`;
+    })
+    .join('');
+
+  return [
+    '<nav class="nav">',
+    '<div class="shell navin">',
+    '<a href="/" data-link class="brand">',
+    '<span class="seal">S</span>',
+    `<span><strong>${E(title)}</strong><small>Ars · Scientia · Disciplina</small></span>`,
+    '</a>',
+    `<div class="navlinks">${desktopLinks}</div>`,
+    `<div class="nav-actions">${accountActions}</div>`,
+    '</div>',
+    `<div id="mobileMenu" class="hidden shell" style="padding:0 0 16px">${mobileLinks}</div>`,
+    state.me ? notificationPanel() : '',
+    '</nav>',
+  ].join('');
 }
 
 function notificationPanel() {
-  return html`<aside class="notification-panel" data-notification-panel aria-label="Notificações">
-    <div class="notification-head">
-      <div><span class="eyebrow">Nuntii</span><h2>Notificações</h2></div>
-      <div class="actions">
-        ${state.unreadNotificationCount ? html`<button class="soft" type="button" data-notifications-read-all>Marcar lidas</button>` : ''}
-        <button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">×</button>
-      </div>
-    </div>
-    <div class="notification-list">
-      ${state.notifications.length
-        ? state.notifications.map((item) => html`<button type="button" class="notification-item ${item.readAt ? '' : 'unread'}" data-notification-open="${E(item.id)}" data-notification-link="${E(item.link || '')}"><span class="notification-mark" aria-hidden="true"></span><span><strong>${E(item.title)}</strong><small>${E(item.message)}</small><time>${date(item.createdAt)}</time></span></button>`).join('')
-        : html`<div class="empty">Nenhuma notificação por enquanto.</div>`}
-    </div>
-  </aside>`;
+  const readAllButton = state.unreadNotificationCount
+    ? '<button class="soft" type="button" data-notifications-read-all>Marcar lidas</button>'
+    : '';
+
+  const notifications = state.notifications.length
+    ? state.notifications
+        .map((item) => {
+          const unreadClass = item.readAt ? '' : 'unread';
+          return [
+            `<button type="button" class="notification-item ${unreadClass}"`,
+            ` data-notification-open="${E(item.id)}"`,
+            ` data-notification-link="${E(item.link || '')}">`,
+            '<span class="notification-mark" aria-hidden="true"></span>',
+            '<span>',
+            `<strong>${E(item.title)}</strong>`,
+            `<small>${E(item.message)}</small>`,
+            `<time>${date(item.createdAt)}</time>`,
+            '</span>',
+            '</button>',
+          ].join('');
+        })
+        .join('')
+    : '<div class="empty">Nenhuma notificação por enquanto.</div>';
+
+  return [
+    '<aside class="notification-panel" data-notification-panel aria-label="Notificações">',
+    '<div class="notification-head">',
+    '<div><span class="eyebrow">Nuntii</span><h2>Notificações</h2></div>',
+    '<div class="actions">',
+    readAllButton,
+    '<button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">×</button>',
+    '</div>',
+    '</div>',
+    `<div class="notification-list">${notifications}</div>`,
+    '</aside>',
+  ].join('');
 }
 
 function footer() {
-  return html`<footer class="footer">
-    <div class="shell footergrid">
-      <div>
-        <div class="brand"><span class="seal">S</span><span><strong>Studiorium</strong><small>Bibliotheca digitalis</small></span></div>
-        <p>Uma plataforma para criar, publicar, pesquisar e discutir conhecimento com autoria, organização e responsabilidade.</p>
-      </div>
-      <div>
-        <h4>Studiorium</h4>
-        ${link('/biblioteca', 'Biblioteca')}${link('/comunidades/design-templates', 'Comunidade de Criação')}${link('/pesquisas', 'Pesquisas')}${link('/autores', 'Autores')}${link('/diretrizes', 'Diretrizes da comunidade')}
-      </div>
-      <div>
-        <h4>Criar</h4>
-        ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link('/estudio-templates', 'Estúdio Criativo')}${link('/redacao', 'Redação colaborativa')}${link('/comunidades/design-templates', 'Compartilhar criação')}${link('/sobre', 'Sobre o projeto')}
-      </div>
-    </div>
-  </footer>`;
+  const studioriumLinks = [
+    link('/biblioteca', 'Biblioteca'),
+    link('/comunidades/design-templates', 'Comunidade de Criação'),
+    link('/pesquisas', 'Pesquisas'),
+    link('/autores', 'Autores'),
+    link('/diretrizes', 'Diretrizes da comunidade'),
+  ].join('');
+
+  const creationLinks = [
+    link('/atelie', 'Ateliê Científico'),
+    link('/publicar', 'Publicar pesquisa'),
+    link('/estudio-templates', 'Estúdio Criativo'),
+    link('/redacao', 'Redação colaborativa'),
+    link('/comunidades/design-templates', 'Compartilhar criação'),
+    link('/sobre', 'Sobre o projeto'),
+  ].join('');
+
+  return [
+    '<footer class="footer"><div class="shell footergrid">',
+    '<div><div class="brand"><span class="seal">S</span>',
+    '<span><strong>Studiorium</strong><small>Bibliotheca digitalis</small></span></div>',
+    '<p>Uma plataforma para criar, publicar, pesquisar e discutir conhecimento com autoria, ',
+    'organização e responsabilidade.</p></div>',
+    `<div><h4>Studiorium</h4>${studioriumLinks}</div>`,
+    `<div><h4>Criar</h4>${creationLinks}</div>`,
+    '</div></footer>',
+  ].join('');
 }
 
 function layout(content, opts = {}) {
   const settings = state.boot?.settings || {};
-  const alerts = `${settings.maintenance_mode ? html`<div class="site-alert danger"><div class="shell"><strong>Modo de manutenção ativo.</strong> O site continua acessível para revisão do administrador.</div></div>` : ''}${settings.site_notice ? html`<div class="site-alert"><div class="shell">${E(settings.site_notice)}</div></div>` : ''}`;
-  app.innerHTML = `${nav()}${alerts}<main id="conteudo">${content}</main>${opts.noFooter ? '' : footer()}`;
+  const maintenanceAlert = settings.maintenance_mode
+    ? [
+        '<div class="site-alert danger"><div class="shell">',
+        '<strong>Modo de manutenção ativo.</strong> ',
+        'O site continua acessível para revisão do administrador.',
+        '</div></div>',
+      ].join('')
+    : '';
+  const noticeAlert = settings.site_notice
+    ? `<div class="site-alert"><div class="shell">${E(settings.site_notice)}</div></div>`
+    : '';
+  const alerts = `${maintenanceAlert}${noticeAlert}`;
+  const footerContent = opts.noFooter ? '' : footer();
+  app.innerHTML = `${nav()}${alerts}<main id="conteudo">${content}</main>${footerContent}`;
 }
 
-function empty(text) { return html`<div class="empty">${E(text)}</div>`; }
+function empty(text) {
+  return `<div class="empty">${E(text)}</div>`;
+}
 
 function requireLogin() {
-  layout(html`<section class="pagehero"><div class="shell"><div class="card" style="max-width:620px;margin:auto;text-align:center"><div class="eyebrow">Área reservada</div><h1 class="pagetitle">Entre para continuar</h1><p>Essa função salva conteúdo em sua conta online do Studiorium.</p><div class="actions" style="justify-content:center">${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}</div></div></div></section>`);
+  const actions = `${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}`;
+  const content = [
+    '<section class="pagehero"><div class="shell">',
+    '<div class="card" style="max-width:620px;margin:auto;text-align:center">',
+    '<div class="eyebrow">Área reservada</div>',
+    '<h1 class="pagetitle">Entre para continuar</h1>',
+    '<p>Essa função salva conteúdo em sua conta online do Studiorium.</p>',
+    `<div class="actions" style="justify-content:center">${actions}</div>`,
+    '</div></div></section>',
+  ].join('');
+  layout(content);
 }
 
 function notFound() {
-  layout(html`<div class="errorpage"><div class="eyebrow">Error 404</div><h1>Página não encontrada</h1><p>Este registro não existe no arquivo do Studiorium.</p>${link('/', 'Voltar ao início', 'solid')}</div>`);
+  const content = [
+    '<div class="errorpage"><div class="eyebrow">Error 404</div>',
+    '<h1>Página não encontrada</h1>',
+    '<p>Este registro não existe no arquivo do Studiorium.</p>',
+    link('/', 'Voltar ao início', 'solid'),
+    '</div>',
+  ].join('');
+  layout(content);
 }
 
-function templateCard(t, i = 0) {
-  return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover"><div class="catno">CRIAÇÃO ${String(i + 1).padStart(2, '0')}</div><h3>${E(t.title)}</h3><p>${E(t.description || 'Modelo da comunidade pronto para adaptar.')}</p><div class="pills"><span class="pill">${E(t.category)}</span><span class="pill">${E(t.docType)}</span><span class="pill">${E(t.style || 'Clássico')}</span></div><div class="rule"></div><div class="meta"><span>${num(t.downloads)} consultas</span>${t.featured ? '<span class="brass">Destaque</span>' : ''}</div></a>`;
+function templateCard(template, index = 0) {
+  const categoryNumber = String(index + 1).padStart(2, '0');
+  const featured = template.featured ? '<span class="brass">Destaque</span>' : '';
+  const href = `/templates/${encodeURIComponent(template.slug)}`;
+
+  return [
+    `<a href="${href}" data-link class="card hover">`,
+    `<div class="catno">CRIAÇÃO ${categoryNumber}</div>`,
+    `<h3>${E(template.title)}</h3>`,
+    `<p>${E(template.description || 'Modelo da comunidade pronto para adaptar.')}</p>`,
+    '<div class="pills">',
+    `<span class="pill">${E(template.category)}</span>`,
+    `<span class="pill">${E(template.docType)}</span>`,
+    `<span class="pill">${E(template.style || 'Clássico')}</span>`,
+    '</div><div class="rule"></div>',
+    `<div class="meta"><span>${num(template.downloads)} consultas</span>${featured}</div>`,
+    '</a>',
+  ].join('');
 }
 
-function publicationCard(p) {
-  return html`<article class="card hover publication-card">${p.coverName ? html`<img class="publication-cover" src="/api/publications/${encodeURIComponent(p.id)}/cover" alt="Foto de apresentação de ${E(p.title)}" loading="lazy" />` : ''}<div class="eyebrow">${E(p.area || 'Pesquisa')}</div><h3>${link('/pesquisas/' + encodeURIComponent(p.slug), E(p.title), 'library-title')}</h3><p>${E((p.abstract || '').slice(0, 180))}${(p.abstract || '').length > 180 ? '…' : ''}</p><div class="pills">${(p.keywords || []).slice(0, 4).map((k) => html`<span class="pill">${E(k)}</span>`).join('')}</div><div class="rule"></div><div class="meta"><span>por ${E(p.authorName)}</span><span>${num(p.views)} leituras</span><span><strong data-boost-count="${E(p.id)}">${num(p.boosts)}</strong> impulsos</span><span>${date(p.createdAt)}</span></div><div class="actions publication-actions">${link('/pesquisas/' + encodeURIComponent(p.slug), 'Abrir trabalho', 'outline')}<button class="soft" type="button" data-publication-boost="${E(p.id)}">Impulsionar</button></div></article>`;
+function publicationCard(publication) {
+  const publicationPath = '/pesquisas/' + encodeURIComponent(publication.slug);
+  const cover = publication.coverName
+    ? [
+        '<img class="publication-cover"',
+        ` src="/api/publications/${encodeURIComponent(publication.id)}/cover"`,
+        ` alt="Foto de apresentação de ${E(publication.title)}" loading="lazy" />`,
+      ].join('')
+    : '';
+  const abstract = E((publication.abstract || '').slice(0, 180));
+  const abstractSuffix = (publication.abstract || '').length > 180 ? '…' : '';
+  const keywords = (publication.keywords || [])
+    .slice(0, 4)
+    .map((keyword) => `<span class="pill">${E(keyword)}</span>`)
+    .join('');
+
+  return [
+    '<article class="card hover publication-card">',
+    cover,
+    `<div class="eyebrow">${E(publication.area || 'Pesquisa')}</div>`,
+    `<h3>${link(publicationPath, E(publication.title), 'library-title')}</h3>`,
+    `<p>${abstract}${abstractSuffix}</p>`,
+    `<div class="pills">${keywords}</div><div class="rule"></div>`,
+    '<div class="meta">',
+    `<span>por ${E(publication.authorName)}</span>`,
+    `<span>${num(publication.views)} leituras</span>`,
+    `<span><strong data-boost-count="${E(publication.id)}">${num(
+      publication.boosts,
+    )}</strong> impulsos</span>`,
+    `<span>${date(publication.createdAt)}</span>`,
+    '</div><div class="actions publication-actions">',
+    link(publicationPath, 'Abrir trabalho', 'outline'),
+    `<button class="soft" type="button" data-publication-boost="${E(
+      publication.id,
+    )}">Impulsionar</button>`,
+    '</div></article>',
+  ].join('');
 }
 
-function discussionRow(d, i, basePath = '/coloquio') {
-  const href = `${String(basePath || '/coloquio').replace(/\/$/, '')}/${encodeURIComponent(d.id)}`;
-  return html`<a href="${href}" data-link class="discussion-row"><span><span class="catno">${String(i + 1).padStart(2, '0')}</span> &nbsp; <strong>${E(d.title)}</strong></span><small>${E(d.category)}</small></a>`;
+function discussionRow(discussion, index, basePath = '/coloquio') {
+  const cleanBasePath = String(basePath || '/coloquio').replace(/\/$/, '');
+  const href = `${cleanBasePath}/${encodeURIComponent(discussion.id)}`;
+  const categoryNumber = String(index + 1).padStart(2, '0');
+  return [
+    `<a href="${href}" data-link class="discussion-row"><span>`,
+    `<span class="catno">${categoryNumber}</span> &nbsp; `,
+    `<strong>${E(discussion.title)}</strong></span>`,
+    `<small>${E(discussion.category)}</small></a>`,
+  ].join('');
 }
 
-export { link, nav, footer, layout, empty, requireLogin, notFound, templateCard, publicationCard, discussionRow };
+export {
+  link,
+  nav,
+  footer,
+  layout,
+  empty,
+  requireLogin,
+  notFound,
+  templateCard,
+  publicationCard,
+  discussionRow,
+};

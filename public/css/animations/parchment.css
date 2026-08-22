@@ -1,0 +1,101 @@
+.parchment-transition-stage {
+  position: fixed;
+  z-index: 1200;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 24px 54px rgb(0 0 0 / 0.38));
+}
+
+.parchment-transition-sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--brass2) 46%, #5f4930);
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 24% 18%, rgb(255 255 255 / 0.13), transparent 28%),
+    radial-gradient(circle at 80% 74%, rgb(79 48 22 / 0.12), transparent 34%),
+    linear-gradient(96deg, #c7aa76, #ead6a5 16%, #d8bc86 50%, #ead6a5 84%, #b89561);
+  box-shadow:
+    inset 0 0 54px rgb(83 52 27 / 0.24),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.parchment-transition-sheet::before,
+.parchment-transition-sheet::after {
+  position: absolute;
+  inset-block: 0;
+  width: 15%;
+  content: '';
+  opacity: 0.28;
+  background: linear-gradient(90deg, rgb(63 37 19 / 0.72), transparent);
+}
+
+.parchment-transition-sheet::before {
+  left: 0;
+}
+
+.parchment-transition-sheet::after {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.parchment-roll {
+  position: absolute;
+  top: -1.5%;
+  bottom: -1.5%;
+  width: 23px;
+  border: 1px solid rgb(70 43 23 / 0.42);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #72502f, #c39c64 46%, #815b35 100%);
+  box-shadow: 0 6px 15px rgb(0 0 0 / 0.28);
+}
+
+.parchment-roll-left {
+  left: -10px;
+}
+
+.parchment-roll-right {
+  right: -10px;
+}
+
+.parchment-seal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  width: 54px;
+  aspect-ratio: 1;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgb(70 30 23 / 0.44);
+  border-radius: 50%;
+  color: #e7cfab;
+  background: radial-gradient(circle at 35% 30%, #923f32, #5f221d 72%);
+  box-shadow: 0 7px 17px rgb(59 26 20 / 0.28);
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.parchment-transition-source {
+  opacity: 0.22;
+  transition: opacity 160ms ease;
+}
+
+.parchment-transition-active {
+  overflow-x: hidden;
+}
+
+@media (max-width: 640px) {
+  .parchment-roll {
+    width: 18px;
+  }
+
+  .parchment-seal {
+    width: 46px;
+  }
+}
+
+html[data-motion='reduced'] .parchment-transition-stage {
+  display: none;
+}
