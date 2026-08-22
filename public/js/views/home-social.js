@@ -4,7 +4,9 @@ import { buildFeed, feedPost } from './home-social-feed.js';
 import {
   renderBooks,
   renderCommunities,
+  renderCommunityPulse,
   renderComposer,
+  renderCreationHub,
   renderExperts,
   renderProjects,
   renderTopics,
@@ -46,6 +48,7 @@ function leftSidebar(data) {
     <div class="social-panel social-menu">
       <h3>Explorar</h3>
       ${link('/comunidades', '♧ Comunidades')}
+      ${link('/comunidades/design-templates', '✦ Criação')}
       ${link('/projetos', '⌘ Projetos')}
       ${link('/biblioteca', '▤ Biblioteca')}
       ${link('/coloquio', '◌ Discussões')}
@@ -76,6 +79,7 @@ function discoveryStrip() {
   return markup`<div class="social-discovery-strip">
     ${link('/coloquio', '<strong>Discussões</strong>Entre na conversa')}
     ${link('/projetos', '<strong>Projetos</strong>Veja o que estão criando')}
+    ${link('/comunidades/design-templates', '<strong>Criação</strong>Templates, materiais e ideias')}
     ${link('/biblioteca', '<strong>Biblioteca</strong>Livros e pesquisas')}
     ${link('/oficina', '<strong>Tutoriais</strong>Aprenda fazendo')}
   </div>`;
@@ -94,13 +98,21 @@ function feedColumn(feed) {
       ${link('/pesquisas', 'Em alta')}
       ${link('/coloquio', 'Novos')}
     </div>
-    ${renderComposer()}
+    ${renderComposer()} ${renderCreationHub()}
     <div class="social-feed-list">${posts}</div>
   </main>`;
 }
 
 function rightSidebar(data) {
   return markup`<aside class="social-right">
+    <div class="social-panel social-pulse-panel">
+      <div class="social-panel-head">
+        <h3>Pulso da comunidade</h3>
+        ${link('/comunidades', 'Explorar')}
+      </div>
+      ${renderCommunityPulse(data.pulse)}
+    </div>
+
     <div class="social-panel">
       <div class="social-panel-head">
         <h3>Projetos em alta</h3>
