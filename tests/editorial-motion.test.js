@@ -30,5 +30,8 @@ test('pergaminho abre também modelos e matérias sem nova aba', () => {
   assert.match(motion, /\/modelos-livres\\\//);
   assert.match(motion, /\/noticias\\\//);
   assert.match(motion, /link\.target && link\.target !== '_self'/);
-  assert.match(motion, /goto\(link\.pathname \+ link\.search \+ link\.hash\)/);
+  assert.match(motion, /const destination = link\.pathname \+ link\.search \+ link\.hash/);
+  assert.match(motion, /runParchmentTransition\(link, destination\)/);
+  assert.match(motion, /await goto\(destination\)/);
+  assert.doesNotMatch(motion, /window\.open/);
 });
