@@ -25,7 +25,8 @@ function routeTheme() {
   if (path.startsWith('/comunidades')) return 'community';
   if (path.startsWith('/autores')) return 'profile';
   if (path.startsWith('/escrivaninha')) return 'workspace';
-  if (path.startsWith('/estudio-templates') || path.startsWith('/modelos-livres')) return 'creation';
+  if (path.startsWith('/estudio-templates') || path.startsWith('/modelos-livres'))
+    return 'creation';
   return 'general';
 }
 
