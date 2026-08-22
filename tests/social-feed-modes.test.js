@@ -1,15 +1,11 @@
-import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import test from 'node:test';
+const assert = require('node:assert/strict');
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
+const test = require('node:test');
 
-const feedSource = await readFile(
-  new URL('../public/js/views/home-social-feed.js', import.meta.url),
-  'utf8',
-);
-const homeSource = await readFile(
-  new URL('../public/js/views/home-social.js', import.meta.url),
-  'utf8',
-);
+const root = path.join(__dirname, '..');
+const feedSource = readFileSync(path.join(root, 'public/js/views/home-social-feed.js'), 'utf8');
+const homeSource = readFileSync(path.join(root, 'public/js/views/home-social.js'), 'utf8');
 
 test('feed exposes explicit supported modes', () => {
   for (const mode of ['for-you', 'discussions', 'trending', 'recent']) {
