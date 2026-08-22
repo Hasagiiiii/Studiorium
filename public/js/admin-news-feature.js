@@ -345,17 +345,19 @@ async function enhanceAdminNews() {
 }
 
 export function installAdminNewsFeature() {
-  void enhanceAdminNews();
   const root = document.getElementById('app');
   if (!root) return;
+
   if (!eventsInstalled) {
     eventsInstalled = true;
     document.addEventListener('click', (event) => {
       void handleManagerClick(event);
     });
   }
-  const observer = new MutationObserver(() => {
+
+  document.addEventListener('studiorium:rendered', () => {
     void enhanceAdminNews();
   });
-  observer.observe(root, { childList: true, subtree: true });
+
+  if (root.childElementCount) void enhanceAdminNews();
 }
