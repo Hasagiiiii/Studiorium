@@ -11,8 +11,7 @@
   inset: 0;
   opacity: 0;
   background:
-    radial-gradient(circle at 50% 44%, rgb(76 55 35 / 0.13), transparent 34%),
-    rgb(13 10 8 / 0.58);
+    radial-gradient(circle at 50% 44%, rgb(76 55 35 / 0.13), transparent 34%), rgb(13 10 8 / 0.58);
   backdrop-filter: blur(2px);
 }
 
@@ -73,22 +72,12 @@
 
 .parchment-transition-paper::before {
   left: 0;
-  background: linear-gradient(
-    90deg,
-    rgb(64 37 18 / 0.72),
-    rgb(111 78 42 / 0.18),
-    transparent
-  );
+  background: linear-gradient(90deg, rgb(64 37 18 / 0.72), rgb(111 78 42 / 0.18), transparent);
 }
 
 .parchment-transition-paper::after {
   right: 0;
-  background: linear-gradient(
-    270deg,
-    rgb(64 37 18 / 0.72),
-    rgb(111 78 42 / 0.18),
-    transparent
-  );
+  background: linear-gradient(270deg, rgb(64 37 18 / 0.72), rgb(111 78 42 / 0.18), transparent);
 }
 
 .parchment-watermark {
