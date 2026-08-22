@@ -36,6 +36,9 @@
 /* Linguagem social compartilhada nas áreas públicas da plataforma. */
 @import url('/css/social-system.css');
 
+/* Componentes sociais de criação, dados e microinterações. */
+@import url('/css/social-experience.css');
+
 /* Acabamento da experiência social. */
 @import url('/css/social-final-polish.css');
 

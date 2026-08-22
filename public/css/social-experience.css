@@ -1,0 +1,220 @@
+/* Studiorium Social — componentes de criação, dados e microinterações. */
+
+.social-creation-hub {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px 16px;
+  align-items: start;
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--brass) 30%, var(--line));
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      color-mix(in srgb, var(--brass) 12%, transparent),
+      transparent 36%
+    ),
+    linear-gradient(145deg, color-mix(in srgb, var(--moss) 8%, var(--panel)), var(--panel));
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--bg) 76%, transparent);
+}
+
+.social-creation-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--brass) 35%, var(--line));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--brass) 12%, var(--panel2));
+  color: var(--brass2);
+  font-size: 1.15rem;
+}
+
+.social-creation-hub h3 {
+  margin: 4px 0 6px;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.social-creation-hub p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.social-creation-hub > .actions {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.social-pulse {
+  display: grid;
+  gap: 12px;
+}
+
+.social-pulse-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+}
+
+.social-pulse-symbol {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--surface-soft);
+  color: var(--brass2);
+  font-family: var(--serif);
+}
+
+.social-pulse-copy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 7px;
+  min-width: 0;
+}
+
+.social-pulse-copy strong {
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.social-pulse-copy small {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.social-pulse-copy i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 4px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.social-pulse-copy i > b {
+  display: block;
+  width: var(--pulse, 8%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brass), var(--brass2));
+}
+
+@keyframes social-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.994);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+html[data-motion='full'] .social-hero-brand,
+html[data-motion='full'] .social-search,
+html[data-motion='full'] .social-feed-tabs,
+html[data-motion='full'] .social-composer,
+html[data-motion='full'] .social-creation-hub,
+html[data-motion='full'] .social-post,
+html[data-motion='full'] .social-panel {
+  animation: social-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-motion='full'] .social-feed-list > .social-post:nth-child(2n),
+html[data-motion='full'] .social-right > .social-panel:nth-child(2n) {
+  animation-delay: 45ms;
+}
+
+html[data-motion='full'] .social-feed-list > .social-post:nth-child(3n),
+html[data-motion='full'] .social-left > .social-panel:nth-child(3n) {
+  animation-delay: 80ms;
+}
+
+.social-post,
+.social-panel,
+.social-composer,
+.social-creation-hub,
+.social-discovery-strip > a {
+  transform-origin: center;
+}
+
+.social-post:focus-within,
+.social-panel:focus-within,
+.social-creation-hub:focus-within {
+  border-color: color-mix(in srgb, var(--brass) 52%, var(--line));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brass) 14%, transparent);
+}
+
+html[data-motion='full'] .social-action:active,
+html[data-motion='full'] .social-feed-tabs button:active,
+html[data-motion='full'] .social-discovery-strip > a:active {
+  transform: scale(0.975);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .social-discovery-strip > a,
+  .social-panel a,
+  .social-action {
+    transition:
+      transform 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .social-discovery-strip > a:hover {
+    transform: translateY(-2px);
+  }
+
+  .social-action:hover,
+  .social-panel a:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 760px) {
+  .social-creation-hub {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .social-creation-hub > .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .social-creation-hub > .actions > * {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .social-creation-hub {
+    grid-template-columns: 1fr;
+  }
+
+  .social-creation-mark {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-discovery-strip > a,
+  .social-panel a,
+  .social-action {
+    transition: none;
+  }
+}
