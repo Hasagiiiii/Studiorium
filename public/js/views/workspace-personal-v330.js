@@ -27,7 +27,7 @@ function mediaEditor(user, kind, title, description) {
     <div class="workspace-media-copy">
       <strong>${E(title)}</strong>
       <p>${E(description)}</p>
-      <input class="field" type="file" name="image" accept="image/jpeg,image/png,image/webp" />
+      <input class="field" type="file" name="image" accept="image/*" />
       <div class="actions">
         <button class="solid" type="submit" value="upload">Atualizar</button>
         ${hasMedia ? '<button class="outline" type="submit" value="remove">Remover</button>' : ''}
@@ -83,13 +83,13 @@ function consolidateProfileCenter(user) {
             user,
             'avatar',
             'Foto de perfil',
-            'JPG, PNG ou WebP de até 3 MB. O enquadramento é automático na exibição.',
+            'Escolha uma foto do celular ou computador. Ela será otimizada automaticamente antes do envio.',
           )}
           ${mediaEditor(
             user,
             'cover',
             'Foto de capa',
-            'Use uma imagem horizontal. Ela acompanha a privacidade do seu perfil.',
+            'Use uma imagem horizontal. Ela será otimizada e seguirá a privacidade do seu perfil.',
           )}
         </div>
       </details>
