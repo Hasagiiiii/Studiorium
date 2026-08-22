@@ -69,39 +69,67 @@ async function renderRoute() {
 
   const p = location.pathname.replace(/\/+$/, '') || '/';
 
-  if (p === '/') return home();
-  if (['/biblioteca', '/library'].includes(p)) return biblioteca();
-  if (p.startsWith('/livros/')) return bookDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (['/oficina', '/tech'].includes(p)) return await oficina();
-  if (p.startsWith('/oficina/'))
+  if (p === '/') {
+    return home();
+  }
+  if (['/biblioteca', '/library'].includes(p)) {
+    return biblioteca();
+  }
+  if (p.startsWith('/livros/')) {
+    return bookDetail(decodeURIComponent(p.split('/')[2] || ''));
+  }
+  if (['/oficina', '/tech'].includes(p)) {
+    return await oficina();
+  }
+  if (p.startsWith('/oficina/')) {
     return await oficinaDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (p === '/laboratorio') return await laboratorio();
-  if (p.startsWith('/laboratorio/'))
+  }
+  if (p === '/laboratorio') {
+    return await laboratorio();
+  }
+  if (p.startsWith('/laboratorio/')) {
     return await laboratorio(decodeURIComponent(p.split('/')[2] || ''));
+  }
 
   if (['/acervo', '/explorar', '/templates'].includes(p)) {
     history.replaceState({}, '', '/comunidades/design-templates');
     return await comunidadeDetalhe('design-templates');
   }
-  if (p.startsWith('/templates/')) return templateDetail(decodeURIComponent(p.split('/')[2] || ''));
+  if (p.startsWith('/templates/')) {
+    return templateDetail(decodeURIComponent(p.split('/')[2] || ''));
+  }
 
-  if (p === '/pesquisas') return pesquisas();
-  if (p.startsWith('/pesquisas/'))
+  if (p === '/pesquisas') {
+    return pesquisas();
+  }
+  if (p.startsWith('/pesquisas/')) {
     return researchDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (p === '/projetos') return projetos();
-  if (p.startsWith('/projetos/'))
+  }
+  if (p === '/projetos') {
+    return projetos();
+  }
+  if (p.startsWith('/projetos/')) {
     return publicProjectDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (p === '/autores') return autores();
-  if (p.startsWith('/autores/')) return authorDetail(decodeURIComponent(p.split('/')[2] || ''));
+  }
+  if (p === '/autores') {
+    return autores();
+  }
+  if (p.startsWith('/autores/')) {
+    return authorDetail(decodeURIComponent(p.split('/')[2] || ''));
+  }
 
-  if (p === '/comunidades') return await comunidades();
+  if (p === '/comunidades') {
+    return await comunidades();
+  }
   if (p === '/coloquio' || p === '/comunidade') {
     history.replaceState({}, '', '/comunidades');
     return await comunidades();
   }
 
   const communityThread = p.match(/^\/comunidades\/([^/]+)\/coloquio\/([^/]+)$/);
-  if (communityThread) return await thread(decodeURIComponent(communityThread[2]));
+  if (communityThread) {
+    return await thread(decodeURIComponent(communityThread[2]));
+  }
 
   const communityColloquium = p.match(/^\/comunidades\/([^/]+)\/coloquio$/);
   if (communityColloquium) {
@@ -111,29 +139,55 @@ async function renderRoute() {
   }
 
   const communityDetail = p.match(/^\/comunidades\/([^/]+)$/);
-  if (communityDetail) return await comunidadeDetalhe(decodeURIComponent(communityDetail[1]));
-  if (p.startsWith('/coloquio/') || p.startsWith('/comunidade/'))
+  if (communityDetail) {
+    return await comunidadeDetalhe(decodeURIComponent(communityDetail[1]));
+  }
+  if (p.startsWith('/coloquio/') || p.startsWith('/comunidade/')) {
     return await thread(decodeURIComponent(p.split('/')[2] || ''));
+  }
 
-  if (p === '/login') return login();
-  if (p === '/recuperar-senha') return requestPasswordReset();
-  if (p === '/redefinir-senha') return resetPassword();
-  if (p === '/noticias') return noticias();
-  if (p.startsWith('/noticias/'))
+  if (p === '/login') {
+    return login();
+  }
+  if (p === '/recuperar-senha') {
+    return requestPasswordReset();
+  }
+  if (p === '/redefinir-senha') {
+    return resetPassword();
+  }
+  if (p === '/noticias') {
+    return noticias();
+  }
+  if (p.startsWith('/noticias/')) {
     return await newsDetail(decodeURIComponent(p.split('/')[2] || ''));
-  if (p === '/redacao') return await redacao();
-  if (p.startsWith('/redacao/')) return await redacao(decodeURIComponent(p.split('/')[2] || ''));
-  if (p === '/estudio-templates') return await templateStudio();
-  if (p.startsWith('/estudio-templates/'))
+  }
+  if (p === '/redacao') {
+    return await redacao();
+  }
+  if (p.startsWith('/redacao/')) {
+    return await redacao(decodeURIComponent(p.split('/')[2] || ''));
+  }
+  if (p === '/estudio-templates') {
+    return await templateStudio();
+  }
+  if (p.startsWith('/estudio-templates/')) {
     return await templateEditor(decodeURIComponent(p.split('/')[2] || ''));
-  if (p.startsWith('/modelos-livres/'))
+  }
+  if (p.startsWith('/modelos-livres/')) {
     return await publicCustomTemplate(decodeURIComponent(p.split('/')[2] || ''));
+  }
 
-  if (p === '/cadastro') return cadastro();
-  if (['/escrivaninha', '/dashboard'].includes(p)) return await escrivaninha();
+  if (p === '/cadastro') {
+    return cadastro();
+  }
+  if (['/escrivaninha', '/dashboard'].includes(p)) {
+    return await escrivaninha();
+  }
 
   if (p === '/editor/novo') {
-    if (!state.me) return requireLogin();
+    if (!state.me) {
+      return requireLogin();
+    }
     const { api } = await import('./runtime.js');
     const data = await api('/api/projects', {
       method: 'POST',
@@ -143,23 +197,55 @@ async function renderRoute() {
     return await editor(data.project.id);
   }
 
-  if (p.startsWith('/editor/')) return await editor(decodeURIComponent(p.split('/')[2] || ''));
-  if (['/publicar', '/dashboard/publicar'].includes(p)) return await publicar();
-  if (['/atelie', '/banner-cientifico'].includes(p)) return atelie();
-  if (p === '/moderacao' || p === '/admin/moderacao') return await moderacao();
+  if (p.startsWith('/editor/')) {
+    return await editor(decodeURIComponent(p.split('/')[2] || ''));
+  }
+  if (['/publicar', '/dashboard/publicar'].includes(p)) {
+    return await publicar();
+  }
+  if (['/atelie', '/banner-cientifico'].includes(p)) {
+    return atelie();
+  }
+  if (p === '/moderacao' || p === '/admin/moderacao') {
+    return await moderacao();
+  }
 
-  if (p === '/admin') return await adminPanel('overview');
-  if (p === '/admin/usuarios') return await adminPanel('usuarios');
-  if (p === '/admin/verificacoes') return await adminPanel('verificacoes');
-  if (p === '/admin/publicacoes') return await adminPanel('publicacoes');
-  if (p === '/admin/oficina') return await adminPanel('oficina');
-  if (p === '/admin/coloquio') return await adminPanel('coloquio');
-  if (p === '/admin/acervo') return await adminPanel('acervo');
-  if (p === '/admin/noticias') return await adminPanel('noticias');
-  if (p === '/admin/configuracoes') return await adminPanel('configuracoes');
-  if (p === '/admin/registro') return await adminPanel('registro');
-  if (p === '/diretrizes') return diretrizes();
-  if (p === '/sobre') return sobre();
+  if (p === '/admin') {
+    return await adminPanel('overview');
+  }
+  if (p === '/admin/usuarios') {
+    return await adminPanel('usuarios');
+  }
+  if (p === '/admin/verificacoes') {
+    return await adminPanel('verificacoes');
+  }
+  if (p === '/admin/publicacoes') {
+    return await adminPanel('publicacoes');
+  }
+  if (p === '/admin/oficina') {
+    return await adminPanel('oficina');
+  }
+  if (p === '/admin/coloquio') {
+    return await adminPanel('coloquio');
+  }
+  if (p === '/admin/acervo') {
+    return await adminPanel('acervo');
+  }
+  if (p === '/admin/noticias') {
+    return await adminPanel('noticias');
+  }
+  if (p === '/admin/configuracoes') {
+    return await adminPanel('configuracoes');
+  }
+  if (p === '/admin/registro') {
+    return await adminPanel('registro');
+  }
+  if (p === '/diretrizes') {
+    return diretrizes();
+  }
+  if (p === '/sobre') {
+    return sobre();
+  }
 
   return notFound();
 }
@@ -175,7 +261,9 @@ export async function render() {
 export function updateQuery(obj) {
   const q = new URLSearchParams();
   Object.entries(obj).forEach(([key, value]) => {
-    if (value) q.set(key, value);
+    if (value) {
+      q.set(key, value);
+    }
   });
   history.pushState({}, '', location.pathname + (q.toString() ? '?' + q : ''));
   render();
