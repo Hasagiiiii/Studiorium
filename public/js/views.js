@@ -11,14 +11,8 @@ export {
 } from './views/core.js';
 export { home } from './views/home-social.js';
 export { biblioteca, acervo, templateDetail } from './views/home-library.js';
-export {
-  pesquisas,
-  researchDetail,
-  projetos,
-  publicProjectDetail,
-  autores,
-  authorDetail,
-} from './views/research.js';
+export { pesquisas, researchDetail, projetos, publicProjectDetail } from './views/research.js';
+export { autores, authorDetail } from './views/profile-social.js';
 export {
   coloquio,
   thread,
