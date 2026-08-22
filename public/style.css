@@ -28,6 +28,7 @@
 @import url('/css/animations/parchment.css');
 @import url('/css/animations/studio-motion.css');
 @import url('/css/animations/editorial-motion.css');
+@import url('/css/animations/startup-loader.css');
 
 /* Polimentos específicos */
 @import url('/css/library-polish.css');
