@@ -262,12 +262,12 @@ async function enhanceAdminPublishedActions() {
 }
 
 export function installAdminPublishedActions() {
-  void enhanceAdminPublishedActions();
   const root = document.getElementById('app');
   if (!root) return;
 
-  const observer = new MutationObserver(() => {
+  document.addEventListener('studiorium:rendered', () => {
     void enhanceAdminPublishedActions();
   });
-  observer.observe(root, { childList: true, subtree: true });
+
+  if (root.childElementCount) void enhanceAdminPublishedActions();
 }
