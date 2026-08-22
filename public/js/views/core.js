@@ -78,17 +78,40 @@ function nav() {
 }
 
 function notificationPanel() {
-  return html`<aside class="notification-panel" data-notification-panel aria-label="Notificações">
+  return html`<aside
+    class="notification-panel"
+    data-notification-panel
+    aria-label="Notificações"
+  >
     <div class="notification-head">
       <div><span class="eyebrow">Nuntii</span><h2>Notificações</h2></div>
       <div class="actions">
-        ${state.unreadNotificationCount ? html`<button class="soft" type="button" data-notifications-read-all>Marcar lidas</button>` : ''}
+        ${state.unreadNotificationCount
+          ? html`<button class="soft" type="button" data-notifications-read-all>
+              Marcar lidas
+            </button>`
+          : ''}
         <button class="iconbtn" type="button" data-notifications-close aria-label="Fechar">×</button>
       </div>
     </div>
     <div class="notification-list">
       ${state.notifications.length
-        ? state.notifications.map((item) => html`<button type="button" class="notification-item ${item.readAt ? '' : 'unread'}" data-notification-open="${E(item.id)}" data-notification-link="${E(item.link || '')}"><span class="notification-mark" aria-hidden="true"></span><span><strong>${E(item.title)}</strong><small>${E(item.message)}</small><time>${date(item.createdAt)}</time></span></button>`).join('')
+        ? state.notifications
+            .map(
+              (item) => html`<button
+                type="button"
+                class="notification-item ${item.readAt ? '' : 'unread'}"
+                data-notification-open="${E(item.id)}"
+                data-notification-link="${E(item.link || '')}"
+              >
+                <span class="notification-mark" aria-hidden="true"></span>
+                <span
+                  ><strong>${E(item.title)}</strong><small>${E(item.message)}</small
+                  ><time>${date(item.createdAt)}</time></span
+                >
+              </button>`,
+            )
+            .join('')
         : html`<div class="empty">Nenhuma notificação por enquanto.</div>`}
     </div>
   </aside>`;
@@ -98,16 +121,34 @@ function footer() {
   return html`<footer class="footer">
     <div class="shell footergrid">
       <div>
-        <div class="brand"><span class="seal">S</span><span><strong>Studiorium</strong><small>Bibliotheca digitalis</small></span></div>
-        <p>Uma plataforma para criar, publicar, pesquisar e discutir conhecimento com autoria, organização e responsabilidade.</p>
+        <div class="brand">
+          <span class="seal">S</span
+          ><span><strong>Studiorium</strong><small>Bibliotheca digitalis</small></span>
+        </div>
+        <p>
+          Uma plataforma para criar, publicar, pesquisar e discutir conhecimento com autoria,
+          organização e responsabilidade.
+        </p>
       </div>
       <div>
         <h4>Studiorium</h4>
-        ${link('/biblioteca', 'Biblioteca')}${link('/comunidades/design-templates', 'Comunidade de Criação')}${link('/pesquisas', 'Pesquisas')}${link('/autores', 'Autores')}${link('/diretrizes', 'Diretrizes da comunidade')}
+        ${link('/biblioteca', 'Biblioteca')}${link(
+          '/comunidades/design-templates',
+          'Comunidade de Criação',
+        )}${link('/pesquisas', 'Pesquisas')}${link('/autores', 'Autores')}${link(
+          '/diretrizes',
+          'Diretrizes da comunidade',
+        )}
       </div>
       <div>
         <h4>Criar</h4>
-        ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link('/estudio-templates', 'Estúdio Criativo')}${link('/redacao', 'Redação colaborativa')}${link('/comunidades/design-templates', 'Compartilhar criação')}${link('/sobre', 'Sobre o projeto')}
+        ${link('/atelie', 'Ateliê Científico')}${link('/publicar', 'Publicar pesquisa')}${link(
+          '/estudio-templates',
+          'Estúdio Criativo',
+        )}${link('/redacao', 'Redação colaborativa')}${link(
+          '/comunidades/design-templates',
+          'Compartilhar criação',
+        )}${link('/sobre', 'Sobre o projeto')}
       </div>
     </div>
   </footer>`;
@@ -115,31 +156,122 @@ function footer() {
 
 function layout(content, opts = {}) {
   const settings = state.boot?.settings || {};
-  const alerts = `${settings.maintenance_mode ? html`<div class="site-alert danger"><div class="shell"><strong>Modo de manutenção ativo.</strong> O site continua acessível para revisão do administrador.</div></div>` : ''}${settings.site_notice ? html`<div class="site-alert"><div class="shell">${E(settings.site_notice)}</div></div>` : ''}`;
-  app.innerHTML = `${nav()}${alerts}<main id="conteudo">${content}</main>${opts.noFooter ? '' : footer()}`;
+  const maintenanceAlert = settings.maintenance_mode
+    ? html`<div class="site-alert danger">
+        <div class="shell">
+          <strong>Modo de manutenção ativo.</strong> O site continua acessível para revisão do
+          administrador.
+        </div>
+      </div>`
+    : '';
+  const noticeAlert = settings.site_notice
+    ? html`<div class="site-alert"><div class="shell">${E(settings.site_notice)}</div></div>`
+    : '';
+  const alerts = `${maintenanceAlert}${noticeAlert}`;
+  app.innerHTML = `${nav()}${alerts}<main id="conteudo">${content}</main>${
+    opts.noFooter ? '' : footer()
+  }`;
 }
 
-function empty(text) { return html`<div class="empty">${E(text)}</div>`; }
+function empty(text) {
+  return html`<div class="empty">${E(text)}</div>`;
+}
 
 function requireLogin() {
-  layout(html`<section class="pagehero"><div class="shell"><div class="card" style="max-width:620px;margin:auto;text-align:center"><div class="eyebrow">Área reservada</div><h1 class="pagetitle">Entre para continuar</h1><p>Essa função salva conteúdo em sua conta online do Studiorium.</p><div class="actions" style="justify-content:center">${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}</div></div></div></section>`);
+  layout(html`<section class="pagehero">
+    <div class="shell">
+      <div class="card" style="max-width:620px;margin:auto;text-align:center">
+        <div class="eyebrow">Área reservada</div>
+        <h1 class="pagetitle">Entre para continuar</h1>
+        <p>Essa função salva conteúdo em sua conta online do Studiorium.</p>
+        <div class="actions" style="justify-content:center">
+          ${link('/login', 'Entrar', 'solid')}${link('/cadastro', 'Criar conta', 'outline')}
+        </div>
+      </div>
+    </div>
+  </section>`);
 }
 
 function notFound() {
-  layout(html`<div class="errorpage"><div class="eyebrow">Error 404</div><h1>Página não encontrada</h1><p>Este registro não existe no arquivo do Studiorium.</p>${link('/', 'Voltar ao início', 'solid')}</div>`);
+  layout(html`<div class="errorpage">
+    <div class="eyebrow">Error 404</div>
+    <h1>Página não encontrada</h1>
+    <p>Este registro não existe no arquivo do Studiorium.</p>
+    ${link('/', 'Voltar ao início', 'solid')}
+  </div>`);
 }
 
 function templateCard(t, i = 0) {
-  return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover"><div class="catno">CRIAÇÃO ${String(i + 1).padStart(2, '0')}</div><h3>${E(t.title)}</h3><p>${E(t.description || 'Modelo da comunidade pronto para adaptar.')}</p><div class="pills"><span class="pill">${E(t.category)}</span><span class="pill">${E(t.docType)}</span><span class="pill">${E(t.style || 'Clássico')}</span></div><div class="rule"></div><div class="meta"><span>${num(t.downloads)} consultas</span>${t.featured ? '<span class="brass">Destaque</span>' : ''}</div></a>`;
+  return html`<a href="/templates/${encodeURIComponent(t.slug)}" data-link class="card hover">
+    <div class="catno">CRIAÇÃO ${String(i + 1).padStart(2, '0')}</div>
+    <h3>${E(t.title)}</h3>
+    <p>${E(t.description || 'Modelo da comunidade pronto para adaptar.')}</p>
+    <div class="pills">
+      <span class="pill">${E(t.category)}</span><span class="pill">${E(t.docType)}</span
+      ><span class="pill">${E(t.style || 'Clássico')}</span>
+    </div>
+    <div class="rule"></div>
+    <div class="meta">
+      <span>${num(t.downloads)} consultas</span
+      >${t.featured ? '<span class="brass">Destaque</span>' : ''}
+    </div>
+  </a>`;
 }
 
 function publicationCard(p) {
-  return html`<article class="card hover publication-card">${p.coverName ? html`<img class="publication-cover" src="/api/publications/${encodeURIComponent(p.id)}/cover" alt="Foto de apresentação de ${E(p.title)}" loading="lazy" />` : ''}<div class="eyebrow">${E(p.area || 'Pesquisa')}</div><h3>${link('/pesquisas/' + encodeURIComponent(p.slug), E(p.title), 'library-title')}</h3><p>${E((p.abstract || '').slice(0, 180))}${(p.abstract || '').length > 180 ? '…' : ''}</p><div class="pills">${(p.keywords || []).slice(0, 4).map((k) => html`<span class="pill">${E(k)}</span>`).join('')}</div><div class="rule"></div><div class="meta"><span>por ${E(p.authorName)}</span><span>${num(p.views)} leituras</span><span><strong data-boost-count="${E(p.id)}">${num(p.boosts)}</strong> impulsos</span><span>${date(p.createdAt)}</span></div><div class="actions publication-actions">${link('/pesquisas/' + encodeURIComponent(p.slug), 'Abrir trabalho', 'outline')}<button class="soft" type="button" data-publication-boost="${E(p.id)}">Impulsionar</button></div></article>`;
+  const cover = p.coverName
+    ? html`<img
+        class="publication-cover"
+        src="/api/publications/${encodeURIComponent(p.id)}/cover"
+        alt="Foto de apresentação de ${E(p.title)}"
+        loading="lazy"
+      />`
+    : '';
+  const abstract = E((p.abstract || '').slice(0, 180));
+  const abstractSuffix = (p.abstract || '').length > 180 ? '…' : '';
+  const keywords = (p.keywords || [])
+    .slice(0, 4)
+    .map((keyword) => html`<span class="pill">${E(keyword)}</span>`)
+    .join('');
+  const publicationPath = '/pesquisas/' + encodeURIComponent(p.slug);
+
+  return html`<article class="card hover publication-card">
+    ${cover}<div class="eyebrow">${E(p.area || 'Pesquisa')}</div>
+    <h3>${link(publicationPath, E(p.title), 'library-title')}</h3>
+    <p>${abstract}${abstractSuffix}</p>
+    <div class="pills">${keywords}</div>
+    <div class="rule"></div>
+    <div class="meta">
+      <span>por ${E(p.authorName)}</span><span>${num(p.views)} leituras</span
+      ><span><strong data-boost-count="${E(p.id)}">${num(p.boosts)}</strong> impulsos</span
+      ><span>${date(p.createdAt)}</span>
+    </div>
+    <div class="actions publication-actions">
+      ${link(publicationPath, 'Abrir trabalho', 'outline')}
+      <button class="soft" type="button" data-publication-boost="${E(p.id)}">Impulsionar</button>
+    </div>
+  </article>`;
 }
 
 function discussionRow(d, i, basePath = '/coloquio') {
   const href = `${String(basePath || '/coloquio').replace(/\/$/, '')}/${encodeURIComponent(d.id)}`;
-  return html`<a href="${href}" data-link class="discussion-row"><span><span class="catno">${String(i + 1).padStart(2, '0')}</span> &nbsp; <strong>${E(d.title)}</strong></span><small>${E(d.category)}</small></a>`;
+  return html`<a href="${href}" data-link class="discussion-row"
+    ><span
+      ><span class="catno">${String(i + 1).padStart(2, '0')}</span> &nbsp;
+      <strong>${E(d.title)}</strong></span
+    ><small>${E(d.category)}</small></a
+  >`;
 }
 
-export { link, nav, footer, layout, empty, requireLogin, notFound, templateCard, publicationCard, discussionRow };
+export {
+  link,
+  nav,
+  footer,
+  layout,
+  empty,
+  requireLogin,
+  notFound,
+  templateCard,
+  publicationCard,
+  discussionRow,
+};
