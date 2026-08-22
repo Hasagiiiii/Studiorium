@@ -46,7 +46,7 @@ async function templateStudio() {
             <h1 class="pagetitle">Estúdio livre de templates</h1>
             <p>Crie do zero, use fotos e importe JSON, PNG, JPG, WebP ou PDF como referência.</p>
           </div>
-          ${link('/acervo', 'Ver acervo', 'outline')}
+          ${link('/comunidades/design-templates', 'Voltar à Criação', 'outline')}
         </div>
         <div class="studio-start card">
           <div>
@@ -165,7 +165,7 @@ async function templateEditor(templateId) {
             <h1 class="pagetitle">${E(template.title)}</h1>
           </div>
           <div class="actions">
-            ${link('/estudio-templates', 'Voltar', 'outline')}
+            ${link('/comunidades/design-templates', 'Voltar à Criação', 'outline')}
             <button class="solid" data-save-custom-template="${E(template.id)}">Salvar</button>
             <button class="outline" data-submit-custom-template="${E(template.id)}">
               Enviar ao acervo

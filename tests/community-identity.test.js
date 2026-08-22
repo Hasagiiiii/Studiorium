@@ -53,11 +53,11 @@ test('perfil acadêmico declara formação sem permitir auto-verificação', () 
 });
 
 test('interface oferece pesquisa de usuários, selo e central interna responsiva', () => {
-  const research = read('public/js/views/research.js');
+  const profile = read('public/js/views/profile-social.js');
   const core = read('public/js/views/core.js');
   const styles = read('public/css/components.css');
-  assert.ok(research.includes('data-author-filter'));
-  assert.ok(research.includes('Especialista verificado'));
+  assert.ok(profile.includes('data-author-filter'));
+  assert.ok(profile.includes('Especialista verificado'));
   assert.ok(core.includes('data-notification-panel'));
   assert.ok(core.includes('data-notifications-read-all'));
   assert.ok(styles.includes('.notification-panel.open'));
@@ -99,6 +99,8 @@ test('projetos acadêmicos podem ser compartilhados sem expor notas privadas', (
   const projects = read('src/server/routes/projects.js');
   const serializers = read('src/server/serializers.js');
   const research = read('public/js/views/research.js');
+  const profile = read('public/js/views/profile-social.js');
+  const router = read('public/js/router.js');
   assert.ok(migration.includes("visibility in ('private', 'public')"));
   assert.ok(projects.includes("['private', 'public'].includes(body.visibility)"));
   assert.ok(serializers.includes('function publicProject'));
@@ -111,6 +113,8 @@ test('projetos acadêmicos podem ser compartilhados sem expor notas privadas', (
       .includes('notes:'),
     false,
   );
-  assert.ok(research.includes('Projetos da comunidade'));
-  assert.ok(research.includes('Projetos públicos deste autor'));
+  assert.ok(research.includes('function publicProjectDetail'));
+  assert.ok(router.includes("p.startsWith('/projetos/')"));
+  assert.ok(profile.includes("'Projetos'"));
+  assert.ok(profile.includes('stats.projects.map(projectCard)'));
 });

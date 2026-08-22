@@ -40,7 +40,8 @@ test('descoberta contextual conecta as áreas sem listas editoriais fixas', () =
   assert.match(intelligence, /emergentTopics/);
   assert.match(intelligence, /recurringTopics\.length >= 3/);
   assert.match(library, /Índice emergente/);
-  assert.match(library, /\.\.\.boot\.publications, \.\.\.boot\.templates/);
+  assert.match(library, /emergentTopics\(boot\.publications\)/);
+  assert.doesNotMatch(library, /\.\.\.boot\.publications, \.\.\.boot\.templates/);
   assert.match(news, /Contexto editorial/);
   assert.match(workshop, /Próximos passos/);
 });

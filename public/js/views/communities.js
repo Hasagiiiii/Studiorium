@@ -1,5 +1,5 @@
 import { api, E, html, state, num } from '../runtime.js';
-import { layout, link, empty, discussionRow } from './core.js';
+import { layout, link, empty, discussionRow, templateCard } from './core.js';
 
 const communityRoleLabels = {
   member: 'Membro',
@@ -178,7 +178,11 @@ function communityDiscussionItem(discussion, index, community, canModerateConten
     ${discussion.communityHidden
       ? '<span class="community-hidden-label">Oculto localmente</span>'
       : ''}
-    ${discussionRow(discussion, index)}
+    ${discussionRow(
+      discussion,
+      index,
+      `/comunidades/${encodeURIComponent(community.slug)}/coloquio`,
+    )}
     ${canModerateContent ? moderationButton(community, 'discussion', discussion) : ''}
   </div>`;
 }
@@ -193,6 +197,92 @@ function rulesBlock(community) {
         Esta comunidade ainda não possui regras locais adicionais. As Diretrizes do Studiorium
         continuam valendo integralmente.
       </div>`;
+}
+
+function creationCommunityHub(community) {
+  if (community.slug !== 'design-templates') return '';
+  const templates = state.boot?.templates || [];
+  const communityTemplates = (state.boot?.customTemplates || []).filter(
+    (template) => template.status === 'published',
+  );
+  const createActions = state.me
+    ? html`<button class="solid" type="button" data-new-custom-template>Criar em branco</button>
+        <label class="outline file-button">
+          Importar arquivo
+          <input data-import-template type="file" accept=".json,.png,.jpg,.jpeg,.webp,.pdf" />
+        </label>
+        ${link('/atelie', 'Banner científico', 'outline')}`
+    : link('/login', 'Entrar para criar', 'solid');
+
+  return html`<section class="community-section creation-community-hub" id="criacao">
+    <div class="sectionhead">
+      <div>
+        <div class="eyebrow">Creatio</div>
+        <h2>Criação e modelos</h2>
+      </div>
+      <div class="actions">${createActions}</div>
+    </div>
+    <p class="community-section-copy">
+      Este é o único hub de criação do Studiorium. Explore modelos, crie materiais ou abra uma
+      ferramenta específica sem manter catálogos paralelos.
+    </p>
+    <section class="studio-guided-start" aria-label="Criação assistida">
+      <div>
+        <span class="eyebrow">Criação assistida</span>
+        <h3>Comece pela intenção, não por outra página.</h3>
+        <p>
+          Os roteiros são locais e transparentes: a interface não finge geração por IA nem envia seu
+          conteúdo para um provedor externo.
+        </p>
+      </div>
+      <div class="grid grid3 studio-guided-grid">
+        <article class="studio-guided-option">
+          <h3>Banner científico</h3>
+          <p>Estrutura acadêmica com introdução, metodologia, resultados e referências.</p>
+          <button class="outline" type="button" data-guided-template="banner">Preparar</button>
+        </article>
+        <article class="studio-guided-option">
+          <h3>Apresentação</h3>
+          <p>Contexto, questão central, evidências e síntese em formato de apresentação.</p>
+          <button class="outline" type="button" data-guided-template="slides">Preparar</button>
+        </article>
+        <article class="studio-guided-option">
+          <h3>Material de estudo</h3>
+          <p>Conceitos-chave, resumo, prática e fontes para revisão organizada.</p>
+          <button class="outline" type="button" data-guided-template="estudo">Preparar</button>
+        </article>
+      </div>
+    </section>
+    <div class="grid grid3">
+      ${templates.slice(0, 9).map(templateCard).join('') || empty('Nenhum modelo-base disponível.')}
+    </div>
+    ${communityTemplates.length
+      ? html`<div class="sectionhead section-gap">
+            <div>
+              <div class="eyebrow">Communitas</div>
+              <h3>Modelos publicados pela comunidade</h3>
+            </div>
+          </div>
+          <div class="grid grid3">
+            ${communityTemplates
+              .slice(0, 9)
+              .map(
+                (template) =>
+                  html`<article class="card studio-card">
+                    <span class="badge">Modelo editável</span>
+                    <h3>${E(template.title)}</h3>
+                    <p>${E(template.description || 'Template publicado pela comunidade.')}</p>
+                    ${link(
+                      `/modelos-livres/${encodeURIComponent(template.id)}`,
+                      'Visualizar modelo',
+                      'outline',
+                    )}
+                  </article>`,
+              )
+              .join('')}
+          </div>`
+      : ''}
+  </section>`;
 }
 
 export async function comunidadeDetalhe(slug, options = {}) {
@@ -287,8 +377,11 @@ export async function comunidadeDetalhe(slug, options = {}) {
           >
           <a href="${canonical}#oficina">Oficina</a>
           <a href="${canonical}#regras">Regras</a>
+          ${community.slug === 'design-templates' ? '<a href="#criacao">Criação</a>' : ''}
           ${canManage ? '<a href="#gestao">Gestão</a>' : ''}
         </nav>
+
+        ${creationCommunityHub(community)}
 
         <section
           class="community-section ${focus === 'coloquio' ? 'community-focus' : ''}"

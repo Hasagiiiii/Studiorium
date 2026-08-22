@@ -27,6 +27,8 @@ function profile(row) {
     verificationStatus: row.verification_status || 'unverified',
     verifiedSpecialty: row.verified_specialty || '',
     contributionStatus: row.contribution_status || 'member',
+    hasAvatar: Boolean(row.avatar_path),
+    hasCover: Boolean(row.cover_path),
     verifiedAt: row.verified_at || null,
     createdAt: row.created_at,
   };
@@ -127,6 +129,8 @@ function adminUser(row, profile) {
     verificationStatus: profile?.verification_status || 'unverified',
     verifiedSpecialty: profile?.verified_specialty || '',
     contributionStatus: profile?.contribution_status || 'member',
+    hasAvatar: Boolean(profile?.avatar_path),
+    hasCover: Boolean(profile?.cover_path),
   };
 }
 
@@ -178,23 +182,9 @@ function book(row) {
 function bookSave(row) {
   return {
     bookId: row.book_id,
-    shelfStatus: row.shelf_status || 'want_to_read',
+    userId: row.user_id,
+    shelfStatus: row.shelf_status || 'quero_ler',
     createdAt: row.created_at,
-  };
-}
-function report(row) {
-  return {
-    id: row.id,
-    reporterId: row.reporter_id,
-    targetType: row.target_type,
-    targetId: row.target_id,
-    category: row.category,
-    description: row.description || '',
-    status: row.status,
-    priority: row.priority,
-    moderatorNote: row.moderator_note || '',
-    createdAt: row.created_at,
-    updatedAt: row.updated_at || null,
   };
 }
 
@@ -205,8 +195,8 @@ function techResource(row) {
     authorName: safePublicName(row.author_name),
     title: row.title,
     slug: row.slug,
-    summary: row.summary || '',
-    body: row.body || '',
+    summary: row.summary,
+    content: row.content || '',
     hub: row.hub,
     category: row.category,
     tags: row.tags || [],
@@ -216,35 +206,18 @@ function techResource(row) {
     updatedAt: row.updated_at,
   };
 }
+
 function codeProject(row) {
   return {
     id: row.id,
     ownerId: row.owner_id,
     title: row.title,
     description: row.description || '',
-    html: row.html || '',
-    css: row.css || '',
-    javascript: row.javascript || '',
     visibility: row.visibility || 'private',
+    files: row.files || [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at || null,
-  };
-}
-
-function newsContributor(row) {
-  if (!row) return null;
-  return {
-    userId: row.user_id,
-    status: row.status,
-    area: row.area || '',
-    institution: row.institution || '',
-    portfolioUrl: row.portfolio_url || '',
-    statement: row.statement || '',
-    reviewerId: row.reviewer_id || null,
-    reviewNote: row.review_note || '',
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
   };
 }
 
@@ -256,19 +229,14 @@ function newsArticle(row) {
     title: row.title,
     slug: row.slug,
     summary: row.summary,
-    body: row.body,
+    body: row.body || '',
     category: row.category,
-    sources: row.sources || [],
     status: row.status,
-    aiReviewStatus: row.ai_review_status,
-    aiReview: row.ai_review || {},
-    editorialNote: row.editorial_note || '',
     featured: row.featured === true,
     hypes: Number(row.hypes || 0),
     certifiedBy: row.certified_by || null,
     certifiedAt: row.certified_at || null,
     publishedAt: row.published_at || null,
-    deletedAt: row.deleted_at || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -280,15 +248,16 @@ function customTemplate(row) {
     ownerId: row.owner_id,
     title: row.title,
     description: row.description || '',
-    document: row.document || { settings: {}, blocks: [] },
-    sourceType: row.source_type || 'editor',
-    status: row.status || 'private',
+    sourceType: row.source_type,
+    status: row.status,
     featured: row.featured === true,
-    deletedAt: row.deleted_at || null,
+    payload: row.payload || {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deletedAt: row.deleted_at || null,
   };
 }
+
 module.exports = {
   template,
   profile,
@@ -297,15 +266,13 @@ module.exports = {
   publication,
   discussion,
   reply,
-  report,
   adminUser,
-  techResource,
-  codeProject,
-  newsContributor,
-  newsArticle,
-  customTemplate,
   verificationRequest,
   notification,
   book,
   bookSave,
+  techResource,
+  codeProject,
+  newsArticle,
+  customTemplate,
 };

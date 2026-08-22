@@ -4,16 +4,36 @@ function link(path, label, cls = '') {
   return `<a href="${path}" data-link class="${cls}">${label}</a>`;
 }
 
+function navigationSection(route) {
+  if (
+    route.startsWith('/pesquisas/') ||
+    route.startsWith('/projetos/') ||
+    route.startsWith('/autores/') ||
+    route.startsWith('/livros/')
+  ) {
+    return '/biblioteca';
+  }
+  if (
+    route.startsWith('/atelie') ||
+    route.startsWith('/estudio-templates') ||
+    route.startsWith('/modelos-livres/') ||
+    route.startsWith('/templates/')
+  ) {
+    return '/comunidades';
+  }
+  if (route.startsWith('/redacao')) return '/noticias';
+  if (route.startsWith('/oficina') || route.startsWith('/laboratorio')) return '/comunidades';
+  if (route.startsWith('/admin') || route === '/moderacao') return '/admin';
+  return route;
+}
+
 function nav() {
-  const route = location.pathname;
+  const route = navigationSection(location.pathname);
   const settings = state.boot?.settings || {};
   const title = String(settings.site_title || 'Studiorium');
   const items = [
     ['/biblioteca', 'Biblioteca'],
-    ['/projetos', 'Projetos'],
     ['/noticias', 'Notícias'],
-    ['/oficina', 'Oficina'],
-    ['/atelie', 'Ateliê'],
     ['/comunidades', 'Comunidades'],
     ['/escrivaninha', 'Escrivaninha'],
   ];
@@ -123,20 +143,18 @@ function notificationPanel() {
 }
 
 function footer() {
-  const studioriumLinks = [
+  const exploreLinks = [
     link('/biblioteca', 'Biblioteca'),
-    link('/comunidades/design-templates', 'Comunidade de Criação'),
-    link('/pesquisas', 'Pesquisas'),
-    link('/autores', 'Autores'),
-    link('/diretrizes', 'Diretrizes da comunidade'),
+    link('/biblioteca?tipo=pesquisas', 'Pesquisas'),
+    link('/biblioteca?tipo=pessoas', 'Pessoas'),
+    link('/noticias', 'Notícias'),
   ].join('');
 
-  const creationLinks = [
-    link('/atelie', 'Ateliê Científico'),
-    link('/publicar', 'Publicar pesquisa'),
-    link('/estudio-templates', 'Estúdio Criativo'),
-    link('/redacao', 'Redação colaborativa'),
-    link('/comunidades/design-templates', 'Compartilhar criação'),
+  const platformLinks = [
+    link('/comunidades', 'Comunidades'),
+    link('/comunidades/design-templates', 'Criação e modelos'),
+    link('/escrivaninha', 'Escrivaninha'),
+    link('/diretrizes', 'Diretrizes'),
     link('/sobre', 'Sobre o projeto'),
   ].join('');
 
@@ -144,10 +162,10 @@ function footer() {
     '<footer class="footer"><div class="shell footergrid">',
     '<div><div class="brand"><span class="seal">S</span>',
     '<span><strong>Studiorium</strong><small>Bibliotheca digitalis</small></span></div>',
-    '<p>Uma plataforma para criar, publicar, pesquisar e discutir conhecimento com autoria, ',
+    '<p>Uma plataforma para pesquisar, criar e compartilhar conhecimento com autoria, ',
     'organização e responsabilidade.</p></div>',
-    `<div><h4>Studiorium</h4>${studioriumLinks}</div>`,
-    `<div><h4>Criar</h4>${creationLinks}</div>`,
+    `<div><h4>Explorar</h4>${exploreLinks}</div>`,
+    `<div><h4>Studiorium</h4>${platformLinks}</div>`,
     '</div></footer>',
   ].join('');
 }

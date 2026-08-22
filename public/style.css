@@ -13,6 +13,7 @@
 @import url('/css/content-discovery.css');
 @import url('/css/communities.css');
 @import url('/css/social-home.css');
+@import url('/css/profile-social.css');
 
 /* Responsividade e navegação */
 @import url('/css/responsive/navigation.css');
@@ -26,6 +27,8 @@
 @import url('/css/animations/motion.css');
 @import url('/css/animations/parchment.css');
 @import url('/css/animations/studio-motion.css');
+@import url('/css/animations/editorial-motion.css');
+@import url('/css/animations/startup-loader.css');
 
 /* Polimentos específicos */
 @import url('/css/library-polish.css');

@@ -90,6 +90,8 @@ async function publicUser(user) {
     verificationStatus: profile?.verification_status || 'unverified',
     verifiedSpecialty: profile?.verified_specialty || '',
     contributionStatus: profile?.contribution_status || 'member',
+    hasAvatar: Boolean(profile?.avatar_path),
+    hasCover: Boolean(profile?.cover_path),
     createdAt: user.created_at,
   };
 }
