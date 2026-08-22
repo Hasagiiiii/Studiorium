@@ -25,6 +25,45 @@ function templateCard(template) {
   </article>`;
 }
 
+function guidedStart() {
+  return html`<section class="card studio-guided-start" aria-labelledby="guided-start-title">
+    <div>
+      <span class="eyebrow">Criação assistida</span>
+      <h2 id="guided-start-title">Comece pela intenção, não pela página em branco.</h2>
+      <p>
+        Escolha um objetivo e o Studiorium prepara uma estrutura inicial editável. O roteiro é local
+        e transparente: não finge geração por IA nem envia seu conteúdo para um provedor externo.
+      </p>
+    </div>
+    <div class="grid grid3 studio-guided-grid">
+      <article class="studio-guided-option">
+        <span class="project-mini" aria-hidden="true">▤</span>
+        <h3>Banner científico</h3>
+        <p>Introdução, objetivos, metodologia, resultados, conclusão e referências.</p>
+        <button class="outline" type="button" data-guided-template="banner">
+          Preparar estrutura
+        </button>
+      </article>
+      <article class="studio-guided-option">
+        <span class="project-mini" aria-hidden="true">▱</span>
+        <h3>Apresentação</h3>
+        <p>Contexto, questão central, evidências e síntese em formato de apresentação.</p>
+        <button class="outline" type="button" data-guided-template="slides">
+          Preparar estrutura
+        </button>
+      </article>
+      <article class="studio-guided-option">
+        <span class="project-mini" aria-hidden="true">✦</span>
+        <h3>Material de estudo</h3>
+        <p>Conceitos-chave, resumo, prática e fontes para uma revisão organizada.</p>
+        <button class="outline" type="button" data-guided-template="estudo">
+          Preparar estrutura
+        </button>
+      </article>
+    </div>
+  </section>`;
+}
+
 export async function templateStudio() {
   await legacyTemplateStudio();
   if (!state.me || location.pathname.replace(/\/+$/, '') !== '/estudio-templates') return;
@@ -36,6 +75,11 @@ export async function templateStudio() {
   const page = document.querySelector('.studio-page .shell');
   const grid = page?.querySelector('.grid.grid3');
   if (!page || !grid) return;
+
+  const start = page.querySelector('.studio-start');
+  if (start && !page.querySelector('.studio-guided-start')) {
+    start.insertAdjacentHTML('beforebegin', guidedStart());
+  }
 
   grid.innerHTML =
     working.map(templateCard).join('') || empty('Nenhum template em edição ou revisão.');
