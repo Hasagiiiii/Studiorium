@@ -158,12 +158,64 @@ function renderExperts(profiles) {
     .join('');
 }
 
+function pulseMetric(label, value, max, symbol) {
+  const safeMax = Math.max(max, 1);
+  const width = Math.max(8, Math.round((value / safeMax) * 100));
+
+  return [
+    '<div class="social-pulse-row">',
+    `<span class="social-pulse-symbol" aria-hidden="true">${symbol}</span>`,
+    '<span class="social-pulse-copy">',
+    `<strong>${value}</strong>`,
+    `<small>${E(label)}</small>`,
+    `<i style="--pulse:${width}%"><b></b></i>`,
+    '</span>',
+    '</div>',
+  ].join('');
+}
+
+function renderCommunityPulse(pulse) {
+  const values = [pulse.discussions, pulse.projects, pulse.publications, pulse.creations];
+  const max = Math.max(...values, 1);
+
+  return [
+    '<div class="social-pulse" aria-label="Pulso da comunidade">',
+    pulseMetric('Discussões', pulse.discussions, max, '◌'),
+    pulseMetric('Projetos', pulse.projects, max, '⌘'),
+    pulseMetric('Pesquisas', pulse.publications, max, '⌕'),
+    pulseMetric('Criações', pulse.creations, max, '✦'),
+    '</div>',
+  ].join('');
+}
+
+function renderCreationHub() {
+  const templateCount = (state.boot.templates || []).length + (state.boot.customTemplates || []).length;
+  const primaryAction = state.me
+    ? link('/estudio-templates', 'Criar agora', 'solid')
+    : link('/cadastro', 'Entrar para criar', 'solid');
+
+  return [
+    '<div class="social-creation-hub">',
+    '<span class="social-creation-mark" aria-hidden="true">✦</span>',
+    '<div>',
+    '<small class="eyebrow">Comunidade de Criação</small>',
+    '<h3>Templates, materiais e ideias vivem juntos.</h3>',
+    `<p>${templateCount} criações e modelos disponíveis para explorar, adaptar e remixar.</p>`,
+    '</div>',
+    '<div class="actions">',
+    link('/comunidades/design-templates', 'Explorar comunidade', 'outline'),
+    primaryAction,
+    '</div>',
+    '</div>',
+  ].join('');
+}
+
 function guestComposer() {
   return [
     '<div class="social-composer guest">',
     '<div>',
     '<strong>Entre para fazer parte da conversa.</strong>',
-    '<p>Siga comunidades, publique conhecimento e participe das discussões.</p>',
+    '<p>Siga comunidades, publique conhecimento, crie materiais e participe das discussões.</p>',
     '</div>',
     '<div class="actions">',
     link('/cadastro', 'Criar conta', 'solid'),
@@ -181,10 +233,11 @@ function memberComposer() {
     `<span class="social-avatar">${initial}</span>`,
     '<div>',
     '<strong>Compartilhe algo com a comunidade</strong>',
-    '<p>Publique uma pesquisa, abra uma discussão ou mostre um projeto.</p>',
+    '<p>Publique uma pesquisa, abra uma discussão, mostre um projeto ou crie um material.</p>',
     '</div>',
     '<div class="actions">',
     link('/publicar', 'Publicar', 'solid'),
+    link('/estudio-templates', 'Criar', 'soft'),
     link('/comunidades', 'Discutir', 'soft'),
     '</div>',
     '</div>',
@@ -209,6 +262,12 @@ function socialData() {
     communities: communitySpotlight(),
     topics: trendingTopics(),
     experts: verified.length ? verified : profiles,
+    pulse: {
+      discussions: (state.boot.discussions || []).length,
+      projects: projects.length,
+      publications: (state.boot.publications || []).length,
+      creations: (state.boot.templates || []).length + (state.boot.customTemplates || []).length,
+    },
   };
 }
 
@@ -218,6 +277,8 @@ export {
   renderProjects,
   renderBooks,
   renderExperts,
+  renderCommunityPulse,
+  renderCreationHub,
   renderComposer,
   socialData,
 };
