@@ -37,17 +37,8 @@ export function installLibraryPolish() {
   const root = document.getElementById('app');
   if (!root) return;
 
-  let scheduled = false;
-  const schedule = () => {
-    if (scheduled) return;
-    scheduled = true;
-    queueMicrotask(() => {
-      scheduled = false;
-      applyLibraryPolish();
-    });
-  };
+  const run = () => queueMicrotask(applyLibraryPolish);
+  document.addEventListener('studiorium:rendered', run);
 
-  const observer = new MutationObserver(schedule);
-  observer.observe(root, { childList: true, subtree: true });
-  schedule();
+  if (root.childElementCount) run();
 }
