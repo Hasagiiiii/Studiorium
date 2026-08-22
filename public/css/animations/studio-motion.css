@@ -1,0 +1,107 @@
+@media (prefers-reduced-motion: no-preference) {
+  .card.hover,
+  .community-spot,
+  .social-list-item,
+  .featurelink {
+    position: relative;
+    transform: perspective(900px) rotateX(var(--motion-rx, 0deg)) rotateY(var(--motion-ry, 0deg));
+    transform-style: preserve-3d;
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+    will-change: transform;
+  }
+
+  .card.hover::after,
+  .community-spot::after,
+  .social-list-item::after,
+  .featurelink::after {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    content: '';
+    opacity: 0;
+    background: radial-gradient(
+      circle at var(--motion-glow-x, 50%) var(--motion-glow-y, 50%),
+      color-mix(in srgb, var(--brass2) 18%, transparent),
+      transparent 42%
+    );
+    transition: opacity 180ms ease;
+  }
+
+  .card.hover:hover::after,
+  .community-spot:hover::after,
+  .social-list-item:hover::after,
+  .featurelink:hover::after {
+    opacity: 1;
+  }
+
+  .card.hover > *,
+  .community-spot > *,
+  .social-list-item > *,
+  .featurelink > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .social-pulse-copy i {
+    overflow: hidden;
+  }
+
+  .social-pulse-copy i b,
+  .social-pulse-segment {
+    transform-origin: left center;
+  }
+
+  .pagetitle,
+  .hero h1,
+  .sectionhead h2 {
+    text-wrap: balance;
+  }
+
+  .notification-panel,
+  #mobileMenu:not(.hidden) {
+    transform-origin: top right;
+    animation: studiorium-panel-in 220ms cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .toast.show,
+  .site-alert {
+    animation: studiorium-soft-rise 240ms cubic-bezier(.2,.8,.2,1) both;
+  }
+}
+
+@keyframes studiorium-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(.985);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes studiorium-soft-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html[data-motion='reduced'] .card.hover,
+html[data-motion='reduced'] .community-spot,
+html[data-motion='reduced'] .social-list-item,
+html[data-motion='reduced'] .featurelink {
+  transform: none !important;
+  transition: none !important;
+}
