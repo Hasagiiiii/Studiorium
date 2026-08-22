@@ -217,7 +217,9 @@ function templateCard(t, i = 0) {
     </div>
     <div class="rule"></div>
     <div class="meta">
-      <span>${num(t.downloads)} usos</span>${t.featured ? '<span class="brass">Destaque</span>' : ''}
+      <span>${num(t.downloads)} usos</span>${t.featured
+        ? '<span class="brass">Destaque</span>'
+        : ''}
     </div></a
   >`;
 }
