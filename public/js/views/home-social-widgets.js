@@ -174,12 +174,47 @@ function pulseMetric(label, value, max, symbol) {
   ].join('');
 }
 
+function pulseDistribution(pulse) {
+  const metrics = [
+    ['Discussões', pulse.discussions, 'discussions'],
+    ['Projetos', pulse.projects, 'projects'],
+    ['Pesquisas', pulse.publications, 'publications'],
+    ['Criações', pulse.creations, 'creations'],
+  ];
+  const count = metrics.reduce((sum, [, value]) => sum + value, 0);
+  const total = Math.max(count, 1);
+  const activeKinds = metrics.filter(([, value]) => value > 0).length;
+  const segments = metrics
+    .filter(([, value]) => value > 0)
+    .map(([label, value, type]) => {
+      const share = Math.max(4, Math.round((value / total) * 100));
+      return [
+        `<span class="social-pulse-segment ${type}" style="--share:${share}%"`,
+        ` title="${E(label)}: ${value}"></span>`,
+      ].join('');
+    })
+    .join('');
+
+  return [
+    '<div class="social-pulse-overview">',
+    '<div class="social-pulse-total">',
+    `<strong>${count}</strong><span>itens em circulação</span>`,
+    '</div>',
+    '<div class="social-pulse-distribution" role="img"',
+    ` aria-label="Distribuição da atividade em ${activeKinds} tipos de conteúdo">`,
+    segments,
+    '</div>',
+    '</div>',
+  ].join('');
+}
+
 function renderCommunityPulse(pulse) {
   const values = [pulse.discussions, pulse.projects, pulse.publications, pulse.creations];
   const max = Math.max(...values, 1);
 
   return [
     '<div class="social-pulse" aria-label="Pulso da comunidade">',
+    pulseDistribution(pulse),
     pulseMetric('Discussões', pulse.discussions, max, '◌'),
     pulseMetric('Projetos', pulse.projects, max, '⌘'),
     pulseMetric('Pesquisas', pulse.publications, max, '⌕'),
