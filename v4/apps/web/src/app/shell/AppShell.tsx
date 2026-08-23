@@ -110,7 +110,7 @@ export function AppShell({ children }: PropsWithChildren) {
               ◇
             </Link>
           ) : null}
-          {me?.role === 'admin' ? <Link to="/admin">Admin</Link> : null}
+          {data?.capabilities.staffDashboard ? <Link to="/admin">Admin</Link> : null}
           {me?.username ? (
             <>
               <Link to={`/perfil/${encodeURIComponent(me.username)}`}>{me.displayName}</Link>
