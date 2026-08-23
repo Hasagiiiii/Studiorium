@@ -1,4 +1,5 @@
 import type { FeedEntry } from '@lorion/contracts';
+import { motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 function destination(entry: FeedEntry): string {
@@ -22,10 +23,18 @@ function summary(entry: FeedEntry): string {
   return entry.item.notes || 'Projeto compartilhado com a comunidade.';
 }
 
-export function FeedCard({ entry }: { entry: FeedEntry }) {
+export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: number }) {
   const text = summary(entry);
+  const reduceMotion = useReducedMotion();
+
   return (
-    <article className={`feed-card feed-${entry.type}`}>
+    <motion.article
+      className={`feed-card feed-${entry.type}`}
+      layout={!reduceMotion}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
+    >
       <span className="eyebrow">{label(entry)}</span>
       <h2>
         <Link to={destination(entry)}>{entry.item.title}</Link>
@@ -34,6 +43,6 @@ export function FeedCard({ entry }: { entry: FeedEntry }) {
       {entry.type === 'news' && entry.item.likeCount > 0 ? (
         <footer>{entry.item.likeCount} curtidas</footer>
       ) : null}
-    </article>
+    </motion.article>
   );
 }
