@@ -75,7 +75,10 @@ export function PostInteractions({ contentId, initial }: Props) {
       }));
       setCommentBody('');
       setReplyTo(null);
-      pushToast({ message: replyTo ? 'Resposta publicada.' : 'Comentário publicado.', tone: 'success' });
+      pushToast({
+        message: replyTo ? 'Resposta publicada.' : 'Comentário publicado.',
+        tone: 'success',
+      });
     } catch (cause) {
       pushToast({
         message: cause instanceof Error ? cause.message : 'Não foi possível publicar o comentário.',
@@ -245,7 +248,11 @@ export function PostInteractions({ contentId, initial }: Props) {
 
                 <footer className="post-comment-actions">
                   {data?.user && interactions.canInteract ? (
-                    <button className="inline-action" type="button" onClick={() => setReplyTo(comment.id)}>
+                    <button
+                      className="inline-action"
+                      type="button"
+                      onClick={() => setReplyTo(comment.id)}
+                    >
                       Responder
                     </button>
                   ) : null}
