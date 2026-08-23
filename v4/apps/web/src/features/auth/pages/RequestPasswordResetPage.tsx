@@ -14,9 +14,11 @@ export function RequestPasswordResetPage() {
 
   if (data?.user) return <Navigate to="/" replace />;
 
+  const passwordResetAvailable = data?.capabilities.passwordResetAvailable === true;
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (status === 'saving') return;
+    if (!passwordResetAvailable || status === 'saving') return;
 
     setStatus('saving');
     setMessage('');
@@ -41,33 +43,49 @@ export function RequestPasswordResetPage() {
     <FeaturePage
       eyebrow="Segurança"
       title="Recuperar senha"
-      description="Informe o e-mail da sua conta. Se ela existir, enviaremos um link de uso único."
+      description={
+        passwordResetAvailable
+          ? 'Informe o e-mail da sua conta. Se ela existir, enviaremos um link de uso único.'
+          : 'A recuperação de senha por e-mail está temporariamente indisponível.'
+      }
     >
-      <form className="auth-form" onSubmit={submit}>
-        <label>
-          E-mail
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </label>
-        {status === 'success' ? (
-          <p role="status">{message}</p>
-        ) : status === 'error' ? (
-          <p className="inline-error" role="alert">
-            {message}
+      {passwordResetAvailable ? (
+        <form className="auth-form" onSubmit={submit}>
+          <label>
+            E-mail
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          {status === 'success' ? (
+            <p role="status">{message}</p>
+          ) : status === 'error' ? (
+            <p className="inline-error" role="alert">
+              {message}
+            </p>
+          ) : null}
+          <button className="button primary" type="submit" disabled={status === 'saving'}>
+            {status === 'saving' ? 'Enviando…' : 'Enviar link de redefinição'}
+          </button>
+          <p>
+            <Link to="/entrar">Voltar para entrar</Link>
           </p>
-        ) : null}
-        <button className="button primary" type="submit" disabled={status === 'saving'}>
-          {status === 'saving' ? 'Enviando…' : 'Enviar link de redefinição'}
-        </button>
-        <p>
-          <Link to="/entrar">Voltar para entrar</Link>
-        </p>
-      </form>
+        </form>
+      ) : (
+        <div className="auth-form">
+          <p role="status">
+            O login continua disponível normalmente. A opção de redefinição aparecerá quando o
+            serviço de e-mail estiver configurado.
+          </p>
+          <p>
+            <Link to="/entrar">Voltar para entrar</Link>
+          </p>
+        </div>
+      )}
     </FeaturePage>
   );
 }
