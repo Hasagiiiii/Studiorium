@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
@@ -23,6 +23,13 @@ export function ExplorePage() {
     ? (requestedType as SearchEntry['type'])
     : null;
   const [value, setValue] = useState(query);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => setValue(query), [query]);
+
+  useEffect(() => {
+    if (params.get('foco') === 'busca') searchRef.current?.focus();
+  }, [params]);
 
   const entries = useMemo(() => (data ? buildSearchIndex(data) : []), [data]);
   const counts = useMemo(
@@ -45,6 +52,7 @@ export function ExplorePage() {
     event.preventDefault();
     const next = new URLSearchParams(params);
     const nextQuery = value.trim();
+    next.delete('foco');
     if (nextQuery) next.set('q', nextQuery);
     else next.delete('q');
     setParams(next);
@@ -65,6 +73,7 @@ export function ExplorePage() {
     >
       <form className="global-search" onSubmit={submit} role="search">
         <input
+          ref={searchRef}
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
