@@ -7,7 +7,9 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 function tokenFromHash(): string {
   if (typeof window === 'undefined') return '';
-  return new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token')?.trim() || '';
+  return (
+    new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token')?.trim() || ''
+  );
 }
 
 export function ResetPasswordPage() {
@@ -51,8 +53,7 @@ export function ResetPasswordPage() {
       });
       navigate('/entrar', { replace: true });
     } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : 'Não foi possível redefinir a senha.';
+      const message = cause instanceof Error ? cause.message : 'Não foi possível redefinir a senha.';
       setStatus('error');
       setError(message);
       pushToast({ message, tone: 'error' });
