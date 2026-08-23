@@ -1,16 +1,43 @@
-import { useState, type PropsWithChildren } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import { motion, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CreateLauncher } from '../../components/create/CreateLauncher.js';
+import { useToast } from '../../components/feedback/toasts/ToastProvider.js';
 import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
 import { services } from '../services/services.js';
 import { useAppState } from '../state/useAppState.js';
 
 export function AppShell({ children }: PropsWithChildren) {
   const { data, reload } = useAppState();
+  const { pushToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const me = data?.user;
   const [createOpen, setCreateOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, 'change', (current) => {
+    const previous = lastScrollY.current;
+    lastScrollY.current = current;
+
+    if (reduceMotion || !window.matchMedia('(max-width: 880px)').matches) {
+      if (!headerVisible) setHeaderVisible(true);
+      return;
+    }
+
+    const delta = current - previous;
+    if (current < 72 || delta < -5) setHeaderVisible(true);
+    else if (delta > 5) setHeaderVisible(false);
+  });
+
+  useEffect(() => {
+    setHeaderVisible(true);
+    if (!location.hash) window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname, location.hash]);
 
   async function logout() {
     if (loggingOut) return;
@@ -19,6 +46,12 @@ export function AppShell({ children }: PropsWithChildren) {
       await services.auth.logout();
       await reload();
       navigate('/');
+      pushToast({ message: 'Sessão encerrada.', tone: 'success' });
+    } catch (cause) {
+      pushToast({
+        message: cause instanceof Error ? cause.message : 'Não foi possível encerrar a sessão.',
+        tone: 'error',
+      });
     } finally {
       setLoggingOut(false);
     }
@@ -26,7 +59,11 @@ export function AppShell({ children }: PropsWithChildren) {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
+      <motion.header
+        className="topbar"
+        animate={{ y: headerVisible || createOpen ? 0 : '-115%' }}
+        transition={{ duration: reduceMotion ? 0.01 : 0.2, ease: 'easeOut' }}
+      >
         <Link className="brand" to="/" aria-label="Lorion — início">
           <span className="brand-mark" aria-hidden="true">
             L
@@ -38,6 +75,18 @@ export function AppShell({ children }: PropsWithChildren) {
         </Link>
         <PrimaryNav />
         <div className="topbar-actions">
+          <motion.button
+            className="topbar-create"
+            type="button"
+            aria-label="Criar"
+            aria-haspopup="dialog"
+            aria-expanded={createOpen}
+            animate={{ rotate: createOpen && !reduceMotion ? 45 : 0 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+            onClick={() => setCreateOpen((value) => !value)}
+          >
+            +
+          </motion.button>
           <Link to="/explorar?foco=busca" aria-label="Pesquisar">
             ⌕
           </Link>
@@ -62,21 +111,23 @@ export function AppShell({ children }: PropsWithChildren) {
             <Link to="/entrar">Entrar</Link>
           )}
         </div>
-      </header>
+      </motion.header>
       <div className="shell-body">{children}</div>
       <nav className="bottom-nav" aria-label="Navegação móvel">
         <Link to="/">Início</Link>
         <Link to="/explorar">Explorar</Link>
-        <button
+        <motion.button
           className="create-action"
           type="button"
           aria-label="Criar"
           aria-haspopup="dialog"
           aria-expanded={createOpen}
-          onClick={() => setCreateOpen(true)}
+          animate={{ rotate: createOpen && !reduceMotion ? 45 : 0, scale: createOpen ? 1.06 : 1 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+          onClick={() => setCreateOpen((value) => !value)}
         >
           +
-        </button>
+        </motion.button>
         <Link to="/comunidades">Comunidades</Link>
         <Link to={me?.username ? `/perfil/${encodeURIComponent(me.username)}` : '/entrar'}>
           Perfil
