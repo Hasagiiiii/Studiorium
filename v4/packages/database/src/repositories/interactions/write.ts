@@ -72,6 +72,7 @@ export async function createContentComment(input: {
 }
 
 export async function updateOwnContentComment(
+  contentId: string,
   commentId: string,
   authorId: string,
   body: string,
@@ -80,6 +81,7 @@ export async function updateOwnContentComment(
     .from('content_comments')
     .update({ body, updated_at: new Date().toISOString() })
     .eq('id', commentId)
+    .eq('content_id', contentId)
     .eq('author_id', authorId)
     .eq('moderation_status', 'clear')
     .is('deleted_at', null)
@@ -90,6 +92,7 @@ export async function updateOwnContentComment(
 }
 
 export async function deleteOwnContentComment(
+  contentId: string,
   commentId: string,
   authorId: string,
 ): Promise<boolean> {
@@ -97,6 +100,7 @@ export async function deleteOwnContentComment(
     .from('content_comments')
     .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', commentId)
+    .eq('content_id', contentId)
     .eq('author_id', authorId)
     .is('deleted_at', null)
     .select('id')
