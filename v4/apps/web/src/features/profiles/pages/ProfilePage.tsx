@@ -125,7 +125,9 @@ export function ProfilePage() {
       });
     } catch (cause) {
       const message =
-        cause instanceof Error ? cause.message : 'Não foi possível alterar a privacidade da estante.';
+        cause instanceof Error
+          ? cause.message
+          : 'Não foi possível alterar a privacidade da estante.';
       pushToast({ message, tone: 'error' });
     } finally {
       setUpdatingBookshelfPrivacy(false);
@@ -134,7 +136,11 @@ export function ProfilePage() {
 
   if (detail.status === 'loading' && !detail.value) {
     return (
-      <FeaturePage eyebrow="Perfil" title="Carregando perfil…" description="Buscando dados públicos." />
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Carregando perfil…"
+        description="Buscando dados públicos."
+      />
     );
   }
 
