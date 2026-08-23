@@ -1,8 +1,4 @@
-import {
-  socialPostSchema,
-  type CreatePostInput,
-  type SocialPost,
-} from '@lorion/contracts';
+import { socialPostSchema, type CreatePostInput, type SocialPost } from '@lorion/contracts';
 import { ApiClient } from '../../core/client.js';
 
 export class PostsService {
