@@ -10,6 +10,12 @@ type MembershipRow = {
   moderation_status: string;
 };
 
+function isParticipating(membership: MembershipRow | undefined): boolean {
+  return Boolean(
+    membership && membership.status === 'active' && membership.moderation_status !== 'removed',
+  );
+}
+
 export async function listCommunities(viewerId?: string | null): Promise<Community[]> {
   const [communitiesResult, membershipsResult] = await Promise.all([
     database()
@@ -31,10 +37,12 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
   const viewerMembership = new Map<string, MembershipRow>();
 
   memberships.forEach((membership) => {
-    countByCommunity.set(
-      membership.community_id,
-      (countByCommunity.get(membership.community_id) || 0) + 1,
-    );
+    if (membership.moderation_status !== 'removed') {
+      countByCommunity.set(
+        membership.community_id,
+        (countByCommunity.get(membership.community_id) || 0) + 1,
+      );
+    }
     if (viewerId && membership.user_id === viewerId) {
       viewerMembership.set(membership.community_id, membership);
     }
@@ -45,7 +53,7 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
       const row = raw as Record<string, unknown>;
       const id = String(row.id);
       const visibility = String(row.visibility || 'public');
-      return visibility !== 'private' || viewerMembership.has(id);
+      return visibility !== 'private' || isParticipating(viewerMembership.get(id));
     })
     .map((raw) => {
       const row = raw as Record<string, unknown>;
@@ -62,7 +70,7 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
         official: row.is_official,
         rules: Array.isArray(row.rules) ? row.rules : [],
         memberCount: countByCommunity.get(id) || 0,
-        joined: Boolean(membership),
+        joined: isParticipating(membership),
         role: membership?.role || null,
         memberModerationStatus: membership?.moderation_status || null,
       });
