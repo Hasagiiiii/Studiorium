@@ -1,14 +1,8 @@
 import type { FeedEntry, Profile } from '@lorion/contracts';
 
-export type FeedMode = 'for-you' | 'following' | 'discussions' | 'trending' | 'recent';
+export type FeedMode = 'for-you' | 'following' | 'trending' | 'recent';
 
-const FEED_MODES = new Set<FeedMode>([
-  'for-you',
-  'following',
-  'discussions',
-  'trending',
-  'recent',
-]);
+const FEED_MODES = new Set<FeedMode>(['for-you', 'following', 'trending', 'recent']);
 
 export function normalizeFeedMode(value: string | null | undefined): FeedMode {
   return FEED_MODES.has(value as FeedMode) ? (value as FeedMode) : 'for-you';
@@ -27,7 +21,7 @@ function numeric(value: unknown): number {
 
 function ownerId(entry: FeedEntry): string | undefined {
   const item = entry.item as Record<string, unknown>;
-  return [item.ownerId, item.authorId, item.contributorId, item.userId].find(
+  return [item.ownerId, item.authorId, item.contributorId].find(
     (value): value is string => typeof value === 'string' && value.length > 0,
   );
 }
@@ -43,7 +37,7 @@ function activityScore(entry: FeedEntry): number {
   }
   if (entry.type === 'discussion') return 18;
   if (entry.type === 'news') {
-    return 14 + (entry.item.featured ? 48 : 0) + Math.log10(numeric(entry.item.hypes) + 1) * 8;
+    return 14 + (entry.item.featured ? 48 : 0) + Math.log10(numeric(entry.item.likeCount) + 1) * 8;
   }
   return 10;
 }
@@ -69,11 +63,6 @@ export function sortFeed(
 
   if (mode === 'following' || mode === 'recent') {
     return feed.sort((a, b) => timestamp(b) - timestamp(a));
-  }
-  if (mode === 'discussions') {
-    return feed
-      .filter((entry) => entry.type === 'discussion')
-      .sort((a, b) => timestamp(b) - timestamp(a));
   }
   if (mode === 'trending') {
     return feed.sort(
