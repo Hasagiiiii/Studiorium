@@ -5,6 +5,7 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 export function ProjectsPage() {
   const { data } = useAppState();
   const me = data?.user;
+  const projects = me ? data?.projects.filter((item) => item.ownerId === me.id) ?? [] : [];
 
   return (
     <FeaturePage
@@ -29,12 +30,22 @@ export function ProjectsPage() {
                 <h2>Meus projetos</h2>
               </div>
             </header>
-            <div className="empty-state">
-              <p>
-                A lista pessoal será carregada pelo serviço de projetos do usuário. Projetos públicos
-                de outras pessoas aparecem em Explorar e nas comunidades relacionadas.
-              </p>
-            </div>
+            {projects.length ? (
+              <div className="resource-grid">
+                {projects.map((project) => (
+                  <article key={project.id} className="resource-card project-card">
+                    <span className="eyebrow">{project.type}</span>
+                    <h3><Link to={`/projetos/${encodeURIComponent(project.id)}`}>{project.title}</Link></h3>
+                    {project.notes ? <p>{project.notes}</p> : null}
+                    <footer>{project.visibility === 'public' ? 'Público' : 'Privado'}</footer>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p>Você ainda não criou projetos.</p>
+              </div>
+            )}
           </section>
         </>
       ) : (
