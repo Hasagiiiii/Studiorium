@@ -12,6 +12,8 @@ import {
   resetPassword,
 } from './features/auth/handler.js';
 import {
+  communityHub,
+  createDiscussionInCommunity,
   decideCommunityMembershipRequest,
   joinCommunity,
   leaveCommunityMembership,
@@ -69,6 +71,20 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
+  }
+
+  const communityHubMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/hub$/);
+  if (communityHubMatch && method === 'GET') {
+    return json(response, 200, await communityHub(request, communityHubMatch[1] || ''));
+  }
+
+  const communityDiscussionMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/discussions$/);
+  if (communityDiscussionMatch && method === 'POST') {
+    return json(
+      response,
+      201,
+      await createDiscussionInCommunity(request, communityDiscussionMatch[1] || ''),
+    );
   }
 
   const communityMembershipMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/membership$/);
