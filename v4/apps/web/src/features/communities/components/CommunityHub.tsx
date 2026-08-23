@@ -101,7 +101,10 @@ export function CommunityHub({ slug, canAccess }: Props) {
                       <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>
                         {post.authorName}
                       </Link>
-                      {post.title ? <strong> · {post.title}</strong> : null}
+                      <span> · </span>
+                      <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>
+                        {post.title || 'Publicação'}
+                      </Link>
                     </div>
                     <p>{post.body}</p>
                   </li>
