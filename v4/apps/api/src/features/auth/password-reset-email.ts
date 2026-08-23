@@ -2,7 +2,8 @@ function escapeHtml(value: string): string {
   return String(value || '').replace(
     /[&<>"']/g,
     (character) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] || character,
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ||
+      character,
   );
 }
 
@@ -15,7 +16,8 @@ export function passwordResetSiteUrl(): string {
   if (explicit) return explicit.replace(/\/$/, '');
 
   const productionHost = String(process.env.VERCEL_PROJECT_PRODUCTION_URL || '').trim();
-  if (productionHost) return `https://${productionHost.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+  if (productionHost)
+    return `https://${productionHost.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
 
   return 'https://studiorium.vercel.app';
 }
