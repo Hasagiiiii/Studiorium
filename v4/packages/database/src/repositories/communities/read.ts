@@ -83,6 +83,8 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
         status: row.status,
         official: row.is_official,
         rules: Array.isArray(row.rules) ? row.rules : [],
+        hasAvatar: Boolean(row.avatar_path),
+        hasCover: Boolean(row.cover_path),
         memberCount: countByCommunity.get(id) || 0,
         joined: isParticipating(membership),
         membershipStatus: membership?.status || null,
