@@ -17,10 +17,12 @@ export function buildPublicFeed(data: BootstrapPayload): FeedEntry[] {
       item,
       at: item.publishedAt || item.createdAt,
     })),
-    ...data.communityProjects.map((item) => ({
-      type: 'project' as const,
-      item,
-      at: item.updatedAt || item.createdAt,
-    })),
+    ...data.projects
+      .filter((item) => item.visibility === 'public')
+      .map((item) => ({
+        type: 'project' as const,
+        item,
+        at: item.updatedAt || item.createdAt,
+      })),
   ];
 }
