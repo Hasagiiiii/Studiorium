@@ -9,6 +9,7 @@ export const state = {
   mobile: false,
   notifications: [],
   unreadNotificationCount: 0,
+  social: { followingIds: [] },
 };
 
 export const E = (v = '') =>
@@ -103,21 +104,34 @@ export async function bootstrap() {
   state.boot = await api('/api/bootstrap');
   state.me = state.boot.user;
   if (state.me) {
-    try {
-      await loadNotifications();
-    } catch {
+    const [notificationsResult, socialResult] = await Promise.allSettled([
+      loadNotifications(),
+      loadSocialGraph(),
+    ]);
+    if (notificationsResult.status === 'rejected') {
       state.notifications = [];
       state.unreadNotificationCount = 0;
+    }
+    if (socialResult.status === 'rejected') {
+      state.social = { followingIds: [] };
     }
   } else {
     state.notifications = [];
     state.unreadNotificationCount = 0;
+    state.social = { followingIds: [] };
   }
 }
 export async function loadNotifications() {
   const data = await api('/api/notifications');
   state.notifications = data.notifications || [];
   state.unreadNotificationCount = Number(data.unreadCount || 0);
+  return data;
+}
+export async function loadSocialGraph() {
+  const data = await api('/api/social/me');
+  state.social = {
+    followingIds: Array.isArray(data.followingIds) ? data.followingIds : [],
+  };
   return data;
 }
 export function formObj(form) {
