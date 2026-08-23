@@ -28,6 +28,20 @@ export class AuthService {
     });
   }
 
+  requestPasswordReset(email: string): Promise<OkResponse> {
+    return this.client.request('/api/v4/auth/password-reset/request', okResponseSchema, {
+      method: 'POST',
+      body: { email },
+    });
+  }
+
+  resetPassword(token: string, newPassword: string): Promise<OkResponse> {
+    return this.client.request('/api/v4/auth/password-reset', okResponseSchema, {
+      method: 'POST',
+      body: { token, newPassword },
+    });
+  }
+
   logout(): Promise<OkResponse> {
     return this.client.request('/api/v4/auth/logout', okResponseSchema, { method: 'POST' });
   }
