@@ -5,8 +5,11 @@ import {
   communityHubSchema,
   communityMembershipRequestSchema,
   communityMembershipResultSchema,
+  contentInteractionsSchema,
+  createCommentInputSchema,
   createPostInputSchema,
   parseBootstrap,
+  postDetailSchema,
   profileDetailSchema,
   profileSchema,
   projectSchema,
@@ -153,6 +156,59 @@ test('post social preserva autor, comunidade opcional e visibilidade explícita'
   assert.equal(input.title, 'Título');
   assert.equal(input.body, 'Texto');
   assert.throws(() => createPostInputSchema.parse({ body: '' }));
+});
+
+test('interações têm defaults consistentes e comentário exige texto válido', () => {
+  const interactions = contentInteractionsSchema.parse({});
+  const comment = createCommentInputSchema.parse({ body: '  Resposta útil  ' });
+
+  assert.equal(interactions.likeCount, 0);
+  assert.equal(interactions.commentCount, 0);
+  assert.equal(interactions.viewerLiked, false);
+  assert.equal(interactions.canInteract, false);
+  assert.deepEqual(interactions.comments, []);
+  assert.equal(comment.body, 'Resposta útil');
+  assert.equal(comment.parentId, null);
+  assert.throws(() => createCommentInputSchema.parse({ body: '' }));
+  assert.throws(() => createCommentInputSchema.parse({ body: 'x'.repeat(2001) }));
+});
+
+test('detalhe de publicação reúne post e interações sem inventar contadores', () => {
+  const detail = postDetailSchema.parse({
+    post: {
+      id: 'pst_1',
+      authorId: 'usr_1',
+      authorUsername: 'pessoa',
+      authorName: 'Pessoa',
+      body: 'Conteúdo social',
+      visibility: 'public',
+      moderationStatus: 'clear',
+      createdAt: null,
+      updatedAt: null,
+    },
+    interactions: {
+      likeCount: 2,
+      commentCount: 1,
+      viewerLiked: true,
+      canInteract: true,
+      comments: [
+        {
+          id: 'cmt_1',
+          contentId: 'pst_1',
+          authorId: 'usr_2',
+          authorUsername: 'leitor',
+          authorName: 'Leitor',
+          body: 'Comentário',
+          moderationStatus: 'clear',
+          createdAt: null,
+          updatedAt: null,
+        },
+      ],
+    },
+  });
+
+  assert.equal(detail.interactions.likeCount, 2);
+  assert.equal(detail.interactions.comments[0]?.canEdit, false);
 });
 
 test('perfil mantém estante privada por padrão e detalhe social com coleções vazias', () => {
