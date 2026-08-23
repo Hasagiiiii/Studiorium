@@ -14,7 +14,7 @@ function mapNews(row: Record<string, unknown>): NewsArticle {
     category: row.category,
     status: row.status,
     featured: row.featured,
-    hypes: Number(row.hypes || 0),
+    likeCount: Number(row.hypes || 0),
     certifiedBy: row.certified_by,
     certifiedAt: row.certified_at,
     publishedAt: row.published_at,
