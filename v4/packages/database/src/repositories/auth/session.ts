@@ -6,6 +6,8 @@ export type SessionUserRow = {
   email: string;
   role: string;
   status: string;
+  is_minor: boolean;
+  birth_year: number | null;
 };
 
 export async function findUserBySessionHash(tokenHash: string): Promise<SessionUserRow | null> {
@@ -20,7 +22,7 @@ export async function findUserBySessionHash(tokenHash: string): Promise<SessionU
 
   const userResult = await database()
     .from('users')
-    .select('id,email,role,status')
+    .select('id,email,role,status,is_minor,birth_year')
     .eq('id', sessionResult.data.user_id)
     .maybeSingle();
 
