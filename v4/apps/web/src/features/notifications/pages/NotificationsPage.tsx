@@ -13,6 +13,8 @@ export function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [markingAll, setMarkingAll] = useState(false);
 
   const load = useCallback(async () => {
     if (!data?.user) return;
@@ -50,50 +52,73 @@ export function NotificationsPage() {
   }
 
   async function markRead(item: Notification) {
-    if (item.readAt) return;
-    await services.notifications.markRead(item.id);
-    const readAt = new Date().toISOString();
-    setNotifications((current) =>
-      current.map((entry) => (entry.id === item.id ? { ...entry, readAt } : entry)),
-    );
-    setUnreadCount((current) => Math.max(0, current - 1));
+    if (item.readAt || updatingId) return;
+    setUpdatingId(item.id);
+    try {
+      await services.notifications.markRead(item.id);
+      const readAt = new Date().toISOString();
+      setNotifications((current) =>
+        current.map((entry) => (entry.id === item.id ? { ...entry, readAt } : entry)),
+      );
+      setUnreadCount((current) => Math.max(0, current - 1));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível atualizar a notificação.');
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
   async function markAllRead() {
-    if (!unreadCount) return;
-    await services.notifications.markAllRead();
-    const readAt = new Date().toISOString();
-    setNotifications((current) =>
-      current.map((entry) => ({ ...entry, readAt: entry.readAt || readAt })),
-    );
-    setUnreadCount(0);
+    if (!unreadCount || markingAll) return;
+    setMarkingAll(true);
+    try {
+      await services.notifications.markAllRead();
+      const readAt = new Date().toISOString();
+      setNotifications((current) =>
+        current.map((entry) => ({ ...entry, readAt: entry.readAt || readAt })),
+      );
+      setUnreadCount(0);
+      setError('');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível atualizar as notificações.');
+    } finally {
+      setMarkingAll(false);
+    }
   }
 
   return (
     <FeaturePage
       eyebrow="Notificações"
       title="Atualizações importantes"
-      description="Seguidores, respostas, curtidas, menções e eventos das suas comunidades aparecem aqui."
+      description="Acompanhe conexões e atividades registradas para sua conta."
     >
       <section className="notifications-panel" aria-live="polite">
         <header className="notifications-toolbar">
           <span>{unreadCount} não lidas</span>
           {unreadCount ? (
-            <button className="button secondary" type="button" onClick={() => void markAllRead()}>
-              Marcar todas como lidas
+            <button
+              className="button secondary"
+              type="button"
+              disabled={markingAll}
+              onClick={() => void markAllRead()}
+            >
+              {markingAll ? 'Atualizando…' : 'Marcar todas como lidas'}
             </button>
           ) : null}
         </header>
 
-        {status === 'loading' ? <p className="feed-status">Carregando notificações…</p> : null}
-        {status === 'error' ? (
-          <div className="empty-state" role="alert">
-            <p>{error}</p>
-            <button className="button secondary" type="button" onClick={() => void load()}>
-              Tentar novamente
-            </button>
+        {error && status !== 'loading' ? (
+          <div className="inline-feedback" role="alert">
+            <p className="inline-error">{error}</p>
+            {status === 'error' ? (
+              <button className="button secondary" type="button" onClick={() => void load()}>
+                Tentar novamente
+              </button>
+            ) : null}
           </div>
         ) : null}
+
+        {status === 'loading' ? <p className="feed-status">Carregando notificações…</p> : null}
 
         {status === 'ready' && notifications.length ? (
           <div className="notification-list">
@@ -112,9 +137,10 @@ export function NotificationsPage() {
                   <button
                     className="button secondary"
                     type="button"
+                    disabled={updatingId === item.id}
                     onClick={() => void markRead(item)}
                   >
-                    Marcar como lida
+                    {updatingId === item.id ? 'Atualizando…' : 'Marcar como lida'}
                   </button>
                 ) : null}
               </article>
