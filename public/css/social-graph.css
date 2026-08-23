@@ -12,11 +12,12 @@
 
 .social-author-link {
   color: inherit;
+  font-weight: 600;
   text-decoration: none;
 }
 
-.social-author-link:hover strong,
-.social-author-link:focus-visible strong {
+.social-author-link:hover,
+.social-author-link:focus-visible {
   color: var(--brass2);
 }
 
