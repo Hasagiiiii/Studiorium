@@ -7,6 +7,7 @@ import {
   leaveCommunity,
   listCommunityDiscussions,
   listCommunityMembers,
+  listCommunitySocialPosts,
   listPendingCommunityMembershipRequests,
   requestRestrictedCommunity,
   resolveCommunityMembershipRequest,
@@ -66,13 +67,15 @@ export async function communityHub(request: ApiRequest, rawSlug: string): Promis
     throw forbidden('Entre na comunidade para acessar membros e discussões.');
   }
 
-  const [members, discussions] = await Promise.all([
+  const [members, posts, discussions] = await Promise.all([
     listCommunityMembers(community.id),
+    listCommunitySocialPosts(community.id),
     listCommunityDiscussions(community.id),
   ]);
 
   return communityHubSchema.parse({
     members,
+    posts,
     discussions,
     canCreateDiscussion: Boolean(isMember && membership?.moderation_status === 'clear'),
   });
