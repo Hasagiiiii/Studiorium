@@ -1,0 +1,52 @@
+name: Format v4 multimedia
+
+on:
+  push:
+    branches:
+      - feat/v4-multimedia-composer
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v4-multimedia-composer
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Format changed v4 files
+        run: |
+          npx prettier --write \
+            v4/apps/api/src/features/social/posts.ts \
+            v4/apps/api/src/router.ts \
+            v4/apps/web/src/components/create/CreateLauncher.tsx \
+            v4/apps/web/src/features/communities/pages/CommunitiesPage.tsx \
+            v4/apps/web/src/features/profiles/pages/ProfilePage.tsx \
+            v4/apps/web/src/features/social/components/FeedCard.tsx \
+            v4/apps/web/src/features/social/state/useFeed.ts \
+            v4/packages/api-client/src/features/social/service.ts \
+            v4/packages/database/src/repositories/social/posts.ts
+
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v4
+          git commit -m "style(v4): format multimedia implementation"
+          git push origin HEAD:feat/v4-multimedia-composer
