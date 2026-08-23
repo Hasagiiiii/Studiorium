@@ -31,6 +31,7 @@ const DEFAULT_SITE_SETTINGS = {
 
 const DEFAULT_CAPABILITIES = {
   passwordResetAvailable: false,
+  staffDashboard: false,
 };
 
 export const siteSettingsSchema = z
@@ -47,6 +48,7 @@ export const siteSettingsSchema = z
 export const capabilitiesSchema = z
   .object({
     passwordResetAvailable: z.boolean().default(DEFAULT_CAPABILITIES.passwordResetAvailable),
+    staffDashboard: z.boolean().default(DEFAULT_CAPABILITIES.staffDashboard),
   })
   .default(DEFAULT_CAPABILITIES);
 
