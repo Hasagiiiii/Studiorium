@@ -33,7 +33,9 @@ export async function createPost(request: ApiRequest): Promise<SocialPost> {
     communityId,
   });
   if (!created) {
-    throw forbidden('Você não pode publicar nesta comunidade ou sua conta não está apta a publicar.');
+    throw forbidden(
+      'Você não pode publicar nesta comunidade ou sua conta não está apta a publicar.',
+    );
   }
 
   const post = await findSocialPostById(contentId, user.id);
