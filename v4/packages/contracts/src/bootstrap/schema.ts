@@ -3,6 +3,7 @@ import { communitySchema } from '../communities/schema.js';
 import { discussionSchema } from '../discussions/schema.js';
 import { bookReviewSchema, bookSchema } from '../library/schema.js';
 import { newsArticleSchema } from '../news/schema.js';
+import { socialPostSchema } from '../posts/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { profileSchema } from '../profiles/schema.js';
 import { publicationSchema } from '../research/schema.js';
@@ -50,6 +51,7 @@ export const capabilitiesSchema = z
   .default(DEFAULT_CAPABILITIES);
 
 export const bootstrapSchema = z.object({
+  posts: z.array(socialPostSchema).default([]),
   publications: z.array(publicationSchema).default([]),
   news: z.array(newsArticleSchema).default([]),
   books: z.array(bookSchema).default([]),
