@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FeedEntry } from '@lorion/contracts';
 import { buildPublicFeed, normalizeFeedMode, sortFeed, type FeedMode } from '@lorion/domain';
 import { services } from '../../../app/services/services.js';
@@ -12,6 +12,9 @@ export function useFeed(modeValue: string | null) {
   const [remoteEntries, setRemoteEntries] = useState<FeedEntry[]>([]);
   const [status, setStatus] = useState<FeedStatus>('ready');
   const [error, setError] = useState<string | null>(null);
+  const [requestVersion, setRequestVersion] = useState(0);
+
+  const retry = useCallback(() => setRequestVersion((value) => value + 1), []);
 
   useEffect(() => {
     let active = true;
@@ -44,13 +47,13 @@ export function useFeed(modeValue: string | null) {
     return () => {
       active = false;
     };
-  }, [mode, data?.user]);
+  }, [mode, data?.user, requestVersion]);
 
   const entries = useMemo(() => {
     if (!data) return [];
     const source = mode === 'following' ? remoteEntries : buildPublicFeed(data);
-    return sortFeed(source, mode as FeedMode, data.profiles).slice(0, 40);
+    return sortFeed(source, mode as FeedMode, data.profiles).slice(0, 80);
   }, [data, mode, remoteEntries]);
 
-  return { mode, entries, status, error };
+  return { mode, entries, status, error, retry };
 }
