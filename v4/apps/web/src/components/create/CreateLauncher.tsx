@@ -17,13 +17,8 @@ const actions = [
     to: '/projetos',
   },
   {
-    label: 'Pesquisa',
-    description: 'Prepare uma publicação acadêmica ligada à biblioteca.',
-    to: '/biblioteca',
-  },
-  {
     label: 'Review de livro',
-    description: 'Escolha uma obra da biblioteca e publique sua avaliação.',
+    description: 'Escolha uma obra da sua biblioteca e publique sua avaliação.',
     to: '/biblioteca',
   },
   {
@@ -61,7 +56,12 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
         </header>
         <div className="create-launcher-grid">
           {actions.map((action) => (
-            <Link key={action.label} to={action.to} onClick={onClose} className="create-launcher-action">
+            <Link
+              key={action.label}
+              to={action.to}
+              onClick={onClose}
+              className="create-launcher-action"
+            >
               <strong>{action.label}</strong>
               <span>{action.description}</span>
             </Link>
