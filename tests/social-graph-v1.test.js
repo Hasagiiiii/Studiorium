@@ -22,7 +22,10 @@ test('grafo de seguidores tem integridade e não fica exposto ao navegador', () 
   assert.match(migration, /primary key \(follower_id, followed_id\)/);
   assert.match(migration, /check \(follower_id <> followed_id\)/);
   assert.match(migration, /enable row level security/);
-  assert.match(migration, /revoke all on table public\.user_follows from public, anon, authenticated/);
+  assert.match(
+    migration,
+    /revoke all on table public\.user_follows from public, anon, authenticated/,
+  );
   assert.match(
     migration,
     /grant select, insert, update, delete on table public\.user_follows to service_role/,
@@ -49,10 +52,7 @@ test('runtime carrega relações atuais sem tornar falha social fatal para o boo
 
 test('perfil público oferece seguir e mostra seguidores e seguindo', () => {
   assert.match(profile, /async function socialSummary/);
-  assert.match(
-    profile,
-    /\/api\/profiles\/\$\{encodeURIComponent\(profile\.username\)\}\/social/,
-  );
+  assert.match(profile, /\/api\/profiles\/\$\{encodeURIComponent\(profile\.username\)\}\/social/);
   assert.match(profile, /data-profile-follow=/);
   assert.match(profile, /data-following=/);
   assert.match(profile, />Seguidores</);

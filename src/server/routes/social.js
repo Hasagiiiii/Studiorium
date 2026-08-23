@@ -14,7 +14,9 @@ function timeValue(value) {
 }
 
 async function profileByUsername(username) {
-  const normalized = String(username || '').trim().toLowerCase();
+  const normalized = String(username || '')
+    .trim()
+    .toLowerCase();
   if (!normalized) throw notFound();
 
   const { data, error } = await db()
