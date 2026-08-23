@@ -2,15 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "rebuild/lorion-v4-clean": false,
+      "rebuild/lorion-v4-clean": true,
       "ci/lorion-v4-verify": false
     }
   },
+  "installCommand": "npm ci --ignore-scripts --no-audit --no-fund && cd v4 && npm install --ignore-scripts --no-audit --no-fund",
+  "buildCommand": "cd v4 && npm run build --workspace @lorion/web",
+  "outputDirectory": "v4/apps/web/dist",
   "functions": {
-    "api/index.js": { "maxDuration": 20 }
+    "api/v4.ts": { "maxDuration": 20 }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api?path=:path*" },
+    { "source": "/api/v4/:path*", "destination": "/api/v4?path=/api/v4/:path*" },
     { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [
