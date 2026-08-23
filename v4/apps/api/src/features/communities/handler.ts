@@ -1,16 +1,29 @@
 import {
+  createCommunityDiscussion,
   findCommunityMembership,
   findCommunityMembershipTarget,
+  findDiscussionById,
   joinPublicCommunity,
   leaveCommunity,
+  listCommunityDiscussions,
+  listCommunityMembers,
   listPendingCommunityMembershipRequests,
   requestRestrictedCommunity,
   resolveCommunityMembershipRequest,
+  toPublicUser,
 } from '@lorion/database';
-import type { CommunityMembershipRequest, CommunityMembershipResult } from '@lorion/contracts';
-import { requireSessionUser } from '../../auth/session.js';
+import {
+  communityHubSchema,
+  type CommunityHub,
+  type CommunityMembershipRequest,
+  type CommunityMembershipResult,
+  type Discussion,
+} from '@lorion/contracts';
+import { requireSessionUser, sessionUser } from '../../auth/session.js';
+import { readJson } from '../../core/http/body.js';
 import type { ApiRequest } from '../../core/http/types.js';
-import { forbidden, HttpError, notFound } from '../../core/http/errors.js';
+import { badRequest, forbidden, HttpError, notFound } from '../../core/http/errors.js';
+import { entityId } from '../../core/security/token.js';
 
 function normalizedSlug(value: string): string {
   try {
@@ -41,6 +54,70 @@ async function requireCommunityModerator(request: ApiRequest, communityId: strin
     (membership.role === 'leader' || membership.role === 'moderator');
   if (!canModerate) throw forbidden('Você não pode gerenciar solicitações desta comunidade.');
   return user;
+}
+
+export async function communityHub(request: ApiRequest, rawSlug: string): Promise<CommunityHub> {
+  const community = await activeCommunity(rawSlug);
+  const viewer = await sessionUser(request);
+  const membership = viewer ? await findCommunityMembership(community.id, viewer.id) : null;
+  const isMember =
+    membership?.status === 'active' && membership.moderation_status !== 'removed';
+
+  if (community.visibility !== 'public' && !isMember) {
+    throw forbidden('Entre na comunidade para acessar membros e discussões.');
+  }
+
+  const [members, discussions] = await Promise.all([
+    listCommunityMembers(community.id),
+    listCommunityDiscussions(community.id),
+  ]);
+
+  return communityHubSchema.parse({
+    members,
+    discussions,
+    canCreateDiscussion: Boolean(isMember && membership?.moderation_status === 'clear'),
+  });
+}
+
+export async function createDiscussionInCommunity(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<Discussion> {
+  const user = await requireSessionUser(request);
+  const community = await activeCommunity(rawSlug);
+  const membership = await findCommunityMembership(community.id, user.id);
+  if (membership?.status !== 'active' || membership.moderation_status !== 'clear') {
+    throw forbidden('Você precisa ser membro ativo para publicar nesta comunidade.');
+  }
+
+  const body = await readJson(request);
+  const title = String(body.title || '').trim();
+  const content = String(body.body || '').trim();
+  const category = String(body.category || 'Geral').trim() || 'Geral';
+  if (title.length < 3 || title.length > 160) {
+    throw badRequest('O título precisa ter entre 3 e 160 caracteres.');
+  }
+  if (content.length < 1 || content.length > 8000) {
+    throw badRequest('A discussão precisa ter entre 1 e 8000 caracteres.');
+  }
+  if (category.length > 60) throw badRequest('A categoria é muito longa.');
+
+  const publicUser = await toPublicUser(user);
+  const discussionId = entityId('dsc');
+  const created = await createCommunityDiscussion({
+    communityId: community.id,
+    discussionId,
+    authorId: user.id,
+    authorName: publicUser?.displayName || user.email.split('@')[0] || 'Membro',
+    title,
+    body: content,
+    category,
+  });
+  if (!created) throw forbidden('Não foi possível publicar nesta comunidade.');
+
+  const discussion = await findDiscussionById(discussionId);
+  if (!discussion) throw new Error('Discussão criada, mas não encontrada após persistência.');
+  return discussion;
 }
 
 export async function joinCommunity(
@@ -114,7 +191,12 @@ export async function decideCommunityMembershipRequest(
 ): Promise<CommunityMembershipResult> {
   const community = await activeCommunity(rawSlug);
   await requireCommunityModerator(request, community.id);
-  const userId = decodeURIComponent(rawUserId || '').trim();
+  let userId = '';
+  try {
+    userId = decodeURIComponent(rawUserId || '').trim();
+  } catch {
+    throw notFound('Solicitação não encontrada.');
+  }
   if (!userId) throw notFound('Solicitação não encontrada.');
 
   const result = await resolveCommunityMembershipRequest(community.id, userId, approve);
