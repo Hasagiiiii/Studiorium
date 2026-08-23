@@ -19,6 +19,7 @@ export * from './repositories/library/write.js';
 export * from './repositories/moderation/read.js';
 export * from './repositories/moderation/write.js';
 export * from './repositories/news/read.js';
+export * from './repositories/news/write.js';
 export * from './repositories/notifications/read.js';
 export * from './repositories/notifications/write.js';
 export * from './repositories/posts/read.js';
