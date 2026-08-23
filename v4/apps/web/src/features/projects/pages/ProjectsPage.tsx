@@ -2,10 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function ProjectsPage() {
   const { data, reload } = useAppState();
+  const { pushToast } = useToast();
   const [params, setParams] = useSearchParams();
   const me = data?.user;
   const projects = me ? (data?.projects.filter((item) => item.ownerId === me.id) ?? []) : [];
@@ -29,7 +31,7 @@ export function ProjectsPage() {
     setStatus('saving');
     setError('');
     try {
-      await services.projects.create({
+      const created = await services.projects.create({
         title: title.trim(),
         type: 'Projeto',
         visibility,
@@ -41,9 +43,12 @@ export function ProjectsPage() {
       setCreating(false);
       await reload();
       setStatus('idle');
+      pushToast({ message: `Projeto “${created.title}” criado.`, tone: 'success' });
     } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Não foi possível criar o projeto.';
       setStatus('error');
-      setError(cause instanceof Error ? cause.message : 'Não foi possível criar o projeto.');
+      setError(message);
+      pushToast({ message, tone: 'error' });
     }
   }
 
