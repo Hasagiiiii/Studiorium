@@ -13,7 +13,9 @@ export function assertSameOrigin(request: ApiRequest) {
   if (!origin) return;
 
   const forwardedHost = request.headers['x-forwarded-host'];
-  const host = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || request.headers.host;
+  const host = Array.isArray(forwardedHost)
+    ? forwardedHost[0]
+    : forwardedHost || request.headers.host;
   if (!host) throw forbidden('Host da requisição não identificado.');
 
   try {

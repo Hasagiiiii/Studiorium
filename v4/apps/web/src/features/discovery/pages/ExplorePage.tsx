@@ -70,11 +70,16 @@ export function ExplorePage() {
           placeholder="Pesquisar pessoas, comunidades, livros, pesquisas, projetos e notícias…"
           aria-label="Pesquisar no Lorion"
         />
-        <button type="submit" className="button primary">Pesquisar</button>
+        <button type="submit" className="button primary">
+          Pesquisar
+        </button>
       </form>
 
       <nav className="explore-filters" aria-label="Filtrar descoberta">
-        <Link className={!selectedType ? 'active' : ''} to={query ? `/explorar?q=${encodeURIComponent(query)}` : '/explorar'}>
+        <Link
+          className={!selectedType ? 'active' : ''}
+          to={query ? `/explorar?q=${encodeURIComponent(query)}` : '/explorar'}
+        >
           Tudo <span>{entries.length}</span>
         </Link>
         {TYPES.map((type) => (
@@ -91,13 +96,19 @@ export function ExplorePage() {
       <section className="search-results" aria-live="polite">
         <header>
           <strong>{visibleEntries.length}</strong>{' '}
-          {query ? `resultados para “${query}”` : selectedType ? `itens em ${selectedType}` : 'destaques para explorar'}
+          {query
+            ? `resultados para “${query}”`
+            : selectedType
+              ? `itens em ${selectedType}`
+              : 'destaques para explorar'}
         </header>
         <div className="resource-grid">
           {visibleEntries.map((entry) => (
             <article key={entry.id} className="resource-card search-result-card">
               <span className="eyebrow">{entry.type}</span>
-              <h2><Link to={entry.href}>{entry.title}</Link></h2>
+              <h2>
+                <Link to={entry.href}>{entry.title}</Link>
+              </h2>
               <p>{entry.description}</p>
             </article>
           ))}

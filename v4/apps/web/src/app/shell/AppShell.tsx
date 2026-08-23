@@ -13,7 +13,9 @@ export function AppShell({ children }: PropsWithChildren) {
     <div className="app-shell">
       <header className="topbar">
         <Link className="brand" to="/" aria-label="Lorion — início">
-          <span className="brand-mark" aria-hidden="true">L</span>
+          <span className="brand-mark" aria-hidden="true">
+            L
+          </span>
           <span>
             <strong>Lorion</strong>
             <small>by Orium Labs</small>
@@ -21,8 +23,14 @@ export function AppShell({ children }: PropsWithChildren) {
         </Link>
         <PrimaryNav />
         <div className="topbar-actions">
-          <Link to="/explorar?foco=busca" aria-label="Pesquisar">⌕</Link>
-          {me ? <Link to="/notificacoes" aria-label="Notificações">◇</Link> : null}
+          <Link to="/explorar?foco=busca" aria-label="Pesquisar">
+            ⌕
+          </Link>
+          {me ? (
+            <Link to="/notificacoes" aria-label="Notificações">
+              ◇
+            </Link>
+          ) : null}
           {me?.username ? (
             <Link to={`/perfil/${encodeURIComponent(me.username)}`}>{me.displayName}</Link>
           ) : (

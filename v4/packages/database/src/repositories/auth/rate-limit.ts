@@ -43,14 +43,16 @@ export async function recordLoginFailure(key: string): Promise<boolean> {
   const attempts = insideWindow ? Number(row?.attempts || 0) + 1 : 1;
   const blocked = attempts >= MAX_ATTEMPTS;
 
-  const update = await database().from('auth_rate_limits').upsert({
-    key,
-    scope: 'login',
-    attempts,
-    window_started_at: new Date(insideWindow ? windowStarted : now).toISOString(),
-    blocked_until: blocked ? new Date(now + BLOCK_MS).toISOString() : null,
-    updated_at: new Date(now).toISOString(),
-  });
+  const update = await database()
+    .from('auth_rate_limits')
+    .upsert({
+      key,
+      scope: 'login',
+      attempts,
+      window_started_at: new Date(insideWindow ? windowStarted : now).toISOString(),
+      blocked_until: blocked ? new Date(now + BLOCK_MS).toISOString() : null,
+      updated_at: new Date(now).toISOString(),
+    });
   if (update.error) throw new Error(update.error.message);
   return blocked;
 }

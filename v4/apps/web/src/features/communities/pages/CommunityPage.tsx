@@ -27,7 +27,9 @@ export function CommunityPage() {
     >
       <section className="community-overview">
         <div className="community-stats">
-          <span><strong>{community.memberCount}</strong> membros</span>
+          <span>
+            <strong>{community.memberCount}</strong> membros
+          </span>
           <span>{community.visibility === 'public' ? 'Pública' : 'Acesso controlado'}</span>
           {community.official ? <span>Comunidade oficial</span> : null}
         </div>
@@ -35,7 +37,9 @@ export function CommunityPage() {
           <div className="community-rules">
             <h2>Diretrizes da comunidade</h2>
             <ul>
-              {community.rules.map((rule) => <li key={rule}>{rule}</li>)}
+              {community.rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
             </ul>
           </div>
         ) : null}

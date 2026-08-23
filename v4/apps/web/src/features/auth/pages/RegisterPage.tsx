@@ -43,25 +43,59 @@ export function RegisterPage() {
       <form className="auth-form" onSubmit={submit}>
         <label>
           Nome de exibição
-          <input required minLength={2} maxLength={80} value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
+          <input
+            required
+            minLength={2}
+            maxLength={80}
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
+          />
         </label>
         <label>
           E-mail
-          <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+          <input
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
         </label>
         <label>
           Ano de nascimento
-          <input type="number" inputMode="numeric" required min={1930} max={new Date().getFullYear()} value={birthYear} onChange={(event) => setBirthYear(event.target.value)} />
+          <input
+            type="number"
+            inputMode="numeric"
+            required
+            min={1930}
+            max={new Date().getFullYear()}
+            value={birthYear}
+            onChange={(event) => setBirthYear(event.target.value)}
+          />
         </label>
         <label>
           Senha
-          <input type="password" autoComplete="new-password" required minLength={12} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} />
+          <input
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={12}
+            maxLength={128}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
         </label>
-        {status === 'error' ? <p className="inline-error" role="alert">{error}</p> : null}
+        {status === 'error' ? (
+          <p className="inline-error" role="alert">
+            {error}
+          </p>
+        ) : null}
         <button className="button primary" type="submit" disabled={status === 'saving'}>
           {status === 'saving' ? 'Criando…' : 'Criar conta'}
         </button>
-        <p>Já tem conta? <Link to="/entrar">Entrar</Link></p>
+        <p>
+          Já tem conta? <Link to="/entrar">Entrar</Link>
+        </p>
       </form>
     </FeaturePage>
   );

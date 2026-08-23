@@ -29,7 +29,9 @@ async function exactCount(column: 'follower_id' | 'followed_id', userId: string)
   return result.count ?? 0;
 }
 
-export async function followCounts(userId: string): Promise<{ followerCount: number; followingCount: number }> {
+export async function followCounts(
+  userId: string,
+): Promise<{ followerCount: number; followingCount: number }> {
   const [followerCount, followingCount] = await Promise.all([
     exactCount('followed_id', userId),
     exactCount('follower_id', userId),
@@ -40,7 +42,10 @@ export async function followCounts(userId: string): Promise<{ followerCount: num
 export async function followUser(followerId: string, followedId: string): Promise<void> {
   const result = await database()
     .from('user_follows')
-    .upsert({ follower_id: followerId, followed_id: followedId }, { onConflict: 'follower_id,followed_id' });
+    .upsert(
+      { follower_id: followerId, followed_id: followedId },
+      { onConflict: 'follower_id,followed_id' },
+    );
   if (result.error) throw new Error(result.error.message);
 }
 

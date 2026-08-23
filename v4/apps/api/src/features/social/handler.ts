@@ -103,10 +103,12 @@ export async function followingFeed(request: ApiRequest): Promise<FeedResponse> 
     listPublishedNews(),
     listPublicProjects(),
   ]);
-  const entries = buildFeedFromSources({ publications, discussions, news, projects }).filter((entry) => {
-    const ownerId = contentOwnerId(entry);
-    return Boolean(ownerId && followingIds.has(ownerId));
-  });
+  const entries = buildFeedFromSources({ publications, discussions, news, projects }).filter(
+    (entry) => {
+      const ownerId = contentOwnerId(entry);
+      return Boolean(ownerId && followingIds.has(ownerId));
+    },
+  );
 
   return feedResponseSchema.parse({ feed: sortFeed(entries, 'following') });
 }

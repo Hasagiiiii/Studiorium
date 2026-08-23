@@ -25,19 +25,28 @@ export function BookPage() {
       <article className="book-detail">
         {book.description ? <p>{book.description}</p> : null}
         <div className="book-meta">
-          <span><strong>{book.ratingAverage.toFixed(1)}</strong> / 5</span>
+          <span>
+            <strong>{book.ratingAverage.toFixed(1)}</strong> / 5
+          </span>
           <span>{book.reviewCount} reviews</span>
           <span>{book.recommendationCount} recomendações</span>
         </div>
         {book.purchaseUrl ? (
-          <a className="button secondary" href={book.purchaseUrl} target="_blank" rel="noreferrer noopener">
+          <a
+            className="button secondary"
+            href={book.purchaseUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             {book.purchaseLabel || 'Ver livro'}
           </a>
         ) : null}
       </article>
 
       <section className="resource-section">
-        <header><h2>Reviews da comunidade</h2></header>
+        <header>
+          <h2>Reviews da comunidade</h2>
+        </header>
         {reviews.length ? (
           <div className="resource-grid">
             {reviews.map((review) => (
@@ -49,7 +58,9 @@ export function BookPage() {
             ))}
           </div>
         ) : (
-          <div className="empty-state"><p>Ainda não há reviews para esta obra.</p></div>
+          <div className="empty-state">
+            <p>Ainda não há reviews para esta obra.</p>
+          </div>
         )}
       </section>
     </FeaturePage>

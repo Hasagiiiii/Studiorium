@@ -20,7 +20,11 @@ export function CodeProjectPage() {
   }
 
   return (
-    <FeaturePage eyebrow="Código" title={project.title} description={project.description || 'Projeto de código no Lorion.'}>
+    <FeaturePage
+      eyebrow="Código"
+      title={project.title}
+      description={project.description || 'Projeto de código no Lorion.'}
+    >
       <section className="empty-state">
         <p>O editor isolado deste projeto será carregado aqui sem reutilizar o editor legado.</p>
       </section>

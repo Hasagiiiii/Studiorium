@@ -26,7 +26,10 @@ export function AppStateProvider({ children }: PropsWithChildren) {
     void reload();
   }, [reload]);
 
-  const value = useMemo<AppState>(() => ({ status, data, error, reload }), [status, data, error, reload]);
+  const value = useMemo<AppState>(
+    () => ({ status, data, error, reload }),
+    [status, data, error, reload],
+  );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }

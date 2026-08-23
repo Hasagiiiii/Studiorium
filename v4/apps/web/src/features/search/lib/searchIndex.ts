@@ -24,7 +24,9 @@ export function buildSearchIndex(data: BootstrapPayload): SearchEntry[] {
       title: item.displayName,
       description: item.bio || item.verifiedSpecialty || item.profileType,
       href: `/perfil/${encodeURIComponent(item.username)}`,
-      searchable: normalize([item.displayName, item.bio, item.verifiedSpecialty, item.institution].join(' ')),
+      searchable: normalize(
+        [item.displayName, item.bio, item.verifiedSpecialty, item.institution].join(' '),
+      ),
     })),
     ...data.communities.map((item) => ({
       id: `community:${item.id}`,
@@ -48,7 +50,9 @@ export function buildSearchIndex(data: BootstrapPayload): SearchEntry[] {
       title: item.title,
       description: item.abstract,
       href: `/pesquisas/${encodeURIComponent(item.slug)}`,
-      searchable: normalize([item.title, item.abstract, item.area, item.keywords.join(' ')].join(' ')),
+      searchable: normalize(
+        [item.title, item.abstract, item.area, item.keywords.join(' ')].join(' '),
+      ),
     })),
     ...data.projects
       .filter((item) => item.visibility === 'public')

@@ -16,7 +16,11 @@ export function CommunitiesPage() {
         {communities.map((community) => (
           <article key={community.id} className="resource-card">
             <span className="eyebrow">{community.area}</span>
-            <h2><Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>{community.name}</Link></h2>
+            <h2>
+              <Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>
+                {community.name}
+              </Link>
+            </h2>
             <p>{community.description}</p>
             <footer>{community.memberCount} membros</footer>
           </article>

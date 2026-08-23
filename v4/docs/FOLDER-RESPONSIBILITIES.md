@@ -3,6 +3,7 @@
 A v4 usa isolamento por responsabilidade como regra obrigatória.
 
 ## apps/web
+
 Interface do usuário.
 
 - `app/`: bootstrap, router, estado global mínimo e App Shell.
@@ -13,6 +14,7 @@ Interface do usuário.
 - `styles/`: tokens, base, componentes, features e motion.
 
 ## apps/api
+
 Backend HTTP.
 
 - `core/`: router, resposta, erros.
@@ -20,18 +22,23 @@ Backend HTTP.
 - `features/`: endpoints separados por domínio.
 
 ## packages/contracts
+
 Schemas runtime e tipos públicos. Não depende de UI, HTTP ou banco.
 
 ## packages/api-client
+
 Chamadas HTTP tipadas. O navegador não chama Supabase diretamente.
 
 ## packages/domain
+
 Regras puras de negócio. Não usa DOM, fetch ou Supabase.
 
 ## packages/database
+
 Tipos do schema, repositories e migrations. Não renderiza UI.
 
 ## tests
+
 Separado em `contracts`, `domain`, `api`, `web` e `integration`.
 
 ## Diagnóstico

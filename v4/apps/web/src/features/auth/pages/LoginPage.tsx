@@ -56,11 +56,17 @@ export function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        {status === 'error' ? <p className="inline-error" role="alert">{error}</p> : null}
+        {status === 'error' ? (
+          <p className="inline-error" role="alert">
+            {error}
+          </p>
+        ) : null}
         <button className="button primary" type="submit" disabled={status === 'saving'}>
           {status === 'saving' ? 'Entrando…' : 'Entrar'}
         </button>
-        <p>Ainda não tem conta? <Link to="/cadastro">Criar conta</Link></p>
+        <p>
+          Ainda não tem conta? <Link to="/cadastro">Criar conta</Link>
+        </p>
       </form>
     </FeaturePage>
   );

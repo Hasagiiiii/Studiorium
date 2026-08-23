@@ -51,15 +51,27 @@ async function route(request: ApiRequest, response: ApiResponse) {
 
   const profileSocialMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/social$/);
   if (profileSocialMatch && method === 'GET') {
-    return json(response, 200, await profileSocial(request, decodeURIComponent(profileSocialMatch[1] || '')));
+    return json(
+      response,
+      200,
+      await profileSocial(request, decodeURIComponent(profileSocialMatch[1] || '')),
+    );
   }
 
   const followMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/follow$/);
   if (followMatch && method === 'POST') {
-    return json(response, 200, await setFollow(request, decodeURIComponent(followMatch[1] || ''), true));
+    return json(
+      response,
+      200,
+      await setFollow(request, decodeURIComponent(followMatch[1] || ''), true),
+    );
   }
   if (followMatch && method === 'DELETE') {
-    return json(response, 200, await setFollow(request, decodeURIComponent(followMatch[1] || ''), false));
+    return json(
+      response,
+      200,
+      await setFollow(request, decodeURIComponent(followMatch[1] || ''), false),
+    );
   }
 
   throw notFound('Endpoint não encontrado.');
@@ -69,22 +81,26 @@ export async function handleApi(request: ApiRequest, response: ApiResponse) {
   try {
     await route(request, response);
   } catch (cause) {
-    const record = cause && typeof cause === 'object' ? (cause as { status?: unknown; code?: unknown }) : {};
-    const status = cause instanceof HttpError
-      ? cause.status
-      : typeof record.status === 'number'
-        ? record.status
-        : 500;
-    const code = cause instanceof HttpError
-      ? cause.code
-      : typeof record.code === 'string'
-        ? record.code
-        : undefined;
-    const publicMessage = status >= 500
-      ? 'O serviço encontrou um erro inesperado.'
-      : cause instanceof Error
-        ? cause.message
-        : 'Não foi possível concluir a solicitação.';
+    const record =
+      cause && typeof cause === 'object' ? (cause as { status?: unknown; code?: unknown }) : {};
+    const status =
+      cause instanceof HttpError
+        ? cause.status
+        : typeof record.status === 'number'
+          ? record.status
+          : 500;
+    const code =
+      cause instanceof HttpError
+        ? cause.code
+        : typeof record.code === 'string'
+          ? record.code
+          : undefined;
+    const publicMessage =
+      status >= 500
+        ? 'O serviço encontrou um erro inesperado.'
+        : cause instanceof Error
+          ? cause.message
+          : 'Não foi possível concluir a solicitação.';
 
     if (status >= 500) console.error('[Lorion v4 API]', cause);
     json(response, status, code ? { error: publicMessage, code } : { error: publicMessage });

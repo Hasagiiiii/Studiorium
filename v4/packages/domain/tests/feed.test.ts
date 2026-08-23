@@ -78,5 +78,8 @@ test('fonte pública exclui projeto privado', () => {
     ],
   });
 
-  assert.deepEqual(feed.map((entry) => entry.item.id), ['prj_public']);
+  assert.deepEqual(
+    feed.map((entry) => entry.item.id),
+    ['prj_public'],
+  );
 });

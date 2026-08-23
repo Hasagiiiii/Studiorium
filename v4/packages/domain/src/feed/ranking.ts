@@ -67,11 +67,10 @@ export function sortFeed(
   if (mode === 'trending') {
     return feed.sort(
       (a, b) =>
-        activityScore(b) + freshnessScore(b, now) * 0.35 -
+        activityScore(b) +
+        freshnessScore(b, now) * 0.35 -
         (activityScore(a) + freshnessScore(a, now) * 0.35),
     );
   }
-  return feed.sort(
-    (a, b) => blendedScore(b, profiles, now) - blendedScore(a, profiles, now),
-  );
+  return feed.sort((a, b) => blendedScore(b, profiles, now) - blendedScore(a, profiles, now));
 }

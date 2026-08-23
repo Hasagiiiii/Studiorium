@@ -95,15 +95,25 @@ export function ProfilePage() {
 
         {social.status === 'ready' ? (
           <div className="profile-social">
-            <span><strong>{social.value.followerCount}</strong> seguidores</span>
-            <span><strong>{social.value.followingCount}</strong> seguindo</span>
+            <span>
+              <strong>{social.value.followerCount}</strong> seguidores
+            </span>
+            <span>
+              <strong>{social.value.followingCount}</strong> seguindo
+            </span>
             {!isOwnProfile && social.value.canFollow ? (
               data?.user ? (
-                <button className="button primary" type="button" onClick={() => void toggleFollow()}>
+                <button
+                  className="button primary"
+                  type="button"
+                  onClick={() => void toggleFollow()}
+                >
                   {social.value.isFollowing ? 'Deixar de seguir' : 'Seguir'}
                 </button>
               ) : (
-                <Link className="button primary" to="/entrar">Entre para seguir</Link>
+                <Link className="button primary" to="/entrar">
+                  Entre para seguir
+                </Link>
               )
             ) : null}
           </div>

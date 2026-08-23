@@ -49,16 +49,24 @@ async function openSession(userId: string, response: ApiResponse) {
 
 export async function login(request: ApiRequest, response: ApiResponse): Promise<AuthUserResponse> {
   const body = await readJson(request);
-  const email = String(body.email || '').trim().toLowerCase();
+  const email = String(body.email || '')
+    .trim()
+    .toLowerCase();
   const password = String(body.password || '');
-  if (!EMAIL_PATTERN.test(email) || !password) throw new HttpError(401, 'E-mail ou senha incorretos.', 'INVALID_CREDENTIALS');
+  if (!EMAIL_PATTERN.test(email) || !password)
+    throw new HttpError(401, 'E-mail ou senha incorretos.', 'INVALID_CREDENTIALS');
 
   const rateKey = `login:${hashSessionToken(email)}`;
   await assertLoginAllowed(rateKey);
   const account = await findAccountByEmail(email);
   if (!account || !verifyPassword(password, account.password_hash)) {
     const blocked = await recordLoginFailure(rateKey);
-    if (blocked) throw new HttpError(429, 'Muitas tentativas. Aguarde alguns minutos e tente novamente.', 'RATE_LIMITED');
+    if (blocked)
+      throw new HttpError(
+        429,
+        'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+        'RATE_LIMITED',
+      );
     throw new HttpError(401, 'E-mail ou senha incorretos.', 'INVALID_CREDENTIALS');
   }
   if (account.status === 'suspended') throw forbidden('Esta conta está suspensa.');
@@ -68,25 +76,39 @@ export async function login(request: ApiRequest, response: ApiResponse): Promise
   return { user: await toPublicUser(account) };
 }
 
-export async function register(request: ApiRequest, response: ApiResponse): Promise<AuthUserResponse> {
+export async function register(
+  request: ApiRequest,
+  response: ApiResponse,
+): Promise<AuthUserResponse> {
   const settings = await loadSiteSettings();
-  if (!settings.registrations_open) throw forbidden('Novos cadastros estão temporariamente pausados.');
+  if (!settings.registrations_open)
+    throw forbidden('Novos cadastros estão temporariamente pausados.');
 
   const body = await readJson(request);
-  const email = String(body.email || '').trim().toLowerCase();
+  const email = String(body.email || '')
+    .trim()
+    .toLowerCase();
   const password = String(body.password || '');
-  const displayName = String(body.displayName || '').trim().slice(0, 80);
+  const displayName = String(body.displayName || '')
+    .trim()
+    .slice(0, 80);
   const birthYear = Number(body.birthYear);
   const currentYear = new Date().getFullYear();
 
   if (!EMAIL_PATTERN.test(email)) throw badRequest('Informe um e-mail válido.');
-  if (password.length < 12 || password.length > 128) throw badRequest('A senha precisa ter entre 12 e 128 caracteres.');
+  if (password.length < 12 || password.length > 128)
+    throw badRequest('A senha precisa ter entre 12 e 128 caracteres.');
   if (displayName.length < 2) throw badRequest('Informe seu nome de exibição.');
-  if (!Number.isInteger(birthYear) || birthYear < 1930 || birthYear > currentYear) throw badRequest('Ano de nascimento inválido.');
+  if (!Number.isInteger(birthYear) || birthYear < 1930 || birthYear > currentYear)
+    throw badRequest('Ano de nascimento inválido.');
 
-  const adminEmail = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  if (adminEmail && email === adminEmail) throw forbidden('Esta conta é provisionada pela administração.');
-  if (await findAccountByEmail(email)) throw new HttpError(409, 'Este e-mail já está cadastrado.', 'EMAIL_IN_USE');
+  const adminEmail = String(process.env.ADMIN_EMAIL || '')
+    .trim()
+    .toLowerCase();
+  if (adminEmail && email === adminEmail)
+    throw forbidden('Esta conta é provisionada pela administração.');
+  if (await findAccountByEmail(email))
+    throw new HttpError(409, 'Este e-mail já está cadastrado.', 'EMAIL_IN_USE');
 
   const userId = entityId('usr');
   const username = await uniqueUsername(displayName);

@@ -20,7 +20,11 @@ export function ResearchPage() {
   }
 
   return (
-    <FeaturePage eyebrow={publication.area} title={publication.title} description={publication.authorName}>
+    <FeaturePage
+      eyebrow={publication.area}
+      title={publication.title}
+      description={publication.authorName}
+    >
       <article className="longform-content">
         {publication.abstract ? (
           <section>
@@ -36,7 +40,9 @@ export function ResearchPage() {
         ) : null}
         {publication.keywords.length ? (
           <footer className="tag-list">
-            {publication.keywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
+            {publication.keywords.map((keyword) => (
+              <span key={keyword}>{keyword}</span>
+            ))}
           </footer>
         ) : null}
       </article>

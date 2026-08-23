@@ -27,7 +27,12 @@ export function App() {
 
   if (status === 'loading') return <LoadingScreen />;
   if (status === 'error') {
-    return <ErrorScreen message={error || 'Não foi possível carregar o Lorion.'} onRetry={() => void reload()} />;
+    return (
+      <ErrorScreen
+        message={error || 'Não foi possível carregar o Lorion.'}
+        onRetry={() => void reload()}
+      />
+    );
   }
 
   return (

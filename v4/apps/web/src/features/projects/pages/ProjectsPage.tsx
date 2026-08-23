@@ -5,7 +5,7 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 export function ProjectsPage() {
   const { data } = useAppState();
   const me = data?.user;
-  const projects = me ? data?.projects.filter((item) => item.ownerId === me.id) ?? [] : [];
+  const projects = me ? (data?.projects.filter((item) => item.ownerId === me.id) ?? []) : [];
 
   return (
     <FeaturePage
@@ -35,7 +35,11 @@ export function ProjectsPage() {
                 {projects.map((project) => (
                   <article key={project.id} className="resource-card project-card">
                     <span className="eyebrow">{project.type}</span>
-                    <h3><Link to={`/projetos/${encodeURIComponent(project.id)}`}>{project.title}</Link></h3>
+                    <h3>
+                      <Link to={`/projetos/${encodeURIComponent(project.id)}`}>
+                        {project.title}
+                      </Link>
+                    </h3>
                     {project.notes ? <p>{project.notes}</p> : null}
                     <footer>{project.visibility === 'public' ? 'Público' : 'Privado'}</footer>
                   </article>
@@ -52,7 +56,9 @@ export function ProjectsPage() {
         <section className="empty-state">
           <h2>Entre para criar e organizar projetos</h2>
           <p>A descoberta de projetos públicos continua disponível em Explorar.</p>
-          <Link className="button primary" to="/entrar">Entrar</Link>
+          <Link className="button primary" to="/entrar">
+            Entrar
+          </Link>
         </section>
       )}
     </FeaturePage>

@@ -5,27 +5,33 @@ Objetivo: manter apenas superfícies que possuem função própria. Funcionalida
 ## Páginas principais — ficam
 
 ### `/` — Início
+
 Função própria: feed social, recomendações, atualizações e relações.
 
 ### `/explorar` — Explorar
+
 Função própria: descoberta global.
 Absorve busca, pessoas, notícias como listagem, pesquisas, tendências e filtros.
 
 ### `/comunidades` — Comunidades
+
 Função própria: descoberta e gestão de espaços sociais.
 Categorias como Tecnologia, Jogos, Hardware, Ciência e Literatura são filtros/classificações, não páginas principais independentes.
 
 ### `/biblioteca` — Biblioteca
+
 Função própria: experiência exclusiva de livros.
 Concentra catálogo de livros, estante pessoal, progresso de leitura, livros lidos/quero ler/lendo, recomendações e reviews. Pesquisas não pertencem à Biblioteca; aparecem em Explorar, Feed, Perfil e Comunidades e mantêm páginas de detalhe próprias.
 
 ### `/projetos` — Projetos
+
 Função própria: workspace pessoal de criação, edição e organização.
 Não deve duplicar Explorar mostrando catálogo geral de projetos de terceiros.
 
 ## Identidade — fica como superfície própria
 
 ### `/perfil/:username`
+
 Função própria: identidade social e portfólio vivo.
 Seguidores, seguindo, publicações, pesquisas, projetos, biblioteca, comunidades e atividade aparecem como módulos/tabs internos.
 
@@ -44,12 +50,15 @@ Detalhes precisam de URL compartilhável, histórico e deep-link.
 ## Ferramentas secundárias — ficam quando há fluxo próprio
 
 ### `/projetos/lab`
+
 É ferramenta/workspace, não aba principal.
 
 ### `/notificacoes`
+
 Pode existir como histórico completo e deep-link, mesmo que o uso normal aconteça em popover/drawer.
 
 ### autenticação
+
 - `/entrar`
 - `/cadastro`
 - `/recuperar-senha`
@@ -58,11 +67,13 @@ Pode existir como histórico completo e deep-link, mesmo que o uso normal aconte
 São fluxos necessários, não itens da navegação principal.
 
 ### administração
+
 - `/admin/*`
 
 É aplicação operacional por permissão, isolada da navegação social comum.
 
 ### institucional
+
 - `/diretrizes`
 - `/sobre`
 
@@ -71,22 +82,27 @@ Ficam fora da navegação principal e podem ser acessadas por footer/configuraç
 ## Deixam de ser páginas
 
 ### `/buscar`
+
 REMOVER.
 Busca vive em `/explorar?q=...` e pode abrir também como command/search overlay.
 
 ### `/pessoas`
+
 REMOVER.
 Pessoas são um filtro de Explorar.
 
 ### `/criar`
+
 REMOVER.
 Criar é launcher/composer acionado pelo botão `+`.
 
 ### `/noticias`
+
 REMOVER como hub principal.
 Notícias são tipo de conteúdo no Feed/Explorar. `/noticias/:slug` permanece para detalhe compartilhável.
 
 ### `/oficina` e `/oficina/:slug`
+
 REMOVER.
 Tecnologia/Hardware/Jogos/Carros/Motos são categorias de comunidades/conteúdos. Tutoriais entram em comunidades.
 

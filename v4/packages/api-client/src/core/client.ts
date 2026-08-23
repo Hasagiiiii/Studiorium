@@ -31,7 +31,11 @@ function isRuntimeValidationError(error: unknown): boolean {
 export class ApiClient {
   constructor(private readonly baseUrl = '') {}
 
-  async request<T>(path: string, schema: RuntimeSchema<T>, options: RequestOptions = {}): Promise<T> {
+  async request<T>(
+    path: string,
+    schema: RuntimeSchema<T>,
+    options: RequestOptions = {},
+  ): Promise<T> {
     const method = String(options.method || 'GET').toUpperCase();
     const attempts = method === 'GET' ? 3 : 1;
     const { body: inputBody, ...requestOptions } = options;
@@ -56,14 +60,19 @@ export class ApiClient {
         const payload = response.status === 204 ? {} : await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          const record = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
+          const record =
+            payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
           const error = new ApiError(
             typeof record.error === 'string' ? record.error : 'Não foi possível concluir a ação.',
             response.status,
             typeof record.code === 'string' ? record.code : undefined,
           );
 
-          if (method === 'GET' && attempt < attempts && RETRYABLE_GET_STATUSES.has(response.status)) {
+          if (
+            method === 'GET' &&
+            attempt < attempts &&
+            RETRYABLE_GET_STATUSES.has(response.status)
+          ) {
             lastError = error;
             await wait(350 * attempt);
             continue;

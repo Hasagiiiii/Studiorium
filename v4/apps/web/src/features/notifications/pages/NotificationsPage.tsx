@@ -12,7 +12,9 @@ export function NotificationsPage() {
         title="Entre para ver suas notificações"
         description="As notificações são privadas e vinculadas à sua conta."
       >
-        <Link className="button primary" to="/entrar">Entrar</Link>
+        <Link className="button primary" to="/entrar">
+          Entrar
+        </Link>
       </FeaturePage>
     );
   }
