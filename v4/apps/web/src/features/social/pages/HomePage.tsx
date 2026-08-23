@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { FeedSkeleton } from '../../../components/feedback/skeleton/Skeleton.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { FeedSkeleton } from '../../../components/feedback/skeleton/Skeleton.js';
 import { FeedCard } from '../components/FeedCard.js';
 import { useFeed } from '../state/useFeed.js';
 import { useProgressiveFeed } from '../state/useProgressiveFeed.js';
@@ -16,7 +16,7 @@ export function HomePage() {
   const [params] = useSearchParams();
   const { data } = useAppState();
   const { mode, entries, status, error, retry } = useFeed(params.get('feed'));
-  const { visibleItems, hasMore, sentinelRef } = useProgressiveFeed(entries, 8);
+  const { visibleItems, hasMore, sentinelRef, loadMore } = useProgressiveFeed(entries, 8);
 
   return (
     <main id="main-content" className="social-home">
@@ -64,8 +64,11 @@ export function HomePage() {
                 />
               ))}
               {hasMore ? (
-                <div ref={sentinelRef} className="feed-sentinel" aria-label="Carregando mais conteúdo">
+                <div ref={sentinelRef} className="feed-sentinel" aria-busy="true">
                   <FeedSkeleton cards={1} />
+                  <button className="button secondary feed-load-more" type="button" onClick={loadMore}>
+                    Carregar mais
+                  </button>
                 </div>
               ) : null}
             </>
