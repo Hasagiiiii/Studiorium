@@ -104,9 +104,7 @@ async function route(request: ApiRequest, response: ApiResponse) {
     return json(response, 201, await createComment(request, contentCommentMatch[1] || ''));
   }
 
-  const contentCommentItemMatch = path.match(
-    /^\/api\/v4\/content\/([^/]+)\/comments\/([^/]+)$/,
-  );
+  const contentCommentItemMatch = path.match(/^\/api\/v4\/content\/([^/]+)\/comments\/([^/]+)$/);
   if (contentCommentItemMatch && method === 'PATCH') {
     return json(
       response,
