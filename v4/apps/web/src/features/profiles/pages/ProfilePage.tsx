@@ -1,51 +1,50 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { FollowSummary } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 type SocialState =
-  | { status: 'idle'; value: null; error: null }
-  | { status: 'loading'; value: null; error: null }
+  | { status: 'loading'; value: FollowSummary | null; error: null }
   | { status: 'ready'; value: FollowSummary; error: null }
-  | { status: 'error'; value: null; error: string };
+  | { status: 'error'; value: FollowSummary | null; error: string };
 
 export function ProfilePage() {
   const { username = '' } = useParams();
   const { data } = useAppState();
+  const { pushToast } = useToast();
   const profile = data?.profiles.find((item) => item.username === username);
   const isOwnProfile = Boolean(data?.user?.username && data.user.username === username);
-  const [social, setSocial] = useState<SocialState>({ status: 'idle', value: null, error: null });
+  const [social, setSocial] = useState<SocialState>({ status: 'loading', value: null, error: null });
+  const [updating, setUpdating] = useState(false);
+
+  const loadSocial = useCallback(async () => {
+    if (!profile) return;
+    setSocial((current) => ({ status: 'loading', value: current.value, error: null }));
+    try {
+      const value = await services.social.profile(profile.username);
+      setSocial({ status: 'ready', value, error: null });
+    } catch (cause) {
+      setSocial((current) => ({
+        status: 'error',
+        value: current.value,
+        error: cause instanceof Error ? cause.message : 'Não foi possível carregar as conexões.',
+      }));
+    }
+  }, [profile]);
 
   useEffect(() => {
-    let active = true;
-    if (!profile) return;
-    setSocial({ status: 'loading', value: null, error: null });
-    void services.social
-      .profile(profile.username)
-      .then((value) => {
-        if (active) setSocial({ status: 'ready', value, error: null });
-      })
-      .catch((cause) => {
-        if (!active) return;
-        setSocial({
-          status: 'error',
-          value: null,
-          error: cause instanceof Error ? cause.message : 'Não foi possível carregar as conexões.',
-        });
-      });
-    return () => {
-      active = false;
-    };
-  }, [profile]);
+    void loadSocial();
+  }, [loadSocial]);
 
   if (!profile) {
     return (
       <FeaturePage
         eyebrow="Perfil"
         title="Perfil não encontrado"
-        description="Este usuário não existe ou o perfil não está disponível publicamente."
+        description="Este usuário não existe ou o perfil não está disponível para você."
       >
         <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
       </FeaturePage>
@@ -55,7 +54,8 @@ export function ProfilePage() {
   const profileUsername = profile.username;
 
   async function toggleFollow() {
-    if (social.status !== 'ready' || !social.value.canFollow) return;
+    if (!social.value?.canFollow || updating) return;
+    setUpdating(true);
     try {
       const result = social.value.isFollowing
         ? await services.social.unfollow(profileUsername)
@@ -67,14 +67,19 @@ export function ProfilePage() {
           ...social.value,
           isFollowing: result.following,
           followerCount: result.followerCount,
+          followingCount: result.followingCount,
         },
       });
-    } catch (cause) {
-      setSocial({
-        status: 'error',
-        value: null,
-        error: cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.',
+      pushToast({
+        message: result.following ? `Você está seguindo @${profileUsername}.` : `Você deixou de seguir @${profileUsername}.`,
+        tone: 'success',
       });
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
+      setSocial((current) => ({ status: 'error', value: current.value, error: message }));
+      pushToast({ message, tone: 'error' });
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -93,7 +98,7 @@ export function ProfilePage() {
           {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
         </div>
 
-        {social.status === 'ready' ? (
+        {social.value ? (
           <div className="profile-social">
             <span>
               <strong>{social.value.followerCount}</strong> seguidores
@@ -106,9 +111,14 @@ export function ProfilePage() {
                 <button
                   className="button primary"
                   type="button"
+                  disabled={updating}
                   onClick={() => void toggleFollow()}
                 >
-                  {social.value.isFollowing ? 'Deixar de seguir' : 'Seguir'}
+                  {updating
+                    ? 'Atualizando…'
+                    : social.value.isFollowing
+                      ? 'Deixar de seguir'
+                      : 'Seguir'}
                 </button>
               ) : (
                 <Link className="button primary" to="/entrar">
@@ -117,8 +127,19 @@ export function ProfilePage() {
               )
             ) : null}
           </div>
-        ) : social.status === 'error' ? (
-          <p className="inline-error">{social.error}</p>
+        ) : null}
+
+        {social.status === 'loading' && !social.value ? (
+          <p className="feed-status">Carregando conexões…</p>
+        ) : null}
+
+        {social.status === 'error' ? (
+          <div className="inline-feedback" role="alert">
+            <p className="inline-error">{social.error}</p>
+            <button className="button secondary" type="button" onClick={() => void loadSocial()}>
+              Tentar novamente
+            </button>
+          </div>
         ) : null}
       </section>
     </FeaturePage>
