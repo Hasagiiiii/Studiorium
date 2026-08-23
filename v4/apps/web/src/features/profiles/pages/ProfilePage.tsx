@@ -1,34 +1,59 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { FollowSummary } from '@lorion/contracts';
+import type { FollowSummary, ProfileDetail } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { ProfileContent } from '../components/ProfileContent.js';
 
 type SocialState =
   | { status: 'loading'; value: FollowSummary | null; error: null }
   | { status: 'ready'; value: FollowSummary; error: null }
   | { status: 'error'; value: FollowSummary | null; error: string };
 
+type DetailState =
+  | { status: 'loading'; value: ProfileDetail | null; error: null }
+  | { status: 'ready'; value: ProfileDetail; error: null }
+  | { status: 'error'; value: ProfileDetail | null; error: string };
+
 export function ProfilePage() {
   const { username = '' } = useParams();
   const { data } = useAppState();
   const { pushToast } = useToast();
-  const profile = data?.profiles.find((item) => item.username === username);
-  const isOwnProfile = Boolean(data?.user?.username && data.user.username === username);
+  const [detail, setDetail] = useState<DetailState>({
+    status: 'loading',
+    value: null,
+    error: null,
+  });
   const [social, setSocial] = useState<SocialState>({
     status: 'loading',
     value: null,
     error: null,
   });
-  const [updating, setUpdating] = useState(false);
+  const [updatingFollow, setUpdatingFollow] = useState(false);
+  const [updatingBookshelfPrivacy, setUpdatingBookshelfPrivacy] = useState(false);
+
+  const loadDetail = useCallback(async () => {
+    if (!username) return;
+    setDetail((current) => ({ status: 'loading', value: current.value, error: null }));
+    try {
+      const value = await services.profiles.detail(username);
+      setDetail({ status: 'ready', value, error: null });
+    } catch (cause) {
+      setDetail((current) => ({
+        status: 'error',
+        value: current.value,
+        error: cause instanceof Error ? cause.message : 'Não foi possível carregar o perfil.',
+      }));
+    }
+  }, [username]);
 
   const loadSocial = useCallback(async () => {
-    if (!profile) return;
+    if (!username) return;
     setSocial((current) => ({ status: 'loading', value: current.value, error: null }));
     try {
-      const value = await services.social.profile(profile.username);
+      const value = await services.social.profile(username);
       setSocial({ status: 'ready', value, error: null });
     } catch (cause) {
       setSocial((current) => ({
@@ -37,33 +62,23 @@ export function ProfilePage() {
         error: cause instanceof Error ? cause.message : 'Não foi possível carregar as conexões.',
       }));
     }
-  }, [profile]);
+  }, [username]);
 
   useEffect(() => {
+    void loadDetail();
     void loadSocial();
-  }, [loadSocial]);
+  }, [loadDetail, loadSocial]);
 
-  if (!profile) {
-    return (
-      <FeaturePage
-        eyebrow="Perfil"
-        title="Perfil não encontrado"
-        description="Este usuário não existe ou o perfil não está disponível para você."
-      >
-        <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
-      </FeaturePage>
-    );
-  }
-
-  const profileUsername = profile.username;
+  const profile = detail.value?.profile || null;
+  const isOwnProfile = detail.value?.isOwnProfile || false;
 
   async function toggleFollow() {
-    if (!social.value?.canFollow || updating) return;
-    setUpdating(true);
+    if (!profile || !social.value?.canFollow || updatingFollow) return;
+    setUpdatingFollow(true);
     try {
       const result = social.value.isFollowing
-        ? await services.social.unfollow(profileUsername)
-        : await services.social.follow(profileUsername);
+        ? await services.social.unfollow(profile.username)
+        : await services.social.follow(profile.username);
       setSocial({
         status: 'ready',
         error: null,
@@ -76,8 +91,8 @@ export function ProfilePage() {
       });
       pushToast({
         message: result.following
-          ? `Você está seguindo @${profileUsername}.`
-          : `Você deixou de seguir @${profileUsername}.`,
+          ? `Você está seguindo @${profile.username}.`
+          : `Você deixou de seguir @${profile.username}.`,
         tone: 'success',
       });
     } catch (cause) {
@@ -86,8 +101,70 @@ export function ProfilePage() {
       setSocial((current) => ({ status: 'error', value: current.value, error: message }));
       pushToast({ message, tone: 'error' });
     } finally {
-      setUpdating(false);
+      setUpdatingFollow(false);
     }
+  }
+
+  async function updateBookshelfPrivacy(bookshelfPublic: boolean) {
+    if (!detail.value?.isOwnProfile || updatingBookshelfPrivacy) return;
+    setUpdatingBookshelfPrivacy(true);
+    try {
+      const updatedProfile = await services.profiles.updateBookshelfPrivacy(bookshelfPublic);
+      setDetail((current) =>
+        current.value
+          ? {
+              status: 'ready',
+              error: null,
+              value: { ...current.value, profile: updatedProfile },
+            }
+          : current,
+      );
+      pushToast({
+        message: bookshelfPublic ? 'Sua estante agora é pública.' : 'Sua estante agora é privada.',
+        tone: 'success',
+      });
+    } catch (cause) {
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível alterar a privacidade da estante.';
+      pushToast({ message, tone: 'error' });
+    } finally {
+      setUpdatingBookshelfPrivacy(false);
+    }
+  }
+
+  if (detail.status === 'loading' && !detail.value) {
+    return (
+      <FeaturePage eyebrow="Perfil" title="Carregando perfil…" description="Buscando dados públicos." />
+    );
+  }
+
+  if (detail.status === 'error' && !detail.value) {
+    return (
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Perfil indisponível"
+        description={detail.error || 'Este perfil não está disponível para você.'}
+      >
+        <div className="inline-feedback" role="alert">
+          <button className="button secondary" type="button" onClick={() => void loadDetail()}>
+            Tentar novamente
+          </button>
+          <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
+        </div>
+      </FeaturePage>
+    );
+  }
+
+  if (!profile || !detail.value) {
+    return (
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Perfil não encontrado"
+        description="Este usuário não existe ou o perfil não está disponível para você."
+      >
+        <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
+      </FeaturePage>
+    );
   }
 
   return (
@@ -103,6 +180,7 @@ export function ProfilePage() {
           {profile.institution ? <span>{profile.institution}</span> : null}
           {profile.course ? <span>{profile.course}</span> : null}
           {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
+          {!profile.isPublic && isOwnProfile ? <span>Perfil privado</span> : null}
         </div>
 
         {isOwnProfile ? (
@@ -126,17 +204,20 @@ export function ProfilePage() {
                 <button
                   className="button primary"
                   type="button"
-                  disabled={updating}
+                  disabled={updatingFollow}
                   onClick={() => void toggleFollow()}
                 >
-                  {updating
+                  {updatingFollow
                     ? 'Atualizando…'
                     : social.value.isFollowing
                       ? 'Deixar de seguir'
                       : 'Seguir'}
                 </button>
               ) : (
-                <Link className="button primary" to="/entrar">
+                <Link
+                  className="button primary"
+                  to={`/entrar?retorno=${encodeURIComponent(`/perfil/${profile.username}`)}`}
+                >
                   Entre para seguir
                 </Link>
               )
@@ -156,6 +237,18 @@ export function ProfilePage() {
             </button>
           </div>
         ) : null}
+
+        {detail.status === 'error' ? (
+          <p className="inline-error" role="alert">
+            {detail.error}
+          </p>
+        ) : null}
+
+        <ProfileContent
+          detail={detail.value}
+          updatingBookshelfPrivacy={updatingBookshelfPrivacy}
+          onBookshelfPrivacyChange={(value) => void updateBookshelfPrivacy(value)}
+        />
       </section>
     </FeaturePage>
   );
