@@ -60,8 +60,7 @@ export async function communityHub(request: ApiRequest, rawSlug: string): Promis
   const community = await activeCommunity(rawSlug);
   const viewer = await sessionUser(request);
   const membership = viewer ? await findCommunityMembership(community.id, viewer.id) : null;
-  const isMember =
-    membership?.status === 'active' && membership.moderation_status !== 'removed';
+  const isMember = membership?.status === 'active' && membership.moderation_status !== 'removed';
 
   if (community.visibility !== 'public' && !isMember) {
     throw forbidden('Entre na comunidade para acessar membros e discussões.');
