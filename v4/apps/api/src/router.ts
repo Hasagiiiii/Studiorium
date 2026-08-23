@@ -27,6 +27,16 @@ import {
   requestCommunityMembership,
 } from './features/communities/handler.js';
 import {
+  communityManagement,
+  createCommunity,
+  removeCommunityMedia,
+  serveCommunityMedia,
+  transferLeadership,
+  updateCommunity,
+  updateCommunityMember,
+  uploadCommunityMedia,
+} from './features/communities/management-handler.js';
+import {
   createComment,
   deleteComment,
   postDetail,
@@ -180,6 +190,55 @@ async function route(request: ApiRequest, response: ApiResponse) {
     );
   }
 
+  if (method === 'POST' && path === '/api/v4/communities') {
+    return json(response, 201, await createCommunity(request));
+  }
+  const communityManageMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/manage$/);
+  if (communityManageMatch && method === 'GET') {
+    return json(response, 200, await communityManagement(request, communityManageMatch[1] || ''));
+  }
+  const communityLeadershipMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/leadership$/);
+  if (communityLeadershipMatch && method === 'POST') {
+    return json(response, 200, await transferLeadership(request, communityLeadershipMatch[1] || ''));
+  }
+  const communityMemberManageMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/members\/([^/]+)$/);
+  if (communityMemberManageMatch && method === 'PATCH') {
+    return json(
+      response,
+      200,
+      await updateCommunityMember(
+        request,
+        communityMemberManageMatch[1] || '',
+        communityMemberManageMatch[2] || '',
+      ),
+    );
+  }
+  const communityMediaItemMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/media\/(avatar|cover)$/);
+  if (communityMediaItemMatch && method === 'GET') {
+    await serveCommunityMedia(
+      request,
+      response,
+      communityMediaItemMatch[1] || '',
+      communityMediaItemMatch[2] || '',
+    );
+    return;
+  }
+  if (communityMediaItemMatch && method === 'DELETE') {
+    return json(
+      response,
+      200,
+      await removeCommunityMedia(
+        request,
+        communityMediaItemMatch[1] || '',
+        communityMediaItemMatch[2] || '',
+      ),
+    );
+  }
+  const communityMediaMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/media$/);
+  if (communityMediaMatch && method === 'POST') {
+    return json(response, 200, await uploadCommunityMedia(request, communityMediaMatch[1] || ''));
+  }
+
   const communityHubMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/hub$/);
   if (communityHubMatch && method === 'GET') {
     return json(response, 200, await communityHub(request, communityHubMatch[1] || ''));
@@ -240,6 +299,11 @@ async function route(request: ApiRequest, response: ApiResponse) {
         communityRequestDecisionMatch[3] === 'approve',
       ),
     );
+  }
+
+  const communityItemMatch = path.match(/^\/api\/v4\/communities\/([^/]+)$/);
+  if (communityItemMatch && method === 'PATCH') {
+    return json(response, 200, await updateCommunity(request, communityItemMatch[1] || ''));
   }
 
   if (method === 'POST' && path === '/api/v4/books') {
