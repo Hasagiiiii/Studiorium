@@ -10,7 +10,9 @@ import type { ApiRequest } from '../../core/http/types.js';
 import { forbidden, HttpError, notFound } from '../../core/http/errors.js';
 
 function normalizedSlug(value: string): string {
-  return decodeURIComponent(value || '').trim().toLowerCase();
+  return decodeURIComponent(value || '')
+    .trim()
+    .toLowerCase();
 }
 
 export async function joinCommunity(
