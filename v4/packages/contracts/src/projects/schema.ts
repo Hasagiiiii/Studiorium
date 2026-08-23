@@ -23,17 +23,5 @@ export const createProjectInputSchema = z.object({
   notes: z.string().trim().max(4000).default(''),
 });
 
-export const codeProjectSchema = z.object({
-  id: z.string(),
-  ownerId: z.string(),
-  title: z.string(),
-  description: optionalText,
-  visibility: projectVisibilitySchema.default('private'),
-  createdAt: timestamp,
-  updatedAt: timestamp,
-  deletedAt: timestamp,
-});
-
 export type Project = z.infer<typeof projectSchema>;
 export type CreateProjectInput = z.infer<typeof createProjectInputSchema>;
-export type CodeProject = z.infer<typeof codeProjectSchema>;
