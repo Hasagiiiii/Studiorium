@@ -11,6 +11,7 @@ export * from './repositories/discussions/read.js';
 export * from './repositories/interactions/read.js';
 export * from './repositories/interactions/write.js';
 export * from './repositories/library/read.js';
+export * from './repositories/library/write.js';
 export * from './repositories/moderation/read.js';
 export * from './repositories/moderation/write.js';
 export * from './repositories/news/read.js';
