@@ -1,5 +1,6 @@
 import { bootstrapSchema, type BootstrapPayload } from '@lorion/contracts';
 import {
+  findProfileByUserId,
   listBookReviews,
   listBooks,
   listCommunities,
@@ -34,11 +35,12 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     bookReviews,
     publicProjects,
     discussions,
-    profiles,
+    publicProfiles,
     communities,
     settings,
     personalProjects,
     personalCodeProjects,
+    ownProfile,
     user,
   ] = await Promise.all([
     listPublishedResearch(),
@@ -53,8 +55,13 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     loadSiteSettings(),
     viewerId ? listUserProjects(viewerId) : Promise.resolve([]),
     viewerId ? listUserCodeProjects(viewerId) : Promise.resolve([]),
+    viewerId ? findProfileByUserId(viewerId) : Promise.resolve(null),
     publicSessionUser(request),
   ]);
+
+  const profiles = ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
+    ? [ownProfile, ...publicProfiles]
+    : publicProfiles;
 
   return bootstrapSchema.parse({
     publications,
