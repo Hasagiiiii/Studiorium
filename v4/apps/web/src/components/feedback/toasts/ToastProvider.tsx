@@ -27,6 +27,7 @@ type ToastContextValue = {
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
+const MAX_TOASTS = 4;
 
 export function ToastProvider({ children }: PropsWithChildren) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -34,12 +35,19 @@ export function ToastProvider({ children }: PropsWithChildren) {
   const timers = useRef(new Map<number, number>());
   const reduceMotion = useReducedMotion();
 
-  const dismiss = useCallback((id: number) => {
+  const clearTimer = useCallback((id: number) => {
     const timer = timers.current.get(id);
     if (timer) window.clearTimeout(timer);
     timers.current.delete(id);
-    setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
+
+  const dismiss = useCallback(
+    (id: number) => {
+      clearTimer(id);
+      setToasts((current) => current.filter((toast) => toast.id !== id));
+    },
+    [clearTimer],
+  );
 
   const pushToast = useCallback(
     ({ message, tone = 'info', duration = 4200 }: ToastInput) => {
@@ -47,14 +55,19 @@ export function ToastProvider({ children }: PropsWithChildren) {
       if (!text) return;
 
       const id = nextId.current++;
-      setToasts((current) => [...current.slice(-3), { id, message: text, tone }]);
+      setToasts((current) => {
+        const next = [...current, { id, message: text, tone }];
+        const removed = next.slice(0, Math.max(0, next.length - MAX_TOASTS));
+        removed.forEach((toast) => clearTimer(toast.id));
+        return next.slice(-MAX_TOASTS);
+      });
 
       if (duration > 0) {
         const timer = window.setTimeout(() => dismiss(id), duration);
         timers.current.set(id, timer);
       }
     },
-    [dismiss],
+    [clearTimer, dismiss],
   );
 
   useEffect(
@@ -70,7 +83,12 @@ export function ToastProvider({ children }: PropsWithChildren) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-region" aria-live="polite" aria-relevant="additions removals">
+      <div
+        className="toast-region"
+        aria-live="polite"
+        aria-atomic="false"
+        aria-relevant="additions removals"
+      >
         <AnimatePresence initial={false}>
           {toasts.map((toast) => (
             <motion.div
