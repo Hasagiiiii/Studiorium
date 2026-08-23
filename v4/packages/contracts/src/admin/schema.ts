@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
 import { reportSchema } from '../moderation/schema.js';
+import { newsArticleSchema, newsContributorSchema } from '../news/schema.js';
+import { publicationSchema } from '../research/schema.js';
 
 export const verificationRequestSchema = z.object({
   id: z.string(),
@@ -80,6 +82,9 @@ export const adminDashboardSchema = z.object({
   permissions: z.array(z.string()).default([]),
   reports: z.array(reportSchema).default([]),
   verificationRequests: z.array(verificationRequestSchema).default([]),
+  researchReviewQueue: z.array(publicationSchema).default([]),
+  newsContributorApplications: z.array(newsContributorSchema).default([]),
+  newsEditorialQueue: z.array(newsArticleSchema).default([]),
   users: z.array(adminUserSchema).default([]),
   roles: z.array(adminRoleSchema).default([]),
   audit: z.array(auditEntrySchema).default([]),
