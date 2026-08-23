@@ -1,60 +1,11 @@
-import { state, api, E, date, num, initials, toast, html } from '../runtime.js';
-import { goto } from '../router.js';
-import {
-  link,
-  nav,
-  footer,
-  layout,
-  empty,
-  notFound,
-  templateCard,
-  publicationCard,
-  discussionRow,
-} from './core.js';
-
-function coloquio() {
-  let q = state.query.get('q') || '';
-  let cat = state.query.get('categoria') || '';
-  const cats = [...new Set(state.boot.discussions.map((d) => d.category))];
-  let list = state.boot.discussions.filter(
-    (d) =>
-      (!q || JSON.stringify(d).toLowerCase().includes(q.toLowerCase())) &&
-      (!cat || d.category === cat),
-  );
-  layout(
-    html`<section class="pagehero">
-      <div class="shell">
-        <div class="eyebrow">Colloquium</div>
-        <h1 class="pagetitle">Colóquio</h1>
-        <p>
-          Discussões públicas sobre estudos, ciência, projetos e vida acadêmica. Conteúdo de ódio,
-          racismo, xenofobia, sexismo, assédio, exploração de menores e exposição de dados pessoais
-          é proibido.
-        </p>
-        <form class="toolbar" data-discussion-filter>
-          <input class="field" name="q" value="${E(q)}" placeholder="Pesquisar discussões" /><select
-            class="select"
-            name="categoria"
-          >
-            <option value="">Todas as áreas</option>
-            ${cats
-              .map((c) => html`<option ${c === cat ? 'selected' : ''}>${E(c)}</option>`)
-              .join('')}</select
-          ><button class="solid">Filtrar</button
-          ><button type="button" class="outline" data-new-discussion>Nova discussão</button>
-        </form>
-        <div>${list.map(discussionRow).join('') || empty('Nenhuma discussão encontrada.')}</div>
-        <div id="discussionComposer"></div>
-      </div>
-    </section>`,
-  );
-}
+import { state, api, E, date, html } from '../runtime.js';
+import { link, layout, empty, notFound } from './core.js';
 
 async function thread(id) {
   let data;
   try {
     data = await api('/api/discussions/' + encodeURIComponent(id) + '/replies');
-  } catch (e) {
+  } catch {
     return notFound();
   }
   const d = data.discussion;
@@ -137,7 +88,7 @@ async function thread(id) {
   layout(
     html`<section class="pagehero">
       <div class="shell">
-        <div class="crumbs">${link('/coloquio', 'Colóquio')} / ${E(d.category)}</div>
+        <div class="crumbs">${link('/comunidades', 'Comunidades')} / ${E(d.category)}</div>
         <article class="threadpost">
           <div class="eyebrow">${E(d.category)}</div>
           <h1>${E(d.title)}</h1>
@@ -439,4 +390,4 @@ function cadastro() {
   );
 }
 
-export { coloquio, thread, login, requestPasswordReset, resetPassword, cadastro };
+export { thread, login, requestPasswordReset, resetPassword, cadastro };

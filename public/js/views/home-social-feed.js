@@ -133,11 +133,12 @@ function newsPost(news) {
   const category = E(news.category || 'Atualizações');
   const title = E(news.title);
   const summary = E((news.summary || '').slice(0, 340));
+  const featuredLabel = news.featured ? ' · Destaque editorial' : '';
 
   return [
     '<article class="social-post">',
     authorLine(news),
-    `<div class="social-kicker">Notícia certificada · ${category}</div>`,
+    `<div class="social-kicker">Notícia certificada${featuredLabel} · ${category}</div>`,
     `<h2>${link(detailPath, title)}</h2>`,
     `<p>${summary}</p>`,
     '<div class="social-actions">',
@@ -157,6 +158,11 @@ function timestamp(entry) {
   return Number.isFinite(value) ? value : 0;
 }
 
+function numeric(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function freshnessScore(entry) {
   const ageHours = Math.max(0, (Date.now() - timestamp(entry)) / 36e5);
   return 120 / (1 + ageHours / 24);
@@ -164,13 +170,17 @@ function freshnessScore(entry) {
 
 function activityScore(entry) {
   if (entry.type === 'publication') {
-    return num(entry.item.boosts) * 8 + Math.log10(num(entry.item.views) + 1) * 16;
+    const boosts = numeric(entry.item.boosts);
+    const views = numeric(entry.item.views);
+    return boosts * 8 + Math.log10(views + 1) * 16;
   }
   if (entry.type === 'discussion') {
     return 18;
   }
   if (entry.type === 'news') {
-    return 14;
+    const hypes = numeric(entry.item.hypes);
+    const featured = entry.item.featured === true ? 48 : 0;
+    return 14 + featured + Math.log10(hypes + 1) * 8;
   }
   return 10;
 }

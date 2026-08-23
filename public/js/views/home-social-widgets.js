@@ -250,10 +250,9 @@ function renderComposer() {
 }
 
 function socialData() {
-  const projects = [
-    ...(state.boot.codeProjects || []),
-    ...(state.boot.communityProjects || []),
-  ].slice(0, 5);
+  const codeProjects = state.boot.codeProjects || [];
+  const communityProjects = state.boot.communityProjects || [];
+  const projects = communityProjects.slice(0, 5);
   const profiles = (state.boot.profiles || []).slice(0, 5);
   const verified = (state.boot.profiles || []).filter(isVerified).slice(0, 4);
 
@@ -265,7 +264,7 @@ function socialData() {
     experts: verified.length ? verified : profiles,
     pulse: {
       discussions: (state.boot.discussions || []).length,
-      projects: projects.length,
+      projects: codeProjects.length + communityProjects.length,
       publications: (state.boot.publications || []).length,
       creations: (state.boot.templates || []).length + (state.boot.customTemplates || []).length,
     },

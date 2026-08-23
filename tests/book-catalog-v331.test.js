@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const read = (path) => fs.readFileSync(path, 'utf8');
 
 const catalog = read('public/js/book-catalog.js');
+const armarium = read('public/js/features/armarium.js');
 const detail = read('public/js/views/books.js');
 const router = read('public/js/router.js');
 const main = read('public/js/main.js');
@@ -34,11 +35,19 @@ test('livro possui página própria com resumo reviews e ações de leitura', ()
   assert.match(router, /p\.startsWith\('\/livros\/'\)/);
 });
 
-test('catálogo é instalado sem substituir melhorias existentes', () => {
+test('catálogo roda antes do Armarium e o texto final nasce no componente', () => {
   assert.ok(main.includes("import { installBookCatalog } from './book-catalog.js';"));
   assert.ok(main.includes('installEnhancements();'));
-  assert.ok(main.includes('installLibraryPolish();'));
   assert.ok(main.includes('installBookCatalog();'));
+  assert.ok(main.indexOf('installBookCatalog();') < main.indexOf('installEnhancements();'));
+  assert.doesNotMatch(main, /LibraryPolish|library-polish/);
+  assert.match(armarium, /<h2>Leituras da comunidade<\/h2>/);
+  assert.match(armarium, /<summary>Adicionar livro lido<\/summary>/);
+});
+
+test('catálogo reage ao ciclo de render sem observar toda a árvore do app', () => {
+  assert.match(catalog, /studiorium:rendered/);
+  assert.doesNotMatch(catalog, /MutationObserver/);
 });
 
 test('layout da estante é compacto e responsivo sem ocupar a largura toda', () => {

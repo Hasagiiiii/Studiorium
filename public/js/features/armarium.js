@@ -16,17 +16,17 @@ function armariumPanel() {
     <div class="armarium-community-head">
       <div>
         <span class="eyebrow">Armarium Librorum</span>
-        <h2>Uma estante construída por leitores reais</h2>
+        <h2>Leituras da comunidade</h2>
         <p>
-          O catálogo não vem mais preenchido pelo sistema. Cada obra entra quando um membro que a
-          leu adiciona uma review, uma nota e decide se recomenda a leitura.
+          Inclua livros que você leu, publique reviews e abra discussões sobre obras, autores e
+          temas relevantes.
         </p>
       </div>
       <span class="armarium-seal" aria-hidden="true">AL</span>
     </div>
     ${state.me
       ? html`<details class="armarium-add">
-          <summary>Adicionar livro que eu li</summary>
+          <summary>Adicionar livro lido</summary>
           <form data-book-create-form>
             <div class="formgrid">
               <div>
@@ -132,10 +132,8 @@ function armariumPanel() {
     ${state.boot?.books?.length
       ? ''
       : html`<div class="armarium-empty">
-          <strong>A estante começa vazia de propósito.</strong>
-          <span
-            >O primeiro livro aparecerá quando a comunidade publicar uma recomendação real.</span
-          >
+          <strong>Nenhum livro adicionado ainda.</strong>
+          <span>Inclua uma leitura para começar a estante da comunidade.</span>
         </div>`}
   </section>`;
 }

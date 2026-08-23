@@ -6,7 +6,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('studio motion is wired with accessible fallbacks', () => {
+test('studio motion is wired with accessible fallbacks and route render lifecycle', () => {
   const main = read('public/js/main.js');
   const style = read('public/style.css');
   const motion = read('public/js/animations/studio-motion.js');
@@ -16,7 +16,9 @@ test('studio motion is wired with accessible fallbacks', () => {
   assert.match(main, /installStudioMotion/);
   assert.match(style, /animations\/studio-motion\.css/);
   assert.match(motion, /prefers-reduced-motion/);
-  assert.match(motion, /MutationObserver/);
+  assert.match(motion, /studiorium:rendered/);
+  assert.doesNotMatch(motion, /MutationObserver/);
+  assert.match(motion, /SPECIALIZED_MOTION_TARGETS/);
   assert.match(motion, /social-pulse/);
   assert.match(motion, /pointermove/);
   assert.match(css, /--motion-rx/);
