@@ -83,9 +83,7 @@ async function route(request: ApiRequest, response: ApiResponse) {
     );
   }
 
-  const communityRequestMatch = path.match(
-    /^\/api\/v4\/communities\/([^/]+)\/membership-request$/,
-  );
+  const communityRequestMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/membership-request$/);
   if (communityRequestMatch && method === 'POST') {
     return json(
       response,
