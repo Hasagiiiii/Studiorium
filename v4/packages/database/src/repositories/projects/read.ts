@@ -11,7 +11,7 @@ function mapProject(row: Record<string, unknown>): Project {
   const sections = Array.isArray(row.sections) ? row.sections : [];
   return projectSchema.parse({
     id: row.id,
-    userId: row.user_id,
+    ownerId: row.user_id,
     title: row.title,
     type: row.type,
     visibility: row.visibility,
@@ -48,11 +48,33 @@ export async function listPublicProjects(): Promise<Project[]> {
   return queryList(result).map((row) => mapProject(row as Record<string, unknown>));
 }
 
+export async function listUserProjects(userId: string): Promise<Project[]> {
+  const result = await database()
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+
+  return queryList(result).map((row) => mapProject(row as Record<string, unknown>));
+}
+
 export async function listPublicCodeProjects(): Promise<CodeProject[]> {
   const result = await database()
     .from('code_projects')
     .select('id,owner_id,title,description,visibility,created_at,updated_at,deleted_at')
     .eq('visibility', 'public')
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+
+  return queryList(result).map((row) => mapCodeProject(row as Record<string, unknown>));
+}
+
+export async function listUserCodeProjects(userId: string): Promise<CodeProject[]> {
+  const result = await database()
+    .from('code_projects')
+    .select('id,owner_id,title,description,visibility,created_at,updated_at,deleted_at')
+    .eq('owner_id', userId)
     .is('deleted_at', null)
     .order('updated_at', { ascending: false });
 
