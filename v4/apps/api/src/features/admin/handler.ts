@@ -22,10 +22,20 @@ import {
   userStatusInputSchema,
   type AdminDashboard,
 } from '@lorion/contracts';
-import { requirePermission } from '../../auth/authorization.js';
+import { requireAnyPermission, requirePermission } from '../../auth/authorization.js';
 import { readJson } from '../../core/http/body.js';
 import { badRequest, forbidden, notFound } from '../../core/http/errors.js';
 import type { ApiRequest } from '../../core/http/types.js';
+
+const DASHBOARD_PERMISSIONS = [
+  'admin.full',
+  'moderation.queue',
+  'moderation.content',
+  'content.curate',
+  'content.edit',
+  'users.manage',
+  'roles.manage',
+] as const;
 
 function mapReport(row: Record<string, unknown>) {
   return {
@@ -76,11 +86,15 @@ function mapAudit(row: Record<string, unknown>) {
 }
 
 export async function adminDashboard(request: ApiRequest): Promise<AdminDashboard> {
-  const user = await requirePermission(request, 'moderation.queue');
+  const user = await requireAnyPermission(request, DASHBOARD_PERMISSIONS);
   const permissions = await userPermissions(user.id);
   const canManageUsers = permissions.includes('admin.full') || permissions.includes('users.manage');
   const canManageRoles = permissions.includes('admin.full') || permissions.includes('roles.manage');
   const canCurate = permissions.includes('admin.full') || permissions.includes('content.curate');
+  const canModerate =
+    permissions.includes('admin.full') ||
+    permissions.includes('moderation.queue') ||
+    permissions.includes('moderation.content');
   const [
     reports,
     verificationRequests,
@@ -91,7 +105,7 @@ export async function adminDashboard(request: ApiRequest): Promise<AdminDashboar
     roles,
     audit,
   ] = await Promise.all([
-    listModerationReports(),
+    canModerate ? listModerationReports() : Promise.resolve([]),
     canManageUsers ? listVerificationRequests('pending') : Promise.resolve([]),
     canCurate ? listPendingResearchReview() : Promise.resolve([]),
     canCurate ? listNewsContributorApplications('pending') : Promise.resolve([]),
