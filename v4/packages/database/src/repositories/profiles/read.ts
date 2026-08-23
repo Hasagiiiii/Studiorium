@@ -63,3 +63,23 @@ export async function findPublicProfile(username: string): Promise<Profile | nul
   if (result.error) throw new Error(result.error.message);
   return result.data ? mapProfile(result.data as Record<string, unknown>) : null;
 }
+
+export async function findProfileMedia(
+  username: string,
+  kind: 'avatar' | 'cover',
+): Promise<{ userId: string; isPublic: boolean; path: string | null } | null> {
+  const column = kind === 'avatar' ? 'avatar_path' : 'cover_path';
+  const result = await database()
+    .from('profiles')
+    .select(`user_id,is_public,${column}`)
+    .eq('username', username)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  if (!result.data) return null;
+  const record = result.data as Record<string, unknown>;
+  return {
+    userId: String(record.user_id),
+    isPublic: record.is_public === true,
+    path: typeof record[column] === 'string' ? String(record[column]) : null,
+  };
+}
