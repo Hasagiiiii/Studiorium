@@ -23,7 +23,10 @@ test('grafo de seguidores tem integridade e não fica exposto ao navegador', () 
   assert.match(migration, /check \(follower_id <> followed_id\)/);
   assert.match(migration, /enable row level security/);
   assert.match(migration, /revoke all on table public\.user_follows from public, anon, authenticated/);
-  assert.match(migration, /grant select, insert, update, delete on table public\.user_follows to service_role/);
+  assert.match(
+    migration,
+    /grant select, insert, update, delete on table public\.user_follows to service_role/,
+  );
 });
 
 test('API social exige sessão para escrita, impede auto-follow e mantém follow idempotente', () => {
@@ -46,7 +49,10 @@ test('runtime carrega relações atuais sem tornar falha social fatal para o boo
 
 test('perfil público oferece seguir e mostra seguidores e seguindo', () => {
   assert.match(profile, /async function socialSummary/);
-  assert.match(profile, /\/api\/profiles\/\$\{encodeURIComponent\(profile\.username\)\}\/social/);
+  assert.match(
+    profile,
+    /\/api\/profiles\/\$\{encodeURIComponent\(profile\.username\)\}\/social/,
+  );
   assert.match(profile, /data-profile-follow=/);
   assert.match(profile, /data-following=/);
   assert.match(profile, />Seguidores</);
@@ -62,12 +68,26 @@ test('handler social alterna follow e atualiza estado antes de renderizar', () =
   assert.match(eventDispatcher, /handleSocialClick/);
 });
 
-test('feed Seguindo usa somente autores presentes no grafo carregado', () => {
-  assert.match(feed, /'following'/);
-  assert.match(feed, /new Set\(state\.social\?\.followingIds \|\| \[\]\)/);
-  assert.match(feed, /\.filter\(\(entry\) => following\.has\(ownerId\(entry\)\)\)/);
+test('feed Seguindo é consultado no backend a partir do grafo persistido', () => {
+  assert.match(socialRoutes, /async function followingFeed\(req\)/);
+  assert.match(socialRoutes, /const followingIds = await followingIdsFor\(user\.id\)/);
+  assert.match(socialRoutes, /\.in\('owner_id', followingIds\)/);
+  assert.match(socialRoutes, /\.in\('author_id', followingIds\)/);
+  assert.match(socialRoutes, /\.in\('contributor_id', followingIds\)/);
+  assert.match(socialRouter, /pathname === '\/social\/feed'/);
+  assert.match(home, /api\('\/api\/social\/feed'\)/);
+  assert.match(feed, /function normalizeFollowingFeed/);
+  assert.match(feed, /FOLLOWING_TYPES/);
   assert.match(home, /tab\('following', 'Seguindo'\)/);
   assert.match(home, /Encontrar pessoas/);
+});
+
+test('timeline Seguindo inclui projetos públicos de pessoas acompanhadas', () => {
+  assert.match(socialRoutes, /\.from\('projects'\)/);
+  assert.match(socialRoutes, /\.in\('user_id', followingIds\)/);
+  assert.match(socialRoutes, /type: 'project'/);
+  assert.match(feed, /function projectPost/);
+  assert.match(feed, /entry\.type === 'project'/);
 });
 
 test('contadores sociais se adaptam a desktop, tablet e celular', () => {
