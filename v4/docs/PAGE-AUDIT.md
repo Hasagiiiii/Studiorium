@@ -9,15 +9,15 @@ Função própria: feed social, recomendações, atualizações e relações.
 
 ### `/explorar` — Explorar
 Função própria: descoberta global.
-Absorve busca, pessoas, notícias como listagem, tendências e filtros.
+Absorve busca, pessoas, notícias como listagem, pesquisas, tendências e filtros.
 
 ### `/comunidades` — Comunidades
 Função própria: descoberta e gestão de espaços sociais.
 Categorias como Tecnologia, Jogos, Hardware, Ciência e Literatura são filtros/classificações, não páginas principais independentes.
 
 ### `/biblioteca` — Biblioteca
-Função própria: livros, pesquisas, reviews, acervo e coleção pessoal.
-A descoberta geral também pode aparecer em Explorar, mas Biblioteca mantém experiência e ferramentas próprias de conhecimento salvo/curado.
+Função própria: experiência exclusiva de livros.
+Concentra catálogo de livros, estante pessoal, progresso de leitura, livros lidos/quero ler/lendo, recomendações e reviews. Pesquisas não pertencem à Biblioteca; aparecem em Explorar, Feed, Perfil e Comunidades e mantêm páginas de detalhe próprias.
 
 ### `/projetos` — Projetos
 Função própria: workspace pessoal de criação, edição e organização.
