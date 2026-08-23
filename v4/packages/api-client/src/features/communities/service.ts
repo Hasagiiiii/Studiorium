@@ -1,7 +1,4 @@
-import {
-  communityMembershipResultSchema,
-  type CommunityMembershipResult,
-} from '@lorion/contracts';
+import { communityMembershipResultSchema, type CommunityMembershipResult } from '@lorion/contracts';
 import { ApiClient } from '../../core/client.js';
 
 export class CommunitiesService {
