@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  communityMembershipRequestSchema,
   communityMembershipResultSchema,
   parseBootstrap,
   projectSchema,
@@ -46,12 +47,14 @@ test('participação em comunidade exige contagem válida e estado explícito', 
   const membership = communityMembershipResultSchema.parse({
     communityId: 'community_1',
     joined: true,
+    membershipStatus: 'active',
     role: 'member',
     memberModerationStatus: 'clear',
     memberCount: 1,
   });
 
   assert.equal(membership.joined, true);
+  assert.equal(membership.membershipStatus, 'active');
   assert.equal(membership.memberCount, 1);
   assert.throws(() =>
     communityMembershipResultSchema.parse({
@@ -59,6 +62,18 @@ test('participação em comunidade exige contagem válida e estado explícito', 
       memberCount: -1,
     }),
   );
+});
+
+test('solicitação de comunidade mantém identidade navegável e data opcional', () => {
+  const request = communityMembershipRequestSchema.parse({
+    userId: 'usr_1',
+    username: 'pessoa',
+    displayName: 'Pessoa',
+    requestedAt: '2026-08-23T15:00:00.000Z',
+  });
+
+  assert.equal(request.username, 'pessoa');
+  assert.equal(request.userId, 'usr_1');
 });
 
 test('projeto v4 exige ownerId e não aceita o contrato legado userId sozinho', () => {
