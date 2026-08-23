@@ -27,6 +27,7 @@ import {
 import { publicSessionUser, requireSessionUser, sessionUser } from '../../auth/session.js';
 import { readJson } from '../../core/http/body.js';
 import { badRequest, HttpError, notFound } from '../../core/http/errors.js';
+import { assertPublishableText } from '../../core/moderation/text.js';
 import type { ApiRequest } from '../../core/http/types.js';
 import { entityId } from '../../core/security/token.js';
 
@@ -111,6 +112,7 @@ export async function createComment(
 
   const parsed = createCommentInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('O comentário precisa ter entre 1 e 2000 caracteres.');
+  assertPublishableText(parsed.data.body, 'Comentário');
 
   const rateKey = `content-comment:${user.id}`;
   await assertAuthRateLimitAllowed(rateKey);
@@ -169,6 +171,7 @@ export async function updateComment(
 
   const parsed = updateCommentInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('O comentário precisa ter entre 1 e 2000 caracteres.');
+  assertPublishableText(parsed.data.body, 'Comentário');
   if (!(await updateOwnContentComment(id, commentId, user.id, parsed.data.body))) {
     throw notFound('Comentário não encontrado ou você não pode editá-lo.');
   }
