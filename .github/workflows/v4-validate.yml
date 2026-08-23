@@ -29,11 +29,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: v4/package-lock.json
 
-      - name: Install dependencies
-        run: npm install --package-lock-only && npm ci
+      - name: Generate workspace lockfile
+        run: npm install --package-lock-only
+
+      - name: Clean install
+        run: npm ci
 
       - name: Typecheck workspaces
         run: npm run typecheck
