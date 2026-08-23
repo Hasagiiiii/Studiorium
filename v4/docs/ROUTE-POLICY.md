@@ -1,6 +1,6 @@
 # Política de rotas da v4
 
-A v4 não herda aliases históricos automaticamente. Uma rota só existe quando representa uma superfície atual e necessária do produto.
+A v4 não herda aliases históricos. Uma rota só existe quando representa uma superfície atual, necessária e funcional do produto.
 
 ## Rotas ativas principais
 
@@ -14,40 +14,38 @@ A v4 não herda aliases históricos automaticamente. Uma rota só existe quando 
 ## Rotas ativas de detalhe
 
 - `/comunidades/:slug` — comunidade
-- `/discussoes/:id` — discussão compartilhável; a associação com comunidade será resolvida pela camada de conteúdo, sem depender de URL histórica
+- `/discussoes/:id` — discussão compartilhável
 - `/livros/:id` — livro
 - `/pesquisas/:slug` — pesquisa
 - `/projetos/:id` — projeto compartilhável
-- `/projetos/lab/:id` — projeto de código
 - `/noticias/:slug` — notícia/editorial compartilhável
 
 ## Rotas ativas secundárias
 
-- `/projetos/lab` — laboratório de código dentro de Projetos
 - `/notificacoes` — histórico privado de notificações
 - `/entrar` — login
 - `/cadastro` — cadastro
 
-## Rotas planejadas, ainda não registradas
+## Experiências não registradas
 
-Estas experiências só ganham rota quando o fluxo correspondente estiver implementado e testado:
+Fluxos que ainda não estão completos não ganham rota nem botão ativo. Isso inclui, até terem implementação integral:
 
+- laboratório/editor de código;
 - recuperação e redefinição de senha;
-- administração;
+- administração v4;
 - diretrizes;
-- sobre/institucional.
-
-Não registrar páginas vazias ou aliases apenas para antecipar funcionalidades futuras.
+- sobre/institucional;
+- criação de discussão, review, tutorial e comunidade pela v4.
 
 ## Funções que não são páginas
 
-- Busca — vive em `/explorar?q=...` e pode ser acionada por overlay/command.
+- Busca — vive em `/explorar?q=...` e pode ser acionada por foco/overlay.
 - Pessoas — filtro de `/explorar`.
-- Criar — launcher/composer do botão `+`.
+- Criar — launcher do botão `+`; mostra apenas ações realmente implementadas.
 - Notícias — aparecem no Feed/Explorar; somente o detalhe possui URL própria.
 - Oficina — não existe como superfície independente. Conteúdo técnico pertence às comunidades e categorias.
-- Seguidores/seguindo — módulos do perfil, drawer/modal ou rota secundária apenas quando deep-link justificar.
-- Loren — camada assistiva integrada ao app; não precisa ser uma aba isolada.
+- Seguidores/seguindo — módulos de perfil, sem hub paralelo.
+- Loren — camada assistiva integrada ao app.
 
 ## Rotas legadas que não existem na v4
 
@@ -73,9 +71,11 @@ Não registrar páginas vazias ou aliases apenas para antecipar funcionalidades 
 - `/editor/*`
 - `/publicar`
 - `/laboratorio/*`
+- `/projetos/lab`
+- `/projetos/lab/*`
 
-Esses caminhos não ganham páginas ocultas nem aliases silenciosos. Qualquer redirect temporário de migração precisa ser documentado individualmente e possuir data de remoção.
+Esses caminhos não ganham páginas ocultas nem aliases silenciosos.
 
 ## Regra
 
-Antes de registrar uma rota nova, verificar se a experiência realmente precisa de URL própria. Caso contrário, usar feature embutida: modal, drawer, filtro, composer, tab interna, popover ou seção.
+Antes de registrar uma rota nova, verificar se a experiência precisa de URL própria e se o fluxo funciona integralmente. Caso contrário, manter a funcionalidade fora da interface ativa ou usar uma feature embutida quando ela estiver pronta.
