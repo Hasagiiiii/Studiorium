@@ -8,7 +8,7 @@ const feedSource = readFileSync(path.join(root, 'public/js/views/home-social-fee
 const homeSource = readFileSync(path.join(root, 'public/js/views/home-social.js'), 'utf8');
 
 test('feed exposes explicit supported modes', () => {
-  for (const mode of ['for-you', 'discussions', 'trending', 'recent']) {
+  for (const mode of ['for-you', 'following', 'discussions', 'trending', 'recent']) {
     assert.match(feedSource, new RegExp(`['\"]${mode}['\"]`));
   }
   assert.match(feedSource, /normalizeFeedMode/);
@@ -36,6 +36,7 @@ test('discussion feed is scoped to actual conversations', () => {
 
 test('home derives the active feed mode from the URL query', () => {
   assert.match(homeSource, /state\.query\?\.get\('feed'\)/);
-  assert.match(homeSource, /buildFeed\(mode\)/);
+  assert.match(homeSource, /loadFollowingSource\(mode\)/);
+  assert.match(homeSource, /buildFeed\(mode, followingSource\.entries\)/);
   assert.match(homeSource, /aria-live="polite"/);
 });

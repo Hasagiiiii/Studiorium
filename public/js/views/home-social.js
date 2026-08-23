@@ -1,4 +1,4 @@
-import { state, E, html as markup } from '../runtime.js';
+import { api, state, E, html as markup } from '../runtime.js';
 import { link, layout, empty } from './core.js';
 import { buildFeed, feedPost, normalizeFeedMode } from './home-social-feed.js';
 import {
@@ -15,7 +15,7 @@ import {
 
 function hero() {
   const settings = state.boot.settings || {};
-  const title = settings.hero_title || 'Aprenda. Construa. Compartilhe.';
+  const title = settings.hero_title || 'Conhecimento conecta.';
   const text =
     settings.hero_text ||
     'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.';
@@ -25,7 +25,7 @@ function hero() {
       <div class="social-hero-brand">
         <img src="/favicon.svg" alt="" class="social-brand-mark" />
         <div>
-          <div class="eyebrow">Conhecimento · comunidade · criação</div>
+          <div class="eyebrow">Lorion · rede social de conhecimento</div>
           <h1>${E(title)}</h1>
           <p>${E(text)}</p>
         </div>
@@ -90,16 +90,50 @@ function feedTabs(mode) {
 
   return markup`<nav class="social-feed-tabs" aria-label="Filtros do feed">
     ${tab('for-you', 'Para você')}
+    ${state.me ? tab('following', 'Seguindo') : ''}
     ${tab('discussions', 'Conversas')}
     ${tab('trending', 'Em alta')}
     ${tab('recent', 'Recentes')}
   </nav>`;
 }
 
-function feedColumn(feed, mode) {
+async function loadFollowingSource(mode) {
+  if (mode !== 'following' || !state.me) return { entries: [], failed: false };
+  try {
+    const data = await api('/api/social/feed');
+    return { entries: Array.isArray(data.feed) ? data.feed : [], failed: false };
+  } catch {
+    return { entries: [], failed: true };
+  }
+}
+
+function followingEmptyState(failed = false) {
+  if (failed) {
+    return markup`<div class="empty">
+      <p>Não foi possível carregar sua timeline agora.</p>
+      <div class="actions">${link('/?feed=following', 'Tentar novamente', 'outline')}</div>
+    </div>`;
+  }
+
+  const action = state.me
+    ? link('/autores', 'Encontrar pessoas', 'outline')
+    : link('/login', 'Entrar para seguir pessoas', 'outline');
+  const message = state.me
+    ? 'Siga pessoas para montar uma timeline com as publicações delas.'
+    : 'Entre na sua conta para criar uma timeline de pessoas que você segue.';
+
+  return markup`<div class="empty">
+    <p>${message}</p>
+    <div class="actions">${action}</div>
+  </div>`;
+}
+
+function feedColumn(feed, mode, followingFailed = false) {
   const posts = feed.length
     ? feed.map(feedPost).join('')
-    : empty('A timeline ainda não tem publicações para este filtro.');
+    : mode === 'following'
+      ? followingEmptyState(followingFailed)
+      : empty('A timeline ainda não tem publicações para este filtro.');
 
   return markup`<main class="social-feed">
     ${discoveryStrip()} ${feedTabs(mode)} ${renderComposer()} ${renderCreationHub()}
@@ -143,18 +177,19 @@ function rightSidebar(data) {
     <div class="social-panel social-quote">
       <span>“</span>
       <p>Grandes ideias começam com boas discussões.</p>
-      <small>Studiorium</small>
+      <small>Lorion · Orium Labs</small>
     </div>
   </aside>`;
 }
 
-function home() {
+async function home() {
   const data = socialData();
   const mode = normalizeFeedMode(state.query?.get('feed') || 'for-you');
-  const feed = buildFeed(mode);
+  const followingSource = await loadFollowingSource(mode);
+  const feed = buildFeed(mode, followingSource.entries);
   const content = markup`${hero()}
     <section class="social-shell shell">
-      ${leftSidebar(data)} ${feedColumn(feed, mode)} ${rightSidebar(data)}
+      ${leftSidebar(data)} ${feedColumn(feed, mode, followingSource.failed)} ${rightSidebar(data)}
     </section>`;
 
   layout(content);
