@@ -1,15 +1,17 @@
 import {
   bookReviewSchema,
+  bookSaveSchema,
   bookSchema,
   profileBookshelfItemSchema,
   type Book,
   type BookReview,
+  type BookSave,
   type ProfileBookshelfItem,
 } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
-function mapBook(row: Record<string, unknown>): Book {
+export function mapBook(row: Record<string, unknown>): Book {
   return bookSchema.parse({
     id: row.id,
     title: row.title,
@@ -30,7 +32,7 @@ function mapBook(row: Record<string, unknown>): Book {
   });
 }
 
-function mapReview(row: Record<string, unknown>): BookReview {
+export function mapReview(row: Record<string, unknown>): BookReview {
   return bookReviewSchema.parse({
     bookId: row.book_id,
     userId: row.user_id,
@@ -54,6 +56,24 @@ export async function listBooks(): Promise<Book[]> {
   return queryList(result).map((row) => mapBook(row as Record<string, unknown>));
 }
 
+export async function findBookById(bookId: string): Promise<Book | null> {
+  const result = await database().from('books').select('*').eq('id', bookId).maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapBook(result.data as Record<string, unknown>) : null;
+}
+
+export async function findBookByTitleAuthor(title: string, author: string): Promise<Book | null> {
+  const result = await database()
+    .from('books')
+    .select('*')
+    .ilike('title', title)
+    .ilike('author', author)
+    .limit(1)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapBook(result.data as Record<string, unknown>) : null;
+}
+
 export async function listBookReviews(limit = 400): Promise<BookReview[]> {
   const result = await database()
     .from('book_reviews')
@@ -62,6 +82,44 @@ export async function listBookReviews(limit = 400): Promise<BookReview[]> {
     .limit(limit);
 
   return queryList(result).map((row) => mapReview(row as Record<string, unknown>));
+}
+
+export async function listReviewsForBook(bookId: string): Promise<BookReview[]> {
+  const result = await database()
+    .from('book_reviews')
+    .select('*')
+    .eq('book_id', bookId)
+    .order('updated_at', { ascending: false })
+    .limit(300);
+  return queryList(result).map((row) => mapReview(row as Record<string, unknown>));
+}
+
+export async function findBookReview(bookId: string, userId: string): Promise<BookReview | null> {
+  const result = await database()
+    .from('book_reviews')
+    .select('*')
+    .eq('book_id', bookId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapReview(result.data as Record<string, unknown>) : null;
+}
+
+export async function findBookSave(bookId: string, userId: string): Promise<BookSave | null> {
+  const result = await database()
+    .from('book_saves')
+    .select('book_id,shelf_status,created_at')
+    .eq('book_id', bookId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data
+    ? bookSaveSchema.parse({
+        bookId: result.data.book_id,
+        shelfStatus: result.data.shelf_status,
+        savedAt: result.data.created_at,
+      })
+    : null;
 }
 
 export async function listProfileBookshelf(userId: string): Promise<ProfileBookshelfItem[]> {
