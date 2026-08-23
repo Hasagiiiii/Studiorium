@@ -1,13 +1,28 @@
 import { useState, type PropsWithChildren } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CreateLauncher } from '../../components/create/CreateLauncher.js';
 import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
+import { services } from '../services/services.js';
 import { useAppState } from '../state/useAppState.js';
 
 export function AppShell({ children }: PropsWithChildren) {
-  const { data } = useAppState();
+  const { data, reload } = useAppState();
+  const navigate = useNavigate();
   const me = data?.user;
   const [createOpen, setCreateOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function logout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await services.auth.logout();
+      await reload();
+      navigate('/');
+    } finally {
+      setLoggingOut(false);
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -32,7 +47,17 @@ export function AppShell({ children }: PropsWithChildren) {
             </Link>
           ) : null}
           {me?.username ? (
-            <Link to={`/perfil/${encodeURIComponent(me.username)}`}>{me.displayName}</Link>
+            <>
+              <Link to={`/perfil/${encodeURIComponent(me.username)}`}>{me.displayName}</Link>
+              <button
+                className="topbar-logout"
+                type="button"
+                disabled={loggingOut}
+                onClick={() => void logout()}
+              >
+                {loggingOut ? 'Saindo…' : 'Sair'}
+              </button>
+            </>
           ) : (
             <Link to="/entrar">Entrar</Link>
           )}
