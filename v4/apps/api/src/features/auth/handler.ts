@@ -132,9 +132,7 @@ export async function register(
   if (!Number.isInteger(birthYear) || birthYear < 1930 || birthYear > currentYear)
     throw badRequest('Ano de nascimento inválido.');
 
-  const adminEmail = String(
-    process.env.STUDIORIUM_ADMIN_EMAIL || process.env.ADMIN_EMAIL || '',
-  )
+  const adminEmail = String(process.env.STUDIORIUM_ADMIN_EMAIL || process.env.ADMIN_EMAIL || '')
     .trim()
     .toLowerCase();
   if (adminEmail && email === adminEmail)
@@ -202,7 +200,9 @@ export async function requestPasswordReset(request: ApiRequest): Promise<OkRespo
   } catch (cause) {
     await deletePasswordResetToken(tokenHash);
     const code =
-      cause && typeof cause === 'object' && 'code' in cause ? String(cause.code) : 'EMAIL_ERROR';
+      cause && typeof cause === 'object' && 'code' in cause
+        ? String(cause.code)
+        : 'EMAIL_ERROR';
     console.error('[Lorion v4 password reset email]', code);
   }
 
