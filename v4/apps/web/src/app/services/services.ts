@@ -1,4 +1,5 @@
 import {
+  AdminService,
   ApiClient,
   AuthService,
   BootstrapService,
@@ -16,6 +17,7 @@ import {
 const client = new ApiClient();
 
 export const services = {
+  admin: new AdminService(client),
   auth: new AuthService(client),
   bootstrap: new BootstrapService(client),
   communities: new CommunitiesService(client),
