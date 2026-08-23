@@ -3,6 +3,7 @@ import type { AdminDashboard } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AdminEditorialQueues } from '../components/AdminEditorialQueues.js';
 
 type LoadState =
   | { status: 'loading'; value: AdminDashboard | null; error: null }
@@ -39,6 +40,7 @@ export function AdminPage() {
   const canModerate = permissions.has('admin.full') || permissions.has('moderation.content');
   const canManageUsers = permissions.has('admin.full') || permissions.has('users.manage');
   const canManageRoles = permissions.has('admin.full') || permissions.has('roles.manage');
+  const canCurate = permissions.has('admin.full') || permissions.has('content.curate');
 
   async function perform(key: string, action: () => Promise<unknown>, success: string) {
     if (busy) return;
@@ -88,7 +90,7 @@ export function AdminPage() {
     <FeaturePage
       eyebrow="Administração"
       title="Governança do Lorion"
-      description="Moderação, verificações, usuários, cargos e trilha de auditoria em uma única área protegida por permissões."
+      description="Moderação, revisão editorial, verificações, usuários, cargos e auditoria em uma área protegida por permissões."
     >
       {state.status === 'error' ? <p className="inline-error">{state.error}</p> : null}
 
@@ -238,6 +240,10 @@ export function AdminPage() {
             <div className="empty-state"><p>Não há solicitações de verificação pendentes.</p></div>
           )}
         </section>
+      ) : null}
+
+      {canCurate ? (
+        <AdminEditorialQueues dashboard={dashboard} busy={busy} perform={perform} />
       ) : null}
 
       {canManageUsers ? (
