@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { optionalText, timestamp } from '../common/fields.js';
+import { optionalText, safeHttpUrl, timestamp } from '../common/fields.js';
 
 export const bookSchema = z.object({
   id: z.string(),
@@ -11,8 +11,8 @@ export const bookSchema = z.object({
   featured: z.boolean().default(false),
   submittedBy: z.string().nullable().default(null),
   isbn: optionalText,
-  coverUrl: optionalText,
-  purchaseUrl: optionalText,
+  coverUrl: safeHttpUrl,
+  purchaseUrl: safeHttpUrl,
   purchaseLabel: optionalText,
   ratingAverage: z.number().default(0),
   reviewCount: z.number().int().nonnegative().default(0),
