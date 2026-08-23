@@ -3,6 +3,8 @@ import { ErrorScreen } from '../components/feedback/ErrorScreen.js';
 import { LoadingScreen } from '../components/feedback/LoadingScreen.js';
 import { LoginPage } from '../features/auth/pages/LoginPage.js';
 import { RegisterPage } from '../features/auth/pages/RegisterPage.js';
+import { RequestPasswordResetPage } from '../features/auth/pages/RequestPasswordResetPage.js';
+import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage.js';
 import { CommunityPage } from '../features/communities/pages/CommunityPage.js';
 import { CommunitiesPage } from '../features/communities/pages/CommunitiesPage.js';
 import { DiscussionPage } from '../features/communities/pages/DiscussionPage.js';
@@ -51,6 +53,8 @@ export function App() {
         <Route path="/notificacoes" element={<NotificationsPage />} />
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
+        <Route path="/esqueci-a-senha" element={<RequestPasswordResetPage />} />
+        <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>
