@@ -1,4 +1,5 @@
 export * from './core/client.js';
+export * from './repositories/auth/rate-limit.js';
 export * from './repositories/auth/session.js';
 export * from './repositories/auth/write.js';
 export * from './repositories/communities/read.js';
