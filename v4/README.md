@@ -2,7 +2,7 @@
 
 Esta árvore é a reconstrução limpa do projeto inteiro.
 
-A v4 não importa o frontend legado nem depende do `bootstrap` antigo. O código atual permanece em produção apenas como fallback até a paridade funcional.
+A v4 não importa o frontend legado nem depende do `bootstrap` antigo. A aplicação atual permanece em produção como fallback até a substituição controlada.
 
 ## Objetivo
 
@@ -11,13 +11,12 @@ Reconstruir o Studiorium como ecossistema e o Lorion como rede social de conheci
 ## O que é preservado
 
 - dados existentes no Supabase que ainda representam o produto atual;
-- autenticação/sessões enquanto a migração de identidade não for aprovada;
-- RBAC e auditoria;
+- autenticação e sessões compatíveis;
 - comunidades, perfis, livros, projetos, pesquisas e notícias com valor de produto;
 - grafo social `user_follows`;
 - notificações;
 - regras de segurança comprovadas;
-- linguagem visual e motion que passaram pela revisão do produto.
+- linguagem visual e motion aprovada para o produto.
 
 Conteúdos técnicos úteis do legado podem ser migrados para comunidades por categoria. A antiga Oficina, seus aliases e catálogos de templates não são superfícies da v4.
 
@@ -25,15 +24,14 @@ Conteúdos técnicos úteis do legado podem ser migrados para comunidades por ca
 
 - estado global implícito do frontend legado;
 - respostas de API sem contrato;
-- views que acessam estruturas opcionais como se sempre existissem;
+- views que tratam estruturas opcionais como obrigatórias;
 - seletores CSS compartilhados entre features sem intenção;
 - handlers globais que concentram regras de negócio;
-- rotas duplicadas e aliases históricos sem necessidade;
-- módulos mortos ou telas substituídas;
-- duplicação de catálogos e hubs;
-- páginas antigas preservadas apenas por compatibilidade histórica.
+- rotas duplicadas e aliases históricos;
+- módulos mortos, telas substituídas ou funcionalidades pela metade;
+- duplicação de catálogos e hubs.
 
-## Arquitetura alvo
+## Arquitetura
 
 ```text
 v4/
@@ -57,24 +55,10 @@ v4/
 - Projetos;
 - Perfil.
 
-Busca vive em Explorar. Criar é uma ação/composer. Notícias são conteúdo. Tecnologia, jogos, hardware, carros, motos e assuntos semelhantes são categorias de comunidades, não hubs paralelos.
+Busca vive em Explorar. Criar é uma ação. Notícias são conteúdo. Tecnologia, jogos, hardware, carros, motos e assuntos semelhantes são categorias de comunidades, não hubs paralelos.
 
-## Ordem de migração
+## Regra de entrega
 
-1. fundação e contratos;
-2. autenticação e identidade;
-3. App Shell;
-4. perfis + grafo social;
-5. feed e publicação social;
-6. comunidades e categorias;
-7. biblioteca e livros;
-8. projetos + laboratório;
-9. pesquisas;
-10. notícias/editorial;
-11. notificações, busca global e moderação;
-12. administração;
-13. motion e identidade visual;
-14. PWA;
-15. Loren.
+A v4 só registra e exibe um fluxo quando ele funciona de ponta a ponta. Funcionalidades futuras permanecem fora das rotas e dos controles ativos até possuírem contrato, API, autorização quando necessária, interface, estados de carregamento/erro/vazio e validação automatizada.
 
-A validação oficial da v4 usa Node 24. Nenhuma área é considerada migrada até possuir contrato, validação, estados de erro/vazio/carregamento, autorização e testes.
+A validação oficial usa Node 24 e executa typecheck, testes e build real do frontend.
