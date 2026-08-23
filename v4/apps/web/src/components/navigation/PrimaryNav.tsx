@@ -6,7 +6,6 @@ const items = [
   ['/comunidades', 'Comunidades'],
   ['/biblioteca', 'Biblioteca'],
   ['/projetos', 'Projetos'],
-  ['/oficina', 'Oficina'],
 ] as const;
 
 export function PrimaryNav() {
