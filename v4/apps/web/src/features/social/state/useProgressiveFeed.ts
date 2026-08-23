@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export function useProgressiveFeed<T>(items: readonly T[], batchSize = 8) {
   const safeBatchSize = Math.max(1, batchSize);
@@ -11,23 +11,27 @@ export function useProgressiveFeed<T>(items: readonly T[], batchSize = 8) {
 
   const hasMore = visibleCount < items.length;
 
+  const loadMore = useCallback(() => {
+    setVisibleCount((current) => Math.min(current + safeBatchSize, items.length));
+  }, [items.length, safeBatchSize]);
+
   useEffect(() => {
     const node = sentinelRef.current;
-    if (!node || !hasMore) return;
+    if (!node || !hasMore || typeof IntersectionObserver === 'undefined') return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
-        setVisibleCount((current) => Math.min(current + safeBatchSize, items.length));
+        loadMore();
       },
       { rootMargin: '320px 0px' },
     );
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMore, items.length, safeBatchSize]);
+  }, [hasMore, loadMore]);
 
   const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
 
-  return { visibleItems, hasMore, sentinelRef };
+  return { visibleItems, hasMore, sentinelRef, loadMore };
 }
