@@ -1,16 +1,20 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { reload } = useAppState();
+  const { data, reload } = useAppState();
+  const { pushToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  if (data?.user) return <Navigate to="/" replace />;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,10 +24,13 @@ export function LoginPage() {
     try {
       await services.auth.login(email.trim(), password);
       await reload();
-      navigate('/');
+      pushToast({ message: 'Login realizado com sucesso.', tone: 'success' });
+      navigate('/', { replace: true });
     } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Não foi possível entrar.';
       setStatus('error');
-      setError(cause instanceof Error ? cause.message : 'Não foi possível entrar.');
+      setError(message);
+      pushToast({ message, tone: 'error' });
     }
   }
 
