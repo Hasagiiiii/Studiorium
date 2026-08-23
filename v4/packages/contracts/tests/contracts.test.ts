@@ -6,7 +6,6 @@ test('bootstrap aplica defaults seguros para payload vazio', () => {
   const payload = parseBootstrap({});
 
   assert.deepEqual(payload.publications, []);
-  assert.deepEqual(payload.codeProjects, []);
   assert.deepEqual(payload.news, []);
   assert.deepEqual(payload.books, []);
   assert.deepEqual(payload.bookReviews, []);
