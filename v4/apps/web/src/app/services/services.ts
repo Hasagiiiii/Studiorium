@@ -11,6 +11,7 @@ import {
   PostsService,
   ProfilesService,
   ProjectsService,
+  ResearchService,
   SocialService,
 } from '@lorion/api-client';
 
@@ -28,5 +29,6 @@ export const services = {
   posts: new PostsService(client),
   profiles: new ProfilesService(client),
   projects: new ProjectsService(client),
+  research: new ResearchService(client),
   social: new SocialService(client),
 };
