@@ -132,7 +132,9 @@ export async function register(
   if (!Number.isInteger(birthYear) || birthYear < 1930 || birthYear > currentYear)
     throw badRequest('Ano de nascimento inválido.');
 
-  const adminEmail = String(process.env.STUDIORIUM_ADMIN_EMAIL || process.env.ADMIN_EMAIL || '')
+  const adminEmail = String(
+    process.env.STUDIORIUM_ADMIN_EMAIL || process.env.ADMIN_EMAIL || '',
+  )
     .trim()
     .toLowerCase();
   if (adminEmail && email === adminEmail)
