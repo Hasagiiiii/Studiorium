@@ -39,20 +39,19 @@ export class ApiClient {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
         const headers = new Headers(options.headers);
-        let body: BodyInit | undefined;
-
-        if (options.body !== undefined) {
-          headers.set('Content-Type', 'application/json');
-          body = JSON.stringify(options.body);
-        }
-
-        const response = await fetch(`${this.baseUrl}${path}`, {
+        const init: RequestInit = {
           ...options,
           method,
           headers,
-          body,
           credentials: 'same-origin',
-        });
+        };
+
+        if (options.body !== undefined) {
+          headers.set('Content-Type', 'application/json');
+          init.body = JSON.stringify(options.body);
+        }
+
+        const response = await fetch(`${this.baseUrl}${path}`, init);
         const payload = response.status === 204 ? {} : await response.json().catch(() => ({}));
 
         if (!response.ok) {
