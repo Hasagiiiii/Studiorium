@@ -25,7 +25,7 @@ export function AppShell({ children }: PropsWithChildren) {
     lastScrollY.current = current;
 
     if (reduceMotion || !window.matchMedia('(max-width: 880px)').matches) {
-      if (!headerVisible) setHeaderVisible(true);
+      setHeaderVisible(true);
       return;
     }
 
@@ -36,6 +36,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
   useEffect(() => {
     setHeaderVisible(true);
+    setCreateOpen(false);
     if (!location.hash) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [location.pathname, location.hash]);
 
@@ -57,12 +58,15 @@ export function AppShell({ children }: PropsWithChildren) {
     }
   }
 
+  const showHeader = headerVisible || createOpen;
+
   return (
     <div className="app-shell">
       <motion.header
         className="topbar"
-        animate={{ y: headerVisible || createOpen ? 0 : '-115%' }}
+        animate={{ y: showHeader ? 0 : '-115%' }}
         transition={{ duration: reduceMotion ? 0.01 : 0.2, ease: 'easeOut' }}
+        onFocusCapture={() => setHeaderVisible(true)}
       >
         <Link className="brand" to="/" aria-label="Lorion — início">
           <span className="brand-mark" aria-hidden="true">
