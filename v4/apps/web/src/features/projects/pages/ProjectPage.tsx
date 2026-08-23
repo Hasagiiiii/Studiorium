@@ -5,7 +5,7 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 export function ProjectPage() {
   const { id = '' } = useParams();
   const { data } = useAppState();
-  const project = data?.communityProjects.find((item) => item.id === id);
+  const project = data?.projects.find((item) => item.id === id);
 
   if (!project) {
     return (
@@ -20,7 +20,11 @@ export function ProjectPage() {
   }
 
   return (
-    <FeaturePage eyebrow={project.type} title={project.title} description={project.notes || 'Projeto compartilhado no Lorion.'}>
+    <FeaturePage
+      eyebrow={project.type}
+      title={project.title}
+      description={project.notes || 'Projeto compartilhado no Lorion.'}
+    >
       <section className="project-detail">
         <div className="content-meta">
           <span>{project.visibility === 'public' ? 'Público' : 'Privado'}</span>
