@@ -120,13 +120,19 @@ test('provisionamento administrativo é explícito e não promove conta comum', 
   assert.equal(script.includes('update({ role'), false);
 });
 
-test('deploy oficial permanece Vercel + Supabase e dependência está fixada', () => {
+test('deploy oficial permanece Vercel + Supabase e a v4 é a superfície publicada', () => {
   const vercel = JSON.parse(read('vercel.json'));
   const pkg = JSON.parse(read('package.json'));
+  const v4Pkg = JSON.parse(read('v4/package.json'));
+
   assert.ok(Array.isArray(vercel.rewrites) && vercel.rewrites.length >= 2);
-  assert.ok(vercel.functions && vercel.functions['api/index.js']);
+  assert.ok(vercel.functions && vercel.functions['api/v4.ts']);
+  assert.equal(vercel.outputDirectory, 'v4/apps/web/dist');
+  assert.ok(String(vercel.buildCommand || '').includes('@lorion/web'));
+  assert.ok(String(vercel.buildCommand || '').includes('smoke:deploy'));
   assert.equal(pkg.dependencies['@supabase/supabase-js'], '2.112.3');
   assert.equal(pkg.engines.node, '24.x');
+  assert.equal(v4Pkg.engines.node, '24.x');
   assert.equal(fs.existsSync(path.join(root, '.github/workflows/deploy-pages.yml')), false);
   assert.equal(fs.existsSync(path.join(root, 'scripts/build-pages.js')), false);
 });
