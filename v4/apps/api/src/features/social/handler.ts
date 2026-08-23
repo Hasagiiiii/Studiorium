@@ -1,9 +1,11 @@
 import {
   createNotification,
+  excludedUserIdsForViewer,
   findProfileByUsername,
   findPublicProfile,
   followCounts,
   followUser,
+  hasBlockBetween,
   isFollowing,
   listFollowingIds,
   listPublicProjects,
@@ -49,13 +51,14 @@ export async function profileSocial(request: ApiRequest, username: string): Prom
     throw notFound('Perfil não encontrado.');
   }
 
+  const blocked = Boolean(viewer && viewer.id !== profile.userId && (await hasBlockBetween(viewer.id, profile.userId)));
   const counts = await followCounts(profile.userId);
-  const following = viewer ? await isFollowing(viewer.id, profile.userId) : false;
+  const following = viewer && !blocked ? await isFollowing(viewer.id, profile.userId) : false;
 
   return followSummarySchema.parse({
     ...counts,
     isFollowing: following,
-    canFollow: Boolean(viewer && viewer.id !== profile.userId && profile.isPublic),
+    canFollow: Boolean(viewer && viewer.id !== profile.userId && profile.isPublic && !blocked),
   });
 }
 
@@ -68,6 +71,9 @@ export async function setFollow(
   const profile = await findPublicProfile(username);
   if (!profile) throw notFound('Perfil não encontrado.');
   if (profile.userId === viewer.id) throw forbidden('Você não pode seguir a própria conta.');
+  if (await hasBlockBetween(viewer.id, profile.userId)) {
+    throw forbidden('Essa conexão não está disponível enquanto houver bloqueio entre os perfis.');
+  }
 
   if (following) {
     const alreadyFollowing = await isFollowing(viewer.id, profile.userId);
@@ -100,7 +106,12 @@ export async function setFollow(
 
 export async function followingFeed(request: ApiRequest): Promise<FeedResponse> {
   const viewer = await requireSessionUser(request);
-  const followingIds = new Set(await listFollowingIds(viewer.id));
+  const [followingRaw, excludedRaw] = await Promise.all([
+    listFollowingIds(viewer.id),
+    excludedUserIdsForViewer(viewer.id),
+  ]);
+  const excluded = new Set(excludedRaw);
+  const followingIds = new Set(followingRaw.filter((id) => !excluded.has(id)));
   if (!followingIds.size) return feedResponseSchema.parse({ feed: [] });
 
   const [posts, publications, discussions, news, projects] = await Promise.all([
