@@ -11,6 +11,15 @@ export async function requirePermission(request: ApiRequest, permission: string)
   return user;
 }
 
+export async function requireAnyPermission(request: ApiRequest, permissions: readonly string[]) {
+  const user = await requireSessionUser(request);
+  const granted = await userPermissions(user.id);
+  if (!permissions.some((permission) => granted.includes(permission))) {
+    throw forbidden('Você não possui permissão para esta área.');
+  }
+  return user;
+}
+
 export async function currentPermissions(request: ApiRequest): Promise<string[]> {
   const user = await requireSessionUser(request);
   return userPermissions(user.id);
