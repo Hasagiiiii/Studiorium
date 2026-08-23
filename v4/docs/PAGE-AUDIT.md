@@ -1,112 +1,88 @@
 # Auditoria de páginas da v4
 
-Objetivo: manter apenas superfícies que possuem função própria. Funcionalidade não é sinônimo de página.
+Objetivo: manter apenas superfícies que possuem função própria e fluxo funcional. Funcionalidade não é sinônimo de página.
 
-## Páginas principais — ficam
+## Páginas principais ativas
 
 ### `/` — Início
 
-Função própria: feed social, recomendações, atualizações e relações.
+Feed social e descoberta por relevância, relações, recência e tendência.
 
 ### `/explorar` — Explorar
 
-Função própria: descoberta global.
-Absorve busca, pessoas, notícias como listagem, pesquisas, tendências e filtros.
+Descoberta global. Absorve busca, pessoas, notícias, pesquisas, projetos, discussões e filtros.
 
 ### `/comunidades` — Comunidades
 
-Função própria: descoberta e gestão de espaços sociais.
-Categorias como Tecnologia, Jogos, Hardware, Ciência e Literatura são filtros/classificações, não páginas principais independentes.
+Descoberta de espaços sociais. Tecnologia, Jogos, Hardware, Ciência, Literatura e outras áreas são categorias/classificações, não páginas principais independentes.
 
 ### `/biblioteca` — Biblioteca
 
-Função própria: experiência exclusiva de livros.
-Concentra catálogo de livros, estante pessoal, progresso de leitura, livros lidos/quero ler/lendo, recomendações e reviews. Pesquisas não pertencem à Biblioteca; aparecem em Explorar, Feed, Perfil e Comunidades e mantêm páginas de detalhe próprias.
+Experiência exclusiva de livros. A superfície ativa apresenta livros e seus detalhes. Recursos sociais de leitura só entram quando seus fluxos próprios estiverem completos. Pesquisas não pertencem à Biblioteca.
 
 ### `/projetos` — Projetos
 
-Função própria: workspace pessoal de criação, edição e organização.
-Não deve duplicar Explorar mostrando catálogo geral de projetos de terceiros.
+Workspace pessoal com criação e organização dos projetos que já são suportados pela API v4. Não duplica Explorar com um catálogo geral de terceiros.
 
-## Identidade — fica como superfície própria
+## Identidade
 
 ### `/perfil/:username`
 
-Função própria: identidade social e portfólio vivo.
-Seguidores, seguindo, publicações, pesquisas, projetos, biblioteca, comunidades e atividade aparecem como módulos/tabs internos.
+Identidade social. Somente informações e ações já suportadas pelo grafo social ficam ativas; novos módulos entram gradualmente sem criar hubs redundantes.
 
-## Páginas de detalhe — ficam
-
-Detalhes precisam de URL compartilhável, histórico e deep-link.
+## Páginas de detalhe ativas
 
 - `/comunidades/:slug`
-- `/comunidades/:slug/discussoes/:id`
+- `/discussoes/:id`
 - `/livros/:id`
 - `/pesquisas/:slug`
 - `/projetos/:id`
-- `/projetos/lab/:id`
 - `/noticias/:slug`
 
-## Ferramentas secundárias — ficam quando há fluxo próprio
-
-### `/projetos/lab`
-
-É ferramenta/workspace, não aba principal.
+## Rotas secundárias ativas
 
 ### `/notificacoes`
 
-Pode existir como histórico completo e deep-link, mesmo que o uso normal aconteça em popover/drawer.
+Histórico privado de notificações, com leitura individual e em lote.
 
 ### autenticação
 
 - `/entrar`
 - `/cadastro`
-- `/recuperar-senha`
-- `/redefinir-senha`
 
-São fluxos necessários, não itens da navegação principal.
+Recuperação de senha só será registrada quando o fluxo transacional estiver completo.
 
-### administração
+## Capacidades planejadas, sem rota ativa
 
-- `/admin/*`
-
-É aplicação operacional por permissão, isolada da navegação social comum.
-
-### institucional
-
-- `/diretrizes`
-- `/sobre`
-
-Ficam fora da navegação principal e podem ser acessadas por footer/configurações.
+- laboratório/editor de código;
+- administração v4;
+- páginas institucionais;
+- criação de discussão, review, tutorial ou comunidade;
+- módulos de leitura que dependam de persistência ainda não portada.
 
 ## Deixam de ser páginas
 
 ### `/buscar`
 
-REMOVER.
-Busca vive em `/explorar?q=...` e pode abrir também como command/search overlay.
+Busca vive em `/explorar?q=...`.
 
 ### `/pessoas`
 
-REMOVER.
-Pessoas são um filtro de Explorar.
+Pessoas são filtro de Explorar.
 
 ### `/criar`
 
-REMOVER.
-Criar é launcher/composer acionado pelo botão `+`.
+Criar é launcher acionado pelo botão `+` e só oferece ações implementadas.
 
 ### `/noticias`
 
-REMOVER como hub principal.
 Notícias são tipo de conteúdo no Feed/Explorar. `/noticias/:slug` permanece para detalhe compartilhável.
 
 ### `/oficina` e `/oficina/:slug`
 
-REMOVER.
-Tecnologia/Hardware/Jogos/Carros/Motos são categorias de comunidades/conteúdos. Tutoriais entram em comunidades.
+Tecnologia, Hardware, Jogos, Carros e Motos são categorias de comunidades/conteúdos, não uma aplicação paralela.
 
-## Legado explicitamente morto
+## Legado morto
 
 Não recriar aliases ou telas para:
 
@@ -126,25 +102,17 @@ Não recriar aliases ou telas para:
 - `/editor/*`
 - `/publicar`
 - `/laboratorio/*`
+- `/projetos/lab`
+- `/projetos/lab/*`
 
 ## Regra para novas páginas
 
-Uma feature só ganha página própria quando precisa de pelo menos um destes fatores:
+Uma feature só ganha página própria quando o fluxo está implementado e precisa de pelo menos um destes fatores:
 
 - URL compartilhável/deep-link;
 - histórico/navegação própria;
 - fluxo longo ou workspace;
 - contexto persistente próprio;
-- necessidade de retorno direto por notificação/link externo.
+- retorno direto por notificação/link externo.
 
-Caso contrário, preferir:
-
-- modal;
-- drawer;
-- popover;
-- composer;
-- tab interna;
-- filtro;
-- seção;
-- action sheet;
-- command palette.
+Caso contrário, usar uma feature embutida quando ela estiver pronta: modal, drawer, popover, composer, tab interna, filtro, seção, action sheet ou command palette.
