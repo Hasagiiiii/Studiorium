@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import type { CommunityMembershipResult } from '@lorion/contracts';
+import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function CommunityPage() {
   const { slug = '' } = useParams();
   const { data } = useAppState();
+  const { pushToast } = useToast();
   const community = data?.communities.find((item) => item.slug === slug);
+  const [membership, setMembership] = useState<CommunityMembershipResult | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [membershipError, setMembershipError] = useState('');
 
   if (!community) {
     return (
@@ -19,25 +27,93 @@ export function CommunityPage() {
     );
   }
 
+  const currentCommunity = community;
+  const joined = membership?.joined ?? currentCommunity.joined;
+  const role = membership?.role ?? currentCommunity.role;
+  const moderationStatus =
+    membership?.memberModerationStatus ?? currentCommunity.memberModerationStatus;
+  const memberCount = membership?.memberCount ?? currentCommunity.memberCount;
+
+  async function toggleMembership() {
+    if (updating || currentCommunity.visibility !== 'public') return;
+    if (!data?.user) return;
+
+    setUpdating(true);
+    setMembershipError('');
+    try {
+      const result = joined
+        ? await services.communities.leave(currentCommunity.slug)
+        : await services.communities.join(currentCommunity.slug);
+      setMembership(result);
+      pushToast({
+        message: result.joined
+          ? `Você entrou em ${currentCommunity.name}.`
+          : `Você saiu de ${currentCommunity.name}.`,
+        tone: 'success',
+      });
+    } catch (cause) {
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar sua participação.';
+      setMembershipError(message);
+      pushToast({ message, tone: 'error' });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
   return (
     <FeaturePage
-      eyebrow={community.area}
-      title={community.name}
-      description={community.description || 'Espaço de colaboração no Lorion.'}
+      eyebrow={currentCommunity.area}
+      title={currentCommunity.name}
+      description={currentCommunity.description || 'Espaço de colaboração no Lorion.'}
     >
       <section className="community-overview">
         <div className="community-stats">
           <span>
-            <strong>{community.memberCount}</strong> membros
+            <strong>{memberCount}</strong> membros
           </span>
-          <span>{community.visibility === 'public' ? 'Pública' : 'Acesso controlado'}</span>
-          {community.official ? <span>Comunidade oficial</span> : null}
+          <span>{currentCommunity.visibility === 'public' ? 'Pública' : 'Acesso controlado'}</span>
+          {currentCommunity.official ? <span>Comunidade oficial</span> : null}
+          {joined && role ? <span>Seu papel: {role}</span> : null}
         </div>
-        {community.rules.length ? (
+
+        <div className="community-membership-actions">
+          {moderationStatus === 'removed' ? (
+            <p className="inline-error" role="alert">
+              Sua participação nesta comunidade foi removida pela moderação.
+            </p>
+          ) : currentCommunity.visibility !== 'public' ? (
+            <p>A entrada nesta comunidade depende de aprovação.</p>
+          ) : data?.user ? (
+            <button
+              className={joined ? 'button secondary' : 'button primary'}
+              type="button"
+              disabled={updating}
+              onClick={() => void toggleMembership()}
+            >
+              {updating ? 'Atualizando…' : joined ? 'Sair da comunidade' : 'Entrar na comunidade'}
+            </button>
+          ) : (
+            <Link
+              className="button primary"
+              to={`/entrar?retorno=${encodeURIComponent(`/comunidades/${currentCommunity.slug}`)}`}
+            >
+              Entre para participar
+            </Link>
+          )}
+
+          {membershipError ? (
+            <p className="inline-error" role="alert">
+              {membershipError}
+            </p>
+          ) : null}
+        </div>
+
+        {currentCommunity.rules.length ? (
           <div className="community-rules">
             <h2>Diretrizes da comunidade</h2>
             <ul>
-              {community.rules.map((rule) => (
+              {currentCommunity.rules.map((rule) => (
                 <li key={rule}>{rule}</li>
               ))}
             </ul>

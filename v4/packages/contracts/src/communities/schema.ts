@@ -17,4 +17,13 @@ export const communitySchema = z.object({
   memberModerationStatus: z.string().nullable().default(null),
 });
 
+export const communityMembershipResultSchema = z.object({
+  communityId: z.string(),
+  joined: z.boolean(),
+  role: z.string().nullable(),
+  memberModerationStatus: z.string().nullable(),
+  memberCount: z.number().int().nonnegative(),
+});
+
 export type Community = z.infer<typeof communitySchema>;
+export type CommunityMembershipResult = z.infer<typeof communityMembershipResultSchema>;

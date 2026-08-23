@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseBootstrap, projectSchema, publicUserSchema } from '../src/index.js';
+import {
+  communityMembershipResultSchema,
+  parseBootstrap,
+  projectSchema,
+  publicUserSchema,
+} from '../src/index.js';
 
 test('bootstrap aplica defaults seguros para payload vazio', () => {
   const payload = parseBootstrap({});
@@ -33,6 +38,25 @@ test('usuário público rejeita e-mail inválido em runtime', () => {
       id: 'usr_1',
       displayName: 'Pessoa',
       email: 'nao-e-email',
+    }),
+  );
+});
+
+test('participação em comunidade exige contagem válida e estado explícito', () => {
+  const membership = communityMembershipResultSchema.parse({
+    communityId: 'community_1',
+    joined: true,
+    role: 'member',
+    memberModerationStatus: 'clear',
+    memberCount: 1,
+  });
+
+  assert.equal(membership.joined, true);
+  assert.equal(membership.memberCount, 1);
+  assert.throws(() =>
+    communityMembershipResultSchema.parse({
+      ...membership,
+      memberCount: -1,
     }),
   );
 });
