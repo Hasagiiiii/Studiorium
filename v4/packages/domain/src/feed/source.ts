@@ -12,11 +12,6 @@ export function buildPublicFeed(data: BootstrapPayload): FeedEntry[] {
       item,
       at: item.createdAt,
     })),
-    ...data.techResources.map((item) => ({
-      type: 'tech' as const,
-      item,
-      at: item.updatedAt || item.createdAt,
-    })),
     ...data.news.map((item) => ({
       type: 'news' as const,
       item,
