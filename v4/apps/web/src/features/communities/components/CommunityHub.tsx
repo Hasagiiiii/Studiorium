@@ -40,7 +40,9 @@ export function CommunityHub({ slug, canAccess }: Props) {
       .catch((cause) => {
         if (!active) return;
         setStatus('error');
-        setError(cause instanceof Error ? cause.message : 'Não foi possível carregar a comunidade.');
+        setError(
+          cause instanceof Error ? cause.message : 'Não foi possível carregar a comunidade.',
+        );
       });
 
     return () => {
@@ -62,9 +64,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
         category: category.trim() || 'Geral',
       });
       setHub((current) =>
-        current
-          ? { ...current, discussions: [discussion, ...current.discussions] }
-          : current,
+        current ? { ...current, discussions: [discussion, ...current.discussions] } : current,
       );
       setTitle('');
       setBody('');
