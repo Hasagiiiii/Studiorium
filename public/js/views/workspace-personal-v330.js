@@ -28,7 +28,9 @@ function mediaEditor(user, kind, title, description) {
       <strong>${E(title)}</strong>
       <p>${E(description)}</p>
       <input class="field" type="file" name="image" accept="image/*,.heic,.heif" />
-      <small>A foto é otimizada automaticamente para manter boa qualidade ocupando pouco espaço.</small>
+      <small
+        >A foto é otimizada automaticamente para manter boa qualidade ocupando pouco espaço.</small
+      >
       <div class="actions">
         <button class="solid" type="submit" value="upload">Atualizar</button>
         ${hasMedia ? '<button class="outline" type="submit" value="remove">Remover</button>' : ''}
