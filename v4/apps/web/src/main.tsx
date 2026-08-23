@@ -7,6 +7,7 @@ import { ToastProvider } from './components/feedback/toasts/ToastProvider.js';
 import './styles/index.css';
 import './styles/features.css';
 import './styles/motion.css';
+import './styles/composer.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
