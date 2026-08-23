@@ -21,6 +21,13 @@ import {
   requestCommunityMembership,
 } from './features/communities/handler.js';
 import {
+  createComment,
+  deleteComment,
+  postDetail,
+  setLike,
+  updateComment,
+} from './features/interactions/handler.js';
+import {
   notifications,
   readAllNotifications,
   readNotification,
@@ -77,6 +84,48 @@ async function route(request: ApiRequest, response: ApiResponse) {
 
   if (method === 'POST' && path === '/api/v4/posts') {
     return json(response, 201, await createPost(request));
+  }
+
+  const postDetailMatch = path.match(/^\/api\/v4\/posts\/([^/]+)\/detail$/);
+  if (postDetailMatch && method === 'GET') {
+    return json(response, 200, await postDetail(request, postDetailMatch[1] || ''));
+  }
+
+  const contentLikeMatch = path.match(/^\/api\/v4\/content\/([^/]+)\/like$/);
+  if (contentLikeMatch && method === 'POST') {
+    return json(response, 200, await setLike(request, contentLikeMatch[1] || '', true));
+  }
+  if (contentLikeMatch && method === 'DELETE') {
+    return json(response, 200, await setLike(request, contentLikeMatch[1] || '', false));
+  }
+
+  const contentCommentMatch = path.match(/^\/api\/v4\/content\/([^/]+)\/comments$/);
+  if (contentCommentMatch && method === 'POST') {
+    return json(response, 201, await createComment(request, contentCommentMatch[1] || ''));
+  }
+
+  const contentCommentItemMatch = path.match(/^\/api\/v4\/content\/([^/]+)\/comments\/([^/]+)$/);
+  if (contentCommentItemMatch && method === 'PATCH') {
+    return json(
+      response,
+      200,
+      await updateComment(
+        request,
+        contentCommentItemMatch[1] || '',
+        contentCommentItemMatch[2] || '',
+      ),
+    );
+  }
+  if (contentCommentItemMatch && method === 'DELETE') {
+    return json(
+      response,
+      200,
+      await deleteComment(
+        request,
+        contentCommentItemMatch[1] || '',
+        contentCommentItemMatch[2] || '',
+      ),
+    );
   }
 
   const communityHubMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/hub$/);

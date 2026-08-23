@@ -2,6 +2,7 @@ export * from './core/client.js';
 export * from './features/auth/service.js';
 export * from './features/bootstrap/service.js';
 export * from './features/communities/service.js';
+export * from './features/interactions/service.js';
 export * from './features/notifications/service.js';
 export * from './features/posts/service.js';
 export * from './features/profiles/service.js';

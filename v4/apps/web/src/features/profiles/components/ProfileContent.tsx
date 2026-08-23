@@ -30,7 +30,9 @@ export function ProfileContent({
             {detail.posts.map((post) => (
               <li key={post.id}>
                 <div>
-                  {post.title ? <strong>{post.title}</strong> : <strong>Publicação</strong>}
+                  <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>
+                    <strong>{post.title || 'Publicação'}</strong>
+                  </Link>
                   {post.community ? (
                     <>
                       <span> em </span>

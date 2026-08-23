@@ -2,6 +2,8 @@ export * from './auth/schema.js';
 export * from './bootstrap/schema.js';
 export * from './communities/schema.js';
 export * from './discussions/schema.js';
+export * from './interactions/schema.js';
+export * from './interactions/post-detail.js';
 export * from './library/schema.js';
 export * from './news/schema.js';
 export * from './notifications/schema.js';
