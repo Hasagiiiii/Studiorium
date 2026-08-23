@@ -34,6 +34,12 @@ export async function listPublicProfiles(): Promise<Profile[]> {
   return queryList(result).map((row) => mapProfile(row as Record<string, unknown>));
 }
 
+export async function findProfileByUserId(userId: string): Promise<Profile | null> {
+  const result = await database().from('profiles').select('*').eq('user_id', userId).maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapProfile(result.data as Record<string, unknown>) : null;
+}
+
 export async function findPublicProfile(username: string): Promise<Profile | null> {
   const result = await database()
     .from('profiles')
