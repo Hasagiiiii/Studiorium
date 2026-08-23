@@ -39,6 +39,9 @@ function activityScore(entry: FeedEntry): number {
   if (entry.type === 'news') {
     return 14 + (entry.item.featured ? 48 : 0) + Math.log10(numeric(entry.item.likeCount) + 1) * 8;
   }
+  if (entry.type === 'post') {
+    return 12 + Math.log10(numeric(entry.item.likeCount) + 1) * 10;
+  }
   return 10;
 }
 
