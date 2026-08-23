@@ -14,6 +14,7 @@ import { BookPage } from '../features/library/pages/BookPage.js';
 import { LibraryPage } from '../features/library/pages/LibraryPage.js';
 import { NewsArticlePage } from '../features/news/pages/NewsArticlePage.js';
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage.js';
+import { PostDetailPage } from '../features/posts/pages/PostDetailPage.js';
 import { ProfilePage } from '../features/profiles/pages/ProfilePage.js';
 import { ProjectPage } from '../features/projects/pages/ProjectPage.js';
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage.js';
@@ -44,6 +45,7 @@ export function App() {
         <Route path="/comunidades" element={<CommunitiesPage />} />
         <Route path="/comunidades/:slug" element={<CommunityPage />} />
         <Route path="/discussoes/:id" element={<DiscussionPage />} />
+        <Route path="/publicacoes/:id" element={<PostDetailPage />} />
         <Route path="/biblioteca" element={<LibraryPage />} />
         <Route path="/livros/:id" element={<BookPage />} />
         <Route path="/pesquisas/:slug" element={<ResearchPage />} />
