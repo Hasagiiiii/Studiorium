@@ -9,7 +9,8 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "check": "npm run typecheck && npm run test"
+    "check": "npm run typecheck && npm run test",
+    "smoke:deploy": "node scripts/predeploy-smoke.mjs"
   },
   "engines": {
     "node": "24.x"
