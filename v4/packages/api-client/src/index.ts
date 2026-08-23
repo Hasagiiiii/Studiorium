@@ -6,6 +6,7 @@ export * from './features/communities/service.js';
 export * from './features/interactions/service.js';
 export * from './features/library/service.js';
 export * from './features/moderation/service.js';
+export * from './features/news/service.js';
 export * from './features/notifications/service.js';
 export * from './features/posts/service.js';
 export * from './features/profiles/service.js';
