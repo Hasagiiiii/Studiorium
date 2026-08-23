@@ -8,6 +8,7 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 import { ProfileContent } from '../components/ProfileContent.js';
 import { ProfileEditor } from '../components/ProfileEditor.js';
 import { ProfileSafetyActions } from '../components/ProfileSafetyActions.js';
+import { VerificationRequestForm } from '../components/VerificationRequestForm.js';
 
 type SocialState =
   | { status: 'loading'; value: FollowSummary | null; error: null }
@@ -235,7 +236,12 @@ export function ProfilePage() {
         ) : null}
         {detail.status === 'error' ? <p className="inline-error" role="alert">{detail.error}</p> : null}
 
-        {isOwnProfile ? <ProfileEditor profile={profile} onUpdated={applyProfile} /> : null}
+        {isOwnProfile ? (
+          <>
+            <ProfileEditor profile={profile} onUpdated={applyProfile} />
+            <VerificationRequestForm profile={profile} onSubmitted={loadDetail} />
+          </>
+        ) : null}
 
         <ProfileContent
           detail={detail.value}
