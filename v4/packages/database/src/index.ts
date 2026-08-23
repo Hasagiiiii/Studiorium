@@ -10,3 +10,4 @@ export * from './repositories/profiles/read.js';
 export * from './repositories/projects/read.js';
 export * from './repositories/research/read.js';
 export * from './repositories/settings/read.js';
+export * from './repositories/social/follows.js';
