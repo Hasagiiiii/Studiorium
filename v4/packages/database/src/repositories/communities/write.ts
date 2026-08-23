@@ -1,7 +1,4 @@
-import type {
-  CommunityMembershipRequest,
-  CommunityMembershipResult,
-} from '@lorion/contracts';
+import type { CommunityMembershipRequest, CommunityMembershipResult } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
