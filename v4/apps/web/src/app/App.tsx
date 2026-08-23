@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { ErrorScreen } from '../components/feedback/ErrorScreen.js';
 import { LoadingScreen } from '../components/feedback/LoadingScreen.js';
+import { AccountSecurityPage } from '../features/auth/pages/AccountSecurityPage.js';
 import { LoginPage } from '../features/auth/pages/LoginPage.js';
 import { RegisterPage } from '../features/auth/pages/RegisterPage.js';
 import { RequestPasswordResetPage } from '../features/auth/pages/RequestPasswordResetPage.js';
@@ -50,6 +51,7 @@ export function App() {
         <Route path="/projetos/:id" element={<ProjectPage />} />
         <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/perfil/:username" element={<ProfilePage />} />
+        <Route path="/conta/seguranca" element={<AccountSecurityPage />} />
         <Route path="/notificacoes" element={<NotificationsPage />} />
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
