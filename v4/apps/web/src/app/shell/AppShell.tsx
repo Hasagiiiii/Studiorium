@@ -86,7 +86,7 @@ export function AppShell({ children }: PropsWithChildren) {
             aria-haspopup="dialog"
             aria-expanded={createOpen}
             animate={{ rotate: createOpen && !reduceMotion ? 45 : 0 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+            whileTap={{ scale: reduceMotion ? 1 : 0.92 }}
             onClick={() => setCreateOpen((value) => !value)}
           >
             +
@@ -127,7 +127,7 @@ export function AppShell({ children }: PropsWithChildren) {
           aria-haspopup="dialog"
           aria-expanded={createOpen}
           animate={{ rotate: createOpen && !reduceMotion ? 45 : 0, scale: createOpen ? 1.06 : 1 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+          whileTap={{ scale: reduceMotion ? 1 : 0.92 }}
           onClick={() => setCreateOpen((value) => !value)}
         >
           +
