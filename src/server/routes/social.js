@@ -38,7 +38,7 @@ async function socialSummary(req, username) {
 
   if (!profile.is_public && !isOwner) throw notFound();
 
-  const relationQuery =
+  const viewerRelationQuery =
     viewer && !isOwner
       ? db()
           .from('user_follows')
@@ -57,7 +57,7 @@ async function socialSummary(req, username) {
       .from('user_follows')
       .select('*', { count: 'exact', head: true })
       .eq('follower_id', profile.user_id),
-    relationQuery,
+    viewerRelationQuery,
   ]);
 
   fail(followersQ.error);
@@ -72,6 +72,20 @@ async function socialSummary(req, username) {
     isFollowing: Boolean(relationQ.data),
     canFollow: Boolean(viewer && !isOwner && profile.is_public),
   };
+}
+
+async function notifyNewFollower(targetUserId, user) {
+  try {
+    const actor = await publicUser(user);
+    await createNotification(targetUserId, {
+      type: 'social.follow',
+      title: `${actor.displayName} começou a seguir você`,
+      message: `@${actor.username} agora acompanha suas publicações no Lorion.`,
+      link: `/autores/${encodeURIComponent(actor.username)}`,
+    });
+  } catch (error) {
+    console.warn('[Lorion follow notification]', error?.message || error);
+  }
 }
 
 async function follow(req, username) {
@@ -93,16 +107,7 @@ async function follow(req, username) {
   });
 
   if (error && error.code !== '23505') fail(error);
-
-  if (!error) {
-    const actor = await publicUser(user);
-    await createNotification(target.user_id, {
-      type: 'social.follow',
-      title: `${actor.displayName} começou a seguir você`,
-      message: `@${actor.username} agora acompanha suas publicações no Lorion.`,
-      link: `/autores/${encodeURIComponent(actor.username)}`,
-    });
-  }
+  if (!error) await notifyNewFollower(target.user_id, user);
 
   return socialSummary(req, target.username);
 }
@@ -128,6 +133,8 @@ async function unfollow(req, username) {
     return {
       userId: target.user_id,
       username: target.username,
+      followerCount: 0,
+      followingCount: 0,
       isFollowing: false,
       canFollow: false,
     };
