@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type {
-  CommunityMembershipRequest,
-  CommunityMembershipResult,
-} from '@lorion/contracts';
+import type { CommunityMembershipRequest, CommunityMembershipResult } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
