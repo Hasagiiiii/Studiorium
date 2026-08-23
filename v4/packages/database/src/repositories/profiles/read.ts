@@ -83,3 +83,19 @@ export async function findProfileMedia(
     path: typeof record[column] === 'string' ? String(record[column]) : null,
   };
 }
+
+export async function findProfileMediaByUserId(
+  userId: string,
+  kind: 'avatar' | 'cover',
+): Promise<string | null> {
+  const column = kind === 'avatar' ? 'avatar_path' : 'cover_path';
+  const result = await database()
+    .from('profiles')
+    .select(column)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  if (!result.data) return null;
+  const record = result.data as Record<string, unknown>;
+  return typeof record[column] === 'string' ? String(record[column]) : null;
+}
