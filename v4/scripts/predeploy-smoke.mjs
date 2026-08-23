@@ -29,6 +29,9 @@ async function assertTable(client, table) {
 async function main() {
   await assertFile('apps/web/dist/index.html');
   await assertFile('apps/web/dist/assets');
+  await assertFile('packages/contracts/dist/index.js');
+  await assertFile('packages/domain/dist/index.js');
+  await assertFile('packages/database/dist/index.js');
 
   const client = createClient(requiredEnv('SUPABASE_URL'), databaseSecret(), {
     auth: {
