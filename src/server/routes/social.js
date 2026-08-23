@@ -1,9 +1,16 @@
 const { db, fail } = require('../db');
 const { currentUser, publicUser, requireUser } = require('../auth');
+const { hiddenCommunityContentIds } = require('../community-links');
+const S = require('../serializers');
 const { createNotification } = require('./notifications');
 
 function notFound() {
   return Object.assign(new Error('Perfil não encontrado.'), { statusCode: 404 });
+}
+
+function timeValue(value) {
+  const parsed = new Date(value || 0).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 async function profileByUsername(username) {
@@ -29,6 +36,89 @@ async function followingIdsFor(userId) {
     .order('created_at', { ascending: false });
   fail(error);
   return data.map((row) => row.followed_id);
+}
+
+async function followingFeed(req) {
+  const user = await requireUser(req);
+  const followingIds = await followingIdsFor(user.id);
+  if (!followingIds.length) return { feed: [] };
+
+  const client = db();
+  const [publicationsQ, discussionsQ, techQ, newsQ, projectsQ] = await Promise.all([
+    client
+      .from('publications')
+      .select('*')
+      .in('owner_id', followingIds)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(30),
+    client
+      .from('discussions')
+      .select('*')
+      .in('author_id', followingIds)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(30),
+    client
+      .from('tech_resources')
+      .select('*')
+      .in('owner_id', followingIds)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(30),
+    client
+      .from('news_articles')
+      .select('*')
+      .in('contributor_id', followingIds)
+      .eq('status', 'published')
+      .not('certified_at', 'is', null)
+      .is('deleted_at', null)
+      .order('published_at', { ascending: false })
+      .limit(30),
+    client
+      .from('projects')
+      .select('*')
+      .in('user_id', followingIds)
+      .eq('visibility', 'public')
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false })
+      .limit(30),
+  ]);
+
+  [publicationsQ, discussionsQ, techQ, newsQ, projectsQ].forEach((query) => fail(query.error));
+
+  const hiddenDiscussionIds = new Set(await hiddenCommunityContentIds('discussion'));
+  const feed = [
+    ...publicationsQ.data.map((row) => ({
+      type: 'publication',
+      item: S.publication(row),
+      at: row.published_at || row.created_at,
+    })),
+    ...discussionsQ.data
+      .filter((row) => !hiddenDiscussionIds.has(row.id))
+      .map((row) => ({ type: 'discussion', item: S.discussion(row), at: row.created_at })),
+    ...techQ.data.map((row) => ({
+      type: 'tech',
+      item: S.techResource(row),
+      at: row.updated_at || row.created_at,
+    })),
+    ...newsQ.data.map((row) => ({
+      type: 'news',
+      item: S.newsArticle(row),
+      at: row.published_at || row.created_at,
+    })),
+    ...projectsQ.data.map((row) => ({
+      type: 'project',
+      item: S.publicProject(row),
+      at: row.updated_at || row.created_at,
+    })),
+  ]
+    .sort((a, b) => timeValue(b.at) - timeValue(a.at))
+    .slice(0, 40);
+
+  return { feed };
 }
 
 async function socialSummary(req, username) {
@@ -143,4 +233,4 @@ async function unfollow(req, username) {
   return socialSummary(req, target.username);
 }
 
-module.exports = { followingIdsFor, socialSummary, follow, unfollow };
+module.exports = { followingIdsFor, followingFeed, socialSummary, follow, unfollow };
