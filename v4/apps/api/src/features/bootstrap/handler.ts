@@ -6,6 +6,7 @@ import {
   listCommunities,
   listPublicProfiles,
   listPublicProjects,
+  listPublicSocialPosts,
   listPublishedDiscussions,
   listPublishedNews,
   listPublishedResearch,
@@ -27,6 +28,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
   const viewerId = account?.id ?? null;
 
   const [
+    posts,
     publications,
     news,
     books,
@@ -40,6 +42,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     ownProfile,
     user,
   ] = await Promise.all([
+    listPublicSocialPosts(),
     listPublishedResearch(),
     listPublishedNews(),
     listBooks(),
@@ -60,6 +63,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
       : publicProfiles;
 
   return bootstrapSchema.parse({
+    posts,
     publications,
     news,
     books,
