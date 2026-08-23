@@ -1,5 +1,9 @@
-import type { CommunityMembershipResult } from '@lorion/contracts';
+import type {
+  CommunityMembershipRequest,
+  CommunityMembershipResult,
+} from '@lorion/contracts';
 import { database } from '../../core/client.js';
+import { queryList } from '../../core/query.js';
 
 type CommunityTargetRow = {
   id: string;
@@ -15,6 +19,13 @@ type MembershipRow = {
   role: string;
   status: string;
   moderation_status: string;
+  joined_at?: string | null;
+};
+
+type ProfileRow = {
+  user_id: string;
+  username: string;
+  display_name: string;
 };
 
 export async function findCommunityMembershipTarget(
@@ -35,7 +46,7 @@ export async function findCommunityMembership(
 ): Promise<MembershipRow | null> {
   const result = await database()
     .from('community_members')
-    .select('community_id,user_id,role,status,moderation_status')
+    .select('community_id,user_id,role,status,moderation_status,joined_at')
     .eq('community_id', communityId)
     .eq('user_id', userId)
     .maybeSingle();
@@ -52,6 +63,27 @@ async function activeMemberCount(communityId: string): Promise<number> {
     .neq('moderation_status', 'removed');
   if (result.error) throw new Error(result.error.message);
   return result.count || 0;
+}
+
+async function membershipResult(
+  communityId: string,
+  userId: string,
+): Promise<CommunityMembershipResult> {
+  const membership = await findCommunityMembership(communityId, userId);
+  return {
+    communityId,
+    joined: membership?.status === 'active' && membership.moderation_status !== 'removed',
+    membershipStatus:
+      membership?.status === 'active' ||
+      membership?.status === 'left' ||
+      membership?.status === 'pending' ||
+      membership?.status === 'rejected'
+        ? membership.status
+        : null,
+    role: membership?.role || null,
+    memberModerationStatus: membership?.moderation_status || null,
+    memberCount: await activeMemberCount(communityId),
+  };
 }
 
 export async function joinPublicCommunity(
@@ -82,14 +114,41 @@ export async function joinPublicCommunity(
     if (update.error) throw new Error(update.error.message);
   }
 
-  const membership = await findCommunityMembership(communityId, userId);
-  return {
-    communityId,
-    joined: membership?.status === 'active' && membership.moderation_status !== 'removed',
-    role: membership?.role || null,
-    memberModerationStatus: membership?.moderation_status || null,
-    memberCount: await activeMemberCount(communityId),
-  };
+  return membershipResult(communityId, userId);
+}
+
+export async function requestRestrictedCommunity(
+  communityId: string,
+  userId: string,
+  current: MembershipRow | null,
+): Promise<CommunityMembershipResult> {
+  const now = new Date().toISOString();
+  if (!current) {
+    const insert = await database().from('community_members').insert({
+      community_id: communityId,
+      user_id: userId,
+      role: 'member',
+      status: 'pending',
+      moderation_status: 'clear',
+      joined_at: now,
+      updated_at: now,
+    });
+    if (insert.error) throw new Error(insert.error.message);
+  } else if (current.status !== 'pending' && current.status !== 'active') {
+    const update = await database()
+      .from('community_members')
+      .update({
+        role: 'member',
+        status: 'pending',
+        joined_at: now,
+        updated_at: now,
+      })
+      .eq('community_id', communityId)
+      .eq('user_id', userId);
+    if (update.error) throw new Error(update.error.message);
+  }
+
+  return membershipResult(communityId, userId);
 }
 
 export async function leaveCommunity(
@@ -109,11 +168,64 @@ export async function leaveCommunity(
     if (update.error) throw new Error(update.error.message);
   }
 
-  return {
-    communityId,
-    joined: false,
-    role: current.role,
-    memberModerationStatus: current.moderation_status,
-    memberCount: await activeMemberCount(communityId),
-  };
+  return membershipResult(communityId, userId);
+}
+
+export async function listPendingCommunityMembershipRequests(
+  communityId: string,
+): Promise<CommunityMembershipRequest[]> {
+  const pending = queryList(
+    await database()
+      .from('community_members')
+      .select('user_id,joined_at')
+      .eq('community_id', communityId)
+      .eq('status', 'pending')
+      .eq('moderation_status', 'clear')
+      .order('joined_at', { ascending: true }),
+  ) as Array<{ user_id: string; joined_at: string | null }>;
+
+  if (!pending.length) return [];
+
+  const userIds = pending.map((item) => item.user_id);
+  const profiles = queryList(
+    await database()
+      .from('profiles')
+      .select('user_id,username,display_name')
+      .in('user_id', userIds),
+  ) as ProfileRow[];
+  const profilesByUser = new Map(profiles.map((profile) => [profile.user_id, profile]));
+
+  return pending.map((item) => {
+    const profile = profilesByUser.get(item.user_id);
+    return {
+      userId: item.user_id,
+      username: profile?.username || '',
+      displayName: profile?.display_name || profile?.username || 'Membro',
+      requestedAt: item.joined_at,
+    };
+  });
+}
+
+export async function resolveCommunityMembershipRequest(
+  communityId: string,
+  userId: string,
+  approve: boolean,
+): Promise<CommunityMembershipResult | null> {
+  const now = new Date().toISOString();
+  const update = await database()
+    .from('community_members')
+    .update({
+      status: approve ? 'active' : 'rejected',
+      joined_at: approve ? now : undefined,
+      updated_at: now,
+    })
+    .eq('community_id', communityId)
+    .eq('user_id', userId)
+    .eq('status', 'pending')
+    .eq('moderation_status', 'clear')
+    .select('user_id')
+    .maybeSingle();
+  if (update.error) throw new Error(update.error.message);
+  if (!update.data) return null;
+  return membershipResult(communityId, userId);
 }
