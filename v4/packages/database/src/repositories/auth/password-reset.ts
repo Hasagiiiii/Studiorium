@@ -10,7 +10,10 @@ export async function deleteOutstandingPasswordResetTokens(userId: string): Prom
 }
 
 export async function deleteExpiredPasswordResetTokens(nowIso: string): Promise<void> {
-  const result = await database().from('password_reset_tokens').delete().lt('expires_at', nowIso);
+  const result = await database()
+    .from('password_reset_tokens')
+    .delete()
+    .lt('expires_at', nowIso);
   if (result.error) throw new Error(result.error.message);
 }
 
