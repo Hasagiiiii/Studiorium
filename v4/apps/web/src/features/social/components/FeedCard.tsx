@@ -2,8 +2,8 @@ import type { FeedEntry } from '@lorion/contracts';
 import { motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
-function destination(entry: FeedEntry): string | null {
-  if (entry.type === 'post') return null;
+function destination(entry: FeedEntry): string {
+  if (entry.type === 'post') return `/publicacoes/${encodeURIComponent(entry.item.id)}`;
   if (entry.type === 'publication') return `/pesquisas/${encodeURIComponent(entry.item.slug)}`;
   if (entry.type === 'discussion') return `/discussoes/${encodeURIComponent(entry.item.id)}`;
   if (entry.type === 'news') return `/noticias/${encodeURIComponent(entry.item.slug)}`;
@@ -61,9 +61,16 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
       ) : null}
 
       {entry.item.title ? (
-        <h2>{link ? <Link to={link}>{entry.item.title}</Link> : entry.item.title}</h2>
+        <h2>
+          <Link to={link}>{entry.item.title}</Link>
+        </h2>
       ) : null}
       {text ? <p>{text.slice(0, 340)}</p> : null}
+      {entry.type === 'post' ? (
+        <footer>
+          <Link to={link}>Abrir publicação e interações</Link>
+        </footer>
+      ) : null}
       {entry.type === 'news' && entry.item.likeCount > 0 ? (
         <footer>{entry.item.likeCount} curtidas</footer>
       ) : null}
