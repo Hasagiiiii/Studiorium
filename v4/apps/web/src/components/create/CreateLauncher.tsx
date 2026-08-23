@@ -139,9 +139,15 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                 </button>
                 <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
                   <strong>Projeto</strong>
-                  <span>
-                    Crie um projeto no seu workspace e escolha se ele será privado ou público.
-                  </span>
+                  <span>Crie um projeto no seu workspace e escolha se ele será privado ou público.</span>
+                </Link>
+                <Link to="/pesquisas/gerenciar" onClick={onClose} className="create-launcher-action">
+                  <strong>Pesquisa</strong>
+                  <span>Escreva um rascunho autoral e envie o trabalho para revisão antes da publicação.</span>
+                </Link>
+                <Link to="/noticias/gerenciar" onClick={onClose} className="create-launcher-action">
+                  <strong>Notícia</strong>
+                  <span>Acesse o credenciamento e o workspace de notícias com certificação editorial.</span>
                 </Link>
               </div>
             )}
