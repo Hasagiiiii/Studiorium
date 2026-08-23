@@ -15,7 +15,7 @@ import {
 
 function hero() {
   const settings = state.boot.settings || {};
-  const title = settings.hero_title || 'Aprenda. Construa. Compartilhe.';
+  const title = settings.hero_title || 'Conhecimento conecta.';
   const text =
     settings.hero_text ||
     'Uma rede para discutir ideias, criar projetos, publicar conhecimento e aprender em comunidade.';
@@ -25,7 +25,7 @@ function hero() {
       <div class="social-hero-brand">
         <img src="/favicon.svg" alt="" class="social-brand-mark" />
         <div>
-          <div class="eyebrow">Conhecimento · comunidade · criação</div>
+          <div class="eyebrow">Lorion · rede social de conhecimento</div>
           <h1>${E(title)}</h1>
           <p>${E(text)}</p>
         </div>
@@ -90,16 +90,33 @@ function feedTabs(mode) {
 
   return markup`<nav class="social-feed-tabs" aria-label="Filtros do feed">
     ${tab('for-you', 'Para você')}
+    ${state.me ? tab('following', 'Seguindo') : ''}
     ${tab('discussions', 'Conversas')}
     ${tab('trending', 'Em alta')}
     ${tab('recent', 'Recentes')}
   </nav>`;
 }
 
+function followingEmptyState() {
+  const action = state.me
+    ? link('/autores', 'Encontrar pessoas', 'outline')
+    : link('/login', 'Entrar para seguir pessoas', 'outline');
+  const message = state.me
+    ? 'Siga pessoas para montar uma timeline com as publicações delas.'
+    : 'Entre na sua conta para criar uma timeline de pessoas que você segue.';
+
+  return markup`<div class="empty">
+    <p>${message}</p>
+    <div class="actions">${action}</div>
+  </div>`;
+}
+
 function feedColumn(feed, mode) {
   const posts = feed.length
     ? feed.map(feedPost).join('')
-    : empty('A timeline ainda não tem publicações para este filtro.');
+    : mode === 'following'
+      ? followingEmptyState()
+      : empty('A timeline ainda não tem publicações para este filtro.');
 
   return markup`<main class="social-feed">
     ${discoveryStrip()} ${feedTabs(mode)} ${renderComposer()} ${renderCreationHub()}
@@ -143,7 +160,7 @@ function rightSidebar(data) {
     <div class="social-panel social-quote">
       <span>“</span>
       <p>Grandes ideias começam com boas discussões.</p>
-      <small>Studiorium</small>
+      <small>Lorion · Orium Labs</small>
     </div>
   </aside>`;
 }
