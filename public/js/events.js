@@ -23,11 +23,13 @@ import {
   handleProjectInput,
 } from './events/projects.js';
 import { handleNewsClick, handleNewsSubmit } from './events/news.js';
+import { handleSocialClick } from './events/social.js';
 import { handleTemplateClick, handleTemplateChange } from './events/template-studio.js';
 
 const clickHandlers = [
   handleNavigationClick,
   handleNotificationClick,
+  handleSocialClick,
   handleBookClick,
   handleOwnedContentClick,
   handlePublicationClick,
