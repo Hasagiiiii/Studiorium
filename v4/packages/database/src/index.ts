@@ -6,6 +6,7 @@ export * from './repositories/communities/read.js';
 export * from './repositories/discussions/read.js';
 export * from './repositories/library/read.js';
 export * from './repositories/news/read.js';
+export * from './repositories/notifications/read.js';
 export * from './repositories/profiles/read.js';
 export * from './repositories/projects/read.js';
 export * from './repositories/research/read.js';
