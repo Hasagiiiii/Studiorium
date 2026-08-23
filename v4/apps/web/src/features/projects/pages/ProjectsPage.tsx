@@ -51,7 +51,7 @@ export function ProjectsPage() {
     <FeaturePage
       eyebrow="Projetos"
       title="Seu espaço de criação"
-      description="Crie, edite e organize projetos sem misturar o workspace pessoal com a descoberta pública do Lorion."
+      description="Crie e organize projetos sem misturar o workspace pessoal com a descoberta pública do Lorion."
     >
       {me ? (
         <>
@@ -59,9 +59,6 @@ export function ProjectsPage() {
             <button className="button primary" type="button" onClick={() => setCreating(!creating)}>
               {creating ? 'Cancelar' : 'Novo projeto'}
             </button>
-            <Link className="button secondary" to="/projetos/lab">
-              Laboratório de código
-            </Link>
           </section>
 
           {creating ? (
