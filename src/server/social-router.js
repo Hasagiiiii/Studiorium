@@ -1,4 +1,4 @@
-const { send } = require('./http');
+const { assertSameOrigin, send } = require('./http');
 const { apiPath } = require('./route-utils');
 const socialRoutes = require('./routes/social');
 
@@ -14,6 +14,8 @@ async function handleSocial(req, res) {
 
   const profileSocial = pathname.match(/^\/profiles\/([^/]+)\/social$/);
   if (!profileSocial) return false;
+
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) assertSameOrigin(req);
 
   const username = decodeURIComponent(profileSocial[1]);
   if (method === 'GET') return send(res, 200, await socialRoutes.socialSummary(req, username));
