@@ -3,7 +3,6 @@ import { discussionSchema } from '../discussions/schema.js';
 import { newsArticleSchema } from '../news/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { publicationSchema } from '../research/schema.js';
-import { techResourceSchema } from '../tech/schema.js';
 
 export const followSummarySchema = z.object({
   followerCount: z.number().int().nonnegative().default(0),
@@ -27,7 +26,6 @@ const feedBase = z.object({ at: z.string().nullable().default(null) });
 export const feedEntrySchema = z.discriminatedUnion('type', [
   feedBase.extend({ type: z.literal('publication'), item: publicationSchema }),
   feedBase.extend({ type: z.literal('discussion'), item: discussionSchema }),
-  feedBase.extend({ type: z.literal('tech'), item: techResourceSchema }),
   feedBase.extend({ type: z.literal('news'), item: newsArticleSchema }),
   feedBase.extend({ type: z.literal('project'), item: projectSchema }),
 ]);
