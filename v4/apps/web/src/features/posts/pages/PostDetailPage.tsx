@@ -16,16 +16,16 @@ export function PostDetailPage() {
 
   const load = useCallback(async () => {
     if (!id) return;
-    setState((current) => ({ status: 'loading', value: current.value, error: null }));
+    setState({ status: 'loading', value: null, error: null });
     try {
       const value = await services.interactions.postDetail(id);
       setState({ status: 'ready', value, error: null });
     } catch (cause) {
-      setState((current) => ({
+      setState({
         status: 'error',
-        value: current.value,
+        value: null,
         error: cause instanceof Error ? cause.message : 'Não foi possível carregar a publicação.',
-      }));
+      });
     }
   }, [id]);
 
@@ -33,7 +33,7 @@ export function PostDetailPage() {
     void load();
   }, [load]);
 
-  if (state.status === 'loading' && !state.value) {
+  if (state.status === 'loading') {
     return (
       <FeaturePage
         eyebrow="Publicação"
@@ -43,7 +43,7 @@ export function PostDetailPage() {
     );
   }
 
-  if (state.status === 'error' && !state.value) {
+  if (state.status === 'error') {
     return (
       <FeaturePage
         eyebrow="Publicação"
@@ -58,7 +58,6 @@ export function PostDetailPage() {
   }
 
   const detail = state.value;
-  if (!detail) return null;
   const { post } = detail;
 
   return (
@@ -82,12 +81,6 @@ export function PostDetailPage() {
         {post.title ? <h2>{post.title}</h2> : null}
         <p className="post-detail-body">{post.body}</p>
       </article>
-
-      {state.status === 'error' ? (
-        <p className="inline-error" role="alert">
-          {state.error}
-        </p>
-      ) : null}
 
       <PostInteractions contentId={post.id} initial={detail.interactions} />
     </FeaturePage>
