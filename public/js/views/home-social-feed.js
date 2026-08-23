@@ -1,7 +1,7 @@
 import { state, E, date, num } from '../runtime.js';
 import { link } from './core.js';
 
-const FEED_MODES = new Set(['for-you', 'discussions', 'trending', 'recent']);
+const FEED_MODES = new Set(['for-you', 'following', 'discussions', 'trending', 'recent']);
 
 function profileFor(id, fallback = '') {
   return (state.boot.profiles || []).find(
@@ -21,12 +21,15 @@ function authorLine(item) {
   const initial = E((name || 'S').slice(0, 1).toUpperCase());
   const itemDate = date(item.createdAt || item.publishedAt || item.updatedAt);
   const badge = isVerified(profile) ? '<small class="social-verified">✓ Verificado</small>' : '';
+  const authorName = profile?.username
+    ? link(`/autores/${encodeURIComponent(profile.username)}`, E(name), 'social-author-link')
+    : `<strong>${E(name)}</strong>`;
 
   return [
     '<div class="social-author">',
     `<span class="social-avatar">${initial}</span>`,
     '<span>',
-    `<strong>${E(name)}</strong>`,
+    authorName,
     badge,
     `<small>${itemDate}</small>`,
     '</span>',
@@ -163,6 +166,10 @@ function numeric(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function ownerId(entry) {
+  return entry.item.ownerId || entry.item.authorId || entry.item.contributorId || null;
+}
+
 function freshnessScore(entry) {
   const ageHours = Math.max(0, (Date.now() - timestamp(entry)) / 36e5);
   return 120 / (1 + ageHours / 24);
@@ -186,8 +193,7 @@ function activityScore(entry) {
 }
 
 function blendedScore(entry) {
-  const ownerId = entry.item.ownerId || entry.item.authorId || entry.item.contributorId;
-  const verified = isVerified(profileFor(ownerId, entry.item.authorName)) ? 14 : 0;
+  const verified = isVerified(profileFor(ownerId(entry), entry.item.authorName)) ? 14 : 0;
   return freshnessScore(entry) + activityScore(entry) + verified;
 }
 
@@ -219,6 +225,14 @@ function sourceFeed() {
 function buildFeed(mode = 'for-you') {
   const selectedMode = normalizeFeedMode(mode);
   const feed = sourceFeed();
+
+  if (selectedMode === 'following') {
+    const following = new Set(state.social?.followingIds || []);
+    return feed
+      .filter((entry) => following.has(ownerId(entry)))
+      .sort((a, b) => timestamp(b) - timestamp(a))
+      .slice(0, 14);
+  }
 
   if (selectedMode === 'discussions') {
     return feed
