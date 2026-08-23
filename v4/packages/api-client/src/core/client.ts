@@ -4,7 +4,7 @@ export type RuntimeSchema<T> = {
 
 export class ApiError extends Error {
   readonly status: number;
-  readonly code?: string;
+  readonly code: string | undefined;
 
   constructor(message: string, status: number, code?: string) {
     super(message);
@@ -22,6 +22,10 @@ const RETRYABLE_GET_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRuntimeValidationError(error: unknown): boolean {
+  return Boolean(error && typeof error === 'object' && 'issues' in error);
 }
 
 export class ApiClient {
@@ -70,7 +74,14 @@ export class ApiClient {
         return schema.parse(payload);
       } catch (error) {
         lastError = error;
-        if (method !== 'GET' || attempt >= attempts || error instanceof ApiError) throw error;
+        if (
+          method !== 'GET' ||
+          attempt >= attempts ||
+          error instanceof ApiError ||
+          isRuntimeValidationError(error)
+        ) {
+          throw error;
+        }
         await wait(350 * attempt);
       }
     }
