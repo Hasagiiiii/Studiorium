@@ -18,6 +18,7 @@ function mapProfile(row: Record<string, unknown>): Profile {
     hasAvatar: Boolean(row.avatar_path),
     hasCover: Boolean(row.cover_path),
     isPublic: row.is_public,
+    bookshelfPublic: row.bookshelf_public,
     verifiedAt: row.verified_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
