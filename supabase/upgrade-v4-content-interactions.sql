@@ -38,6 +38,9 @@ create index if not exists content_comments_author_created_idx
   on public.content_comments (author_id, created_at desc)
   where deleted_at is null;
 
+create index if not exists content_comments_parent_content_idx
+  on public.content_comments (parent_id, content_id);
+
 alter table public.content_likes enable row level security;
 alter table public.content_comments enable row level security;
 
