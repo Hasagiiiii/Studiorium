@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
+      "*": false,
+      "main": true,
       "rebuild/lorion-v4-clean": true,
       "ci/lorion-v4-verify": false
     }
