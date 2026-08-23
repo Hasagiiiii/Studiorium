@@ -4,6 +4,7 @@ import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { ProjectTrash } from '../components/ProjectTrash.js';
 
 export function ProjectsPage() {
   const { data, reload } = useAppState();
@@ -56,14 +57,15 @@ export function ProjectsPage() {
     <FeaturePage
       eyebrow="Projetos"
       title="Seu espaço de criação"
-      description="Crie e organize projetos sem misturar o workspace pessoal com a descoberta pública do Lorion."
+      description="Crie, edite e organize projetos sem misturar o workspace pessoal com a descoberta pública do Lorion."
     >
       {me ? (
         <>
-          <section className="project-workspace-actions">
+          <section className="project-workspace-actions form-actions">
             <button className="button primary" type="button" onClick={() => setCreating(!creating)}>
               {creating ? 'Cancelar' : 'Novo projeto'}
             </button>
+            <ProjectTrash />
           </section>
 
           {creating ? (
@@ -122,7 +124,9 @@ export function ProjectsPage() {
                       </Link>
                     </h3>
                     {project.notes ? <p>{project.notes}</p> : null}
-                    <footer>{project.visibility === 'public' ? 'Público' : 'Privado'}</footer>
+                    <footer>
+                      {project.visibility === 'public' ? 'Público' : 'Privado'} · {project.sections.length} seções
+                    </footer>
                   </article>
                 ))}
               </div>
