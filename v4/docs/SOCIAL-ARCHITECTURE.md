@@ -5,14 +5,14 @@ A v4 reduz o número de páginas, mas não reduz a capacidade do produto. A regr
 ## Superfícies principais
 
 - Início — feed social e recomendações.
-- Explorar — busca, descoberta de pessoas, comunidades e conteúdo.
+- Explorar — busca, descoberta de pessoas, comunidades, pesquisas e conteúdo.
 - Comunidades — espaços sociais organizados por interesse e categoria.
-- Biblioteca — livros, pesquisas, reviews e acervo pessoal.
+- Biblioteca — exclusiva para livros: estante, leituras, recomendações e reviews.
 - Projetos — workspace pessoal de criação e código.
 - Perfil — identidade social do usuário.
 - Loren — camada assistiva, não uma página isolada obrigatória.
 
-Criar, buscar, seguir, salvar, comentar, compartilhar, bloquear, silenciar e reagir são ações ou features. Elas não ganham páginas principais só porque existem.
+Criar, buscar, seguir, salvar, comentar, compartilhar, bloquear, silenciar e curtir são ações ou features. Elas não ganham páginas principais só porque existem.
 
 ## Perfil social
 
@@ -26,7 +26,7 @@ Criar, buscar, seguir, salvar, comentar, compartilhar, bloquear, silenciar e rea
 - publicações;
 - projetos;
 - pesquisas;
-- biblioteca pública;
+- biblioteca pública de livros;
 - comunidades;
 - atividade recente;
 - itens fixados;
@@ -37,6 +37,26 @@ Criar, buscar, seguir, salvar, comentar, compartilhar, bloquear, silenciar e rea
 - reputação/contribuição.
 
 Seguidores e seguindo podem abrir drawer/modal ou rota secundária deep-linkable. Eles não precisam virar itens da navegação principal.
+
+## Biblioteca
+
+Biblioteca não é acervo acadêmico genérico. É uma experiência exclusiva para livros.
+
+Ela deve suportar progressivamente:
+
+- catálogo de livros;
+- estante pessoal;
+- status `quero ler`, `lendo`, `lido` e `abandonado`;
+- progresso de leitura;
+- favoritos;
+- reviews;
+- notas/avaliações;
+- recomendações;
+- listas/coleções de livros;
+- histórico de leitura;
+- compartilhamento social de leitura.
+
+Pesquisas não entram na Biblioteca. Elas são conteúdo acadêmico/social acessível por Explorar, Feed, Perfil, Comunidades e páginas de detalhe próprias.
 
 ## Grafo social
 
@@ -67,7 +87,7 @@ Tipos previstos:
 - atualização de projeto;
 - conteúdo de comunidade.
 
-Cada tipo pode manter seu próprio domínio, mas a camada social precisa enxergá-los por um contrato comum para feed, comentários, saves, reações, denúncias e notificações.
+Cada tipo pode manter seu próprio domínio, mas a camada social precisa enxergá-los por um contrato comum para feed, comentários, salvamentos, curtidas, denúncias e notificações.
 
 Contrato social conceitual:
 
@@ -85,18 +105,18 @@ SocialContent
 ├── moderationStatus
 └── capabilities
     ├── canComment
-    ├── canReact
+    ├── canLike
     ├── canSave
     └── canShare
 ```
 
-Não duplicar a mesma lógica de reação/comentário em cada tipo de conteúdo.
+Não duplicar a mesma lógica de curtida/comentário em cada tipo de conteúdo.
 
 ## Interações
 
 Features reutilizáveis:
 
-- reactions / Hype;
+- likes / curtidas;
 - comments;
 - threaded replies;
 - saves/bookmarks;
@@ -132,7 +152,7 @@ Antes de implementar, validar se a integridade referencial exige um registro can
 
 ## Registro canônico de conteúdo
 
-Para evitar que feed, comentários, saves e notificações precisem conhecer todas as tabelas específicas, avaliar uma tabela `content_items` como registro social canônico.
+Para evitar que feed, comentários, salvamentos e notificações precisem conhecer todas as tabelas específicas, avaliar uma tabela `content_items` como registro social canônico.
 
 Exemplo:
 
@@ -153,7 +173,7 @@ Tabelas específicas podem referenciar `content_items.id`.
 Benefícios:
 
 - comentários com FK real;
-- reações com FK real;
+- curtidas com FK real;
 - saves com FK real;
 - denúncias com FK real;
 - feed uniforme;
@@ -161,7 +181,7 @@ Benefícios:
 - contadores consistentes;
 - menos `target_type + target_id` sem integridade.
 
-Essa decisão deve ser tomada antes de ampliar comentários/reactions para todos os domínios.
+Essa decisão deve ser tomada antes de ampliar comentários/curtidas para todos os domínios.
 
 ## Mídia
 
@@ -208,7 +228,7 @@ Eventos previstos:
 - novo seguidor;
 - comentário;
 - resposta;
-- Hype/reação;
+- curtida;
 - menção;
 - convite/comunidade;
 - moderação;
@@ -238,7 +258,7 @@ Sinais futuros:
 - qualidade/reputação;
 - recência;
 - diversidade;
-- segurança/moderação.
+- segurança/moderação;
 
 O ranking fica em `packages/domain/feed`, nunca dentro de componente React.
 
@@ -249,6 +269,7 @@ Explorar concentra:
 - busca global;
 - pessoas;
 - comunidades;
+- pesquisas;
 - conteúdos;
 - recomendações;
 - tendências;
