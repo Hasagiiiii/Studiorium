@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "rebuild/lorion-v4-clean": false,
+      "ci/lorion-v4-verify": false
+    }
+  },
   "functions": {
     "api/index.js": { "maxDuration": 20 }
   },
