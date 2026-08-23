@@ -14,12 +14,14 @@ import { ExplorePage } from '../features/discovery/pages/ExplorePage.js';
 import { BookPage } from '../features/library/pages/BookPage.js';
 import { LibraryPage } from '../features/library/pages/LibraryPage.js';
 import { NewsArticlePage } from '../features/news/pages/NewsArticlePage.js';
+import { NewsWorkspacePage } from '../features/news/pages/NewsWorkspacePage.js';
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage.js';
 import { PostDetailPage } from '../features/posts/pages/PostDetailPage.js';
 import { ProfilePage } from '../features/profiles/pages/ProfilePage.js';
 import { ProjectPage } from '../features/projects/pages/ProjectPage.js';
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage.js';
 import { ResearchPage } from '../features/research/pages/ResearchPage.js';
+import { ResearchWorkspacePage } from '../features/research/pages/ResearchWorkspacePage.js';
 import { HomePage } from '../features/social/pages/HomePage.js';
 import { NotFoundPage } from '../features/system/pages/NotFoundPage.js';
 import { AppShell } from './shell/AppShell.js';
@@ -49,9 +51,11 @@ export function App() {
         <Route path="/publicacoes/:id" element={<PostDetailPage />} />
         <Route path="/biblioteca" element={<LibraryPage />} />
         <Route path="/livros/:id" element={<BookPage />} />
+        <Route path="/pesquisas/gerenciar" element={<ResearchWorkspacePage />} />
         <Route path="/pesquisas/:slug" element={<ResearchPage />} />
         <Route path="/projetos" element={<ProjectsPage />} />
         <Route path="/projetos/:id" element={<ProjectPage />} />
+        <Route path="/noticias/gerenciar" element={<NewsWorkspacePage />} />
         <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/perfil/:username" element={<ProfilePage />} />
         <Route path="/conta/seguranca" element={<AccountSecurityPage />} />
