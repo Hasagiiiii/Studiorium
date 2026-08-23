@@ -1,5 +1,6 @@
 import {
   createNotification,
+  findProfileByUsername,
   findPublicProfile,
   followCounts,
   followUser,
@@ -40,16 +41,19 @@ export async function myGraph(request: ApiRequest): Promise<SocialGraph> {
 }
 
 export async function profileSocial(request: ApiRequest, username: string): Promise<FollowSummary> {
-  const profile = await findPublicProfile(username);
-  if (!profile) throw notFound('Perfil não encontrado.');
   const viewer = await sessionUser(request);
+  const profile = await findProfileByUsername(username);
+  if (!profile || (!profile.isPublic && viewer?.id !== profile.userId)) {
+    throw notFound('Perfil não encontrado.');
+  }
+
   const counts = await followCounts(profile.userId);
   const following = viewer ? await isFollowing(viewer.id, profile.userId) : false;
 
   return followSummarySchema.parse({
     ...counts,
     isFollowing: following,
-    canFollow: Boolean(viewer && viewer.id !== profile.userId),
+    canFollow: Boolean(viewer && viewer.id !== profile.userId && profile.isPublic),
   });
 }
 
