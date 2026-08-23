@@ -28,6 +28,10 @@ function mapPublication(row: Record<string, unknown>): Publication {
   });
 }
 
+function mapPublications(rows: unknown[]): Publication[] {
+  return rows.map((row) => mapPublication(row as Record<string, unknown>));
+}
+
 export async function listPublishedResearch(): Promise<Publication[]> {
   const result = await database()
     .from('publications')
@@ -38,5 +42,17 @@ export async function listPublishedResearch(): Promise<Publication[]> {
     .order('boosts', { ascending: false })
     .order('created_at', { ascending: false });
 
-  return queryList(result).map((row) => mapPublication(row as Record<string, unknown>));
+  return mapPublications(queryList(result));
+}
+
+export async function listPublishedResearchByOwnerId(ownerId: string): Promise<Publication[]> {
+  const result = await database()
+    .from('publications')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .eq('status', 'published')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  return mapPublications(queryList(result));
 }
