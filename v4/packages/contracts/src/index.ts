@@ -1,6 +1,5 @@
 export * from './bootstrap/schema.js';
 export * from './communities/schema.js';
-export * from './creation/schema.js';
 export * from './discussions/schema.js';
 export * from './library/schema.js';
 export * from './news/schema.js';
@@ -8,4 +7,3 @@ export * from './profiles/schema.js';
 export * from './projects/schema.js';
 export * from './research/schema.js';
 export * from './social/schema.js';
-export * from './tech/schema.js';
