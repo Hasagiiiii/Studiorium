@@ -1,9 +1,18 @@
 import {
   adminDashboardSchema,
   adminMutationResultSchema,
+  newsArticleSchema,
+  newsContributorSchema,
+  publicationSchema,
   verificationDecisionResultSchema,
   verificationRequestSchema,
   type AdminDashboard,
+  type NewsArticle,
+  type NewsContributor,
+  type NewsContributorDecisionInput,
+  type NewsEditorialDecisionInput,
+  type Publication,
+  type PublicationReviewInput,
   type ReportDecisionInput,
   type RoleMutationInput,
   type SubmitVerificationInput,
@@ -40,6 +49,30 @@ export class AdminService {
     return this.client.request(
       `/api/v4/admin/reports/${encodeURIComponent(reportId)}`,
       adminMutationResultSchema,
+      { method: 'POST', body: input },
+    );
+  }
+
+  reviewResearch(publicationId: string, input: PublicationReviewInput): Promise<Publication> {
+    return this.client.request(
+      `/api/v4/admin/research/${encodeURIComponent(publicationId)}`,
+      publicationSchema,
+      { method: 'POST', body: input },
+    );
+  }
+
+  reviewNewsContributor(userId: string, input: NewsContributorDecisionInput): Promise<NewsContributor> {
+    return this.client.request(
+      `/api/v4/admin/news/contributors/${encodeURIComponent(userId)}`,
+      newsContributorSchema,
+      { method: 'POST', body: input },
+    );
+  }
+
+  reviewNewsArticle(articleId: string, input: NewsEditorialDecisionInput): Promise<NewsArticle> {
+    return this.client.request(
+      `/api/v4/admin/news/articles/${encodeURIComponent(articleId)}`,
+      newsArticleSchema,
       { method: 'POST', body: input },
     );
   }
