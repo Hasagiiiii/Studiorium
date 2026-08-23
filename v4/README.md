@@ -57,6 +57,19 @@ v4/
 
 Busca vive em Explorar. Criar é uma ação. Notícias são conteúdo. Tecnologia, jogos, hardware, carros, motos e assuntos semelhantes são categorias de comunidades, não hubs paralelos.
 
+## Interação e motion
+
+A fundação de interação usa `motion/react` somente onde o movimento explica estado ou contexto. Já fazem parte da v4:
+
+- skeleton shimmer com fallback para `prefers-reduced-motion`;
+- carregamento progressivo do feed com `IntersectionObserver` e botão manual de fallback;
+- pilha de toasts para feedback de ações;
+- botão `+` com resposta de estado;
+- launcher de criação como painel no desktop e sheet arrastável no mobile;
+- header móvel que se recolhe ao descer e reaparece ao subir ou receber foco.
+
+Esses comportamentos são componentes da própria v4 e não reutilizam código dos exemplos usados como referência.
+
 ## Regra de entrega
 
 A v4 só registra e exibe um fluxo quando ele funciona de ponta a ponta. Funcionalidades futuras permanecem fora das rotas e dos controles ativos até possuírem contrato, API, autorização quando necessária, interface, estados de carregamento/erro/vazio e validação automatizada.
