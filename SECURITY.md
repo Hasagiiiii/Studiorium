@@ -39,3 +39,7 @@ Se uma credencial real chegar a um repositório público, considere-a comprometi
 ## Banco de dados
 
 A chave secreta do Supabase é exclusiva do backend. O navegador não deve recebê-la. Alterações de permissões, RLS ou funções privilegiadas precisam de revisão antes da produção.
+
+Na arquitetura v4, o cliente não consulta tabelas do Supabase diretamente. O pacote `@lorion/database` existe apenas no backend e usa a credencial de Service Role. Por isso, tabelas com RLS habilitado e sem policies públicas representam uma postura intencional de negação por padrão para acessos `anon` e `authenticated`; autorização e regras de negócio permanecem na API do Lorion. Uma policy pública só deve ser criada se o produto adotar deliberadamente acesso direto do cliente a uma tabela específica.
+
+Avisos de índices marcados apenas como `unused_index` não devem motivar remoção automática em bancos novos ou com pouco tráfego. Uso real e planos de consulta precisam ser observados antes de eliminar índices.
