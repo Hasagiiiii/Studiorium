@@ -32,20 +32,29 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
   ]);
 
   const communities = queryList(communitiesResult);
-  const memberships = queryList(membershipsResult) as MembershipRow[];
+  const activeMemberships = queryList(membershipsResult) as MembershipRow[];
+  const viewerMemberships = viewerId
+    ? (queryList(
+        await database()
+          .from('community_members')
+          .select('community_id,user_id,role,status,moderation_status')
+          .eq('user_id', viewerId),
+      ) as MembershipRow[])
+    : [];
   const countByCommunity = new Map<string, number>();
   const viewerMembership = new Map<string, MembershipRow>();
 
-  memberships.forEach((membership) => {
+  activeMemberships.forEach((membership) => {
     if (membership.moderation_status !== 'removed') {
       countByCommunity.set(
         membership.community_id,
         (countByCommunity.get(membership.community_id) || 0) + 1,
       );
     }
-    if (viewerId && membership.user_id === viewerId) {
-      viewerMembership.set(membership.community_id, membership);
-    }
+  });
+
+  viewerMemberships.forEach((membership) => {
+    viewerMembership.set(membership.community_id, membership);
   });
 
   return communities
@@ -71,6 +80,7 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
         rules: Array.isArray(row.rules) ? row.rules : [],
         memberCount: countByCommunity.get(id) || 0,
         joined: isParticipating(membership),
+        membershipStatus: membership?.status || null,
         role: membership?.role || null,
         memberModerationStatus: membership?.moderation_status || null,
       });
