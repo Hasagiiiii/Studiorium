@@ -86,7 +86,7 @@ export async function setLike(
 
   if (liked && mutation.changed && access.authorId !== user.id) {
     const actor = await publicSessionUser(request);
-    void notifySafely({
+    await notifySafely({
       id: entityId('ntf'),
       userId: access.authorId,
       type: 'like',
@@ -143,7 +143,7 @@ export async function createComment(
   const notificationTarget = parent?.authorId || access.authorId;
   if (notificationTarget !== user.id) {
     const actor = await publicSessionUser(request);
-    void notifySafely({
+    await notifySafely({
       id: entityId('ntf'),
       userId: notificationTarget,
       type: parent ? 'reply' : 'comment',
