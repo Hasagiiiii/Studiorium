@@ -17,19 +17,25 @@ const TYPES: SearchEntry['type'][] = [
 export function ExplorePage() {
   const { data } = useAppState();
   const [params, setParams] = useSearchParams();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const query = params.get('q')?.trim() || '';
   const requestedType = params.get('tipo') || '';
   const selectedType = TYPES.includes(requestedType as SearchEntry['type'])
     ? (requestedType as SearchEntry['type'])
     : null;
   const [value, setValue] = useState(query);
-  const searchRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => setValue(query), [query]);
 
   useEffect(() => {
-    if (params.get('foco') === 'busca') searchRef.current?.focus();
-  }, [params]);
+    setValue(query);
+  }, [query]);
+
+  useEffect(() => {
+    if (params.get('foco') !== 'busca') return;
+    inputRef.current?.focus({ preventScroll: false });
+    const next = new URLSearchParams(params);
+    next.delete('foco');
+    setParams(next, { replace: true });
+  }, [params, setParams]);
 
   const entries = useMemo(() => (data ? buildSearchIndex(data) : []), [data]);
   const counts = useMemo(
@@ -51,8 +57,8 @@ export function ExplorePage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const next = new URLSearchParams(params);
-    const nextQuery = value.trim();
     next.delete('foco');
+    const nextQuery = value.trim();
     if (nextQuery) next.set('q', nextQuery);
     else next.delete('q');
     setParams(next);
@@ -73,7 +79,7 @@ export function ExplorePage() {
     >
       <form className="global-search" onSubmit={submit} role="search">
         <input
-          ref={searchRef}
+          ref={inputRef}
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
@@ -112,17 +118,24 @@ export function ExplorePage() {
               ? `itens em ${selectedType}`
               : 'destaques para explorar'}
         </header>
-        <div className="resource-grid">
-          {visibleEntries.map((entry) => (
-            <article key={entry.id} className="resource-card search-result-card">
-              <span className="eyebrow">{entry.type}</span>
-              <h2>
-                <Link to={entry.href}>{entry.title}</Link>
-              </h2>
-              <p>{entry.description}</p>
-            </article>
-          ))}
-        </div>
+        {visibleEntries.length ? (
+          <div className="resource-grid">
+            {visibleEntries.map((entry) => (
+              <article key={entry.id} className="resource-card search-result-card">
+                <span className="eyebrow">{entry.type}</span>
+                <h2>
+                  <Link to={entry.href}>{entry.title}</Link>
+                </h2>
+                <p>{entry.description}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h2>Nenhum resultado encontrado.</h2>
+            <p>Tente outro termo ou remova o filtro atual.</p>
+          </div>
+        )}
       </section>
     </FeaturePage>
   );
