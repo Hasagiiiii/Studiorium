@@ -1,5 +1,6 @@
 export * from './core/client.js';
 export * from './repositories/auth/session.js';
+export * from './repositories/auth/write.js';
 export * from './repositories/communities/read.js';
 export * from './repositories/discussions/read.js';
 export * from './repositories/library/read.js';
