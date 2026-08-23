@@ -115,7 +115,11 @@ export async function createComment(
   const rateKey = `content-comment:${user.id}`;
   await assertAuthRateLimitAllowed(rateKey);
   if (await recordAuthRateLimitAttempt(rateKey, COMMENT_POLICY)) {
-    throw new HttpError(429, 'Muitos comentários em pouco tempo. Tente novamente mais tarde.', 'RATE_LIMITED');
+    throw new HttpError(
+      429,
+      'Muitos comentários em pouco tempo. Tente novamente mais tarde.',
+      'RATE_LIMITED',
+    );
   }
 
   const parent = parsed.data.parentId
@@ -165,7 +169,7 @@ export async function updateComment(
 
   const parsed = updateCommentInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('O comentário precisa ter entre 1 e 2000 caracteres.');
-  if (!(await updateOwnContentComment(commentId, user.id, parsed.data.body))) {
+  if (!(await updateOwnContentComment(id, commentId, user.id, parsed.data.body))) {
     throw notFound('Comentário não encontrado ou você não pode editá-lo.');
   }
 
@@ -192,7 +196,7 @@ export async function deleteComment(
   if (!current || current.contentId !== id || current.authorId !== user.id) {
     throw notFound('Comentário não encontrado ou você não pode excluí-lo.');
   }
-  if (!(await deleteOwnContentComment(commentId, user.id))) {
+  if (!(await deleteOwnContentComment(id, commentId, user.id))) {
     throw notFound('Comentário não encontrado ou você não pode excluí-lo.');
   }
 
