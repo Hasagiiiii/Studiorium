@@ -5,6 +5,7 @@
       "*": false,
       "main": true,
       "rebuild/lorion-v4-clean": true,
+      "feat/lorion-social-core": true,
       "ci/lorion-v4-verify": false
     }
   },
