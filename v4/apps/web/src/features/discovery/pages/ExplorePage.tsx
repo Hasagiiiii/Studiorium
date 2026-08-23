@@ -8,6 +8,7 @@ const TYPES: SearchEntry['type'][] = [
   'Pessoa',
   'Comunidade',
   'Livro',
+  'Publicação',
   'Pesquisa',
   'Projeto',
   'Discussão',
@@ -75,7 +76,7 @@ export function ExplorePage() {
     <FeaturePage
       eyebrow="Explorar"
       title="Descubra pessoas e conhecimento"
-      description="Busca e descoberta vivem no mesmo lugar. Pessoas, discussões e notícias são tipos de resultado, não abas paralelas."
+      description="Busca e descoberta vivem no mesmo lugar. Pessoas, publicações, discussões e notícias são tipos de resultado, não abas paralelas."
     >
       <form className="global-search" onSubmit={submit} role="search">
         <input
@@ -83,7 +84,7 @@ export function ExplorePage() {
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="Pesquisar pessoas, comunidades, livros, pesquisas, projetos, discussões e notícias…"
+          placeholder="Pesquisar pessoas, comunidades, livros, publicações, pesquisas, projetos e discussões…"
           aria-label="Pesquisar no Lorion"
         />
         <button type="submit" className="button primary">
