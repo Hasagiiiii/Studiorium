@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 function destination(entry: FeedEntry): string {
   if (entry.type === 'publication') return `/pesquisas/${encodeURIComponent(entry.item.slug)}`;
-  if (entry.type === 'discussion') return `/discussoes/${encodeURIComponent(entry.item.id)}`;
-  if (entry.type === 'tech') return `/oficina/${encodeURIComponent(entry.item.slug)}`;
+  if (entry.type === 'discussion') return '/comunidades';
+  if (entry.type === 'tech') return '/comunidades';
   if (entry.type === 'news') return `/noticias/${encodeURIComponent(entry.item.slug)}`;
   return `/projetos/${encodeURIComponent(entry.item.id)}`;
 }
@@ -12,7 +12,7 @@ function destination(entry: FeedEntry): string {
 function label(entry: FeedEntry): string {
   if (entry.type === 'publication') return 'Pesquisa';
   if (entry.type === 'discussion') return 'Discussão';
-  if (entry.type === 'tech') return 'Oficina';
+  if (entry.type === 'tech') return 'Tutorial da comunidade';
   if (entry.type === 'news') return 'Notícia';
   return 'Projeto';
 }
