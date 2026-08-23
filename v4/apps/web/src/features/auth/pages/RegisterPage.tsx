@@ -1,18 +1,22 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { reload } = useAppState();
+  const { data, reload } = useAppState();
+  const { pushToast } = useToast();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  if (data?.user) return <Navigate to="/" replace />;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,10 +31,13 @@ export function RegisterPage() {
         birthYear: Number(birthYear),
       });
       await reload();
-      navigate('/');
+      pushToast({ message: 'Conta criada com sucesso.', tone: 'success' });
+      navigate('/', { replace: true });
     } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Não foi possível criar a conta.';
       setStatus('error');
-      setError(cause instanceof Error ? cause.message : 'Não foi possível criar a conta.');
+      setError(message);
+      pushToast({ message, tone: 'error' });
     }
   }
 
