@@ -52,12 +52,14 @@ export function ProfilePage() {
     );
   }
 
+  const profileUsername = profile.username;
+
   async function toggleFollow() {
     if (social.status !== 'ready' || !social.value.canFollow) return;
     try {
       const result = social.value.isFollowing
-        ? await services.social.unfollow(profile.username)
-        : await services.social.follow(profile.username);
+        ? await services.social.unfollow(profileUsername)
+        : await services.social.follow(profileUsername);
       setSocial({
         status: 'ready',
         error: null,
