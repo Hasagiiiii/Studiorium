@@ -3,6 +3,7 @@ import {
   assertLoginAllowed,
   clearAuthRateLimit,
   clearLoginFailures,
+  completeAuthenticatedPasswordChange,
   completePasswordReset,
   createAccount,
   createPasswordResetToken,
@@ -12,6 +13,7 @@ import {
   deletePasswordResetToken,
   deleteSessionByHash,
   findAccountByEmail,
+  findAccountSecurityById,
   loadSiteSettings,
   recordAuthRateLimitAttempt,
   recordLoginFailure,
@@ -19,6 +21,7 @@ import {
   usernameExists,
 } from '@lorion/database';
 import type { AuthUserResponse, OkResponse } from '@lorion/contracts';
+import { requireSessionUser } from '../../auth/session.js';
 import type { ApiRequest, ApiResponse } from '../../core/http/types.js';
 import { readJson } from '../../core/http/body.js';
 import { parseCookies } from '../../core/http/cookies.js';
@@ -48,6 +51,13 @@ const PASSWORD_RESET_REQUEST_POLICY = {
 const PASSWORD_RESET_POLICY = {
   scope: 'password-reset',
   maxAttempts: 8,
+  windowMs: 15 * 60 * 1000,
+  blockMs: 15 * 60 * 1000,
+};
+
+const PASSWORD_CHANGE_POLICY = {
+  scope: 'password-change',
+  maxAttempts: 5,
   windowMs: 15 * 60 * 1000,
   blockMs: 15 * 60 * 1000,
 };
@@ -156,6 +166,45 @@ export async function register(
   return {
     user: await toPublicUser({ id: userId, email, role: 'user', status: 'active' }),
   };
+}
+
+export async function changePassword(
+  request: ApiRequest,
+  response: ApiResponse,
+): Promise<OkResponse> {
+  const user = await requireSessionUser(request);
+  const body = await readJson(request);
+  const currentPassword = String(body.currentPassword || '');
+  const newPassword = String(body.newPassword || '');
+  const rateKey = `password-change:${hashSessionToken(user.id)}`;
+
+  await assertAuthRateLimitAllowed(rateKey);
+
+  if (!currentPassword) throw badRequest('Informe a senha atual.');
+  if (newPassword.length < 12 || newPassword.length > 128)
+    throw badRequest('A nova senha precisa ter entre 12 e 128 caracteres.');
+
+  const account = await findAccountSecurityById(user.id);
+  if (!account || !verifyPassword(currentPassword, account.password_hash)) {
+    const blocked = await recordAuthRateLimitAttempt(rateKey, PASSWORD_CHANGE_POLICY);
+    throw new HttpError(
+      blocked ? 429 : 401,
+      blocked
+        ? 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
+        : 'A senha atual está incorreta.',
+      blocked ? 'RATE_LIMITED' : 'INVALID_CURRENT_PASSWORD',
+    );
+  }
+
+  if (verifyPassword(newPassword, account.password_hash))
+    throw badRequest('Escolha uma senha diferente da atual.');
+
+  const completed = await completeAuthenticatedPasswordChange(user.id, hashPassword(newPassword));
+  if (!completed) throw forbidden('Não foi possível alterar a senha desta conta.');
+
+  await clearAuthRateLimit(rateKey);
+  await openSession(user.id, response);
+  return { ok: true };
 }
 
 export async function requestPasswordReset(request: ApiRequest): Promise<OkResponse> {
