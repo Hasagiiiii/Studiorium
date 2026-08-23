@@ -1,12 +1,11 @@
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAppState } from '../../../app/state/useAppState.js';
 import { FeedCard } from '../components/FeedCard.js';
 import { useFeed } from '../state/useFeed.js';
-import { useAppState } from '../../../app/state/useAppState.js';
 
 const tabs = [
   ['for-you', 'Para você'],
   ['following', 'Seguindo'],
-  ['discussions', 'Conversas'],
   ['trending', 'Em alta'],
   ['recent', 'Recentes'],
 ] as const;
@@ -52,7 +51,9 @@ export function HomePage() {
                 ? 'Siga pessoas para montar sua timeline.'
                 : 'A comunidade ainda não publicou conteúdo para este filtro.'}
             </p>
-            {mode === 'following' ? <Link to="/pessoas">Encontrar pessoas</Link> : null}
+            {mode === 'following' ? (
+              <Link to="/explorar?tipo=Pessoa">Encontrar pessoas</Link>
+            ) : null}
           </div>
         )}
       </section>
