@@ -74,4 +74,4 @@ Esses comportamentos são componentes da própria v4 e não reutilizam código d
 
 A v4 só registra e exibe um fluxo quando ele funciona de ponta a ponta. Funcionalidades futuras permanecem fora das rotas e dos controles ativos até possuírem contrato, API, autorização quando necessária, interface, estados de carregamento/erro/vazio e validação automatizada.
 
-A validação oficial usa Node 24 e executa typecheck, testes e build real do frontend.
+A validação oficial usa Node 24 e executa typecheck, testes e build real do frontend. O deploy também executa um smoke gate que confirma os artefatos gerados, as variáveis server-side do Supabase e o acesso às tabelas essenciais antes de a Vercel aceitar o preview.
