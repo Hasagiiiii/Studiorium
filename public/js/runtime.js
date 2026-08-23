@@ -12,6 +12,21 @@ export const state = {
   social: { followingIds: [] },
 };
 
+const BOOT_ARRAY_FIELDS = [
+  'templates',
+  'publications',
+  'codeProjects',
+  'news',
+  'customTemplates',
+  'books',
+  'bookReviews',
+  'communityProjects',
+  'discussions',
+  'profiles',
+  'techResources',
+  'communities',
+];
+
 export const E = (v = '') =>
   String(v).replace(
     /[&<>'"]/g,
@@ -59,6 +74,26 @@ function canRetry(method, status, attempt, maxAttempts) {
   return status === 0 || RETRYABLE_GET_STATUSES.has(status);
 }
 
+export function normalizeBootstrapPayload(payload) {
+  const source = payload && typeof payload === 'object' && !Array.isArray(payload) ? payload : {};
+  const normalized = { ...source };
+
+  BOOT_ARRAY_FIELDS.forEach((field) => {
+    normalized[field] = Array.isArray(source[field]) ? source[field] : [];
+  });
+
+  normalized.settings =
+    source.settings && typeof source.settings === 'object' && !Array.isArray(source.settings)
+      ? source.settings
+      : {};
+  normalized.user =
+    source.user && typeof source.user === 'object' && !Array.isArray(source.user)
+      ? source.user
+      : null;
+
+  return normalized;
+}
+
 export async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
   const method = String(options.method || 'GET').toUpperCase();
@@ -101,7 +136,7 @@ export async function api(path, options = {}) {
   throw lastError || new Error('Não foi possível concluir a ação.');
 }
 export async function bootstrap() {
-  state.boot = await api('/api/bootstrap');
+  state.boot = normalizeBootstrapPayload(await api('/api/bootstrap'));
   state.me = state.boot.user;
   if (state.me) {
     const [notificationsResult, socialResult] = await Promise.allSettled([
@@ -123,7 +158,7 @@ export async function bootstrap() {
 }
 export async function loadNotifications() {
   const data = await api('/api/notifications');
-  state.notifications = data.notifications || [];
+  state.notifications = Array.isArray(data.notifications) ? data.notifications : [];
   state.unreadNotificationCount = Number(data.unreadCount || 0);
   return data;
 }
