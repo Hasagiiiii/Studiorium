@@ -42,6 +42,18 @@ import {
 } from './features/library/handler.js';
 import { createReport, setProfileSafetyControl } from './features/moderation/handler.js';
 import {
+  applyNewsContributor,
+  createNews,
+  deleteNews,
+  newsWorkspace,
+  purgeDeletedNews,
+  restoreDeletedNews,
+  reviewNewsArticle,
+  reviewNewsContributor,
+  submitNews,
+  updateNews,
+} from './features/news/handler.js';
+import {
   notifications,
   readAllNotifications,
   readNotification,
@@ -64,6 +76,16 @@ import {
   restoreUserProject,
   updateUserProject,
 } from './features/projects/handler.js';
+import {
+  createResearch,
+  decideResearchReview,
+  deleteResearch,
+  purgeDeletedResearch,
+  researchWorkspace,
+  restoreDeletedResearch,
+  submitResearch,
+  updateResearch,
+} from './features/research/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
 import { decideVerification, submitVerification } from './features/verification/handler.js';
 
@@ -239,6 +261,61 @@ async function route(request: ApiRequest, response: ApiResponse) {
     return json(response, 200, await reviewBook(request, bookReviewMatch[1] || ''));
   }
 
+  if (method === 'GET' && path === '/api/v4/research') {
+    return json(response, 200, await researchWorkspace(request));
+  }
+  if (method === 'POST' && path === '/api/v4/research') {
+    return json(response, 201, await createResearch(request));
+  }
+  const researchSubmitMatch = path.match(/^\/api\/v4\/research\/([^/]+)\/submit$/);
+  if (researchSubmitMatch && method === 'POST') {
+    return json(response, 200, await submitResearch(request, researchSubmitMatch[1] || ''));
+  }
+  const researchRestoreMatch = path.match(/^\/api\/v4\/research\/([^/]+)\/restore$/);
+  if (researchRestoreMatch && method === 'POST') {
+    return json(response, 200, await restoreDeletedResearch(request, researchRestoreMatch[1] || ''));
+  }
+  const researchPurgeMatch = path.match(/^\/api\/v4\/research\/([^/]+)\/purge$/);
+  if (researchPurgeMatch && method === 'DELETE') {
+    return json(response, 200, await purgeDeletedResearch(request, researchPurgeMatch[1] || ''));
+  }
+  const researchItemMatch = path.match(/^\/api\/v4\/research\/([^/]+)$/);
+  if (researchItemMatch && method === 'PATCH') {
+    return json(response, 200, await updateResearch(request, researchItemMatch[1] || ''));
+  }
+  if (researchItemMatch && method === 'DELETE') {
+    return json(response, 200, await deleteResearch(request, researchItemMatch[1] || ''));
+  }
+
+  if (method === 'GET' && path === '/api/v4/news/workspace') {
+    return json(response, 200, await newsWorkspace(request));
+  }
+  if (method === 'POST' && path === '/api/v4/news/contributor') {
+    return json(response, 200, await applyNewsContributor(request));
+  }
+  if (method === 'POST' && path === '/api/v4/news') {
+    return json(response, 201, await createNews(request));
+  }
+  const newsSubmitMatch = path.match(/^\/api\/v4\/news\/([^/]+)\/submit$/);
+  if (newsSubmitMatch && method === 'POST') {
+    return json(response, 200, await submitNews(request, newsSubmitMatch[1] || ''));
+  }
+  const newsRestoreMatch = path.match(/^\/api\/v4\/news\/([^/]+)\/restore$/);
+  if (newsRestoreMatch && method === 'POST') {
+    return json(response, 200, await restoreDeletedNews(request, newsRestoreMatch[1] || ''));
+  }
+  const newsPurgeMatch = path.match(/^\/api\/v4\/news\/([^/]+)\/purge$/);
+  if (newsPurgeMatch && method === 'DELETE') {
+    return json(response, 200, await purgeDeletedNews(request, newsPurgeMatch[1] || ''));
+  }
+  const newsItemMatch = path.match(/^\/api\/v4\/news\/([^/]+)$/);
+  if (newsItemMatch && method === 'PATCH') {
+    return json(response, 200, await updateNews(request, newsItemMatch[1] || ''));
+  }
+  if (newsItemMatch && method === 'DELETE') {
+    return json(response, 200, await deleteNews(request, newsItemMatch[1] || ''));
+  }
+
   if (method === 'POST' && path === '/api/v4/projects') {
     return json(response, 201, await createUserProject(request));
   }
@@ -371,6 +448,18 @@ async function route(request: ApiRequest, response: ApiResponse) {
   const adminVerificationMatch = path.match(/^\/api\/v4\/admin\/verification\/([^/]+)$/);
   if (adminVerificationMatch && method === 'POST') {
     return json(response, 200, await decideVerification(request, adminVerificationMatch[1] || ''));
+  }
+  const adminResearchMatch = path.match(/^\/api\/v4\/admin\/research\/([^/]+)$/);
+  if (adminResearchMatch && method === 'POST') {
+    return json(response, 200, await decideResearchReview(request, adminResearchMatch[1] || ''));
+  }
+  const adminNewsContributorMatch = path.match(/^\/api\/v4\/admin\/news\/contributors\/([^/]+)$/);
+  if (adminNewsContributorMatch && method === 'POST') {
+    return json(response, 200, await reviewNewsContributor(request, adminNewsContributorMatch[1] || ''));
+  }
+  const adminNewsArticleMatch = path.match(/^\/api\/v4\/admin\/news\/articles\/([^/]+)$/);
+  if (adminNewsArticleMatch && method === 'POST') {
+    return json(response, 200, await reviewNewsArticle(request, adminNewsArticleMatch[1] || ''));
   }
   const adminUserStatusMatch = path.match(/^\/api\/v4\/admin\/users\/([^/]+)\/status$/);
   if (adminUserStatusMatch && method === 'POST') {
