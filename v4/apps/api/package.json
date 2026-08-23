@@ -1,0 +1,18 @@
+{
+  "name": "@lorion/api",
+  "version": "4.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lorion/contracts": "*",
+    "@lorion/database": "*",
+    "@lorion/domain": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
