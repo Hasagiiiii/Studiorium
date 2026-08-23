@@ -28,6 +28,13 @@ export class AuthService {
     });
   }
 
+  changePassword(currentPassword: string, newPassword: string): Promise<OkResponse> {
+    return this.client.request('/api/v4/auth/change-password', okResponseSchema, {
+      method: 'POST',
+      body: { currentPassword, newPassword },
+    });
+  }
+
   requestPasswordReset(email: string): Promise<OkResponse> {
     return this.client.request('/api/v4/auth/password-reset/request', okResponseSchema, {
       method: 'POST',
