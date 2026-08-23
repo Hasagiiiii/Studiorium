@@ -45,10 +45,14 @@ export function ResetPasswordPage() {
     try {
       await services.auth.resetPassword(token, password);
       await reload();
-      pushToast({ message: 'Senha redefinida. Entre novamente com a nova senha.', tone: 'success' });
+      pushToast({
+        message: 'Senha redefinida. Entre novamente com a nova senha.',
+        tone: 'success',
+      });
       navigate('/entrar', { replace: true });
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Não foi possível redefinir a senha.';
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível redefinir a senha.';
       setStatus('error');
       setError(message);
       pushToast({ message, tone: 'error' });
