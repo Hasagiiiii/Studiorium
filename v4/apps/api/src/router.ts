@@ -12,6 +12,10 @@ import {
   resetPassword,
 } from './features/auth/handler.js';
 import {
+  joinCommunity,
+  leaveCommunityMembership,
+} from './features/communities/handler.js';
+import {
   notifications,
   readAllNotifications,
   readNotification,
@@ -62,6 +66,22 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
+  }
+
+  const communityMembershipMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/membership$/);
+  if (communityMembershipMatch && method === 'POST') {
+    return json(
+      response,
+      200,
+      await joinCommunity(request, communityMembershipMatch[1] || ''),
+    );
+  }
+  if (communityMembershipMatch && method === 'DELETE') {
+    return json(
+      response,
+      200,
+      await leaveCommunityMembership(request, communityMembershipMatch[1] || ''),
+    );
   }
 
   if (method === 'POST' && path === '/api/v4/projects') {
