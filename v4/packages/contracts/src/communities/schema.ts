@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { optionalText } from '../common/fields.js';
 import { discussionSchema } from '../discussions/schema.js';
+import { socialPostSchema } from '../posts/schema.js';
 
 export const communityMembershipStatusSchema = z
   .enum(['active', 'left', 'pending', 'rejected'])
@@ -51,6 +52,7 @@ export const communityMemberSchema = z.object({
 
 export const communityHubSchema = z.object({
   members: z.array(communityMemberSchema).default([]),
+  posts: z.array(socialPostSchema).default([]),
   discussions: z.array(discussionSchema).default([]),
   canCreateDiscussion: z.boolean().default(false),
 });
