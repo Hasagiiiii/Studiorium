@@ -4,43 +4,46 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function ProjectsPage() {
   const { data } = useAppState();
-  const projects = data?.communityProjects ?? [];
-  const codeProjects = data?.codeProjects ?? [];
+  const me = data?.user;
 
   return (
     <FeaturePage
       eyebrow="Projetos"
-      title="Crie, documente e compartilhe"
-      description="Projetos acadêmicos, técnicos e experimentos de código em uma área única."
+      title="Seu espaço de criação"
+      description="Crie, edite e organize projetos sem misturar o workspace pessoal com a descoberta pública do Lorion."
     >
-      <div className="feature-actions">
-        <Link className="button primary" to="/criar">Criar projeto</Link>
-        <Link className="button secondary" to="/projetos/lab">Laboratório de código</Link>
-      </div>
-      <section className="resource-section">
-        <header><h2>Projetos da comunidade</h2></header>
-        <div className="resource-grid">
-          {projects.map((project) => (
-            <article key={project.id} className="resource-card project-card">
-              <span className="eyebrow">{project.type}</span>
-              <h3><Link to={`/projetos/${encodeURIComponent(project.id)}`}>{project.title}</Link></h3>
-              <p>{project.notes || 'Projeto compartilhado no Lorion.'}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="resource-section">
-        <header><h2>Projetos de código</h2></header>
-        <div className="resource-grid">
-          {codeProjects.map((project) => (
-            <article key={project.id} className="resource-card code-card">
-              <span className="eyebrow">Código</span>
-              <h3><Link to={`/projetos/lab/${encodeURIComponent(project.id)}`}>{project.title}</Link></h3>
-              <p>{project.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {me ? (
+        <>
+          <section className="project-workspace-actions">
+            <button className="button primary" type="button" data-create-project>
+              Novo projeto
+            </button>
+            <Link className="button secondary" to="/projetos/lab">
+              Laboratório de código
+            </Link>
+          </section>
+          <section className="resource-section">
+            <header>
+              <div>
+                <span className="eyebrow">Workspace</span>
+                <h2>Meus projetos</h2>
+              </div>
+            </header>
+            <div className="empty-state">
+              <p>
+                A lista pessoal será carregada pelo serviço de projetos do usuário. Projetos públicos
+                de outras pessoas aparecem em Explorar e nas comunidades relacionadas.
+              </p>
+            </div>
+          </section>
+        </>
+      ) : (
+        <section className="empty-state">
+          <h2>Entre para criar e organizar projetos</h2>
+          <p>A descoberta de projetos públicos continua disponível em Explorar.</p>
+          <Link className="button primary" to="/entrar">Entrar</Link>
+        </section>
+      )}
     </FeaturePage>
   );
 }
