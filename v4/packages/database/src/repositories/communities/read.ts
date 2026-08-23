@@ -1,4 +1,9 @@
-import { communitySchema, type Community } from '@lorion/contracts';
+import {
+  communitySchema,
+  profileCommunitySchema,
+  type Community,
+  type ProfileCommunity,
+} from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
@@ -85,4 +90,54 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
         memberModerationStatus: membership?.moderation_status || null,
       });
     });
+}
+
+export async function listProfileCommunities(
+  userId: string,
+  includeControlled = false,
+): Promise<ProfileCommunity[]> {
+  const memberships = queryList(
+    await database()
+      .from('community_members')
+      .select('community_id,user_id,role,status,moderation_status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .neq('moderation_status', 'removed'),
+  ) as MembershipRow[];
+
+  if (!memberships.length) return [];
+
+  let query = database()
+    .from('communities')
+    .select('id,slug,name,area,visibility,is_official,status,deleted_at')
+    .in(
+      'id',
+      memberships.map((membership) => membership.community_id),
+    )
+    .eq('status', 'active')
+    .is('deleted_at', null);
+
+  if (!includeControlled) query = query.eq('visibility', 'public');
+
+  const communities = queryList(await query);
+  const membershipByCommunity = new Map(
+    memberships.map((membership) => [membership.community_id, membership]),
+  );
+
+  return communities
+    .map((raw) => {
+      const row = raw as Record<string, unknown>;
+      const membership = membershipByCommunity.get(String(row.id));
+      if (!membership) return null;
+      return profileCommunitySchema.parse({
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        area: row.area,
+        role: membership.role,
+        official: row.is_official,
+      });
+    })
+    .filter((community): community is ProfileCommunity => Boolean(community))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 }
