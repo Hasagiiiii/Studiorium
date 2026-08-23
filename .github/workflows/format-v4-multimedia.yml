@@ -27,6 +27,34 @@ jobs:
       - name: Install root dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Fix composer type switch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('v4/apps/web/src/components/create/CreateLauncher.tsx')
+          source = path.read_text()
+          old = '''<button
+                  type="button"
+                  className="composer-back"
+                  onClick={() => chooseKind('text')}
+                  disabled={submitting}
+                >'''
+          new = '''<button
+                  type="button"
+                  className="composer-back"
+                  onClick={() => {
+                    setKind(null);
+                    setFile(null);
+                    setError(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  disabled={submitting}
+                >'''
+          if old not in source:
+              raise SystemExit('composer-back pattern not found')
+          path.write_text(source.replace(old, new, 1))
+          PY
+
       - name: Format changed v4 files
         run: |
           npx prettier --write \
@@ -40,7 +68,7 @@ jobs:
             v4/packages/api-client/src/features/social/service.ts \
             v4/packages/database/src/repositories/social/posts.ts
 
-      - name: Commit formatting
+      - name: Commit changes
         run: |
           if git diff --quiet; then
             exit 0
@@ -48,5 +76,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v4
-          git commit -m "style(v4): format multimedia implementation"
+          git commit -m "fix(v4): return composer to type selector"
           git push origin HEAD:feat/v4-multimedia-composer
