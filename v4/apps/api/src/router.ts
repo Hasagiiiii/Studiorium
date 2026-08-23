@@ -4,6 +4,7 @@ import { json, noContent } from './core/http/response.js';
 import { assertSameOrigin } from './middleware/origin.js';
 import { bootstrap } from './features/bootstrap/handler.js';
 import {
+  changePassword,
   login,
   logout,
   register,
@@ -49,6 +50,9 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/register') {
     return json(response, 201, await register(request, response));
+  }
+  if (method === 'POST' && path === '/api/v4/auth/change-password') {
+    return json(response, 200, await changePassword(request, response));
   }
   if (method === 'POST' && path === '/api/v4/auth/password-reset/request') {
     return json(response, 200, await requestPasswordReset(request));
