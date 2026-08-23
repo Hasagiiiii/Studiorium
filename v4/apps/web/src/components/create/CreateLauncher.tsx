@@ -170,6 +170,13 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
     if (nextKind === 'photo') setBody('');
   }
 
+  function returnToTypeSelector() {
+    setKind(null);
+    setFile(null);
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
   async function publish() {
     if (!kind || submitting) return;
     if (!data?.user) {
@@ -341,7 +348,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                 <button
                   type="button"
                   className="composer-back"
-                  onClick={() => chooseKind('text')}
+                  onClick={returnToTypeSelector}
                   disabled={submitting}
                 >
                   ← Trocar tipo
@@ -403,7 +410,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                   <button
                     type="button"
                     className="button secondary"
-                    onClick={() => setKind(null)}
+                    onClick={returnToTypeSelector}
                     disabled={submitting}
                   >
                     Cancelar
