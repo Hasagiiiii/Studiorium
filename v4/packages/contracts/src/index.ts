@@ -1,3 +1,4 @@
+export * from './admin/schema.js';
 export * from './auth/schema.js';
 export * from './bootstrap/schema.js';
 export * from './communities/schema.js';
