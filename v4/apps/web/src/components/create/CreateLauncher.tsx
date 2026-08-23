@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 type CreateLauncherProps = {
@@ -6,39 +8,73 @@ type CreateLauncherProps = {
 };
 
 export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
-  if (!open) return null;
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose();
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
 
   return (
-    <div className="create-launcher-layer" role="presentation" onMouseDown={onClose}>
-      <section
-        className="create-launcher"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="create-launcher-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <header>
-          <div>
-            <span className="eyebrow">Criar</span>
-            <h2 id="create-launcher-title">Comece algo novo</h2>
-          </div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Fechar">
-            ×
-          </button>
-        </header>
-        <div className="create-launcher-grid">
-          <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
-            <strong>Projeto</strong>
-            <span>
-              Crie um projeto real no seu workspace e escolha se ele será privado ou público.
-            </span>
-          </Link>
-        </div>
-        <p className="create-launcher-note">
-          Discussões, reviews, tutoriais e novas comunidades aparecerão aqui somente quando os
-          respectivos fluxos estiverem completos.
-        </p>
-      </section>
-    </div>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="create-launcher-layer"
+          role="presentation"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduceMotion ? 0.01 : 0.18 }}
+          onMouseDown={onClose}
+        >
+          <motion.section
+            className="create-launcher"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-launcher-title"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 56, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 42, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
+            drag={reduceMotion ? false : 'y'}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.18}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 110 || info.velocity.y > 700) onClose();
+            }}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="sheet-handle" aria-hidden="true" />
+            <header>
+              <div>
+                <span className="eyebrow">Criar</span>
+                <h2 id="create-launcher-title">Comece algo novo</h2>
+              </div>
+              <button type="button" className="icon-button" onClick={onClose} aria-label="Fechar">
+                ×
+              </button>
+            </header>
+            <div className="create-launcher-grid">
+              <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
+                <strong>Projeto</strong>
+                <span>Crie um projeto no seu workspace e escolha se ele será privado ou público.</span>
+              </Link>
+            </div>
+          </motion.section>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
