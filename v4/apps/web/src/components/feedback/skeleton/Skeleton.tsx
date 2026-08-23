@@ -6,13 +6,18 @@ type SkeletonBlockProps = {
 
 export function SkeletonBlock({ className = '' }: SkeletonBlockProps) {
   const reduceMotion = useReducedMotion();
+  const classes = `skeleton-block ${className}`.trim();
+
+  if (reduceMotion) {
+    return <span aria-hidden="true" className={classes} />;
+  }
 
   return (
     <motion.span
       aria-hidden="true"
-      className={`skeleton-block ${className}`.trim()}
-      animate={reduceMotion ? undefined : { backgroundPositionX: ['180%', '-180%'] }}
-      transition={reduceMotion ? undefined : { duration: 1.35, ease: 'linear', repeat: Infinity }}
+      className={classes}
+      animate={{ backgroundPositionX: ['180%', '-180%'] }}
+      transition={{ duration: 1.35, ease: 'linear', repeat: Infinity }}
     />
   );
 }
