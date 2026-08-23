@@ -36,7 +36,7 @@ export const bootstrapSchema = z.object({
   news: z.array(newsArticleSchema).default([]),
   books: z.array(bookSchema).default([]),
   bookReviews: z.array(bookReviewSchema).default([]),
-  communityProjects: z.array(projectSchema).default([]),
+  projects: z.array(projectSchema).default([]),
   discussions: z.array(discussionSchema).default([]),
   profiles: z.array(profileSchema).default([]),
   communities: z.array(communitySchema).default([]),
