@@ -13,6 +13,7 @@ export * from './repositories/news/read.js';
 export * from './repositories/notifications/read.js';
 export * from './repositories/notifications/write.js';
 export * from './repositories/profiles/read.js';
+export * from './repositories/profiles/write.js';
 export * from './repositories/projects/read.js';
 export * from './repositories/projects/write.js';
 export * from './repositories/research/read.js';
