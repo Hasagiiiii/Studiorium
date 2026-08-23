@@ -40,7 +40,8 @@ export function AccountSecurityPage() {
       setMessage('Senha alterada. As outras sessões da sua conta foram encerradas.');
       pushToast({ message: 'Senha alterada com segurança.', tone: 'success' });
     } catch (cause) {
-      const nextMessage = cause instanceof Error ? cause.message : 'Não foi possível alterar a senha.';
+      const nextMessage =
+        cause instanceof Error ? cause.message : 'Não foi possível alterar a senha.';
       setStatus('error');
       setMessage(nextMessage);
       pushToast({ message: nextMessage, tone: 'error' });
