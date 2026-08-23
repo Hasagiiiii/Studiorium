@@ -2,6 +2,12 @@ import type { ApiRequest, ApiResponse } from './core/http/types.js';
 import { HttpError, notFound } from './core/http/errors.js';
 import { json, noContent } from './core/http/response.js';
 import { assertSameOrigin } from './middleware/origin.js';
+import {
+  adminDashboard,
+  changeUserRole,
+  changeUserStatus,
+  reviewReport,
+} from './features/admin/handler.js';
 import { bootstrap } from './features/bootstrap/handler.js';
 import {
   changePassword,
@@ -28,14 +34,38 @@ import {
   updateComment,
 } from './features/interactions/handler.js';
 import {
+  bookDetail,
+  createBook,
+  removeBook,
+  reviewBook,
+  saveBook,
+} from './features/library/handler.js';
+import { createReport, setProfileSafetyControl } from './features/moderation/handler.js';
+import {
   notifications,
   readAllNotifications,
   readNotification,
 } from './features/notifications/handler.js';
 import { createPost } from './features/posts/handler.js';
-import { profileDetail, updateBookshelfPrivacy } from './features/profiles/handler.js';
-import { createUserProject } from './features/projects/handler.js';
+import {
+  profileDetail,
+  removeOwnProfileMedia,
+  serveProfileMedia,
+  updateBookshelfPrivacy,
+  updateOwnProfile,
+  uploadOwnProfileMedia,
+} from './features/profiles/handler.js';
+import {
+  createUserProject,
+  deleteUserProject,
+  projectDetail,
+  projectTrash,
+  purgeUserProject,
+  restoreUserProject,
+  updateUserProject,
+} from './features/projects/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
+import { decideVerification, submitVerification } from './features/verification/handler.js';
 
 function requestPath(request: ApiRequest): string {
   const host = request.headers.host || 'localhost';
@@ -190,8 +220,49 @@ async function route(request: ApiRequest, response: ApiResponse) {
     );
   }
 
+  if (method === 'POST' && path === '/api/v4/books') {
+    return json(response, 201, await createBook(request));
+  }
+  const bookDetailMatch = path.match(/^\/api\/v4\/books\/([^/]+)\/detail$/);
+  if (bookDetailMatch && method === 'GET') {
+    return json(response, 200, await bookDetail(request, bookDetailMatch[1] || ''));
+  }
+  const bookShelfMatch = path.match(/^\/api\/v4\/books\/([^/]+)\/shelf$/);
+  if (bookShelfMatch && method === 'PUT') {
+    return json(response, 200, await saveBook(request, bookShelfMatch[1] || ''));
+  }
+  if (bookShelfMatch && method === 'DELETE') {
+    return json(response, 200, await removeBook(request, bookShelfMatch[1] || ''));
+  }
+  const bookReviewMatch = path.match(/^\/api\/v4\/books\/([^/]+)\/review$/);
+  if (bookReviewMatch && method === 'PUT') {
+    return json(response, 200, await reviewBook(request, bookReviewMatch[1] || ''));
+  }
+
   if (method === 'POST' && path === '/api/v4/projects') {
     return json(response, 201, await createUserProject(request));
+  }
+  if (method === 'GET' && path === '/api/v4/projects/trash') {
+    return json(response, 200, await projectTrash(request));
+  }
+  const projectDetailMatch = path.match(/^\/api\/v4\/projects\/([^/]+)\/detail$/);
+  if (projectDetailMatch && method === 'GET') {
+    return json(response, 200, await projectDetail(request, projectDetailMatch[1] || ''));
+  }
+  const projectItemMatch = path.match(/^\/api\/v4\/projects\/([^/]+)$/);
+  if (projectItemMatch && method === 'PATCH') {
+    return json(response, 200, await updateUserProject(request, projectItemMatch[1] || ''));
+  }
+  if (projectItemMatch && method === 'DELETE') {
+    return json(response, 200, await deleteUserProject(request, projectItemMatch[1] || ''));
+  }
+  const projectRestoreMatch = path.match(/^\/api\/v4\/projects\/([^/]+)\/restore$/);
+  if (projectRestoreMatch && method === 'POST') {
+    return json(response, 200, await restoreUserProject(request, projectRestoreMatch[1] || ''));
+  }
+  const projectPurgeMatch = path.match(/^\/api\/v4\/projects\/([^/]+)\/purge$/);
+  if (projectPurgeMatch && method === 'DELETE') {
+    return json(response, 200, await purgeUserProject(request, projectPurgeMatch[1] || ''));
   }
 
   if (method === 'GET' && path === '/api/v4/notifications') {
@@ -209,10 +280,29 @@ async function route(request: ApiRequest, response: ApiResponse) {
     );
   }
 
+  if (method === 'PATCH' && path === '/api/v4/profiles/me') {
+    return json(response, 200, await updateOwnProfile(request));
+  }
   if (method === 'PATCH' && path === '/api/v4/profiles/me/bookshelf-privacy') {
     return json(response, 200, await updateBookshelfPrivacy(request));
   }
-
+  if (method === 'POST' && path === '/api/v4/profiles/me/media') {
+    return json(response, 200, await uploadOwnProfileMedia(request));
+  }
+  const ownProfileMediaMatch = path.match(/^\/api\/v4\/profiles\/me\/media\/(avatar|cover)$/);
+  if (ownProfileMediaMatch && method === 'DELETE') {
+    return json(response, 200, await removeOwnProfileMedia(request, ownProfileMediaMatch[1] || ''));
+  }
+  const profileMediaMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/media\/(avatar|cover)$/);
+  if (profileMediaMatch && method === 'GET') {
+    await serveProfileMedia(
+      request,
+      response,
+      profileMediaMatch[1] || '',
+      profileMediaMatch[2] || '',
+    );
+    return;
+  }
   const profileDetailMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/detail$/);
   if (profileDetailMatch && method === 'GET') {
     return json(response, 200, await profileDetail(request, profileDetailMatch[1] || ''));
@@ -247,6 +337,51 @@ async function route(request: ApiRequest, response: ApiResponse) {
       response,
       200,
       await setFollow(request, decodeURIComponent(followMatch[1] || ''), false),
+    );
+  }
+
+  const safetyMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/(block|mute)$/);
+  if (safetyMatch && (method === 'POST' || method === 'DELETE')) {
+    return json(
+      response,
+      200,
+      await setProfileSafetyControl(
+        request,
+        safetyMatch[1] || '',
+        safetyMatch[2] as 'block' | 'mute',
+        method === 'POST',
+      ),
+    );
+  }
+  if (method === 'POST' && path === '/api/v4/reports') {
+    return json(response, 201, await createReport(request));
+  }
+
+  if (method === 'POST' && path === '/api/v4/verification') {
+    return json(response, 201, await submitVerification(request));
+  }
+
+  if (method === 'GET' && path === '/api/v4/admin') {
+    return json(response, 200, await adminDashboard(request));
+  }
+  const adminReportMatch = path.match(/^\/api\/v4\/admin\/reports\/([^/]+)$/);
+  if (adminReportMatch && method === 'POST') {
+    return json(response, 200, await reviewReport(request, adminReportMatch[1] || ''));
+  }
+  const adminVerificationMatch = path.match(/^\/api\/v4\/admin\/verification\/([^/]+)$/);
+  if (adminVerificationMatch && method === 'POST') {
+    return json(response, 200, await decideVerification(request, adminVerificationMatch[1] || ''));
+  }
+  const adminUserStatusMatch = path.match(/^\/api\/v4\/admin\/users\/([^/]+)\/status$/);
+  if (adminUserStatusMatch && method === 'POST') {
+    return json(response, 200, await changeUserStatus(request, adminUserStatusMatch[1] || ''));
+  }
+  const adminUserRoleMatch = path.match(/^\/api\/v4\/admin\/users\/([^/]+)\/roles$/);
+  if (adminUserRoleMatch && (method === 'POST' || method === 'DELETE')) {
+    return json(
+      response,
+      200,
+      await changeUserRole(request, adminUserRoleMatch[1] || '', method === 'POST'),
     );
   }
 
