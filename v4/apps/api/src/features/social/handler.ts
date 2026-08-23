@@ -7,6 +7,7 @@ import {
   isFollowing,
   listFollowingIds,
   listPublicProjects,
+  listPublicSocialPosts,
   listPublishedDiscussions,
   listPublishedNews,
   listPublishedResearch,
@@ -29,6 +30,7 @@ import { entityId } from '../../core/security/token.js';
 import { publicSessionUser, requireSessionUser, sessionUser } from '../../auth/session.js';
 
 function contentOwnerId(entry: FeedResponse['feed'][number]): string | null {
+  if (entry.type === 'post') return entry.item.authorId;
   if (entry.type === 'publication') return entry.item.ownerId;
   if (entry.type === 'discussion') return entry.item.authorId;
   if (entry.type === 'news') return entry.item.contributorId;
@@ -101,13 +103,14 @@ export async function followingFeed(request: ApiRequest): Promise<FeedResponse> 
   const followingIds = new Set(await listFollowingIds(viewer.id));
   if (!followingIds.size) return feedResponseSchema.parse({ feed: [] });
 
-  const [publications, discussions, news, projects] = await Promise.all([
+  const [posts, publications, discussions, news, projects] = await Promise.all([
+    listPublicSocialPosts(),
     listPublishedResearch(),
     listPublishedDiscussions(),
     listPublishedNews(),
     listPublicProjects(),
   ]);
-  const entries = buildFeedFromSources({ publications, discussions, news, projects }).filter(
+  const entries = buildFeedFromSources({ posts, publications, discussions, news, projects }).filter(
     (entry) => {
       const ownerId = contentOwnerId(entry);
       return Boolean(ownerId && followingIds.has(ownerId));
