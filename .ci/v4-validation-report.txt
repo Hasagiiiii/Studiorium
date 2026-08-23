@@ -1,0 +1,105 @@
+source_sha=41ce12bce5d332184ceebaeaee6b55dfaffa78d7
+root_install=0
+secrets=0
+root_check=1
+
+[root_check]
+
+> studiorium-online@3.4.2 check
+> node scripts/check-project.js && prettier --check .
+
+OK — 42 módulos de servidor, 54 módulos de interface e 89 arquivos legíveis verificados.
+Checking formatting...
+[[33mwarn[39m] v4/apps/web/src/components/create/CreateLauncher.tsx
+[[33mwarn[39m] v4/apps/web/src/components/feedback/LoadingScreen.tsx
+[[33mwarn[39m] v4/apps/web/src/features/notifications/pages/NotificationsPage.tsx
+[[33mwarn[39m] v4/apps/web/src/features/profiles/pages/ProfilePage.tsx
+[[33mwarn[39m] v4/apps/web/src/features/social/components/FeedCard.tsx
+[[33mwarn[39m] v4/apps/web/src/features/social/pages/HomePage.tsx
+[[33mwarn[39m] v4/apps/web/src/styles/motion.css
+[[33mwarn[39m] Code style issues found in 7 files. Run Prettier with --write to fix.
+
+root_test=0
+v4_lock=0
+v4_install=0
+v4_typecheck=2
+
+[v4_typecheck]
+
+> lorion-v4@4.0.0-alpha.1 typecheck
+> npm run typecheck --workspaces --if-present
+
+
+> @lorion/api@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+
+> @lorion/web@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+src/app/shell/AppShell.tsx(82,12): error TS2375: Type '{ children: string; className: string; type: "button"; "aria-label": string; "aria-haspopup": "dialog"; "aria-expanded": boolean; animate: { rotate: number; }; whileTap: { scale: number; } | undefined; onClick: () => void; }' is not assignable to type 'Omit<HTMLMotionProps<"button">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'whileTap' are incompatible.
+    Type '{ scale: number; } | undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+      Type 'undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+src/app/shell/AppShell.tsx(123,10): error TS2375: Type '{ children: string; className: string; type: "button"; "aria-label": string; "aria-haspopup": "dialog"; "aria-expanded": boolean; animate: { rotate: number; scale: number; }; whileTap: { scale: number; } | undefined; onClick: () => void; }' is not assignable to type 'Omit<HTMLMotionProps<"button">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'whileTap' are incompatible.
+    Type '{ scale: number; } | undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+      Type 'undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+src/components/feedback/skeleton/Skeleton.tsx(11,6): error TS2375: Type '{ "aria-hidden": "true"; className: string; animate: { backgroundPositionX: string[]; } | undefined; transition: { duration: number; ease: "linear"; repeat: number; } | undefined; }' is not assignable to type 'Omit<HTMLMotionProps<"span">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'animate' are incompatible.
+    Type '{ backgroundPositionX: string[]; } | undefined' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls'.
+      Type 'undefined' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls'.
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 2
+npm error path /home/runner/work/Studiorium/Studiorium/v4/apps/web
+npm error workspace @lorion/web@4.0.0-alpha.1
+npm error location /home/runner/work/Studiorium/Studiorium/v4/apps/web
+npm error command failed
+npm error command sh -c tsc --noEmit
+
+
+> @lorion/api-client@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+
+> @lorion/contracts@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+
+> @lorion/database@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+
+> @lorion/domain@4.0.0-alpha.1 typecheck
+> tsc --noEmit
+
+
+v4_test=0
+v4_build=2
+
+[v4_build]
+
+> @lorion/web@4.0.0-alpha.1 build
+> tsc --noEmit && vite build
+
+src/app/shell/AppShell.tsx(82,12): error TS2375: Type '{ children: string; className: string; type: "button"; "aria-label": string; "aria-haspopup": "dialog"; "aria-expanded": boolean; animate: { rotate: number; }; whileTap: { scale: number; } | undefined; onClick: () => void; }' is not assignable to type 'Omit<HTMLMotionProps<"button">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'whileTap' are incompatible.
+    Type '{ scale: number; } | undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+      Type 'undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+src/app/shell/AppShell.tsx(123,10): error TS2375: Type '{ children: string; className: string; type: "button"; "aria-label": string; "aria-haspopup": "dialog"; "aria-expanded": boolean; animate: { rotate: number; scale: number; }; whileTap: { scale: number; } | undefined; onClick: () => void; }' is not assignable to type 'Omit<HTMLMotionProps<"button">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'whileTap' are incompatible.
+    Type '{ scale: number; } | undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+      Type 'undefined' is not assignable to type 'TargetAndTransition | VariantLabels'.
+src/components/feedback/skeleton/Skeleton.tsx(11,6): error TS2375: Type '{ "aria-hidden": "true"; className: string; animate: { backgroundPositionX: string[]; } | undefined; transition: { duration: number; ease: "linear"; repeat: number; } | undefined; }' is not assignable to type 'Omit<HTMLMotionProps<"span">, "ref">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'animate' are incompatible.
+    Type '{ backgroundPositionX: string[]; } | undefined' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls'.
+      Type 'undefined' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /home/runner/work/Studiorium/Studiorium/v4/apps/web
+npm error workspace @lorion/web@4.0.0-alpha.1
+npm error location /home/runner/work/Studiorium/Studiorium/v4/apps/web
+npm error command failed
+npm error command sh -c tsc --noEmit && vite build
+
+result=failed
