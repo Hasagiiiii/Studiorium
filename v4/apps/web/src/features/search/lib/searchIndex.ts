@@ -50,14 +50,16 @@ export function buildSearchIndex(data: BootstrapPayload): SearchEntry[] {
       href: `/pesquisas/${encodeURIComponent(item.slug)}`,
       searchable: normalize([item.title, item.abstract, item.area, item.keywords.join(' ')].join(' ')),
     })),
-    ...data.communityProjects.map((item) => ({
-      id: `project:${item.id}`,
-      type: 'Projeto' as const,
-      title: item.title,
-      description: item.notes,
-      href: `/projetos/${encodeURIComponent(item.id)}`,
-      searchable: normalize([item.title, item.type, item.notes].join(' ')),
-    })),
+    ...data.projects
+      .filter((item) => item.visibility === 'public')
+      .map((item) => ({
+        id: `project:${item.id}`,
+        type: 'Projeto' as const,
+        title: item.title,
+        description: item.notes,
+        href: `/projetos/${encodeURIComponent(item.id)}`,
+        searchable: normalize([item.title, item.type, item.notes].join(' ')),
+      })),
     ...data.news.map((item) => ({
       id: `news:${item.id}`,
       type: 'Notícia' as const,
