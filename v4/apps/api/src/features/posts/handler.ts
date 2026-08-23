@@ -7,6 +7,7 @@ import { createPostInputSchema, type SocialPost } from '@lorion/contracts';
 import { requireSessionUser } from '../../auth/session.js';
 import { readJson } from '../../core/http/body.js';
 import { badRequest, forbidden, notFound } from '../../core/http/errors.js';
+import { assertPublishableText } from '../../core/moderation/text.js';
 import type { ApiRequest } from '../../core/http/types.js';
 import { entityId } from '../../core/security/token.js';
 
@@ -14,6 +15,7 @@ export async function createPost(request: ApiRequest): Promise<SocialPost> {
   const user = await requireSessionUser(request);
   const parsed = createPostInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('Revise o texto, o título e a comunidade da publicação.');
+  assertPublishableText(`${parsed.data.title}\n${parsed.data.body}`, 'Publicação');
 
   let communityId: string | null = null;
   if (parsed.data.communitySlug) {
