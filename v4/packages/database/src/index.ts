@@ -8,6 +8,8 @@ export * from './repositories/communities/hub.js';
 export * from './repositories/communities/read.js';
 export * from './repositories/communities/write.js';
 export * from './repositories/discussions/read.js';
+export * from './repositories/interactions/read.js';
+export * from './repositories/interactions/write.js';
 export * from './repositories/library/read.js';
 export * from './repositories/news/read.js';
 export * from './repositories/notifications/read.js';
