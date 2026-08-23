@@ -16,6 +16,12 @@ export const socialGraphSchema = z.object({
   followingIds: z.array(z.string()).default([]),
 });
 
+export const followMutationSchema = z.object({
+  following: z.boolean(),
+  followerCount: z.number().int().nonnegative().default(0),
+  followingCount: z.number().int().nonnegative().default(0),
+});
+
 const feedBase = z.object({ at: z.string().nullable().default(null) });
 
 export const feedEntrySchema = z.discriminatedUnion('type', [
@@ -32,5 +38,6 @@ export const feedResponseSchema = z.object({
 
 export type FollowSummary = z.infer<typeof followSummarySchema>;
 export type SocialGraph = z.infer<typeof socialGraphSchema>;
+export type FollowMutation = z.infer<typeof followMutationSchema>;
 export type FeedEntry = z.infer<typeof feedEntrySchema>;
 export type FeedResponse = z.infer<typeof feedResponseSchema>;
