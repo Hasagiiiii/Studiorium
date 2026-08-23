@@ -3,7 +3,10 @@ import {
   grantUserRole,
   listAdminAudit,
   listAdminUsers,
+  listEditorialNewsQueue,
   listModerationReports,
+  listNewsContributorApplications,
+  listPendingResearchReview,
   listRolesWithPermissions,
   listVerificationRequests,
   revokeUserRole,
@@ -77,9 +80,22 @@ export async function adminDashboard(request: ApiRequest): Promise<AdminDashboar
   const permissions = await userPermissions(user.id);
   const canManageUsers = permissions.includes('admin.full') || permissions.includes('users.manage');
   const canManageRoles = permissions.includes('admin.full') || permissions.includes('roles.manage');
-  const [reports, verificationRequests, users, roles, audit] = await Promise.all([
+  const canCurate = permissions.includes('admin.full') || permissions.includes('content.curate');
+  const [
+    reports,
+    verificationRequests,
+    researchReviewQueue,
+    newsContributorApplications,
+    newsEditorialQueue,
+    users,
+    roles,
+    audit,
+  ] = await Promise.all([
     listModerationReports(),
     canManageUsers ? listVerificationRequests('pending') : Promise.resolve([]),
+    canCurate ? listPendingResearchReview() : Promise.resolve([]),
+    canCurate ? listNewsContributorApplications('pending') : Promise.resolve([]),
+    canCurate ? listEditorialNewsQueue() : Promise.resolve([]),
     canManageUsers ? listAdminUsers() : Promise.resolve([]),
     canManageRoles ? listRolesWithPermissions() : Promise.resolve([]),
     permissions.includes('admin.full') ? listAdminAudit(200) : Promise.resolve([]),
@@ -90,6 +106,9 @@ export async function adminDashboard(request: ApiRequest): Promise<AdminDashboar
     verificationRequests: verificationRequests.map((row) =>
       mapVerification(row as Record<string, unknown>),
     ),
+    researchReviewQueue,
+    newsContributorApplications,
+    newsEditorialQueue,
     users,
     roles,
     audit: audit.map((row) => mapAudit(row as Record<string, unknown>)),
@@ -114,7 +133,9 @@ export async function reviewReport(request: ApiRequest, reportId: string) {
 
 export async function changeUserStatus(request: ApiRequest, targetUserId: string) {
   const admin = await requirePermission(request, 'users.manage');
-  if (admin.id === targetUserId) throw forbidden('Você não pode suspender ou reativar a própria conta por esta tela.');
+  if (admin.id === targetUserId) {
+    throw forbidden('Você não pode suspender ou reativar a própria conta por esta tela.');
+  }
   const parsed = userStatusInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('Estado da conta inválido.');
   if (parsed.data.status === 'suspended' && parsed.data.reason.length < 5) {
@@ -145,7 +166,9 @@ export async function changeUserRole(
     throw forbidden('Você não pode remover o próprio cargo de administrador por esta tela.');
   }
   if (grant) await grantUserRole(targetUserId, parsed.data.roleId, admin.id);
-  else if (!(await revokeUserRole(targetUserId, parsed.data.roleId))) throw notFound('Cargo não encontrado para o usuário.');
+  else if (!(await revokeUserRole(targetUserId, parsed.data.roleId))) {
+    throw notFound('Cargo não encontrado para o usuário.');
+  }
   await writeAdminAudit({
     adminId: admin.id,
     action: grant ? 'role.grant' : 'role.revoke',
