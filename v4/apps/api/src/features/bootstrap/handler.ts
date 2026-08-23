@@ -13,10 +13,21 @@ import {
   listPublishedResearch,
   listUserProjects,
   loadSiteSettings,
+  userPermissions,
 } from '@lorion/database';
 import type { ApiRequest } from '../../core/http/types.js';
 import { publicSessionUser, sessionUser } from '../../auth/session.js';
 import { isPasswordResetEmailConfigured } from '../auth/password-reset-email.js';
+
+const STAFF_PERMISSIONS = new Set([
+  'admin.full',
+  'moderation.queue',
+  'moderation.content',
+  'content.curate',
+  'content.edit',
+  'users.manage',
+  'roles.manage',
+]);
 
 function mergeById<T extends { id: string }>(...groups: readonly T[][]): T[] {
   const values = new Map<string, T>();
@@ -43,6 +54,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     ownProfile,
     user,
     excludedRaw,
+    permissions,
   ] = await Promise.all([
     listPublicSocialPosts(),
     listPublishedResearch(),
@@ -58,6 +70,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     viewerId ? findProfileByUserId(viewerId) : Promise.resolve(null),
     publicSessionUser(request),
     viewerId ? excludedUserIdsForViewer(viewerId) : Promise.resolve([]),
+    viewerId ? userPermissions(viewerId) : Promise.resolve([]),
   ]);
 
   const excluded = new Set(excludedRaw);
@@ -87,6 +100,7 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     settings,
     capabilities: {
       passwordResetAvailable: isPasswordResetEmailConfigured(),
+      staffDashboard: permissions.some((permission) => STAFF_PERMISSIONS.has(permission)),
     },
     user,
   });
