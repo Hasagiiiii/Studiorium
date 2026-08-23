@@ -28,11 +28,17 @@ function normalizedUsername(value: string): string {
   }
 }
 
-export async function profileDetail(request: ApiRequest, rawUsername: string): Promise<ProfileDetail> {
+export async function profileDetail(
+  request: ApiRequest,
+  rawUsername: string,
+): Promise<ProfileDetail> {
   const username = normalizedUsername(rawUsername);
   if (!username) throw notFound('Perfil não encontrado.');
 
-  const [viewer, profile] = await Promise.all([sessionUser(request), findProfileByUsername(username)]);
+  const [viewer, profile] = await Promise.all([
+    sessionUser(request),
+    findProfileByUsername(username),
+  ]);
   if (!profile) throw notFound('Perfil não encontrado.');
 
   const isOwnProfile = viewer?.id === profile.userId;
@@ -42,7 +48,9 @@ export async function profileDetail(request: ApiRequest, rawUsername: string): P
     listPublishedResearchByOwnerId(profile.userId),
     listPublicProjectsByUserId(profile.userId),
     listProfileCommunities(profile.userId, isOwnProfile),
-    profile.bookshelfPublic || isOwnProfile ? listProfileBookshelf(profile.userId) : Promise.resolve([]),
+    profile.bookshelfPublic || isOwnProfile
+      ? listProfileBookshelf(profile.userId)
+      : Promise.resolve([]),
   ]);
 
   return profileDetailSchema.parse({
