@@ -11,7 +11,13 @@ import {
   requestPasswordReset,
   resetPassword,
 } from './features/auth/handler.js';
-import { joinCommunity, leaveCommunityMembership } from './features/communities/handler.js';
+import {
+  decideCommunityMembershipRequest,
+  joinCommunity,
+  leaveCommunityMembership,
+  pendingCommunityMembershipRequests,
+  requestCommunityMembership,
+} from './features/communities/handler.js';
 import {
   notifications,
   readAllNotifications,
@@ -74,6 +80,44 @@ async function route(request: ApiRequest, response: ApiResponse) {
       response,
       200,
       await leaveCommunityMembership(request, communityMembershipMatch[1] || ''),
+    );
+  }
+
+  const communityRequestMatch = path.match(
+    /^\/api\/v4\/communities\/([^/]+)\/membership-request$/,
+  );
+  if (communityRequestMatch && method === 'POST') {
+    return json(
+      response,
+      200,
+      await requestCommunityMembership(request, communityRequestMatch[1] || ''),
+    );
+  }
+
+  const communityRequestsMatch = path.match(
+    /^\/api\/v4\/communities\/([^/]+)\/membership-requests$/,
+  );
+  if (communityRequestsMatch && method === 'GET') {
+    return json(
+      response,
+      200,
+      await pendingCommunityMembershipRequests(request, communityRequestsMatch[1] || ''),
+    );
+  }
+
+  const communityRequestDecisionMatch = path.match(
+    /^\/api\/v4\/communities\/([^/]+)\/membership-requests\/([^/]+)\/(approve|reject)$/,
+  );
+  if (communityRequestDecisionMatch && method === 'POST') {
+    return json(
+      response,
+      200,
+      await decideCommunityMembershipRequest(
+        request,
+        communityRequestDecisionMatch[1] || '',
+        communityRequestDecisionMatch[2] || '',
+        communityRequestDecisionMatch[3] === 'approve',
+      ),
     );
   }
 
