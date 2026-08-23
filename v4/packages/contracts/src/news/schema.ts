@@ -12,7 +12,7 @@ export const newsArticleSchema = z.object({
   category: z.string().default('Atualizações'),
   status: z.string(),
   featured: z.boolean().default(false),
-  hypes: z.number().int().nonnegative().default(0),
+  likeCount: z.number().int().nonnegative().default(0),
   certifiedBy: z.string().nullable().default(null),
   certifiedAt: timestamp,
   publishedAt: timestamp,
