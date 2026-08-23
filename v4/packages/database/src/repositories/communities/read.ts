@@ -40,23 +40,31 @@ export async function listCommunities(viewerId?: string | null): Promise<Communi
     }
   });
 
-  return communities.map((raw) => {
-    const row = raw as Record<string, unknown>;
-    const membership = viewerMembership.get(String(row.id));
-    return communitySchema.parse({
-      id: row.id,
-      slug: row.slug,
-      name: row.name,
-      area: row.area,
-      description: row.description,
-      visibility: row.visibility,
-      status: row.status,
-      official: row.is_official,
-      rules: Array.isArray(row.rules) ? row.rules : [],
-      memberCount: countByCommunity.get(String(row.id)) || 0,
-      joined: Boolean(membership),
-      role: membership?.role || null,
-      memberModerationStatus: membership?.moderation_status || null,
+  return communities
+    .filter((raw) => {
+      const row = raw as Record<string, unknown>;
+      const id = String(row.id);
+      const visibility = String(row.visibility || 'public');
+      return visibility !== 'private' || viewerMembership.has(id);
+    })
+    .map((raw) => {
+      const row = raw as Record<string, unknown>;
+      const id = String(row.id);
+      const membership = viewerMembership.get(id);
+      return communitySchema.parse({
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        area: row.area,
+        description: row.description,
+        visibility: row.visibility,
+        status: row.status,
+        official: row.is_official,
+        rules: Array.isArray(row.rules) ? row.rules : [],
+        memberCount: countByCommunity.get(id) || 0,
+        joined: Boolean(membership),
+        role: membership?.role || null,
+        memberModerationStatus: membership?.moderation_status || null,
+      });
     });
-  });
 }
