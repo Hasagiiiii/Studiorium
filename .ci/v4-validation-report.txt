@@ -1,28 +1,11 @@
-source_sha=fa7ac0d72594a847726135d3bcecd8b1af890f24
+source_sha=e75d38e6aebea60ec325f3144e33f0214fa39290
 root_install=0
 secrets=0
-root_check=1
-
-[root_check]
-
-> studiorium-online@3.4.2 check
-> node scripts/check-project.js && prettier --check .
-
-OK — 42 módulos de servidor, 54 módulos de interface e 89 arquivos legíveis verificados.
-Checking formatting...
-[[33mwarn[39m] v4/apps/web/src/components/create/CreateLauncher.tsx
-[[33mwarn[39m] v4/apps/web/src/components/feedback/LoadingScreen.tsx
-[[33mwarn[39m] v4/apps/web/src/features/notifications/pages/NotificationsPage.tsx
-[[33mwarn[39m] v4/apps/web/src/features/profiles/pages/ProfilePage.tsx
-[[33mwarn[39m] v4/apps/web/src/features/social/components/FeedCard.tsx
-[[33mwarn[39m] v4/apps/web/src/features/social/pages/HomePage.tsx
-[[33mwarn[39m] v4/apps/web/src/styles/motion.css
-[[33mwarn[39m] Code style issues found in 7 files. Run Prettier with --write to fix.
-
+root_check=0
 root_test=0
 v4_lock=0
 v4_install=0
 v4_typecheck=0
 v4_test=0
 v4_build=0
-result=failed
+result=passed
