@@ -19,7 +19,10 @@ function mapNotification(row: Record<string, unknown>): Notification {
   });
 }
 
-export async function listNotifications(userId: string, limit = 100): Promise<NotificationsResponse> {
+export async function listNotifications(
+  userId: string,
+  limit = 100,
+): Promise<NotificationsResponse> {
   const result = await database()
     .from('notifications')
     .select('id,type,title,message,link,read_at,created_at')

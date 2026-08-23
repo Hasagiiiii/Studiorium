@@ -1,7 +1,9 @@
 import { projectSchema, type CreateProjectInput, type Project } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 
-export async function createProject(input: CreateProjectInput & { id: string; ownerId: string }): Promise<Project> {
+export async function createProject(
+  input: CreateProjectInput & { id: string; ownerId: string },
+): Promise<Project> {
   const result = await database()
     .from('projects')
     .insert({

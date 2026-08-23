@@ -1,8 +1,4 @@
-import {
-  createProjectInputSchema,
-  projectSchema,
-  type Project,
-} from '@lorion/contracts';
+import { createProjectInputSchema, projectSchema, type Project } from '@lorion/contracts';
 import { createProject } from '@lorion/database';
 import type { ApiRequest } from '../../core/http/types.js';
 import { readJson } from '../../core/http/body.js';

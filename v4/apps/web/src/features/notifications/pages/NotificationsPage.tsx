@@ -25,7 +25,9 @@ export function NotificationsPage() {
       setStatus('ready');
     } catch (cause) {
       setStatus('error');
-      setError(cause instanceof Error ? cause.message : 'Não foi possível carregar as notificações.');
+      setError(
+        cause instanceof Error ? cause.message : 'Não foi possível carregar as notificações.',
+      );
     }
   }, [data?.user]);
 
@@ -61,7 +63,9 @@ export function NotificationsPage() {
     if (!unreadCount) return;
     await services.notifications.markAllRead();
     const readAt = new Date().toISOString();
-    setNotifications((current) => current.map((entry) => ({ ...entry, readAt: entry.readAt || readAt })));
+    setNotifications((current) =>
+      current.map((entry) => ({ ...entry, readAt: entry.readAt || readAt })),
+    );
     setUnreadCount(0);
   }
 
@@ -94,10 +98,7 @@ export function NotificationsPage() {
         {status === 'ready' && notifications.length ? (
           <div className="notification-list">
             {notifications.map((item) => (
-              <article
-                key={item.id}
-                className={`notification-item${item.readAt ? '' : ' unread'}`}
-              >
+              <article key={item.id} className={`notification-item${item.readAt ? '' : ' unread'}`}>
                 <div>
                   <span className="eyebrow">{item.type}</span>
                   <h2>{item.title}</h2>
@@ -108,7 +109,11 @@ export function NotificationsPage() {
                     Abrir
                   </Link>
                 ) : !item.readAt ? (
-                  <button className="button secondary" type="button" onClick={() => void markRead(item)}>
+                  <button
+                    className="button secondary"
+                    type="button"
+                    onClick={() => void markRead(item)}
+                  >
                     Marcar como lida
                   </button>
                 ) : null}

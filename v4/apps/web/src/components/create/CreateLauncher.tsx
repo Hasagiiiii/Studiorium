@@ -27,17 +27,16 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
           </button>
         </header>
         <div className="create-launcher-grid">
-          <Link
-            to="/projetos?criar=1"
-            onClick={onClose}
-            className="create-launcher-action"
-          >
+          <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
             <strong>Projeto</strong>
-            <span>Crie um projeto real no seu workspace e escolha se ele será privado ou público.</span>
+            <span>
+              Crie um projeto real no seu workspace e escolha se ele será privado ou público.
+            </span>
           </Link>
         </div>
         <p className="create-launcher-note">
-          Discussões, reviews, tutoriais e novas comunidades aparecerão aqui somente quando os respectivos fluxos estiverem completos.
+          Discussões, reviews, tutoriais e novas comunidades aparecerão aqui somente quando os
+          respectivos fluxos estiverem completos.
         </p>
       </section>
     </div>

@@ -1,8 +1,4 @@
-import {
-  projectSchema,
-  type CreateProjectInput,
-  type Project,
-} from '@lorion/contracts';
+import { projectSchema, type CreateProjectInput, type Project } from '@lorion/contracts';
 import { ApiClient } from '../../core/client.js';
 
 export class ProjectsService {

@@ -59,9 +59,10 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     publicSessionUser(request),
   ]);
 
-  const profiles = ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
-    ? [ownProfile, ...publicProfiles]
-    : publicProfiles;
+  const profiles =
+    ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
+      ? [ownProfile, ...publicProfiles]
+      : publicProfiles;
 
   return bootstrapSchema.parse({
     publications,
