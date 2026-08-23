@@ -1,21 +1,19 @@
 import { Route, Routes } from 'react-router-dom';
 import { ErrorScreen } from '../components/feedback/ErrorScreen.js';
 import { LoadingScreen } from '../components/feedback/LoadingScreen.js';
+import { LoginPage } from '../features/auth/pages/LoginPage.js';
+import { RegisterPage } from '../features/auth/pages/RegisterPage.js';
 import { CommunityPage } from '../features/communities/pages/CommunityPage.js';
 import { CommunitiesPage } from '../features/communities/pages/CommunitiesPage.js';
 import { DiscussionPage } from '../features/communities/pages/DiscussionPage.js';
 import { ExplorePage } from '../features/discovery/pages/ExplorePage.js';
-import { LoginPage } from '../features/auth/pages/LoginPage.js';
-import { RegisterPage } from '../features/auth/pages/RegisterPage.js';
 import { BookPage } from '../features/library/pages/BookPage.js';
 import { LibraryPage } from '../features/library/pages/LibraryPage.js';
 import { NewsArticlePage } from '../features/news/pages/NewsArticlePage.js';
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage.js';
-import { CodeLabPage } from '../features/projects/pages/CodeLabPage.js';
-import { CodeProjectPage } from '../features/projects/pages/CodeProjectPage.js';
+import { ProfilePage } from '../features/profiles/pages/ProfilePage.js';
 import { ProjectPage } from '../features/projects/pages/ProjectPage.js';
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage.js';
-import { ProfilePage } from '../features/profiles/pages/ProfilePage.js';
 import { ResearchPage } from '../features/research/pages/ResearchPage.js';
 import { HomePage } from '../features/social/pages/HomePage.js';
 import { NotFoundPage } from '../features/system/pages/NotFoundPage.js';
@@ -47,8 +45,6 @@ export function App() {
         <Route path="/livros/:id" element={<BookPage />} />
         <Route path="/pesquisas/:slug" element={<ResearchPage />} />
         <Route path="/projetos" element={<ProjectsPage />} />
-        <Route path="/projetos/lab" element={<CodeLabPage />} />
-        <Route path="/projetos/lab/:id" element={<CodeProjectPage />} />
         <Route path="/projetos/:id" element={<ProjectPage />} />
         <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/perfil/:username" element={<ProfilePage />} />
