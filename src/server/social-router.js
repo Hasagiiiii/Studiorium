@@ -12,6 +12,10 @@ async function handleSocial(req, res) {
     return send(res, 200, { followingIds: await socialRoutes.followingIdsFor(user.id) });
   }
 
+  if (method === 'GET' && pathname === '/social/feed') {
+    return send(res, 200, await socialRoutes.followingFeed(req));
+  }
+
   const profileSocial = pathname.match(/^\/profiles\/([^/]+)\/social$/);
   if (!profileSocial) return false;
 
