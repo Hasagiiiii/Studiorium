@@ -4,6 +4,7 @@ import {
   BootstrapService,
   CommunitiesService,
   NotificationsService,
+  ProfilesService,
   ProjectsService,
   SocialService,
 } from '@lorion/api-client';
@@ -15,6 +16,7 @@ export const services = {
   bootstrap: new BootstrapService(client),
   communities: new CommunitiesService(client),
   notifications: new NotificationsService(client),
+  profiles: new ProfilesService(client),
   projects: new ProjectsService(client),
   social: new SocialService(client),
 };

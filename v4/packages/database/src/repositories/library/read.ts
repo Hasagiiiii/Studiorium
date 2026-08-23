@@ -1,4 +1,11 @@
-import { bookReviewSchema, bookSchema, type Book, type BookReview } from '@lorion/contracts';
+import {
+  bookReviewSchema,
+  bookSchema,
+  profileBookshelfItemSchema,
+  type Book,
+  type BookReview,
+  type ProfileBookshelfItem,
+} from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
@@ -55,4 +62,44 @@ export async function listBookReviews(limit = 400): Promise<BookReview[]> {
     .limit(limit);
 
   return queryList(result).map((row) => mapReview(row as Record<string, unknown>));
+}
+
+export async function listProfileBookshelf(userId: string): Promise<ProfileBookshelfItem[]> {
+  const saves = queryList(
+    await database()
+      .from('book_saves')
+      .select('book_id,shelf_status,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false }),
+  ) as Array<{ book_id: string; shelf_status: string; created_at: string | null }>;
+
+  if (!saves.length) return [];
+
+  const books = queryList(
+    await database()
+      .from('books')
+      .select('*')
+      .in(
+        'id',
+        saves.map((save) => save.book_id),
+      ),
+  );
+  const bookById = new Map(
+    books.map((row) => {
+      const book = mapBook(row as Record<string, unknown>);
+      return [book.id, book] as const;
+    }),
+  );
+
+  return saves.flatMap((save) => {
+    const book = bookById.get(save.book_id);
+    if (!book) return [];
+    return [
+      profileBookshelfItemSchema.parse({
+        book,
+        shelfStatus: save.shelf_status,
+        savedAt: save.created_at,
+      }),
+    ];
+  });
 }

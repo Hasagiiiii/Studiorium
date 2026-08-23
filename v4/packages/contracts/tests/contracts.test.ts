@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  bookshelfStatusSchema,
   communityHubSchema,
   communityMembershipRequestSchema,
   communityMembershipResultSchema,
   parseBootstrap,
+  profileDetailSchema,
+  profileSchema,
   projectSchema,
   publicUserSchema,
 } from '../src/index.js';
@@ -107,6 +110,33 @@ test('hub de comunidade mantém membros navegáveis e discussões relacionais', 
   assert.equal(hub.members[0]?.username, 'pessoa');
   assert.equal(hub.discussions[0]?.authorId, 'usr_1');
   assert.equal(hub.canCreateDiscussion, true);
+});
+
+test('perfil mantém estante privada por padrão e detalhe social com coleções vazias', () => {
+  const profile = profileSchema.parse({
+    userId: 'usr_1',
+    username: 'pessoa',
+    displayName: 'Pessoa',
+    isPublic: true,
+    createdAt: null,
+    updatedAt: null,
+    verifiedAt: null,
+  });
+  const detail = profileDetailSchema.parse({ profile, isOwnProfile: false });
+
+  assert.equal(profile.bookshelfPublic, false);
+  assert.deepEqual(detail.publications, []);
+  assert.deepEqual(detail.projects, []);
+  assert.deepEqual(detail.communities, []);
+  assert.deepEqual(detail.bookshelf, []);
+});
+
+test('estante aceita todos os estados funcionais definidos pelo produto', () => {
+  assert.equal(bookshelfStatusSchema.parse('want_to_read'), 'want_to_read');
+  assert.equal(bookshelfStatusSchema.parse('reading'), 'reading');
+  assert.equal(bookshelfStatusSchema.parse('read'), 'read');
+  assert.equal(bookshelfStatusSchema.parse('abandoned'), 'abandoned');
+  assert.throws(() => bookshelfStatusSchema.parse('unknown'));
 });
 
 test('projeto v4 exige ownerId e não aceita o contrato legado userId sozinho', () => {
