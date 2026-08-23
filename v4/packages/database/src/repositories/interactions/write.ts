@@ -60,14 +60,16 @@ export async function createContentComment(input: {
     }
   }
 
-  const result = await database().from('content_comments').insert({
-    id: input.id,
-    content_id: input.contentId,
-    author_id: input.authorId,
-    parent_id: input.parentId || null,
-    body: input.body,
-    moderation_status: 'clear',
-  });
+  const result = await database()
+    .from('content_comments')
+    .insert({
+      id: input.id,
+      content_id: input.contentId,
+      author_id: input.authorId,
+      parent_id: input.parentId || null,
+      body: input.body,
+      moderation_status: 'clear',
+    });
   if (result.error) throw new Error(result.error.message);
 }
 
