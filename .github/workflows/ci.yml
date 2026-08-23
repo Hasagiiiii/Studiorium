@@ -37,5 +37,11 @@ jobs:
       - name: Validate project structure and syntax
         run: npm run check
 
+      - name: Show formatting diff on validation failure
+        if: failure()
+        run: |
+          npx prettier --write .
+          git diff -- .
+
       - name: Run tests
         run: npm test
