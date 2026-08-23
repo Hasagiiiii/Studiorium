@@ -45,8 +45,23 @@ test('feed recente ordena por data decrescente', () => {
   assert.equal(sorted[1]?.item.id, 'dis_2');
 });
 
-test('fonte pública exclui projeto privado', () => {
+test('fonte do feed inclui post social e exclui projeto privado', () => {
   const feed = buildFeedFromSources({
+    posts: [
+      {
+        id: 'pst_1',
+        authorId: 'usr_2',
+        authorUsername: 'bia',
+        authorName: 'Bia',
+        title: '',
+        body: 'Uma atualização',
+        community: null,
+        visibility: 'public',
+        moderationStatus: 'clear',
+        createdAt: '2026-08-23T03:00:00.000Z',
+        updatedAt: '2026-08-23T03:00:00.000Z',
+      },
+    ],
     publications: [],
     discussions: [],
     news: [],
@@ -80,6 +95,6 @@ test('fonte pública exclui projeto privado', () => {
 
   assert.deepEqual(
     feed.map((entry) => entry.item.id),
-    ['prj_public'],
+    ['pst_1', 'prj_public'],
   );
 });
