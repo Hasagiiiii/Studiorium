@@ -1,5 +1,6 @@
 import { bootstrapSchema, type BootstrapPayload } from '@lorion/contracts';
 import {
+  excludedUserIdsForViewer,
   findProfileByUserId,
   listBookReviews,
   listBooks,
@@ -28,19 +29,20 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
   const viewerId = account?.id ?? null;
 
   const [
-    posts,
-    publications,
-    news,
+    postsRaw,
+    publicationsRaw,
+    newsRaw,
     books,
-    bookReviews,
-    publicProjects,
-    discussions,
-    publicProfiles,
+    bookReviewsRaw,
+    publicProjectsRaw,
+    discussionsRaw,
+    publicProfilesRaw,
     communities,
     settings,
     personalProjects,
     ownProfile,
     user,
+    excludedRaw,
   ] = await Promise.all([
     listPublicSocialPosts(),
     listPublishedResearch(),
@@ -55,7 +57,17 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     viewerId ? listUserProjects(viewerId) : Promise.resolve([]),
     viewerId ? findProfileByUserId(viewerId) : Promise.resolve(null),
     publicSessionUser(request),
+    viewerId ? excludedUserIdsForViewer(viewerId) : Promise.resolve([]),
   ]);
+
+  const excluded = new Set(excludedRaw);
+  const posts = postsRaw.filter((item) => !excluded.has(item.authorId));
+  const publications = publicationsRaw.filter((item) => !excluded.has(item.ownerId));
+  const news = newsRaw.filter((item) => !item.contributorId || !excluded.has(item.contributorId));
+  const bookReviews = bookReviewsRaw.filter((item) => !excluded.has(item.userId));
+  const publicProjects = publicProjectsRaw.filter((item) => !excluded.has(item.ownerId));
+  const discussions = discussionsRaw.filter((item) => !excluded.has(item.authorId));
+  const publicProfiles = publicProfilesRaw.filter((item) => !excluded.has(item.userId));
 
   const profiles =
     ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
