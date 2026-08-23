@@ -1,11 +1,51 @@
-import { Link } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function ProjectsPage() {
-  const { data } = useAppState();
+  const { data, reload } = useAppState();
+  const [params, setParams] = useSearchParams();
   const me = data?.user;
   const projects = me ? (data?.projects.filter((item) => item.ownerId === me.id) ?? []) : [];
+  const [title, setTitle] = useState('');
+  const [notes, setNotes] = useState('');
+  const [visibility, setVisibility] = useState<'private' | 'public'>('private');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
+  const [error, setError] = useState('');
+  const creating = params.get('criar') === '1';
+
+  function setCreating(open: boolean) {
+    const next = new URLSearchParams(params);
+    if (open) next.set('criar', '1');
+    else next.delete('criar');
+    setParams(next, { replace: true });
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!me || status === 'saving') return;
+    setStatus('saving');
+    setError('');
+    try {
+      await services.projects.create({
+        title: title.trim(),
+        type: 'Projeto',
+        visibility,
+        notes: notes.trim(),
+      });
+      setTitle('');
+      setNotes('');
+      setVisibility('private');
+      setCreating(false);
+      await reload();
+      setStatus('idle');
+    } catch (cause) {
+      setStatus('error');
+      setError(cause instanceof Error ? cause.message : 'Não foi possível criar o projeto.');
+    }
+  }
 
   return (
     <FeaturePage
@@ -16,13 +56,52 @@ export function ProjectsPage() {
       {me ? (
         <>
           <section className="project-workspace-actions">
-            <button className="button primary" type="button" data-create-project>
-              Novo projeto
+            <button className="button primary" type="button" onClick={() => setCreating(!creating)}>
+              {creating ? 'Cancelar' : 'Novo projeto'}
             </button>
             <Link className="button secondary" to="/projetos/lab">
               Laboratório de código
             </Link>
           </section>
+
+          {creating ? (
+            <form className="auth-form project-create-form" onSubmit={submit}>
+              <label>
+                Título
+                <input
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                />
+              </label>
+              <label>
+                Visibilidade
+                <select
+                  value={visibility}
+                  onChange={(event) => setVisibility(event.target.value as 'private' | 'public')}
+                >
+                  <option value="private">Privado</option>
+                  <option value="public">Público</option>
+                </select>
+              </label>
+              <label>
+                Notas
+                <textarea
+                  maxLength={4000}
+                  rows={5}
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                />
+              </label>
+              {status === 'error' ? <p className="inline-error">{error}</p> : null}
+              <button className="button primary" type="submit" disabled={status === 'saving'}>
+                {status === 'saving' ? 'Criando…' : 'Criar projeto'}
+              </button>
+            </form>
+          ) : null}
+
           <section className="resource-section">
             <header>
               <div>
