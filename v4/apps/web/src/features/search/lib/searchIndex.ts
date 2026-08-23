@@ -2,7 +2,7 @@ import type { BootstrapPayload } from '@lorion/contracts';
 
 export type SearchEntry = {
   id: string;
-  type: 'Pessoa' | 'Comunidade' | 'Livro' | 'Pesquisa' | 'Projeto' | 'Oficina' | 'Notícia';
+  type: 'Pessoa' | 'Comunidade' | 'Livro' | 'Pesquisa' | 'Projeto' | 'Notícia';
   title: string;
   description: string;
   href: string;
@@ -57,14 +57,6 @@ export function buildSearchIndex(data: BootstrapPayload): SearchEntry[] {
       description: item.notes,
       href: `/projetos/${encodeURIComponent(item.id)}`,
       searchable: normalize([item.title, item.type, item.notes].join(' ')),
-    })),
-    ...data.techResources.map((item) => ({
-      id: `tech:${item.id}`,
-      type: 'Oficina' as const,
-      title: item.title,
-      description: item.summary,
-      href: `/oficina/${encodeURIComponent(item.slug)}`,
-      searchable: normalize([item.title, item.summary, item.hub, item.category, item.tags.join(' ')].join(' ')),
     })),
     ...data.news.map((item) => ({
       id: `news:${item.id}`,
