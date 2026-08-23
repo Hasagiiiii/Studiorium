@@ -70,9 +70,11 @@ export function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        <p>
-          <Link to="/esqueci-a-senha">Esqueci minha senha</Link>
-        </p>
+        {data?.capabilities.passwordResetAvailable ? (
+          <p>
+            <Link to="/esqueci-a-senha">Esqueci minha senha</Link>
+          </p>
+        ) : null}
         {status === 'error' ? (
           <p className="inline-error" role="alert">
             {error}
