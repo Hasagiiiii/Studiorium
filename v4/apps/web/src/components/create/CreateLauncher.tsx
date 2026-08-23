@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { PostComposer } from '../../features/posts/components/PostComposer.js';
 
 type CreateLauncherProps = {
   open: boolean;
   onClose(): void;
 };
+
+type LauncherView = 'menu' | 'post';
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -15,6 +18,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
   const dialogRef = useRef<HTMLElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const [compact, setCompact] = useState(false);
+  const [view, setView] = useState<LauncherView>('menu');
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 880px)');
@@ -25,7 +29,10 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setView('menu');
+      return;
+    }
 
     const previousOverflow = document.body.style.overflow;
     const previousFocus =
@@ -36,7 +43,8 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        if (view === 'post') setView('menu');
+        else onClose();
         return;
       }
 
@@ -66,7 +74,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
       window.removeEventListener('keydown', onKeyDown);
       previousFocus?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, view]);
 
   return (
     <AnimatePresence>
@@ -90,7 +98,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 42, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
-            drag={!reduceMotion && compact ? 'y' : false}
+            drag={!reduceMotion && compact && view === 'menu' ? 'y' : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.18}
             onDragEnd={(_, info) => {
@@ -102,7 +110,9 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
             <header>
               <div>
                 <span className="eyebrow">Criar</span>
-                <h2 id="create-launcher-title">Comece algo novo</h2>
+                <h2 id="create-launcher-title">
+                  {view === 'post' ? 'Nova publicação' : 'Comece algo novo'}
+                </h2>
               </div>
               <button
                 ref={closeButtonRef}
@@ -114,14 +124,27 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                 ×
               </button>
             </header>
-            <div className="create-launcher-grid">
-              <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
-                <strong>Projeto</strong>
-                <span>
-                  Crie um projeto no seu workspace e escolha se ele será privado ou público.
-                </span>
-              </Link>
-            </div>
+
+            {view === 'post' ? (
+              <PostComposer onCancel={() => setView('menu')} onCreated={onClose} />
+            ) : (
+              <div className="create-launcher-grid">
+                <button
+                  type="button"
+                  className="create-launcher-action"
+                  onClick={() => setView('post')}
+                >
+                  <strong>Publicação</strong>
+                  <span>Compartilhe texto no seu perfil e, se quiser, em uma comunidade.</span>
+                </button>
+                <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
+                  <strong>Projeto</strong>
+                  <span>
+                    Crie um projeto no seu workspace e escolha se ele será privado ou público.
+                  </span>
+                </Link>
+              </div>
+            )}
           </motion.section>
         </motion.div>
       ) : null}
