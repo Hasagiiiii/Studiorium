@@ -7,6 +7,8 @@ import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
 import { services } from '../services/services.js';
 import { useAppState } from '../state/useAppState.js';
 
+const CREATE_RETURN_PATH = '/projetos?criar=1';
+
 export function AppShell({ children }: PropsWithChildren) {
   const { data, reload } = useAppState();
   const { pushToast } = useToast();
@@ -40,6 +42,15 @@ export function AppShell({ children }: PropsWithChildren) {
     if (!location.hash) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [location.pathname, location.hash]);
 
+  function toggleCreate() {
+    if (!me) {
+      pushToast({ message: 'Entre na sua conta para criar um projeto.', tone: 'info' });
+      navigate(`/entrar?retorno=${encodeURIComponent(CREATE_RETURN_PATH)}`);
+      return;
+    }
+    setCreateOpen((value) => !value);
+  }
+
   async function logout() {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -58,7 +69,7 @@ export function AppShell({ children }: PropsWithChildren) {
     }
   }
 
-  const showHeader = headerVisible || createOpen;
+  const showHeader = headerVisible || Boolean(me && createOpen);
 
   return (
     <div className="app-shell">
@@ -82,12 +93,12 @@ export function AppShell({ children }: PropsWithChildren) {
           <motion.button
             className="topbar-create"
             type="button"
-            aria-label="Criar"
-            aria-haspopup="dialog"
-            aria-expanded={createOpen}
-            animate={{ rotate: createOpen && !reduceMotion ? 45 : 0 }}
+            aria-label={me ? 'Criar' : 'Entrar para criar'}
+            aria-haspopup={me ? 'dialog' : undefined}
+            aria-expanded={me ? createOpen : undefined}
+            animate={{ rotate: createOpen && me && !reduceMotion ? 45 : 0 }}
             whileTap={{ scale: reduceMotion ? 1 : 0.92 }}
-            onClick={() => setCreateOpen((value) => !value)}
+            onClick={toggleCreate}
           >
             +
           </motion.button>
@@ -123,12 +134,15 @@ export function AppShell({ children }: PropsWithChildren) {
         <motion.button
           className="create-action"
           type="button"
-          aria-label="Criar"
-          aria-haspopup="dialog"
-          aria-expanded={createOpen}
-          animate={{ rotate: createOpen && !reduceMotion ? 45 : 0, scale: createOpen ? 1.06 : 1 }}
+          aria-label={me ? 'Criar' : 'Entrar para criar'}
+          aria-haspopup={me ? 'dialog' : undefined}
+          aria-expanded={me ? createOpen : undefined}
+          animate={{
+            rotate: createOpen && me && !reduceMotion ? 45 : 0,
+            scale: createOpen && me ? 1.06 : 1,
+          }}
           whileTap={{ scale: reduceMotion ? 1 : 0.92 }}
-          onClick={() => setCreateOpen((value) => !value)}
+          onClick={toggleCreate}
         >
           +
         </motion.button>
@@ -137,7 +151,7 @@ export function AppShell({ children }: PropsWithChildren) {
           Perfil
         </Link>
       </nav>
-      <CreateLauncher open={createOpen} onClose={() => setCreateOpen(false)} />
+      {me ? <CreateLauncher open={createOpen} onClose={() => setCreateOpen(false)} /> : null}
     </div>
   );
 }

@@ -1,4 +1,6 @@
 export * from './core/client.js';
+export * from './repositories/auth/account-security.js';
+export * from './repositories/auth/password-reset.js';
 export * from './repositories/auth/rate-limit.js';
 export * from './repositories/auth/session.js';
 export * from './repositories/auth/write.js';

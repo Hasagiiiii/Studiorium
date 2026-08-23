@@ -28,6 +28,10 @@ const DEFAULT_SITE_SETTINGS = {
   maintenance_mode: false,
 };
 
+const DEFAULT_CAPABILITIES = {
+  passwordResetAvailable: false,
+};
+
 export const siteSettingsSchema = z
   .object({
     site_title: z.string().default(DEFAULT_SITE_SETTINGS.site_title),
@@ -39,6 +43,12 @@ export const siteSettingsSchema = z
   })
   .default(DEFAULT_SITE_SETTINGS);
 
+export const capabilitiesSchema = z
+  .object({
+    passwordResetAvailable: z.boolean().default(DEFAULT_CAPABILITIES.passwordResetAvailable),
+  })
+  .default(DEFAULT_CAPABILITIES);
+
 export const bootstrapSchema = z.object({
   publications: z.array(publicationSchema).default([]),
   news: z.array(newsArticleSchema).default([]),
@@ -49,11 +59,13 @@ export const bootstrapSchema = z.object({
   profiles: z.array(profileSchema).default([]),
   communities: z.array(communitySchema).default([]),
   settings: siteSettingsSchema,
+  capabilities: capabilitiesSchema,
   user: publicUserSchema,
 });
 
 export type PublicUser = z.infer<typeof publicUserSchema>;
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
+export type Capabilities = z.infer<typeof capabilitiesSchema>;
 export type BootstrapPayload = z.infer<typeof bootstrapSchema>;
 
 export function parseBootstrap(input: unknown): BootstrapPayload {

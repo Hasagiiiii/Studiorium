@@ -1,20 +1,27 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
+function safeReturnPath(value: string | null): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/';
+  return value;
+}
+
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data, reload } = useAppState();
   const { pushToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState('');
+  const returnTo = safeReturnPath(searchParams.get('retorno'));
 
-  if (data?.user) return <Navigate to="/" replace />;
+  if (data?.user) return <Navigate to={returnTo} replace />;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +32,7 @@ export function LoginPage() {
       await services.auth.login(email.trim(), password);
       await reload();
       pushToast({ message: 'Login realizado com sucesso.', tone: 'success' });
-      navigate('/', { replace: true });
+      navigate(returnTo, { replace: true });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Não foi possível entrar.';
       setStatus('error');
@@ -63,6 +70,11 @@ export function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
+        {data?.capabilities.passwordResetAvailable ? (
+          <p>
+            <Link to="/esqueci-a-senha">Esqueci minha senha</Link>
+          </p>
+        ) : null}
         {status === 'error' ? (
           <p className="inline-error" role="alert">
             {error}

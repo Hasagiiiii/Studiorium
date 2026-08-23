@@ -105,6 +105,14 @@ export function ProfilePage() {
           {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
         </div>
 
+        {isOwnProfile ? (
+          <p>
+            <Link className="button secondary" to="/conta/seguranca">
+              Segurança da conta
+            </Link>
+          </p>
+        ) : null}
+
         {social.value ? (
           <div className="profile-social">
             <span>

@@ -14,6 +14,7 @@ import {
 } from '@lorion/database';
 import type { ApiRequest } from '../../core/http/types.js';
 import { publicSessionUser, sessionUser } from '../../auth/session.js';
+import { isPasswordResetEmailConfigured } from '../auth/password-reset-email.js';
 
 function mergeById<T extends { id: string }>(...groups: readonly T[][]): T[] {
   const values = new Map<string, T>();
@@ -68,6 +69,9 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     profiles,
     communities,
     settings,
+    capabilities: {
+      passwordResetAvailable: isPasswordResetEmailConfigured(),
+    },
     user,
   });
 }

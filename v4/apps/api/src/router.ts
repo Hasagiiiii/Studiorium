@@ -3,7 +3,14 @@ import { HttpError, notFound } from './core/http/errors.js';
 import { json, noContent } from './core/http/response.js';
 import { assertSameOrigin } from './middleware/origin.js';
 import { bootstrap } from './features/bootstrap/handler.js';
-import { login, logout, register } from './features/auth/handler.js';
+import {
+  changePassword,
+  login,
+  logout,
+  register,
+  requestPasswordReset,
+  resetPassword,
+} from './features/auth/handler.js';
 import {
   notifications,
   readAllNotifications,
@@ -43,6 +50,15 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/register') {
     return json(response, 201, await register(request, response));
+  }
+  if (method === 'POST' && path === '/api/v4/auth/change-password') {
+    return json(response, 200, await changePassword(request, response));
+  }
+  if (method === 'POST' && path === '/api/v4/auth/password-reset/request') {
+    return json(response, 200, await requestPasswordReset(request));
+  }
+  if (method === 'POST' && path === '/api/v4/auth/password-reset') {
+    return json(response, 200, await resetPassword(request));
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
