@@ -41,6 +41,17 @@ export async function findProfileByUserId(userId: string): Promise<Profile | nul
   return result.data ? mapProfile(result.data as Record<string, unknown>) : null;
 }
 
+export async function findProfileByUsername(username: string): Promise<Profile | null> {
+  const result = await database()
+    .from('profiles')
+    .select('*')
+    .eq('username', username)
+    .maybeSingle();
+
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapProfile(result.data as Record<string, unknown>) : null;
+}
+
 export async function findPublicProfile(username: string): Promise<Profile | null> {
   const result = await database()
     .from('profiles')
