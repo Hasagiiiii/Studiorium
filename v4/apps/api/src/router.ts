@@ -4,6 +4,11 @@ import { json, noContent } from './core/http/response.js';
 import { assertSameOrigin } from './middleware/origin.js';
 import { bootstrap } from './features/bootstrap/handler.js';
 import { login, logout, register } from './features/auth/handler.js';
+import {
+  notifications,
+  readAllNotifications,
+  readNotification,
+} from './features/notifications/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
 
 function requestPath(request: ApiRequest): string {
@@ -40,6 +45,21 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
+  }
+
+  if (method === 'GET' && path === '/api/v4/notifications') {
+    return json(response, 200, await notifications(request));
+  }
+  if (method === 'POST' && path === '/api/v4/notifications/read-all') {
+    return json(response, 200, await readAllNotifications(request));
+  }
+  const notificationReadMatch = path.match(/^\/api\/v4\/notifications\/([^/]+)\/read$/);
+  if (notificationReadMatch && method === 'POST') {
+    return json(
+      response,
+      200,
+      await readNotification(request, decodeURIComponent(notificationReadMatch[1] || '')),
+    );
   }
 
   if (method === 'GET' && path === '/api/v4/social/me') {
