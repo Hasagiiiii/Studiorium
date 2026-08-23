@@ -91,6 +91,18 @@ export async function listCommunityDiscussions(communityId: string): Promise<Dis
   return queryList(result).map((row) => mapDiscussion(row as Record<string, unknown>));
 }
 
+export async function findDiscussionById(id: string): Promise<Discussion | null> {
+  const result = await database()
+    .from('discussions')
+    .select('*')
+    .eq('id', id)
+    .eq('status', 'published')
+    .is('deleted_at', null)
+    .maybeSingle();
+  if (result.error) throw new Error(result.error.message);
+  return result.data ? mapDiscussion(result.data as Record<string, unknown>) : null;
+}
+
 export async function createCommunityDiscussion(input: {
   communityId: string;
   discussionId: string;
