@@ -9,6 +9,7 @@ import {
   readAllNotifications,
   readNotification,
 } from './features/notifications/handler.js';
+import { createUserProject } from './features/projects/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
 
 function requestPath(request: ApiRequest): string {
@@ -45,6 +46,10 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
+  }
+
+  if (method === 'POST' && path === '/api/v4/projects') {
+    return json(response, 201, await createUserProject(request));
   }
 
   if (method === 'GET' && path === '/api/v4/notifications') {
