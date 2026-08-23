@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { FollowSummary } from '@lorion/contracts';
+import type { FollowSummary, SocialPost } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { FeedCard } from '../../social/components/FeedCard.js';
 
 type SocialState =
   | { status: 'loading'; value: FollowSummary | null; error: null }
   | { status: 'ready'; value: FollowSummary; error: null }
   | { status: 'error'; value: FollowSummary | null; error: string };
+
+type PostsState =
+  | { status: 'loading'; value: SocialPost[]; error: null }
+  | { status: 'ready'; value: SocialPost[]; error: null }
+  | { status: 'error'; value: SocialPost[]; error: string };
 
 export function ProfilePage() {
   const { username = '' } = useParams();
@@ -22,7 +28,9 @@ export function ProfilePage() {
     value: null,
     error: null,
   });
+  const [posts, setPosts] = useState<PostsState>({ status: 'loading', value: [], error: null });
   const [updating, setUpdating] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
   const loadSocial = useCallback(async () => {
     if (!profile) return;
@@ -39,9 +47,34 @@ export function ProfilePage() {
     }
   }, [profile]);
 
+  const loadPosts = useCallback(async () => {
+    if (!profile) return;
+    setPosts((current) => ({ status: 'loading', value: current.value, error: null }));
+    try {
+      const result = await services.social.profilePosts(profile.username);
+      setPosts({ status: 'ready', value: result.posts, error: null });
+    } catch (cause) {
+      setPosts((current) => ({
+        status: 'error',
+        value: current.value,
+        error: cause instanceof Error ? cause.message : 'Não foi possível carregar as publicações.',
+      }));
+    }
+  }, [profile]);
+
   useEffect(() => {
     void loadSocial();
   }, [loadSocial]);
+  useEffect(() => {
+    void loadPosts();
+  }, [loadPosts]);
+  useEffect(() => {
+    const refresh = () => {
+      void loadPosts();
+    };
+    window.addEventListener('lorion:profile-posts-refresh', refresh);
+    return () => window.removeEventListener('lorion:profile-posts-refresh', refresh);
+  }, [loadPosts]);
 
   if (!profile) {
     return (
@@ -87,6 +120,28 @@ export function ProfilePage() {
       pushToast({ message, tone: 'error' });
     } finally {
       setUpdating(false);
+    }
+  }
+
+  async function deletePost(postId: string) {
+    if (!isOwnProfile || deletingPostId) return;
+    setDeletingPostId(postId);
+    try {
+      await services.social.deletePost(postId);
+      setPosts((current) => ({
+        status: 'ready',
+        error: null,
+        value: current.value.filter((post) => post.id !== postId),
+      }));
+      window.dispatchEvent(new Event('lorion:feed-refresh'));
+      pushToast({ message: 'Publicação removida com segurança.', tone: 'success' });
+    } catch (cause) {
+      pushToast({
+        message: cause instanceof Error ? cause.message : 'Não foi possível remover a publicação.',
+        tone: 'error',
+      });
+    } finally {
+      setDeletingPostId(null);
     }
   }
 
@@ -139,7 +194,6 @@ export function ProfilePage() {
         {social.status === 'loading' && !social.value ? (
           <p className="feed-status">Carregando conexões…</p>
         ) : null}
-
         {social.status === 'error' ? (
           <div className="inline-feedback" role="alert">
             <p className="inline-error">{social.error}</p>
@@ -148,6 +202,46 @@ export function ProfilePage() {
             </button>
           </div>
         ) : null}
+      </section>
+
+      <section className="profile-posts" aria-labelledby="profile-posts-title">
+        <header className="section-heading">
+          <div>
+            <span className="eyebrow">Perfil</span>
+            <h2 id="profile-posts-title">Publicações</h2>
+          </div>
+        </header>
+        {posts.status === 'loading' && posts.value.length === 0 ? (
+          <p className="feed-status">Carregando publicações…</p>
+        ) : null}
+        {posts.status === 'error' ? (
+          <div className="inline-feedback" role="alert">
+            <p className="inline-error">{posts.error}</p>
+            <button className="button secondary" type="button" onClick={() => void loadPosts()}>
+              Tentar novamente
+            </button>
+          </div>
+        ) : null}
+        {posts.status !== 'loading' && posts.value.length === 0 ? (
+          <p className="feed-status">Nenhuma publicação ainda.</p>
+        ) : null}
+        <div className="profile-post-list">
+          {posts.value.map((post, index) => (
+            <div className="profile-post-item" key={post.id}>
+              <FeedCard entry={{ type: 'post', at: post.createdAt, item: post }} index={index} />
+              {isOwnProfile ? (
+                <button
+                  type="button"
+                  className="button secondary post-delete-button"
+                  disabled={deletingPostId === post.id}
+                  onClick={() => void deletePost(post.id)}
+                >
+                  {deletingPostId === post.id ? 'Removendo…' : 'Remover publicação'}
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
       </section>
     </FeaturePage>
   );

@@ -6,6 +6,7 @@ import {
   isFollowing,
   listFollowingIds,
   listPublicProjects,
+  listPublicSocialPosts,
   listPublishedDiscussions,
   listPublishedNews,
   listPublishedResearch,
@@ -97,18 +98,20 @@ export async function followingFeed(request: ApiRequest): Promise<FeedResponse> 
   const followingIds = new Set(await listFollowingIds(viewer.id));
   if (!followingIds.size) return feedResponseSchema.parse({ feed: [] });
 
-  const [publications, discussions, news, projects] = await Promise.all([
+  const [publications, discussions, news, projects, posts] = await Promise.all([
     listPublishedResearch(),
     listPublishedDiscussions(),
     listPublishedNews(),
     listPublicProjects(),
+    listPublicSocialPosts(),
   ]);
-  const entries = buildFeedFromSources({ publications, discussions, news, projects }).filter(
-    (entry) => {
-      const ownerId = contentOwnerId(entry);
-      return Boolean(ownerId && followingIds.has(ownerId));
-    },
-  );
+  const entries = [
+    ...buildFeedFromSources({ publications, discussions, news, projects }),
+    ...posts.map((item) => ({ type: 'post' as const, at: item.createdAt, item })),
+  ].filter((entry) => {
+    const ownerId = contentOwnerId(entry);
+    return Boolean(ownerId && followingIds.has(ownerId));
+  });
 
   return feedResponseSchema.parse({ feed: sortFeed(entries, 'following') });
 }

@@ -8,4 +8,5 @@ export * from './notifications/schema.js';
 export * from './profiles/schema.js';
 export * from './projects/schema.js';
 export * from './research/schema.js';
+export * from './social/posts.js';
 export * from './social/schema.js';

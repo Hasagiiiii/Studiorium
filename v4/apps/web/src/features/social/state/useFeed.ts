@@ -10,16 +10,26 @@ export function useFeed(modeValue: string | null) {
   const { data } = useAppState();
   const mode = normalizeFeedMode(modeValue);
   const [remoteEntries, setRemoteEntries] = useState<FeedEntry[]>([]);
-  const [status, setStatus] = useState<FeedStatus>('ready');
+  const [status, setStatus] = useState<FeedStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [requestVersion, setRequestVersion] = useState(0);
 
   const retry = useCallback(() => setRequestVersion((value) => value + 1), []);
 
   useEffect(() => {
-    let active = true;
+    const refresh = () => setRequestVersion((value) => value + 1);
+    window.addEventListener('lorion:feed-refresh', refresh);
+    return () => window.removeEventListener('lorion:feed-refresh', refresh);
+  }, []);
 
-    if (mode !== 'following' || !data?.user) {
+  useEffect(() => {
+    let active = true;
+    if (!data)
+      return () => {
+        active = false;
+      };
+
+    if (mode === 'following' && !data.user) {
       setRemoteEntries([]);
       setStatus('ready');
       setError(null);
@@ -30,8 +40,8 @@ export function useFeed(modeValue: string | null) {
 
     setStatus('loading');
     setError(null);
-    void services.social
-      .feed()
+    const request = mode === 'following' ? services.social.feed() : services.social.publicFeed();
+    void request
       .then((result) => {
         if (!active) return;
         setRemoteEntries(result.feed);
@@ -47,12 +57,13 @@ export function useFeed(modeValue: string | null) {
     return () => {
       active = false;
     };
-  }, [mode, data?.user, requestVersion]);
+  }, [mode, data, requestVersion]);
 
   const entries = useMemo(() => {
     if (!data) return [];
-    const source = mode === 'following' ? remoteEntries : buildPublicFeed(data);
-    return sortFeed(source, mode as FeedMode, data.profiles).slice(0, 80);
+    const source =
+      mode === 'following' ? remoteEntries : [...buildPublicFeed(data), ...remoteEntries];
+    return sortFeed(source, mode as FeedMode, data.profiles).slice(0, 160);
   }, [data, mode, remoteEntries]);
 
   return { mode, entries, status, error, retry };

@@ -11,6 +11,15 @@ import {
 } from './features/notifications/handler.js';
 import { createUserProject } from './features/projects/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
+import {
+  discardMedia,
+  finalizeMedia,
+  profilePosts,
+  publicPostsFeed,
+  publishPost,
+  removePost,
+  reserveMedia,
+} from './features/social/posts.js';
 
 function requestPath(request: ApiRequest): string {
   const host = request.headers.host || 'localhost';
@@ -72,6 +81,35 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'GET' && path === '/api/v4/social/feed') {
     return json(response, 200, await followingFeed(request));
+  }
+  if (method === 'GET' && path === '/api/v4/social/public-feed') {
+    return json(response, 200, await publicPostsFeed());
+  }
+  if (method === 'POST' && path === '/api/v4/social/media/reserve') {
+    return json(response, 201, await reserveMedia(request));
+  }
+  if (method === 'POST' && path === '/api/v4/social/media/finalize') {
+    return json(response, 200, await finalizeMedia(request));
+  }
+  const mediaMatch = path.match(/^\/api\/v4\/social\/media\/([^/]+)$/);
+  if (mediaMatch && method === 'DELETE') {
+    return json(
+      response,
+      200,
+      await discardMedia(request, decodeURIComponent(mediaMatch[1] || '')),
+    );
+  }
+  if (method === 'POST' && path === '/api/v4/social/posts') {
+    return json(response, 201, await publishPost(request));
+  }
+  const postMatch = path.match(/^\/api\/v4\/social\/posts\/([^/]+)$/);
+  if (postMatch && method === 'DELETE') {
+    return json(response, 200, await removePost(request, decodeURIComponent(postMatch[1] || '')));
+  }
+
+  const profilePostsMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/posts$/);
+  if (profilePostsMatch && method === 'GET') {
+    return json(response, 200, await profilePosts(decodeURIComponent(profilePostsMatch[1] || '')));
   }
 
   const profileSocialMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/social$/);

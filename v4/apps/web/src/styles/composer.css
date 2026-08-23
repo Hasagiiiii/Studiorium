@@ -1,0 +1,134 @@
+.composer-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.composer-back {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.composer-back:hover {
+  color: var(--text);
+}
+
+.composer-field {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.composer-field textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.composer-field small {
+  color: #8f8370;
+}
+
+.composer-file-name {
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.create-launcher-action:is(button) {
+  width: 100%;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.inline-feedback {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.inline-feedback p {
+  margin: 0;
+}
+
+.post-author-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  align-items: baseline;
+  margin: 0.5rem 0 0.8rem;
+}
+
+.post-author-line a {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.post-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.post-media {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 48rem);
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #090806;
+  object-fit: contain;
+}
+
+.profile-posts {
+  display: grid;
+  gap: 1rem;
+  max-width: 48rem;
+  margin-top: 2rem;
+}
+
+.profile-post-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-post-item {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.post-delete-button {
+  justify-self: end;
+}
+
+@media (max-width: 620px) {
+  .composer-actions .button {
+    flex: 1 1 9rem;
+  }
+
+  .post-media {
+    max-height: 65vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-back,
+  .post-media,
+  .create-launcher-action {
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+}
