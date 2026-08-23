@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
@@ -10,6 +10,7 @@ const TYPES: SearchEntry['type'][] = [
   'Livro',
   'Pesquisa',
   'Projeto',
+  'Discussão',
   'Notícia',
 ];
 
@@ -60,14 +61,14 @@ export function ExplorePage() {
     <FeaturePage
       eyebrow="Explorar"
       title="Descubra pessoas e conhecimento"
-      description="Busca e descoberta vivem no mesmo lugar. Pessoas e notícias são tipos de resultado, não abas paralelas."
+      description="Busca e descoberta vivem no mesmo lugar. Pessoas, discussões e notícias são tipos de resultado, não abas paralelas."
     >
       <form className="global-search" onSubmit={submit} role="search">
         <input
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="Pesquisar pessoas, comunidades, livros, pesquisas, projetos e notícias…"
+          placeholder="Pesquisar pessoas, comunidades, livros, pesquisas, projetos, discussões e notícias…"
           aria-label="Pesquisar no Lorion"
         />
         <button type="submit" className="button primary">
