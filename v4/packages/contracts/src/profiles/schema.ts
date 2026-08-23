@@ -6,6 +6,23 @@ import { socialPostSchema } from '../posts/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { publicationSchema } from '../research/schema.js';
 
+export const profileTypeSchema = z.enum([
+  'estudante',
+  'universitario',
+  'professor',
+  'pesquisador',
+  'designer',
+  'instituicao',
+  'criador',
+  'jornalista',
+  'comunicador',
+  'monitor',
+  'tecnico',
+  'profissional',
+  'autodidata',
+  'internauta',
+]);
+
 export const profileSchema = z.object({
   userId: z.string(),
   username: z.string(),
@@ -25,6 +42,27 @@ export const profileSchema = z.object({
   verifiedAt: timestamp,
   createdAt: timestamp,
   updatedAt: timestamp,
+});
+
+export const updateProfileInputSchema = z.object({
+  displayName: z.string().trim().min(2).max(80),
+  bio: z.string().trim().max(500).default(''),
+  profileType: profileTypeSchema,
+  institution: z.string().trim().max(160).default(''),
+  course: z.string().trim().max(160).default(''),
+  educationLevel: z.string().trim().max(100).default(''),
+  isPublic: z.boolean(),
+});
+
+export const profileMediaKindSchema = z.enum(['avatar', 'cover']);
+export const profileMediaFileSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  mime: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+  dataBase64: z.string().min(4),
+});
+export const profileMediaUploadInputSchema = z.object({
+  kind: profileMediaKindSchema,
+  file: profileMediaFileSchema,
 });
 
 export const bookshelfStatusSchema = z.enum(['want_to_read', 'reading', 'read', 'abandoned']);
@@ -64,6 +102,11 @@ export const bookshelfPrivacyInputSchema = z.object({
 });
 
 export type Profile = z.infer<typeof profileSchema>;
+export type ProfileType = z.infer<typeof profileTypeSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
+export type ProfileMediaKind = z.infer<typeof profileMediaKindSchema>;
+export type ProfileMediaFile = z.infer<typeof profileMediaFileSchema>;
+export type ProfileMediaUploadInput = z.infer<typeof profileMediaUploadInputSchema>;
 export type BookshelfStatus = z.infer<typeof bookshelfStatusSchema>;
 export type ProfileBookshelfItem = z.infer<typeof profileBookshelfItemSchema>;
 export type ProfileCommunity = z.infer<typeof profileCommunitySchema>;
