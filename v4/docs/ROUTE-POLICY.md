@@ -2,36 +2,42 @@
 
 A v4 não herda aliases históricos automaticamente. Uma rota só existe quando representa uma superfície atual e necessária do produto.
 
-## Rotas principais
+## Rotas ativas principais
 
 - `/` — Lorion / feed
-- `/explorar` — descoberta + busca global + pessoas + notícias como filtro
+- `/explorar` — descoberta + busca global + pessoas, discussões e notícias como filtros
 - `/comunidades` — comunidades
-- `/biblioteca` — biblioteca
+- `/biblioteca` — biblioteca exclusiva para livros
 - `/projetos` — workspace pessoal de projetos
 - `/perfil/:username` — perfil social
 
-## Rotas de detalhe
+## Rotas ativas de detalhe
 
 - `/comunidades/:slug` — comunidade
-- `/comunidades/:slug/discussoes/:id` — discussão em comunidade
+- `/discussoes/:id` — discussão compartilhável; a associação com comunidade será resolvida pela camada de conteúdo, sem depender de URL histórica
 - `/livros/:id` — livro
 - `/pesquisas/:slug` — pesquisa
 - `/projetos/:id` — projeto compartilhável
 - `/projetos/lab/:id` — projeto de código
 - `/noticias/:slug` — notícia/editorial compartilhável
 
-## Rotas secundárias
+## Rotas ativas secundárias
 
-- `/projetos/lab` — laboratório de código
-- `/notificacoes` — histórico completo de notificações
+- `/projetos/lab` — laboratório de código dentro de Projetos
+- `/notificacoes` — histórico privado de notificações
 - `/entrar` — login
 - `/cadastro` — cadastro
-- `/recuperar-senha` — recuperação
-- `/redefinir-senha` — redefinição
-- `/admin/*` — administração
-- `/diretrizes` — diretrizes
-- `/sobre` — sobre
+
+## Rotas planejadas, ainda não registradas
+
+Estas experiências só ganham rota quando o fluxo correspondente estiver implementado e testado:
+
+- recuperação e redefinição de senha;
+- administração;
+- diretrizes;
+- sobre/institucional.
+
+Não registrar páginas vazias ou aliases apenas para antecipar funcionalidades futuras.
 
 ## Funções que não são páginas
 
