@@ -1,0 +1,53 @@
+.profile-social-stats.compact {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.profile-social-actions [data-profile-follow] {
+  min-width: 112px;
+}
+
+.profile-social-actions [data-profile-follow][aria-pressed='true'] {
+  color: var(--ink);
+}
+
+.social-author-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.social-author-link:hover strong,
+.social-author-link:focus-visible strong {
+  color: var(--brass2);
+}
+
+@media (max-width: 1000px) {
+  .profile-social-stats.compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .profile-social-stats.compact span:nth-child(4) {
+    border-left: 0;
+  }
+
+  .profile-social-stats.compact span:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 700px) {
+  .profile-social-stats.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-social-stats.compact span:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .profile-social-stats.compact span:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .profile-social-actions [data-profile-follow] {
+    width: 100%;
+  }
+}
