@@ -27,26 +27,28 @@ export function CommunityPage() {
     );
   }
 
-  const joined = membership?.joined ?? community.joined;
-  const role = membership?.role ?? community.role;
-  const moderationStatus = membership?.memberModerationStatus ?? community.memberModerationStatus;
-  const memberCount = membership?.memberCount ?? community.memberCount;
+  const currentCommunity = community;
+  const joined = membership?.joined ?? currentCommunity.joined;
+  const role = membership?.role ?? currentCommunity.role;
+  const moderationStatus =
+    membership?.memberModerationStatus ?? currentCommunity.memberModerationStatus;
+  const memberCount = membership?.memberCount ?? currentCommunity.memberCount;
 
   async function toggleMembership() {
-    if (updating || community.visibility !== 'public') return;
+    if (updating || currentCommunity.visibility !== 'public') return;
     if (!data?.user) return;
 
     setUpdating(true);
     setMembershipError('');
     try {
       const result = joined
-        ? await services.communities.leave(community.slug)
-        : await services.communities.join(community.slug);
+        ? await services.communities.leave(currentCommunity.slug)
+        : await services.communities.join(currentCommunity.slug);
       setMembership(result);
       pushToast({
         message: result.joined
-          ? `Você entrou em ${community.name}.`
-          : `Você saiu de ${community.name}.`,
+          ? `Você entrou em ${currentCommunity.name}.`
+          : `Você saiu de ${currentCommunity.name}.`,
         tone: 'success',
       });
     } catch (cause) {
@@ -61,17 +63,17 @@ export function CommunityPage() {
 
   return (
     <FeaturePage
-      eyebrow={community.area}
-      title={community.name}
-      description={community.description || 'Espaço de colaboração no Lorion.'}
+      eyebrow={currentCommunity.area}
+      title={currentCommunity.name}
+      description={currentCommunity.description || 'Espaço de colaboração no Lorion.'}
     >
       <section className="community-overview">
         <div className="community-stats">
           <span>
             <strong>{memberCount}</strong> membros
           </span>
-          <span>{community.visibility === 'public' ? 'Pública' : 'Acesso controlado'}</span>
-          {community.official ? <span>Comunidade oficial</span> : null}
+          <span>{currentCommunity.visibility === 'public' ? 'Pública' : 'Acesso controlado'}</span>
+          {currentCommunity.official ? <span>Comunidade oficial</span> : null}
           {joined && role ? <span>Seu papel: {role}</span> : null}
         </div>
 
@@ -80,7 +82,7 @@ export function CommunityPage() {
             <p className="inline-error" role="alert">
               Sua participação nesta comunidade foi removida pela moderação.
             </p>
-          ) : community.visibility !== 'public' ? (
+          ) : currentCommunity.visibility !== 'public' ? (
             <p>A entrada nesta comunidade depende de aprovação.</p>
           ) : data?.user ? (
             <button
@@ -94,7 +96,7 @@ export function CommunityPage() {
           ) : (
             <Link
               className="button primary"
-              to={`/entrar?retorno=${encodeURIComponent(`/comunidades/${community.slug}`)}`}
+              to={`/entrar?retorno=${encodeURIComponent(`/comunidades/${currentCommunity.slug}`)}`}
             >
               Entre para participar
             </Link>
@@ -107,11 +109,11 @@ export function CommunityPage() {
           ) : null}
         </div>
 
-        {community.rules.length ? (
+        {currentCommunity.rules.length ? (
           <div className="community-rules">
             <h2>Diretrizes da comunidade</h2>
             <ul>
-              {community.rules.map((rule) => (
+              {currentCommunity.rules.map((rule) => (
                 <li key={rule}>{rule}</li>
               ))}
             </ul>
