@@ -5,6 +5,7 @@ import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { CommunityHub } from '../components/CommunityHub.js';
 
 export function CommunityPage() {
   const { slug = '' } = useParams();
@@ -74,6 +75,7 @@ export function CommunityPage() {
     membership?.memberModerationStatus ?? currentCommunity.memberModerationStatus;
   const memberCount = membership?.memberCount ?? currentCommunity.memberCount;
   const canModerate = joined && (role === 'leader' || role === 'moderator');
+  const canAccessHub = currentCommunity.visibility === 'public' || joined;
 
   async function updateMembership(action: 'join' | 'leave' | 'request') {
     if (updating || !data?.user) return;
@@ -261,6 +263,8 @@ export function CommunityPage() {
             ) : null}
           </section>
         ) : null}
+
+        <CommunityHub slug={currentCommunity.slug} canAccess={canAccessHub} />
 
         {currentCommunity.rules.length ? (
           <div className="community-rules">

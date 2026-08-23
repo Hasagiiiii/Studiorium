@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  communityHubSchema,
   communityMembershipRequestSchema,
   communityMembershipResultSchema,
   parseBootstrap,
@@ -74,6 +75,38 @@ test('solicitação de comunidade mantém identidade navegável e data opcional'
 
   assert.equal(request.username, 'pessoa');
   assert.equal(request.userId, 'usr_1');
+});
+
+test('hub de comunidade mantém membros navegáveis e discussões relacionais', () => {
+  const hub = communityHubSchema.parse({
+    members: [
+      {
+        userId: 'usr_1',
+        username: 'pessoa',
+        displayName: 'Pessoa',
+        role: 'member',
+        joinedAt: null,
+      },
+    ],
+    discussions: [
+      {
+        id: 'dsc_1',
+        authorId: 'usr_1',
+        authorName: 'Pessoa',
+        title: 'Tema da comunidade',
+        body: 'Conteúdo',
+        category: 'Geral',
+        status: 'published',
+        createdAt: null,
+        updatedAt: null,
+      },
+    ],
+    canCreateDiscussion: true,
+  });
+
+  assert.equal(hub.members[0]?.username, 'pessoa');
+  assert.equal(hub.discussions[0]?.authorId, 'usr_1');
+  assert.equal(hub.canCreateDiscussion, true);
 });
 
 test('projeto v4 exige ownerId e não aceita o contrato legado userId sozinho', () => {

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { optionalText } from '../common/fields.js';
+import { discussionSchema } from '../discussions/schema.js';
 
 export const communityMembershipStatusSchema = z
   .enum(['active', 'left', 'pending', 'rejected'])
@@ -40,6 +41,22 @@ export const communityMembershipRequestSchema = z.object({
 
 export const communityMembershipRequestsSchema = z.array(communityMembershipRequestSchema);
 
+export const communityMemberSchema = z.object({
+  userId: z.string(),
+  username: z.string(),
+  displayName: z.string(),
+  role: z.string(),
+  joinedAt: z.string().nullable(),
+});
+
+export const communityHubSchema = z.object({
+  members: z.array(communityMemberSchema).default([]),
+  discussions: z.array(discussionSchema).default([]),
+  canCreateDiscussion: z.boolean().default(false),
+});
+
 export type Community = z.infer<typeof communitySchema>;
 export type CommunityMembershipResult = z.infer<typeof communityMembershipResultSchema>;
 export type CommunityMembershipRequest = z.infer<typeof communityMembershipRequestSchema>;
+export type CommunityMember = z.infer<typeof communityMemberSchema>;
+export type CommunityHub = z.infer<typeof communityHubSchema>;
