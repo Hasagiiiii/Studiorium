@@ -1,4 +1,4 @@
-import { E, date, html, initials, num, state } from '../runtime.js';
+import { api, E, date, html, initials, num, state } from '../runtime.js';
 import { empty, layout, link, publicationCard } from './core.js';
 
 const PROFILE_TYPE_LABELS = {
@@ -76,7 +76,7 @@ function authorCard(profile) {
     <span class="profile-card-cover">
       ${profile.hasCover
         ? html`<img src="${mediaUrl(profile, 'cover')}" alt="" loading="lazy" />`
-        : '<span class="profile-cover-fallback">Studiorium</span>'}
+        : '<span class="profile-cover-fallback">Lorion</span>'}
     </span>
     <span class="profile-card-main">
       ${avatar(profile, 'profile-card-avatar')}
@@ -90,7 +90,7 @@ function authorCard(profile) {
         <small>@${E(profile.username)} · ${E(typeLabel(profile.profileType))}</small>
       </span>
     </span>
-    <span class="profile-card-bio">${E(profile.bio || 'Membro da comunidade Studiorium.')}</span>
+    <span class="profile-card-bio">${E(profile.bio || 'Membro da comunidade Lorion.')}</span>
     <span class="profile-card-stats">
       <span><strong>${stats.publications.length}</strong><small>publicações</small></span>
       <span><strong>${stats.projects.length}</strong><small>projetos</small></span>
@@ -117,8 +117,8 @@ function autores() {
       <div class="shell">
         <div class="profile-directory-heading">
           <div>
-            <div class="eyebrow">Communitas</div>
-            <h1 class="pagetitle">Pessoas do Studiorium</h1>
+            <div class="eyebrow">Lorion · Pessoas</div>
+            <h1 class="pagetitle">Pessoas do Lorion</h1>
             <p>Encontre autores, estudantes, professores, especialistas e criadores.</p>
           </div>
           ${state.me?.username
@@ -182,7 +182,37 @@ function contentPanel(label, count, content, emptyText) {
   </details>`;
 }
 
-function authorDetail(username) {
+async function socialSummary(profile) {
+  try {
+    return await api(`/api/profiles/${encodeURIComponent(profile.username)}/social`);
+  } catch {
+    return {
+      followerCount: 0,
+      followingCount: 0,
+      isFollowing: false,
+      canFollow: false,
+    };
+  }
+}
+
+function profileAction(profile, social, isOwn) {
+  if (isOwn) return link('/escrivaninha', 'Gerenciar na Escrivaninha', 'solid');
+  if (!state.me) return link('/login', 'Entrar para seguir', 'outline');
+  if (!social.canFollow) return '';
+
+  const following = social.isFollowing === true;
+  return html`<button
+    class="${following ? 'outline' : 'solid'}"
+    type="button"
+    data-profile-follow="${E(profile.username)}"
+    data-following="${following ? 'true' : 'false'}"
+    aria-pressed="${following ? 'true' : 'false'}"
+  >
+    ${following ? 'Seguindo' : 'Seguir'}
+  </button>`;
+}
+
+async function authorDetail(username) {
   const profile = publicProfileFor(username);
   if (!profile) {
     layout(
@@ -198,6 +228,7 @@ function authorDetail(username) {
 
   const stats = profileStats(profile);
   const isOwn = state.me?.id === profile.userId;
+  const social = await socialSummary(profile);
 
   layout(
     html`<section class="profile-social-page profile-social-minimal">
@@ -209,7 +240,7 @@ function authorDetail(username) {
                   src="${mediaUrl(profile, 'cover')}"
                   alt="Capa de ${E(profile.displayName)}"
                 />`
-              : '<span class="profile-cover-fallback large">Studiorium</span>'}
+              : '<span class="profile-cover-fallback large">Lorion</span>'}
           </div>
           <div class="profile-social-header compact">
             ${avatar(profile, 'profile-social-avatar')}
@@ -232,11 +263,11 @@ function authorDetail(username) {
                 ${profile.educationLevel ? `<span>${E(profile.educationLevel)}</span>` : ''}
               </div>
             </div>
-            <div class="profile-social-actions">
-              ${isOwn ? link('/escrivaninha', 'Gerenciar na Escrivaninha', 'solid') : ''}
-            </div>
+            <div class="profile-social-actions">${profileAction(profile, social, isOwn)}</div>
           </div>
           <div class="profile-social-stats compact">
+            <span><strong>${num(social.followerCount)}</strong><small>Seguidores</small></span>
+            <span><strong>${num(social.followingCount)}</strong><small>Seguindo</small></span>
             <span><strong>${stats.publications.length}</strong><small>Publicações</small></span>
             <span><strong>${stats.projects.length}</strong><small>Projetos</small></span>
             <span><strong>${stats.discussions.length}</strong><small>Discussões</small></span>
