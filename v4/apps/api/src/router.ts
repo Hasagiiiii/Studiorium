@@ -11,10 +11,7 @@ import {
   requestPasswordReset,
   resetPassword,
 } from './features/auth/handler.js';
-import {
-  joinCommunity,
-  leaveCommunityMembership,
-} from './features/communities/handler.js';
+import { joinCommunity, leaveCommunityMembership } from './features/communities/handler.js';
 import {
   notifications,
   readAllNotifications,
@@ -70,11 +67,7 @@ async function route(request: ApiRequest, response: ApiResponse) {
 
   const communityMembershipMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/membership$/);
   if (communityMembershipMatch && method === 'POST') {
-    return json(
-      response,
-      200,
-      await joinCommunity(request, communityMembershipMatch[1] || ''),
-    );
+    return json(response, 200, await joinCommunity(request, communityMembershipMatch[1] || ''));
   }
   if (communityMembershipMatch && method === 'DELETE') {
     return json(
