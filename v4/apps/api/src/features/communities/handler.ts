@@ -7,10 +7,7 @@ import {
   requestRestrictedCommunity,
   resolveCommunityMembershipRequest,
 } from '@lorion/database';
-import type {
-  CommunityMembershipRequest,
-  CommunityMembershipResult,
-} from '@lorion/contracts';
+import type { CommunityMembershipRequest, CommunityMembershipResult } from '@lorion/contracts';
 import { requireSessionUser } from '../../auth/session.js';
 import type { ApiRequest } from '../../core/http/types.js';
 import { forbidden, HttpError, notFound } from '../../core/http/errors.js';
@@ -75,7 +72,11 @@ export async function requestCommunityMembership(
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
   if (community.visibility === 'public') {
-    throw new HttpError(409, 'Esta comunidade é pública. Entre diretamente.', 'COMMUNITY_IS_PUBLIC');
+    throw new HttpError(
+      409,
+      'Esta comunidade é pública. Entre diretamente.',
+      'COMMUNITY_IS_PUBLIC',
+    );
   }
   if (community.visibility === 'private') {
     throw forbidden('Esta comunidade não aceita solicitações públicas de entrada.');
