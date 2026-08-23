@@ -19,16 +19,25 @@ export const publicUserSchema = z
   .nullable()
   .default(null);
 
+const DEFAULT_SITE_SETTINGS = {
+  site_title: 'Lorion',
+  hero_title: 'Conhecimento conecta.',
+  hero_text: '',
+  site_notice: '',
+  registrations_open: true,
+  maintenance_mode: false,
+};
+
 export const siteSettingsSchema = z
   .object({
-    site_title: z.string().default('Lorion'),
-    hero_title: z.string().default('Conhecimento conecta.'),
-    hero_text: z.string().default(''),
-    site_notice: z.string().default(''),
-    registrations_open: z.boolean().default(true),
-    maintenance_mode: z.boolean().default(false),
+    site_title: z.string().default(DEFAULT_SITE_SETTINGS.site_title),
+    hero_title: z.string().default(DEFAULT_SITE_SETTINGS.hero_title),
+    hero_text: z.string().default(DEFAULT_SITE_SETTINGS.hero_text),
+    site_notice: z.string().default(DEFAULT_SITE_SETTINGS.site_notice),
+    registrations_open: z.boolean().default(DEFAULT_SITE_SETTINGS.registrations_open),
+    maintenance_mode: z.boolean().default(DEFAULT_SITE_SETTINGS.maintenance_mode),
   })
-  .default({});
+  .default(DEFAULT_SITE_SETTINGS);
 
 export const bootstrapSchema = z.object({
   publications: z.array(publicationSchema).default([]),
