@@ -3,8 +3,7 @@ import { optionalText, timestamp } from '../common/fields.js';
 
 export const projectSchema = z.object({
   id: z.string(),
-  ownerId: z.string().optional(),
-  userId: z.string().optional(),
+  ownerId: z.string(),
   title: z.string(),
   type: z.string().default('Projeto'),
   visibility: z.string().default('private'),
