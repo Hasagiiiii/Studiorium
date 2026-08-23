@@ -4,13 +4,11 @@ import {
   listBookReviews,
   listBooks,
   listCommunities,
-  listPublicCodeProjects,
   listPublicProfiles,
   listPublicProjects,
   listPublishedDiscussions,
   listPublishedNews,
   listPublishedResearch,
-  listUserCodeProjects,
   listUserProjects,
   loadSiteSettings,
 } from '@lorion/database';
@@ -29,7 +27,6 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
 
   const [
     publications,
-    publicCodeProjects,
     news,
     books,
     bookReviews,
@@ -39,12 +36,10 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     communities,
     settings,
     personalProjects,
-    personalCodeProjects,
     ownProfile,
     user,
   ] = await Promise.all([
     listPublishedResearch(),
-    listPublicCodeProjects(),
     listPublishedNews(),
     listBooks(),
     listBookReviews(),
@@ -54,7 +49,6 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     listCommunities(viewerId),
     loadSiteSettings(),
     viewerId ? listUserProjects(viewerId) : Promise.resolve([]),
-    viewerId ? listUserCodeProjects(viewerId) : Promise.resolve([]),
     viewerId ? findProfileByUserId(viewerId) : Promise.resolve(null),
     publicSessionUser(request),
   ]);
@@ -66,7 +60,6 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
 
   return bootstrapSchema.parse({
     publications,
-    codeProjects: mergeById(publicCodeProjects, personalCodeProjects),
     news,
     books,
     bookReviews,
