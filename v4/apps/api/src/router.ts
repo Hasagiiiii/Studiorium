@@ -25,6 +25,7 @@ import {
   readAllNotifications,
   readNotification,
 } from './features/notifications/handler.js';
+import { createPost } from './features/posts/handler.js';
 import { profileDetail, updateBookshelfPrivacy } from './features/profiles/handler.js';
 import { createUserProject } from './features/projects/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
@@ -72,6 +73,10 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   if (method === 'POST' && path === '/api/v4/auth/logout') {
     return json(response, 200, await logout(request, response));
+  }
+
+  if (method === 'POST' && path === '/api/v4/posts') {
+    return json(response, 201, await createPost(request));
   }
 
   const communityHubMatch = path.match(/^\/api\/v4\/communities\/([^/]+)\/hub$/);

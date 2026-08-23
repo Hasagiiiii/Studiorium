@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { discussionSchema } from '../discussions/schema.js';
 import { newsArticleSchema } from '../news/schema.js';
+import { socialPostSchema } from '../posts/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { publicationSchema } from '../research/schema.js';
 
@@ -24,6 +25,7 @@ export const followMutationSchema = z.object({
 const feedBase = z.object({ at: z.string().nullable().default(null) });
 
 export const feedEntrySchema = z.discriminatedUnion('type', [
+  feedBase.extend({ type: z.literal('post'), item: socialPostSchema }),
   feedBase.extend({ type: z.literal('publication'), item: publicationSchema }),
   feedBase.extend({ type: z.literal('discussion'), item: discussionSchema }),
   feedBase.extend({ type: z.literal('news'), item: newsArticleSchema }),

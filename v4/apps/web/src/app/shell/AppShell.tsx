@@ -7,7 +7,7 @@ import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
 import { services } from '../services/services.js';
 import { useAppState } from '../state/useAppState.js';
 
-const CREATE_RETURN_PATH = '/projetos?criar=1';
+const CREATE_RETURN_PATH = '/';
 
 export function AppShell({ children }: PropsWithChildren) {
   const { data, reload } = useAppState();
@@ -44,7 +44,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
   function toggleCreate() {
     if (!me) {
-      pushToast({ message: 'Entre na sua conta para criar um projeto.', tone: 'info' });
+      pushToast({ message: 'Entre na sua conta para criar conteúdo.', tone: 'info' });
       navigate(`/entrar?retorno=${encodeURIComponent(CREATE_RETURN_PATH)}`);
       return;
     }

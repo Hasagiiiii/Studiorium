@@ -5,6 +5,7 @@ export * from './discussions/schema.js';
 export * from './library/schema.js';
 export * from './news/schema.js';
 export * from './notifications/schema.js';
+export * from './posts/schema.js';
 export * from './profiles/schema.js';
 export * from './projects/schema.js';
 export * from './research/schema.js';

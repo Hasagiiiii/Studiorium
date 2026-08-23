@@ -82,7 +82,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
   return (
     <section className="community-hub">
       <h2>Espaço da comunidade</h2>
-      {status === 'loading' ? <p>Carregando membros e discussões…</p> : null}
+      {status === 'loading' ? <p>Carregando membros, publicações e discussões…</p> : null}
       {status === 'error' ? (
         <p className="inline-error" role="alert">
           {error}
@@ -91,6 +91,27 @@ export function CommunityHub({ slug, canAccess }: Props) {
 
       {hub ? (
         <>
+          <div className="community-posts">
+            <h3>Publicações</h3>
+            {hub.posts.length ? (
+              <ul>
+                {hub.posts.map((post) => (
+                  <li key={post.id}>
+                    <div>
+                      <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>
+                        {post.authorName}
+                      </Link>
+                      {post.title ? <strong> · {post.title}</strong> : null}
+                    </div>
+                    <p>{post.body}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Ainda não há publicações nesta comunidade.</p>
+            )}
+          </div>
+
           {hub.canCreateDiscussion ? (
             <form className="auth-form community-discussion-form" onSubmit={submitDiscussion}>
               <h3>Nova discussão</h3>

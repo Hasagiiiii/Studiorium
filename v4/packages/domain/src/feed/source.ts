@@ -2,11 +2,16 @@ import type { BootstrapPayload, FeedEntry } from '@lorion/contracts';
 
 export type FeedSources = Pick<
   BootstrapPayload,
-  'publications' | 'discussions' | 'news' | 'projects'
+  'posts' | 'publications' | 'discussions' | 'news' | 'projects'
 >;
 
 export function buildFeedFromSources(data: FeedSources): FeedEntry[] {
   return [
+    ...data.posts.map((item) => ({
+      type: 'post' as const,
+      item,
+      at: item.createdAt,
+    })),
     ...data.publications.map((item) => ({
       type: 'publication' as const,
       item,

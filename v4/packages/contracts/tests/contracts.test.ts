@@ -5,16 +5,19 @@ import {
   communityHubSchema,
   communityMembershipRequestSchema,
   communityMembershipResultSchema,
+  createPostInputSchema,
   parseBootstrap,
   profileDetailSchema,
   profileSchema,
   projectSchema,
   publicUserSchema,
+  socialPostSchema,
 } from '../src/index.js';
 
 test('bootstrap aplica defaults seguros para payload vazio', () => {
   const payload = parseBootstrap({});
 
+  assert.deepEqual(payload.posts, []);
   assert.deepEqual(payload.publications, []);
   assert.deepEqual(payload.news, []);
   assert.deepEqual(payload.books, []);
@@ -80,7 +83,7 @@ test('solicitação de comunidade mantém identidade navegável e data opcional'
   assert.equal(request.userId, 'usr_1');
 });
 
-test('hub de comunidade mantém membros navegáveis e discussões relacionais', () => {
+test('hub de comunidade mantém membros, posts e discussões relacionais', () => {
   const hub = communityHubSchema.parse({
     members: [
       {
@@ -89,6 +92,21 @@ test('hub de comunidade mantém membros navegáveis e discussões relacionais', 
         displayName: 'Pessoa',
         role: 'member',
         joinedAt: null,
+      },
+    ],
+    posts: [
+      {
+        id: 'pst_1',
+        authorId: 'usr_1',
+        authorUsername: 'pessoa',
+        authorName: 'Pessoa',
+        title: '',
+        body: 'Atualização da comunidade',
+        community: { id: 'community_1', slug: 'geral', name: 'Geral' },
+        visibility: 'public',
+        moderationStatus: 'clear',
+        createdAt: null,
+        updatedAt: null,
       },
     ],
     discussions: [
@@ -108,8 +126,33 @@ test('hub de comunidade mantém membros navegáveis e discussões relacionais', 
   });
 
   assert.equal(hub.members[0]?.username, 'pessoa');
+  assert.equal(hub.posts[0]?.authorId, 'usr_1');
   assert.equal(hub.discussions[0]?.authorId, 'usr_1');
   assert.equal(hub.canCreateDiscussion, true);
+});
+
+test('post social preserva autor, comunidade opcional e visibilidade explícita', () => {
+  const post = socialPostSchema.parse({
+    id: 'pst_1',
+    authorId: 'usr_1',
+    authorUsername: 'pessoa',
+    authorName: 'Pessoa',
+    body: 'Conteúdo social',
+    visibility: 'public',
+    moderationStatus: 'clear',
+    createdAt: null,
+    updatedAt: null,
+  });
+  const input = createPostInputSchema.parse({
+    title: '  Título  ',
+    body: '  Texto  ',
+    communitySlug: null,
+  });
+
+  assert.equal(post.community, null);
+  assert.equal(input.title, 'Título');
+  assert.equal(input.body, 'Texto');
+  assert.throws(() => createPostInputSchema.parse({ body: '' }));
 });
 
 test('perfil mantém estante privada por padrão e detalhe social com coleções vazias', () => {
@@ -125,6 +168,7 @@ test('perfil mantém estante privada por padrão e detalhe social com coleções
   const detail = profileDetailSchema.parse({ profile, isOwnProfile: false });
 
   assert.equal(profile.bookshelfPublic, false);
+  assert.deepEqual(detail.posts, []);
   assert.deepEqual(detail.publications, []);
   assert.deepEqual(detail.projects, []);
   assert.deepEqual(detail.communities, []);

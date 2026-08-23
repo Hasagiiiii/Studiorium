@@ -3,6 +3,7 @@ import {
   findProfileByUsername,
   listProfileBookshelf,
   listProfileCommunities,
+  listProfileSocialPosts,
   listPublicProjectsByUserId,
   listPublishedResearchByOwnerId,
   setBookshelfVisibility,
@@ -44,7 +45,8 @@ export async function profileDetail(
   const isOwnProfile = viewer?.id === profile.userId;
   if (!profile.isPublic && !isOwnProfile) throw notFound('Perfil não encontrado.');
 
-  const [publications, projects, communities, bookshelf] = await Promise.all([
+  const [posts, publications, projects, communities, bookshelf] = await Promise.all([
+    listProfileSocialPosts(profile.userId, viewer?.id),
     listPublishedResearchByOwnerId(profile.userId),
     listPublicProjectsByUserId(profile.userId),
     listProfileCommunities(profile.userId, isOwnProfile),
@@ -55,6 +57,7 @@ export async function profileDetail(
 
   return profileDetailSchema.parse({
     profile,
+    posts,
     publications,
     projects,
     communities,

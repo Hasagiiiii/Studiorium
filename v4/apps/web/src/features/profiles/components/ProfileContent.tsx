@@ -25,6 +25,32 @@ export function ProfileContent({
     <div className="profile-content-sections">
       <section className="profile-content-section">
         <h2>Publicações</h2>
+        {detail.posts.length ? (
+          <ul>
+            {detail.posts.map((post) => (
+              <li key={post.id}>
+                <div>
+                  {post.title ? <strong>{post.title}</strong> : <strong>Publicação</strong>}
+                  {post.community ? (
+                    <>
+                      <span> em </span>
+                      <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>
+                        {post.community.name}
+                      </Link>
+                    </>
+                  ) : null}
+                </div>
+                <p>{post.body}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Nenhuma publicação visível deste autor.</p>
+        )}
+      </section>
+
+      <section className="profile-content-section">
+        <h2>Pesquisas</h2>
         {detail.publications.length ? (
           <ul>
             {detail.publications.map((publication) => (
@@ -37,7 +63,7 @@ export function ProfileContent({
             ))}
           </ul>
         ) : (
-          <p>Nenhuma publicação pública deste autor.</p>
+          <p>Nenhuma pesquisa publicada por este autor.</p>
         )}
       </section>
 

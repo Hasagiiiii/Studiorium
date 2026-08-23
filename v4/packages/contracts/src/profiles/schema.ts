@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
 import { bookSchema } from '../library/schema.js';
+import { socialPostSchema } from '../posts/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { publicationSchema } from '../research/schema.js';
 
@@ -44,6 +45,7 @@ export const profileCommunitySchema = z.object({
 
 export const profileDetailSchema = z.object({
   profile: profileSchema,
+  posts: z.array(socialPostSchema).default([]),
   publications: z.array(publicationSchema).default([]),
   projects: z.array(projectSchema).default([]),
   communities: z.array(profileCommunitySchema).default([]),
