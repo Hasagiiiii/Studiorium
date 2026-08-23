@@ -9,7 +9,7 @@
     }
   },
   "installCommand": "npm ci --ignore-scripts --no-audit --no-fund && cd v4 && npm install --ignore-scripts --no-audit --no-fund",
-  "buildCommand": "cd v4 && npm run build --workspace @lorion/web && npm run smoke:deploy",
+  "buildCommand": "cd v4 && npm run build:server && npm run build --workspace @lorion/web && npm run smoke:deploy",
   "outputDirectory": "v4/apps/web/dist",
   "functions": {
     "api/v4.ts": { "maxDuration": 20 }
