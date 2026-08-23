@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
 import { bookSchema } from '../library/schema.js';
+import { profileSafetyStateSchema } from '../moderation/schema.js';
 import { socialPostSchema } from '../posts/schema.js';
 import { projectSchema } from '../projects/schema.js';
 import { publicationSchema } from '../research/schema.js';
@@ -50,6 +51,11 @@ export const profileDetailSchema = z.object({
   projects: z.array(projectSchema).default([]),
   communities: z.array(profileCommunitySchema).default([]),
   bookshelf: z.array(profileBookshelfItemSchema).default([]),
+  viewerSafety: profileSafetyStateSchema.default({
+    blocked: false,
+    muted: false,
+    blockedByTarget: false,
+  }),
   isOwnProfile: z.boolean().default(false),
 });
 
