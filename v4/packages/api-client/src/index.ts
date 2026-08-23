@@ -1,4 +1,5 @@
 export * from './core/client.js';
+export * from './features/admin/service.js';
 export * from './features/auth/service.js';
 export * from './features/bootstrap/service.js';
 export * from './features/communities/service.js';
