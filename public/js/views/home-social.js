@@ -1,4 +1,4 @@
-import { state, E, html as markup } from '../runtime.js';
+import { api, state, E, html as markup } from '../runtime.js';
 import { link, layout, empty } from './core.js';
 import { buildFeed, feedPost, normalizeFeedMode } from './home-social-feed.js';
 import {
@@ -97,7 +97,24 @@ function feedTabs(mode) {
   </nav>`;
 }
 
-function followingEmptyState() {
+async function loadFollowingSource(mode) {
+  if (mode !== 'following' || !state.me) return { entries: [], failed: false };
+  try {
+    const data = await api('/api/social/feed');
+    return { entries: Array.isArray(data.feed) ? data.feed : [], failed: false };
+  } catch {
+    return { entries: [], failed: true };
+  }
+}
+
+function followingEmptyState(failed = false) {
+  if (failed) {
+    return markup`<div class="empty">
+      <p>Não foi possível carregar sua timeline agora.</p>
+      <div class="actions">${link('/?feed=following', 'Tentar novamente', 'outline')}</div>
+    </div>`;
+  }
+
   const action = state.me
     ? link('/autores', 'Encontrar pessoas', 'outline')
     : link('/login', 'Entrar para seguir pessoas', 'outline');
@@ -111,11 +128,11 @@ function followingEmptyState() {
   </div>`;
 }
 
-function feedColumn(feed, mode) {
+function feedColumn(feed, mode, followingFailed = false) {
   const posts = feed.length
     ? feed.map(feedPost).join('')
     : mode === 'following'
-      ? followingEmptyState()
+      ? followingEmptyState(followingFailed)
       : empty('A timeline ainda não tem publicações para este filtro.');
 
   return markup`<main class="social-feed">
@@ -165,13 +182,14 @@ function rightSidebar(data) {
   </aside>`;
 }
 
-function home() {
+async function home() {
   const data = socialData();
   const mode = normalizeFeedMode(state.query?.get('feed') || 'for-you');
-  const feed = buildFeed(mode);
+  const followingSource = await loadFollowingSource(mode);
+  const feed = buildFeed(mode, followingSource.entries);
   const content = markup`${hero()}
     <section class="social-shell shell">
-      ${leftSidebar(data)} ${feedColumn(feed, mode)} ${rightSidebar(data)}
+      ${leftSidebar(data)} ${feedColumn(feed, mode, followingSource.failed)} ${rightSidebar(data)}
     </section>`;
 
   layout(content);
