@@ -23,7 +23,11 @@ export function ProfilePage() {
   const { pushToast } = useToast();
   const profile = data?.profiles.find((item) => item.username === username);
   const isOwnProfile = Boolean(data?.user?.username && data.user.username === username);
-  const [social, setSocial] = useState<SocialState>({ status: 'loading', value: null, error: null });
+  const [social, setSocial] = useState<SocialState>({
+    status: 'loading',
+    value: null,
+    error: null,
+  });
   const [posts, setPosts] = useState<PostsState>({ status: 'loading', value: [], error: null });
   const [updating, setUpdating] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
@@ -58,10 +62,16 @@ export function ProfilePage() {
     }
   }, [profile]);
 
-  useEffect(() => { void loadSocial(); }, [loadSocial]);
-  useEffect(() => { void loadPosts(); }, [loadPosts]);
   useEffect(() => {
-    const refresh = () => { void loadPosts(); };
+    void loadSocial();
+  }, [loadSocial]);
+  useEffect(() => {
+    void loadPosts();
+  }, [loadPosts]);
+  useEffect(() => {
+    const refresh = () => {
+      void loadPosts();
+    };
     window.addEventListener('lorion:profile-posts-refresh', refresh);
     return () => window.removeEventListener('lorion:profile-posts-refresh', refresh);
   }, [loadPosts]);
@@ -104,7 +114,8 @@ export function ProfilePage() {
         tone: 'success',
       });
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
       setSocial((current) => ({ status: 'error', value: current.value, error: message }));
       pushToast({ message, tone: 'error' });
     } finally {
@@ -151,41 +162,69 @@ export function ProfilePage() {
 
         {social.value ? (
           <div className="profile-social">
-            <span><strong>{social.value.followerCount}</strong> seguidores</span>
-            <span><strong>{social.value.followingCount}</strong> seguindo</span>
+            <span>
+              <strong>{social.value.followerCount}</strong> seguidores
+            </span>
+            <span>
+              <strong>{social.value.followingCount}</strong> seguindo
+            </span>
             {!isOwnProfile && social.value.canFollow ? (
               data?.user ? (
-                <button className="button primary" type="button" disabled={updating} onClick={() => void toggleFollow()}>
-                  {updating ? 'Atualizando…' : social.value.isFollowing ? 'Deixar de seguir' : 'Seguir'}
+                <button
+                  className="button primary"
+                  type="button"
+                  disabled={updating}
+                  onClick={() => void toggleFollow()}
+                >
+                  {updating
+                    ? 'Atualizando…'
+                    : social.value.isFollowing
+                      ? 'Deixar de seguir'
+                      : 'Seguir'}
                 </button>
               ) : (
-                <Link className="button primary" to="/entrar">Entre para seguir</Link>
+                <Link className="button primary" to="/entrar">
+                  Entre para seguir
+                </Link>
               )
             ) : null}
           </div>
         ) : null}
 
-        {social.status === 'loading' && !social.value ? <p className="feed-status">Carregando conexões…</p> : null}
+        {social.status === 'loading' && !social.value ? (
+          <p className="feed-status">Carregando conexões…</p>
+        ) : null}
         {social.status === 'error' ? (
           <div className="inline-feedback" role="alert">
             <p className="inline-error">{social.error}</p>
-            <button className="button secondary" type="button" onClick={() => void loadSocial()}>Tentar novamente</button>
+            <button className="button secondary" type="button" onClick={() => void loadSocial()}>
+              Tentar novamente
+            </button>
           </div>
         ) : null}
       </section>
 
       <section className="profile-posts" aria-labelledby="profile-posts-title">
         <header className="section-heading">
-          <div><span className="eyebrow">Perfil</span><h2 id="profile-posts-title">Publicações</h2></div>
+          <div>
+            <span className="eyebrow">Perfil</span>
+            <h2 id="profile-posts-title">Publicações</h2>
+          </div>
         </header>
-        {posts.status === 'loading' && posts.value.length === 0 ? <p className="feed-status">Carregando publicações…</p> : null}
+        {posts.status === 'loading' && posts.value.length === 0 ? (
+          <p className="feed-status">Carregando publicações…</p>
+        ) : null}
         {posts.status === 'error' ? (
           <div className="inline-feedback" role="alert">
             <p className="inline-error">{posts.error}</p>
-            <button className="button secondary" type="button" onClick={() => void loadPosts()}>Tentar novamente</button>
+            <button className="button secondary" type="button" onClick={() => void loadPosts()}>
+              Tentar novamente
+            </button>
           </div>
         ) : null}
-        {posts.status !== 'loading' && posts.value.length === 0 ? <p className="feed-status">Nenhuma publicação ainda.</p> : null}
+        {posts.status !== 'loading' && posts.value.length === 0 ? (
+          <p className="feed-status">Nenhuma publicação ainda.</p>
+        ) : null}
         <div className="profile-post-list">
           {posts.value.map((post, index) => (
             <div className="profile-post-item" key={post.id}>

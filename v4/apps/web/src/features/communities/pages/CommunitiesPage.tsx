@@ -5,7 +5,9 @@ import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 export function CommunitiesPage() {
   const { data } = useAppState();
   const communities = data?.communities ?? [];
-  const publicProjects = (data?.projects ?? []).filter((project) => project.visibility === 'public').slice(0, 12);
+  const publicProjects = (data?.projects ?? [])
+    .filter((project) => project.visibility === 'public')
+    .slice(0, 12);
 
   return (
     <FeaturePage

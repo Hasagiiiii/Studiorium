@@ -40,8 +40,11 @@ export async function uploadToSignedMediaUrl(signedUrl: string, file: File): Pro
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
-    const record = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
-    throw new Error(typeof record.message === 'string' ? record.message : 'Falha ao enviar a mídia.');
+    const record =
+      payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
+    throw new Error(
+      typeof record.message === 'string' ? record.message : 'Falha ao enviar a mídia.',
+    );
   }
 }
 

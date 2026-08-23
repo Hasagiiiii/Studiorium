@@ -24,13 +24,18 @@ export function useFeed(modeValue: string | null) {
 
   useEffect(() => {
     let active = true;
-    if (!data) return () => { active = false; };
+    if (!data)
+      return () => {
+        active = false;
+      };
 
     if (mode === 'following' && !data.user) {
       setRemoteEntries([]);
       setStatus('ready');
       setError(null);
-      return () => { active = false; };
+      return () => {
+        active = false;
+      };
     }
 
     setStatus('loading');
@@ -49,14 +54,15 @@ export function useFeed(modeValue: string | null) {
         setError(cause instanceof Error ? cause.message : 'Não foi possível carregar o feed.');
       });
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [mode, data, requestVersion]);
 
   const entries = useMemo(() => {
     if (!data) return [];
-    const source = mode === 'following'
-      ? remoteEntries
-      : [...buildPublicFeed(data), ...remoteEntries];
+    const source =
+      mode === 'following' ? remoteEntries : [...buildPublicFeed(data), ...remoteEntries];
     return sortFeed(source, mode as FeedMode, data.profiles).slice(0, 160);
   }, [data, mode, remoteEntries]);
 

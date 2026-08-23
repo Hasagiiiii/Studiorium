@@ -45,9 +45,15 @@ function extensionFor(mime: string): string {
   throw badRequest('Formato de mídia não permitido.', 'UNSUPPORTED_MEDIA_TYPE');
 }
 
-function validateMedia(kind: 'image' | 'video', mimeType: string, sizeBytes: number, duration?: number | null) {
+function validateMedia(
+  kind: 'image' | 'video',
+  mimeType: string,
+  sizeBytes: number,
+  duration?: number | null,
+) {
   const allowed = kind === 'image' ? IMAGE_TYPES : VIDEO_TYPES;
-  if (!allowed.has(mimeType)) throw badRequest('Formato de mídia não permitido.', 'UNSUPPORTED_MEDIA_TYPE');
+  if (!allowed.has(mimeType))
+    throw badRequest('Formato de mídia não permitido.', 'UNSUPPORTED_MEDIA_TYPE');
   const maxBytes = kind === 'image' ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
   if (sizeBytes > maxBytes) {
     throw badRequest(
@@ -55,7 +61,10 @@ function validateMedia(kind: 'image' | 'video', mimeType: string, sizeBytes: num
       'MEDIA_TOO_LARGE',
     );
   }
-  if (kind === 'video' && (duration == null || !Number.isFinite(duration) || duration <= 0 || duration > 60)) {
+  if (
+    kind === 'video' &&
+    (duration == null || !Number.isFinite(duration) || duration <= 0 || duration > 60)
+  ) {
     throw badRequest('O vídeo deve ter duração máxima de 60 segundos.', 'VIDEO_DURATION_INVALID');
   }
 }
@@ -63,9 +72,10 @@ function validateMedia(kind: 'image' | 'video', mimeType: string, sizeBytes: num
 function storageMetadata(entry: unknown): { size: number | null; mimeType: string | null } {
   if (!entry || typeof entry !== 'object') return { size: null, mimeType: null };
   const record = entry as Record<string, unknown>;
-  const metadata = record.metadata && typeof record.metadata === 'object'
-    ? (record.metadata as Record<string, unknown>)
-    : {};
+  const metadata =
+    record.metadata && typeof record.metadata === 'object'
+      ? (record.metadata as Record<string, unknown>)
+      : {};
   const sizeValue = metadata.size ?? record.size;
   const mimeValue = metadata.mimetype ?? metadata.mimeType ?? record.mimetype;
   const size = Number(sizeValue);
@@ -85,7 +95,8 @@ export async function reserveMedia(request: ApiRequest): Promise<MediaReservatio
   const bucket = socialMediaBucket();
   const storage = database().storage.from(bucket);
   const signed = await storage.createSignedUploadUrl(path, { upsert: false });
-  if (signed.error || !signed.data) throw new Error(signed.error?.message || 'Falha ao preparar upload.');
+  if (signed.error || !signed.data)
+    throw new Error(signed.error?.message || 'Falha ao preparar upload.');
   const publicUrl = storage.getPublicUrl(path).data.publicUrl;
 
   await reserveSocialMedia({
@@ -114,36 +125,48 @@ export async function finalizeMedia(request: ApiRequest): Promise<SocialPost['me
   const input = mediaFinalizeInputSchema.parse(await readJson(request));
   const media = await findOwnedSocialMedia(input.mediaId, user.id);
   if (!media) throw notFound('Mídia não encontrada.');
-  if (media.status === 'ready') return socialPostSchema.shape.media.parse({
-    id: media.id,
-    kind: media.kind,
-    url: media.public_url,
-    mimeType: media.mime_type,
-    sizeBytes: Number(media.size_bytes),
-    width: media.width,
-    height: media.height,
-    durationSeconds: media.duration_seconds,
-  });
+  if (media.status === 'ready')
+    return socialPostSchema.shape.media.parse({
+      id: media.id,
+      kind: media.kind,
+      url: media.public_url,
+      mimeType: media.mime_type,
+      sizeBytes: Number(media.size_bytes),
+      width: media.width,
+      height: media.height,
+      durationSeconds: media.duration_seconds,
+    });
 
   const slash = media.path.lastIndexOf('/');
   const folder = slash >= 0 ? media.path.slice(0, slash) : '';
   const filename = slash >= 0 ? media.path.slice(slash + 1) : media.path;
-  const listed = await database().storage.from(media.bucket).list(folder, { search: filename, limit: 10 });
+  const listed = await database()
+    .storage.from(media.bucket)
+    .list(folder, { search: filename, limit: 10 });
   if (listed.error) throw new Error(listed.error.message);
   const object = listed.data?.find((entry) => entry.name === filename);
   if (!object) throw badRequest('O arquivo ainda não foi enviado.', 'MEDIA_NOT_UPLOADED');
   const actual = storageMetadata(object);
   const actualSize = actual.size ?? Number(media.size_bytes);
   const actualMime = actual.mimeType || media.mime_type;
-  validateMedia(media.kind, actualMime, actualSize, input.durationSeconds ?? media.duration_seconds);
+  validateMedia(
+    media.kind,
+    actualMime,
+    actualSize,
+    input.durationSeconds ?? media.duration_seconds,
+  );
   if (actualMime !== media.mime_type) {
-    throw badRequest('O tipo real do arquivo não corresponde ao upload autorizado.', 'MEDIA_MIME_MISMATCH');
+    throw badRequest(
+      'O tipo real do arquivo não corresponde ao upload autorizado.',
+      'MEDIA_MIME_MISMATCH',
+    );
   }
 
   const finalized = await finalizeSocialMedia(media.id, user.id, {
-    width: media.kind === 'image' ? input.width ?? null : null,
-    height: media.kind === 'image' ? input.height ?? null : null,
-    duration_seconds: media.kind === 'video' ? Number(input.durationSeconds ?? media.duration_seconds) : null,
+    width: media.kind === 'image' ? (input.width ?? null) : null,
+    height: media.kind === 'image' ? (input.height ?? null) : null,
+    duration_seconds:
+      media.kind === 'video' ? Number(input.durationSeconds ?? media.duration_seconds) : null,
     size_bytes: actualSize,
     mime_type: actualMime,
   });
@@ -165,7 +188,8 @@ export async function discardMedia(request: ApiRequest, id: string) {
   const media = await findOwnedSocialMedia(id, user.id);
   if (!media) return { ok: true };
   const removed = await database().storage.from(media.bucket).remove([media.path]);
-  if (removed.error && !/not found/i.test(removed.error.message)) throw new Error(removed.error.message);
+  if (removed.error && !/not found/i.test(removed.error.message))
+    throw new Error(removed.error.message);
   await deleteOwnedSocialMedia(id, user.id);
   return { ok: true };
 }
@@ -180,22 +204,27 @@ export async function publishPost(request: ApiRequest): Promise<SocialPost> {
     if (!body) throw badRequest('Escreva algo antes de publicar.');
     if (media) throw badRequest('Publicação de texto não deve conter arquivo.');
   } else {
-    if (!media || media.status !== 'ready') throw badRequest('Finalize o upload da mídia antes de publicar.');
+    if (!media || media.status !== 'ready')
+      throw badRequest('Finalize o upload da mídia antes de publicar.');
     if ((input.kind === 'photo' || input.kind === 'photo_text') && media.kind !== 'image') {
       throw badRequest('Escolha uma imagem para este tipo de publicação.');
     }
-    if (input.kind === 'video' && media.kind !== 'video') throw badRequest('Escolha um vídeo válido.');
+    if (input.kind === 'video' && media.kind !== 'video')
+      throw badRequest('Escolha um vídeo válido.');
     if (input.kind === 'photo_text' && !body) throw badRequest('Adicione um texto à foto.');
-    if (input.kind === 'photo' && body) throw badRequest('Use “foto + texto” para publicar uma legenda.');
+    if (input.kind === 'photo' && body)
+      throw badRequest('Use “foto + texto” para publicar uma legenda.');
   }
 
-  return socialPostSchema.parse(await createSocialPost({
-    id: entityId('pst'),
-    userId: user.id,
-    kind: input.kind,
-    body,
-    mediaId: media?.id || null,
-  }));
+  return socialPostSchema.parse(
+    await createSocialPost({
+      id: entityId('pst'),
+      userId: user.id,
+      kind: input.kind,
+      body,
+      mediaId: media?.id || null,
+    }),
+  );
 }
 
 export async function removePost(request: ApiRequest, id: string) {
@@ -206,7 +235,8 @@ export async function removePost(request: ApiRequest, id: string) {
     const media = await findOwnedSocialMedia(post.media_id, user.id);
     if (media) {
       const removed = await database().storage.from(media.bucket).remove([media.path]);
-      if (removed.error && !/not found/i.test(removed.error.message)) throw new Error(removed.error.message);
+      if (removed.error && !/not found/i.test(removed.error.message))
+        throw new Error(removed.error.message);
       await deleteOwnedSocialMedia(media.id, user.id);
     }
   }
@@ -215,7 +245,9 @@ export async function removePost(request: ApiRequest, id: string) {
 
 export async function publicPostsFeed(): Promise<FeedResponse> {
   const posts = await listPublicSocialPosts();
-  return feedResponseSchema.parse({ feed: posts.map((item) => ({ type: 'post', at: item.createdAt, item })) });
+  return feedResponseSchema.parse({
+    feed: posts.map((item) => ({ type: 'post', at: item.createdAt, item })),
+  });
 }
 
 export async function profilePosts(username: string): Promise<SocialPostsResponse> {

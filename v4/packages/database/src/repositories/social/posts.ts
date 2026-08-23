@@ -45,7 +45,9 @@ function mediaFromRow(row: MediaRow | undefined): PostMedia | null {
 async function hydratePosts(rows: PostRow[]): Promise<SocialPost[]> {
   if (!rows.length) return [];
   const userIds = [...new Set(rows.map((row) => row.user_id))];
-  const mediaIds = [...new Set(rows.map((row) => row.media_id).filter((id): id is string => Boolean(id)))];
+  const mediaIds = [
+    ...new Set(rows.map((row) => row.media_id).filter((id): id is string => Boolean(id))),
+  ];
 
   const [profilesResult, mediaResult] = await Promise.all([
     database().from('profiles').select('user_id,username,display_name').in('user_id', userIds),
@@ -59,7 +61,10 @@ async function hydratePosts(rows: PostRow[]): Promise<SocialPost[]> {
   const profiles = new Map(
     (profilesResult.data || []).map((row) => [
       String(row.user_id),
-      { username: String(row.username || ''), displayName: String(row.display_name || row.username || 'Membro') },
+      {
+        username: String(row.username || ''),
+        displayName: String(row.display_name || row.username || 'Membro'),
+      },
     ]),
   );
   const media = new Map((mediaResult.data || []).map((row) => [String(row.id), row as MediaRow]));

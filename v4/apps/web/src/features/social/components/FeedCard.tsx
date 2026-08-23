@@ -54,7 +54,11 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
             <img
               className="post-media"
               src={entry.item.media.url}
-              alt={text ? `Imagem publicada por ${entry.item.authorDisplayName}` : `Imagem de ${entry.item.authorDisplayName}`}
+              alt={
+                text
+                  ? `Imagem publicada por ${entry.item.authorDisplayName}`
+                  : `Imagem de ${entry.item.authorDisplayName}`
+              }
               loading="lazy"
               decoding="async"
               width={entry.item.media.width || undefined}

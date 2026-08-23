@@ -57,7 +57,8 @@ async function inspectMedia(file: File, kind: ComposerKind): Promise<MediaMeta> 
         image.onerror = () => reject(new Error('Não foi possível ler a imagem.'));
         image.src = url;
       });
-      if (!dimensions.width || !dimensions.height) throw new Error('A imagem não possui dimensões válidas.');
+      if (!dimensions.width || !dimensions.height)
+        throw new Error('A imagem não possui dimensões válidas.');
       return { durationSeconds: null, width: dimensions.width, height: dimensions.height };
     } finally {
       URL.revokeObjectURL(url);
@@ -247,7 +248,9 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduceMotion ? 0.01 : 0.18 }}
-          onMouseDown={() => { if (!submitting) onClose(); }}
+          onMouseDown={() => {
+            if (!submitting) onClose();
+          }}
         >
           <motion.section
             ref={dialogRef}
@@ -288,31 +291,59 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
             {!data?.user ? (
               <div className="inline-feedback">
                 <p>Entre na sua conta para publicar ou criar projetos no seu workspace.</p>
-                <Link className="button primary" to="/entrar" onClick={onClose}>Entrar</Link>
+                <Link className="button primary" to="/entrar" onClick={onClose}>
+                  Entrar
+                </Link>
               </div>
             ) : null}
 
             {!kind ? (
               <div className="create-launcher-grid">
-                <button type="button" className="create-launcher-action" onClick={() => chooseKind('text')}>
-                  <strong>Texto</strong><span>Publique uma ideia, atualização ou reflexão.</span>
+                <button
+                  type="button"
+                  className="create-launcher-action"
+                  onClick={() => chooseKind('text')}
+                >
+                  <strong>Texto</strong>
+                  <span>Publique uma ideia, atualização ou reflexão.</span>
                 </button>
-                <button type="button" className="create-launcher-action" onClick={() => chooseKind('photo')}>
-                  <strong>Foto</strong><span>Compartilhe uma imagem sem legenda.</span>
+                <button
+                  type="button"
+                  className="create-launcher-action"
+                  onClick={() => chooseKind('photo')}
+                >
+                  <strong>Foto</strong>
+                  <span>Compartilhe uma imagem sem legenda.</span>
                 </button>
-                <button type="button" className="create-launcher-action" onClick={() => chooseKind('photo_text')}>
-                  <strong>Foto + texto</strong><span>Combine imagem e contexto em uma publicação.</span>
+                <button
+                  type="button"
+                  className="create-launcher-action"
+                  onClick={() => chooseKind('photo_text')}
+                >
+                  <strong>Foto + texto</strong>
+                  <span>Combine imagem e contexto em uma publicação.</span>
                 </button>
                 <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
-                  <strong>Projeto</strong><span>Crie no workspace pessoal e escolha a visibilidade.</span>
+                  <strong>Projeto</strong>
+                  <span>Crie no workspace pessoal e escolha a visibilidade.</span>
                 </Link>
-                <button type="button" className="create-launcher-action" onClick={() => chooseKind('video')}>
-                  <strong>Vídeo curto</strong><span>MP4 ou WebM, com até 60 segundos.</span>
+                <button
+                  type="button"
+                  className="create-launcher-action"
+                  onClick={() => chooseKind('video')}
+                >
+                  <strong>Vídeo curto</strong>
+                  <span>MP4 ou WebM, com até 60 segundos.</span>
                 </button>
               </div>
             ) : (
               <div className="composer-form">
-                <button type="button" className="composer-back" onClick={() => chooseKind('text')} disabled={submitting}>
+                <button
+                  type="button"
+                  className="composer-back"
+                  onClick={() => chooseKind('text')}
+                  disabled={submitting}
+                >
                   ← Trocar tipo
                 </button>
 
@@ -324,7 +355,11 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                       onChange={(event) => setBody(event.target.value)}
                       maxLength={5000}
                       rows={5}
-                      placeholder={kind === 'photo_text' ? 'Conte o contexto desta foto…' : 'O que você quer compartilhar?'}
+                      placeholder={
+                        kind === 'photo_text'
+                          ? 'Conte o contexto desta foto…'
+                          : 'O que você quer compartilhar?'
+                      }
                       disabled={submitting}
                     />
                     <small>{body.length}/5000</small>
@@ -337,7 +372,11 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept={kind === 'video' ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp,image/avif'}
+                      accept={
+                        kind === 'video'
+                          ? 'video/mp4,video/webm'
+                          : 'image/jpeg,image/png,image/webp,image/avif'
+                      }
                       disabled={submitting}
                       onChange={(event) => {
                         const next = event.currentTarget.files?.[0] || null;
@@ -346,19 +385,35 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                       }}
                     />
                     <small>
-                      {kind === 'video' ? 'Até 60 s e 80 MB. Qualidade original preservada.' : 'JPG, PNG, WebP ou AVIF, até 12 MB.'}
+                      {kind === 'video'
+                        ? 'Até 60 s e 80 MB. Qualidade original preservada.'
+                        : 'JPG, PNG, WebP ou AVIF, até 12 MB.'}
                     </small>
                     {file ? <span className="composer-file-name">{file.name}</span> : null}
                   </label>
                 ) : null}
 
-                {error ? <p className="inline-error" role="alert">{error}</p> : null}
+                {error ? (
+                  <p className="inline-error" role="alert">
+                    {error}
+                  </p>
+                ) : null}
 
                 <div className="composer-actions">
-                  <button type="button" className="button secondary" onClick={() => setKind(null)} disabled={submitting}>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    onClick={() => setKind(null)}
+                    disabled={submitting}
+                  >
                     Cancelar
                   </button>
-                  <button type="button" className="button primary" onClick={() => void publish()} disabled={submitting || !data?.user}>
+                  <button
+                    type="button"
+                    className="button primary"
+                    onClick={() => void publish()}
+                    disabled={submitting || !data?.user}
+                  >
                     {submitting ? 'Publicando…' : 'Publicar'}
                   </button>
                 </div>

@@ -93,7 +93,11 @@ async function route(request: ApiRequest, response: ApiResponse) {
   }
   const mediaMatch = path.match(/^\/api\/v4\/social\/media\/([^/]+)$/);
   if (mediaMatch && method === 'DELETE') {
-    return json(response, 200, await discardMedia(request, decodeURIComponent(mediaMatch[1] || '')));
+    return json(
+      response,
+      200,
+      await discardMedia(request, decodeURIComponent(mediaMatch[1] || '')),
+    );
   }
   if (method === 'POST' && path === '/api/v4/social/posts') {
     return json(response, 201, await publishPost(request));
