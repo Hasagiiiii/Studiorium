@@ -2,6 +2,7 @@ import { state, E, date, num } from '../runtime.js';
 import { link } from './core.js';
 
 const FEED_MODES = new Set(['for-you', 'following', 'discussions', 'trending', 'recent']);
+const FOLLOWING_TYPES = new Set(['publication', 'discussion', 'tech', 'news', 'project']);
 
 function profileFor(id, fallback = '') {
   return (state.boot.profiles || []).find(
@@ -15,10 +16,10 @@ function isVerified(profile) {
 }
 
 function authorLine(item) {
-  const ownerId = item.ownerId || item.authorId || item.contributorId;
-  const profile = profileFor(ownerId, item.authorName);
-  const name = profile?.displayName || item.authorName || 'Comunidade Studiorium';
-  const initial = E((name || 'S').slice(0, 1).toUpperCase());
+  const owner = item.ownerId || item.authorId || item.contributorId;
+  const profile = profileFor(owner, item.authorName);
+  const name = profile?.displayName || item.authorName || 'Comunidade Lorion';
+  const initial = E((name || 'L').slice(0, 1).toUpperCase());
   const itemDate = date(item.createdAt || item.publishedAt || item.updatedAt);
   const badge = isVerified(profile) ? '<small class="social-verified">✓ Verificado</small>' : '';
   const authorName = profile?.username
@@ -152,6 +153,24 @@ function newsPost(news) {
   ].join('');
 }
 
+function projectPost(project) {
+  const detailPath = `/projetos/${encodeURIComponent(project.id)}`;
+  const excerpt = (project.sections || []).find((section) => section.content)?.content || '';
+  const summary = E(excerpt.slice(0, 340) || 'Projeto compartilhado com a comunidade.');
+
+  return [
+    '<article class="social-post project-card">',
+    authorLine(project),
+    `<div class="social-kicker">Projeto · ${E(project.type || 'Criação')}</div>`,
+    `<h2>${link(detailPath, E(project.title))}</h2>`,
+    `<p>${summary}</p>`,
+    '<div class="social-actions">',
+    link(detailPath, '⌘ Abrir projeto', 'social-action'),
+    '</div>',
+    '</article>',
+  ].join('');
+}
+
 function normalizeFeedMode(mode) {
   return FEED_MODES.has(mode) ? mode : 'for-you';
 }
@@ -168,6 +187,18 @@ function numeric(value) {
 
 function ownerId(entry) {
   return entry.item.ownerId || entry.item.authorId || entry.item.contributorId || null;
+}
+
+function normalizeFollowingFeed(entries) {
+  if (!Array.isArray(entries)) return [];
+  return entries.filter(
+    (entry) =>
+      entry &&
+      FOLLOWING_TYPES.has(entry.type) &&
+      entry.item &&
+      typeof entry.item === 'object' &&
+      typeof entry.item.id === 'string',
+  );
 }
 
 function freshnessScore(entry) {
@@ -222,16 +253,14 @@ function sourceFeed() {
   ];
 }
 
-function buildFeed(mode = 'for-you') {
+function buildFeed(mode = 'for-you', remoteFollowingFeed = []) {
   const selectedMode = normalizeFeedMode(mode);
   const feed = sourceFeed();
 
   if (selectedMode === 'following') {
-    const following = new Set(state.social?.followingIds || []);
-    return feed
-      .filter((entry) => following.has(ownerId(entry)))
+    return normalizeFollowingFeed(remoteFollowingFeed)
       .sort((a, b) => timestamp(b) - timestamp(a))
-      .slice(0, 14);
+      .slice(0, 40);
   }
 
   if (selectedMode === 'discussions') {
@@ -263,6 +292,7 @@ function feedPost(entry) {
   if (entry.type === 'publication') return publicationPost(entry.item);
   if (entry.type === 'discussion') return discussionPost(entry.item);
   if (entry.type === 'tech') return techPost(entry.item);
+  if (entry.type === 'project') return projectPost(entry.item);
   return newsPost(entry.item);
 }
 
