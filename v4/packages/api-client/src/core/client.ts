@@ -34,21 +34,22 @@ export class ApiClient {
   async request<T>(path: string, schema: RuntimeSchema<T>, options: RequestOptions = {}): Promise<T> {
     const method = String(options.method || 'GET').toUpperCase();
     const attempts = method === 'GET' ? 3 : 1;
+    const { body: inputBody, ...requestOptions } = options;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const headers = new Headers(options.headers);
+        const headers = new Headers(requestOptions.headers);
         const init: RequestInit = {
-          ...options,
+          ...requestOptions,
           method,
           headers,
           credentials: 'same-origin',
         };
 
-        if (options.body !== undefined) {
+        if (inputBody !== undefined) {
           headers.set('Content-Type', 'application/json');
-          init.body = JSON.stringify(options.body);
+          init.body = JSON.stringify(inputBody);
         }
 
         const response = await fetch(`${this.baseUrl}${path}`, init);
