@@ -17,7 +17,11 @@ export function ProfilePage() {
   const { pushToast } = useToast();
   const profile = data?.profiles.find((item) => item.username === username);
   const isOwnProfile = Boolean(data?.user?.username && data.user.username === username);
-  const [social, setSocial] = useState<SocialState>({ status: 'loading', value: null, error: null });
+  const [social, setSocial] = useState<SocialState>({
+    status: 'loading',
+    value: null,
+    error: null,
+  });
   const [updating, setUpdating] = useState(false);
 
   const loadSocial = useCallback(async () => {
@@ -71,11 +75,14 @@ export function ProfilePage() {
         },
       });
       pushToast({
-        message: result.following ? `Você está seguindo @${profileUsername}.` : `Você deixou de seguir @${profileUsername}.`,
+        message: result.following
+          ? `Você está seguindo @${profileUsername}.`
+          : `Você deixou de seguir @${profileUsername}.`,
         tone: 'success',
       });
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
       setSocial((current) => ({ status: 'error', value: current.value, error: message }));
       pushToast({ message, tone: 'error' });
     } finally {

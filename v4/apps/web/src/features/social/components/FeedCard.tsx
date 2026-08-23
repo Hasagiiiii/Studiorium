@@ -33,7 +33,10 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
       layout={!reduceMotion}
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
+      transition={{
+        duration: reduceMotion ? 0.01 : 0.24,
+        delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035,
+      }}
     >
       <span className="eyebrow">{label(entry)}</span>
       <h2>

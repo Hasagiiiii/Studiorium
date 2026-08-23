@@ -62,7 +62,9 @@ export function NotificationsPage() {
       );
       setUnreadCount((current) => Math.max(0, current - 1));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Não foi possível atualizar a notificação.');
+      setError(
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar a notificação.',
+      );
     } finally {
       setUpdatingId(null);
     }
@@ -80,7 +82,9 @@ export function NotificationsPage() {
       setUnreadCount(0);
       setError('');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Não foi possível atualizar as notificações.');
+      setError(
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar as notificações.',
+      );
     } finally {
       setMarkingAll(false);
     }

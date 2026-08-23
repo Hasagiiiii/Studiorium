@@ -57,16 +57,16 @@ export function HomePage() {
           {visibleItems.length ? (
             <>
               {visibleItems.map((entry, index) => (
-                <FeedCard
-                  key={`${entry.type}:${entry.item.id}`}
-                  entry={entry}
-                  index={index % 8}
-                />
+                <FeedCard key={`${entry.type}:${entry.item.id}`} entry={entry} index={index % 8} />
               ))}
               {hasMore ? (
                 <div ref={sentinelRef} className="feed-sentinel" aria-busy="true">
                   <FeedSkeleton cards={1} />
-                  <button className="button secondary feed-load-more" type="button" onClick={loadMore}>
+                  <button
+                    className="button secondary feed-load-more"
+                    type="button"
+                    onClick={loadMore}
+                  >
                     Carregar mais
                   </button>
                 </div>

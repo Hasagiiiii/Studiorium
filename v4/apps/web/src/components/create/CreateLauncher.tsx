@@ -28,7 +28,8 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
     if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = 'hidden';
     window.setTimeout(() => closeButtonRef.current?.focus(), 0);
 
@@ -116,7 +117,9 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
             <div className="create-launcher-grid">
               <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
                 <strong>Projeto</strong>
-                <span>Crie um projeto no seu workspace e escolha se ele será privado ou público.</span>
+                <span>
+                  Crie um projeto no seu workspace e escolha se ele será privado ou público.
+                </span>
               </Link>
             </div>
           </motion.section>
