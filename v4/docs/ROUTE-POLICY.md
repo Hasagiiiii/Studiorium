@@ -1,30 +1,30 @@
 # Política de rotas da v4
 
-A v4 não herda aliases históricos automaticamente. Uma rota só existe quando representa uma área atual do produto.
+A v4 não herda aliases históricos automaticamente. Uma rota só existe quando representa uma superfície atual e necessária do produto.
 
-## Rotas canônicas
+## Rotas principais
 
 - `/` — Lorion / feed
-- `/explorar` — descoberta
-- `/buscar` — busca global
-- `/criar` — launcher de criação
-- `/pessoas` — descoberta de pessoas
-- `/perfil/:username` — perfil
+- `/explorar` — descoberta + busca global + pessoas + notícias como filtro
 - `/comunidades` — comunidades
+- `/biblioteca` — biblioteca
+- `/projetos` — workspace pessoal de projetos
+- `/perfil/:username` — perfil social
+
+## Rotas de detalhe
+
 - `/comunidades/:slug` — comunidade
 - `/comunidades/:slug/discussoes/:id` — discussão em comunidade
-- `/biblioteca` — biblioteca
 - `/livros/:id` — livro
 - `/pesquisas/:slug` — pesquisa
-- `/projetos` — projetos
-- `/projetos/:id` — projeto
-- `/projetos/lab` — laboratório de código
+- `/projetos/:id` — projeto compartilhável
 - `/projetos/lab/:id` — projeto de código
-- `/oficina` — Oficina
-- `/oficina/:slug` — conteúdo da Oficina
-- `/noticias` — notícias
-- `/noticias/:slug` — notícia
-- `/notificacoes` — notificações
+- `/noticias/:slug` — notícia/editorial compartilhável
+
+## Rotas secundárias
+
+- `/projetos/lab` — laboratório de código
+- `/notificacoes` — histórico completo de notificações
 - `/entrar` — login
 - `/cadastro` — cadastro
 - `/recuperar-senha` — recuperação
@@ -33,8 +33,24 @@ A v4 não herda aliases históricos automaticamente. Uma rota só existe quando 
 - `/diretrizes` — diretrizes
 - `/sobre` — sobre
 
+## Funções que não são páginas
+
+- Busca — vive em `/explorar?q=...` e pode ser acionada por overlay/command.
+- Pessoas — filtro de `/explorar`.
+- Criar — launcher/composer do botão `+`.
+- Notícias — aparecem no Feed/Explorar; somente o detalhe possui URL própria.
+- Oficina — não existe como superfície independente. Conteúdo técnico pertence às comunidades e categorias.
+- Seguidores/seguindo — módulos do perfil, drawer/modal ou rota secundária apenas quando deep-link justificar.
+- Loren — camada assistiva integrada ao app; não precisa ser uma aba isolada.
+
 ## Rotas legadas que não existem na v4
 
+- `/buscar`
+- `/pessoas`
+- `/criar`
+- `/noticias`
+- `/oficina`
+- `/oficina/*`
 - `/tech`
 - `/library`
 - `/acervo`
@@ -52,10 +68,8 @@ A v4 não herda aliases históricos automaticamente. Uma rota só existe quando 
 - `/publicar`
 - `/laboratorio/*`
 
-Esses caminhos não ganham páginas ocultas nem aliases silenciosos. Durante a migração, qualquer redirect necessário precisa ser documentado individualmente e possuir data para remoção.
+Esses caminhos não ganham páginas ocultas nem aliases silenciosos. Qualquer redirect temporário de migração precisa ser documentado individualmente e possuir data de remoção.
 
-## Nomenclatura
+## Regra
 
-A interface usa **Oficina**. O rótulo histórico `Officina Technica` não faz parte da v4.
-
-O laboratório de código pertence a **Projetos** e usa `/projetos/lab`.
+Antes de registrar uma rota nova, verificar se a experiência realmente precisa de URL própria. Caso contrário, usar feature embutida: modal, drawer, filtro, composer, tab interna, popover ou seção.
