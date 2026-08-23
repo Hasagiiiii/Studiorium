@@ -1,7 +1,6 @@
 export * from './core/client.js';
 export * from './repositories/auth/session.js';
 export * from './repositories/communities/read.js';
-export * from './repositories/creation/read.js';
 export * from './repositories/discussions/read.js';
 export * from './repositories/library/read.js';
 export * from './repositories/news/read.js';
@@ -9,4 +8,3 @@ export * from './repositories/profiles/read.js';
 export * from './repositories/projects/read.js';
 export * from './repositories/research/read.js';
 export * from './repositories/settings/read.js';
-export * from './repositories/tech/read.js';
