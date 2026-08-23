@@ -7,13 +7,33 @@ import {
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
+const ACTIVE_LINKS = [
+  /^\/$/,
+  /^\/explorar(?:[?#].*)?$/,
+  /^\/comunidades(?:\/[^/?#]+)?(?:[?#].*)?$/,
+  /^\/discussoes\/[^/?#]+(?:[?#].*)?$/,
+  /^\/biblioteca(?:[?#].*)?$/,
+  /^\/livros\/[^/?#]+(?:[?#].*)?$/,
+  /^\/pesquisas\/[^/?#]+(?:[?#].*)?$/,
+  /^\/projetos(?:\/[^/?#]+)?(?:[?#].*)?$/,
+  /^\/noticias\/[^/?#]+(?:[?#].*)?$/,
+  /^\/perfil\/[^/?#]+(?:[?#].*)?$/,
+  /^\/notificacoes(?:[?#].*)?$/,
+] as const;
+
+function normalizeNotificationLink(value: unknown): string {
+  const link = typeof value === 'string' ? value.trim() : '';
+  if (!link.startsWith('/') || link.startsWith('//')) return '';
+  return ACTIVE_LINKS.some((pattern) => pattern.test(link)) ? link : '';
+}
+
 function mapNotification(row: Record<string, unknown>): Notification {
   return notificationSchema.parse({
     id: row.id,
     type: row.type,
     title: row.title,
     message: row.message,
-    link: row.link,
+    link: normalizeNotificationLink(row.link),
     readAt: row.read_at,
     createdAt: row.created_at,
   });
@@ -37,22 +57,4 @@ export async function listNotifications(
     notifications,
     unreadCount: notifications.filter((item) => !item.readAt).length,
   });
-}
-
-export async function markNotificationRead(userId: string, notificationId: string): Promise<void> {
-  const result = await database()
-    .from('notifications')
-    .update({ read_at: new Date().toISOString() })
-    .eq('id', notificationId)
-    .eq('user_id', userId);
-  if (result.error) throw new Error(result.error.message);
-}
-
-export async function markAllNotificationsRead(userId: string): Promise<void> {
-  const result = await database()
-    .from('notifications')
-    .update({ read_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .is('read_at', null);
-  if (result.error) throw new Error(result.error.message);
 }
