@@ -6,6 +6,7 @@ import {
 } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
+import { excludedUserIdsForViewer, hasBlockBetween } from '../moderation/read.js';
 
 export type AccessibleContentItem = {
   id: string;
@@ -55,6 +56,9 @@ export async function findAccessibleContentItem(
   if (!result.data) return null;
 
   const item = result.data as ContentItemRow;
+  if (viewerId && viewerId !== item.author_id && (await hasBlockBetween(viewerId, item.author_id))) {
+    return null;
+  }
   if (item.visibility === 'community' && viewerId !== item.author_id) {
     if (!viewerId || !item.community_id) return null;
     const membership = await database()
@@ -117,7 +121,10 @@ export async function listContentComments(
   ) as CommentRow[];
   if (!rows.length) return [];
 
-  const authorIds = [...new Set(rows.map((row) => row.author_id))];
+  const excluded = new Set(viewerId ? await excludedUserIdsForViewer(viewerId) : []);
+  const visibleRows = rows.filter((row) => !excluded.has(row.author_id));
+  if (!visibleRows.length) return [];
+  const authorIds = [...new Set(visibleRows.map((row) => row.author_id))];
   const profiles = queryList(
     await database()
       .from('profiles')
@@ -126,7 +133,7 @@ export async function listContentComments(
   ) as ProfileRow[];
   const profileByUserId = new Map(profiles.map((profile) => [profile.user_id, profile]));
 
-  return rows.flatMap((row) => {
+  return visibleRows.flatMap((row) => {
     const profile = profileByUserId.get(row.author_id);
     if (!profile) return [];
     return [
