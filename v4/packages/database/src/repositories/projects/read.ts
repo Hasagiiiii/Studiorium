@@ -18,6 +18,10 @@ function mapProject(row: Record<string, unknown>): Project {
   });
 }
 
+function mapProjects(rows: unknown[]): Project[] {
+  return rows.map((row) => mapProject(row as Record<string, unknown>));
+}
+
 export async function listPublicProjects(): Promise<Project[]> {
   const result = await database()
     .from('projects')
@@ -27,7 +31,19 @@ export async function listPublicProjects(): Promise<Project[]> {
     .order('updated_at', { ascending: false })
     .limit(200);
 
-  return queryList(result).map((row) => mapProject(row as Record<string, unknown>));
+  return mapProjects(queryList(result));
+}
+
+export async function listPublicProjectsByUserId(userId: string): Promise<Project[]> {
+  const result = await database()
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('visibility', 'public')
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+
+  return mapProjects(queryList(result));
 }
 
 export async function listUserProjects(userId: string): Promise<Project[]> {
@@ -38,5 +54,5 @@ export async function listUserProjects(userId: string): Promise<Project[]> {
     .is('deleted_at', null)
     .order('updated_at', { ascending: false });
 
-  return queryList(result).map((row) => mapProject(row as Record<string, unknown>));
+  return mapProjects(queryList(result));
 }
