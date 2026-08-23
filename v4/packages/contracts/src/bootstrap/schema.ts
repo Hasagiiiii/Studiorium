@@ -49,6 +49,8 @@ export const bootstrapSchema = z.object({
   user: publicUserSchema,
 });
 
+export type PublicUser = z.infer<typeof publicUserSchema>;
+export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 export type BootstrapPayload = z.infer<typeof bootstrapSchema>;
 
 export function parseBootstrap(input: unknown): BootstrapPayload {
