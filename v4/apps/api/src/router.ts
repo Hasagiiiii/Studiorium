@@ -25,6 +25,7 @@ import {
   readAllNotifications,
   readNotification,
 } from './features/notifications/handler.js';
+import { profileDetail, updateBookshelfPrivacy } from './features/profiles/handler.js';
 import { createUserProject } from './features/projects/handler.js';
 import { followingFeed, myGraph, profileSocial, setFollow } from './features/social/handler.js';
 
@@ -152,6 +153,15 @@ async function route(request: ApiRequest, response: ApiResponse) {
       200,
       await readNotification(request, decodeURIComponent(notificationReadMatch[1] || '')),
     );
+  }
+
+  if (method === 'PATCH' && path === '/api/v4/profiles/me/bookshelf-privacy') {
+    return json(response, 200, await updateBookshelfPrivacy(request));
+  }
+
+  const profileDetailMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/detail$/);
+  if (profileDetailMatch && method === 'GET') {
+    return json(response, 200, await profileDetail(request, profileDetailMatch[1] || ''));
   }
 
   if (method === 'GET' && path === '/api/v4/social/me') {
