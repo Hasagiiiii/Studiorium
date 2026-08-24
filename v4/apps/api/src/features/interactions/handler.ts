@@ -24,6 +24,7 @@ import {
   type LikeMutation,
   type PostDetail,
 } from '@lorion/contracts';
+import { decideCommentNotification } from '@lorion/domain';
 import { publicSessionUser, requireSessionUser, sessionUser } from '../../auth/session.js';
 import { readJson } from '../../core/http/body.js';
 import { badRequest, HttpError, notFound } from '../../core/http/errors.js';
@@ -140,15 +141,20 @@ export async function createComment(
   ]);
   if (!comment) throw new Error('Comentário criado, mas não encontrado após persistência.');
 
-  const notificationTarget = parent?.authorId || access.authorId;
-  if (notificationTarget !== user.id) {
+  const notification = decideCommentNotification({
+    actorId: user.id,
+    contentAuthorId: access.authorId,
+    parentAuthorId: parent?.authorId,
+  });
+  if (notification) {
     const actor = await publicSessionUser(request);
+    const isReply = notification.kind === 'reply';
     await notifySafely({
       id: entityId('ntf'),
-      userId: notificationTarget,
-      type: parent ? 'reply' : 'comment',
-      title: parent ? 'Nova resposta' : 'Novo comentário',
-      message: `${actor?.displayName || 'Alguém'} ${parent ? 'respondeu seu comentário' : 'comentou no seu conteúdo'}.`,
+      userId: notification.targetUserId,
+      type: notification.kind,
+      title: isReply ? 'Nova resposta' : 'Novo comentário',
+      message: `${actor?.displayName || 'Alguém'} ${isReply ? 'respondeu seu comentário' : 'comentou no seu conteúdo'}.`,
       link: contentLink(access.type, id),
     });
   }
