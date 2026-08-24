@@ -1,0 +1,381 @@
+@media (max-width: 760px) {
+  body {
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .nav {
+    min-height: 56px;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .navin {
+    min-height: 56px;
+    padding-block: 8px;
+  }
+
+  .brand small,
+  .navlinks,
+  .nav-actions > .outline:not([href='/login']),
+  .nav-actions > .solid {
+    display: none;
+  }
+
+  .brand .seal {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand strong {
+    font-size: 1rem;
+  }
+
+  .social-hero {
+    padding: 18px 0 12px;
+    border-bottom: 0;
+    background: none;
+  }
+
+  .social-hero-brand {
+    gap: 10px;
+  }
+
+  .social-brand-mark {
+    display: none;
+  }
+
+  .social-hero h1 {
+    max-width: 13ch;
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    line-height: 0.98;
+  }
+
+  .social-hero p {
+    margin-bottom: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .social-shell {
+    padding: 8px 0 24px;
+  }
+
+  .social-left {
+    display: none;
+  }
+
+  .social-feed-tabs {
+    margin-inline: -2px;
+    margin-bottom: 8px;
+    padding: 4px;
+    border-radius: 12px;
+    box-shadow: none;
+    scrollbar-width: none;
+  }
+
+  .social-feed-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .social-feed-tabs button,
+  .social-feed-tabs a {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+  }
+
+  .social-composer {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .social-composer .actions {
+    grid-column: auto;
+  }
+
+  .social-composer .actions .outline,
+  .social-composer .actions .solid {
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+
+  .social-feed-list {
+    gap: 8px;
+  }
+
+  .social-post {
+    padding: 12px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .social-post::after {
+    display: none;
+  }
+
+  .social-author {
+    gap: 9px;
+  }
+
+  .social-avatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .social-author > span:last-child {
+    gap: 4px 7px;
+  }
+
+  .social-author strong,
+  .social-author-link {
+    font-size: 0.86rem;
+  }
+
+  .social-kicker {
+    margin-top: 8px;
+    font-size: 0.61rem;
+  }
+
+  .social-post h2 {
+    margin: 6px 0;
+    font-size: clamp(1.08rem, 5.4vw, 1.32rem);
+    line-height: 1.14;
+  }
+
+  .social-post > p {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0 0 8px;
+    color: color-mix(in srgb, var(--muted) 88%, var(--ink));
+    font-size: 0.9rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+
+  .social-media {
+    margin: 9px 0;
+    border-radius: 12px;
+  }
+
+  .social-media img {
+    max-height: 260px;
+  }
+
+  .social-tags {
+    margin: 7px 0;
+  }
+
+  .social-tags span:nth-child(n + 4) {
+    display: none;
+  }
+
+  .social-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding-top: 7px;
+  }
+
+  .social-action {
+    min-width: 0;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 0.7rem;
+  }
+
+  .social-stat {
+    grid-column: 1 / -1;
+    width: auto;
+    margin: 0;
+    padding: 3px 4px 0;
+    font-size: 0.66rem;
+  }
+
+  .pagetitle,
+  .threadpost h1,
+  .profile-social-name-row h1,
+  .community-detail .pagetitle,
+  .news-detail h1,
+  .article-width h1 {
+    max-width: 100%;
+    font-size: clamp(2rem, 10vw, 3rem) !important;
+    line-height: 0.98 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .pagehero {
+    padding-top: 22px;
+  }
+
+  .pagehero > .shell > p {
+    font-size: 0.93rem;
+    line-height: 1.5;
+  }
+
+  .community-hero-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .community-tabs {
+    position: static;
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    margin-top: 10px;
+    padding: 4px;
+    scrollbar-width: none;
+  }
+
+  .community-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .community-tabs a {
+    flex: 0 0 auto;
+    padding: 9px 11px;
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+
+  .community-section {
+    padding: 18px 0;
+  }
+
+  .profile-directory-hero {
+    padding-top: 16px;
+  }
+
+  .profile-directory-heading {
+    gap: 10px;
+  }
+
+  .profile-directory-heading .pagetitle {
+    font-size: clamp(2rem, 9vw, 2.8rem) !important;
+  }
+
+  .profile-directory-search {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .profile-directory-grid {
+    gap: 8px;
+  }
+
+  .profile-discovery-card {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 9px;
+    align-items: center;
+    min-height: 0;
+    padding: 11px;
+    border-radius: 14px;
+  }
+
+  .profile-card-cover,
+  .profile-card-bio,
+  .profile-card-stats {
+    display: none;
+  }
+
+  .profile-card-main {
+    display: contents;
+  }
+
+  .profile-card-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .profile-card-copy {
+    min-width: 0;
+  }
+
+  .profile-card-title strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1rem;
+  }
+
+  .profile-card-copy small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72rem;
+  }
+
+  .profile-social-page {
+    padding-top: 12px;
+  }
+
+  .profile-social-hero {
+    border-radius: 14px;
+  }
+
+  .profile-social-cover {
+    max-height: 150px;
+  }
+
+  .profile-social-header.compact {
+    padding: 0 12px 12px;
+  }
+
+  .profile-social-avatar {
+    width: 76px;
+    height: 76px;
+    margin-top: -38px;
+  }
+
+  .profile-social-name-row h1 {
+    font-size: clamp(1.75rem, 8vw, 2.4rem) !important;
+  }
+
+  .profile-social-stats.compact {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 10px 12px;
+    scrollbar-width: none;
+  }
+
+  .profile-social-stats.compact::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-social-stats.compact > span {
+    flex: 0 0 auto;
+  }
+
+  .bottom-nav,
+  .mobile-bottom-nav,
+  [data-bottom-nav] {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    max-width: min(94vw, 560px);
+  }
+}
+
+@media (max-width: 420px) {
+  .shell {
+    width: min(100% - 20px, var(--shell));
+  }
+
+  .social-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .social-stat {
+    grid-column: 1 / -1;
+  }
+}
