@@ -50,3 +50,6 @@
 
 /* Última camada: proteção global contra regressões de layout. */
 @import url('/css/responsive/hardening.css');
+
+/* Prioridade mobile: experiência social compacta e segura para touch/safe-area. */
+@import url('/css/social-first-mobile.css');
