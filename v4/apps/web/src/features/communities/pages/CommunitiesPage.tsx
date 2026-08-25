@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import type { Community } from '@lorion/contracts';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
@@ -81,7 +82,7 @@ export function CommunitiesPage() {
   );
 }
 
-function CommunityRow({ community }: { community: NonNullable<ReturnType<typeof useAppState>['data']>['communities'][number] }) {
+function CommunityRow({ community }: { community: Community }) {
   return (
     <article className="community-row">
       <Link
