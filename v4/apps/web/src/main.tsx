@@ -10,6 +10,7 @@ import './styles/typography.css';
 import './styles/motion.css';
 import './styles/polish.css';
 import './styles/bookshelf.css';
+import './styles/communities.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
