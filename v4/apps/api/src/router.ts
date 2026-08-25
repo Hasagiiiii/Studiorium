@@ -221,37 +221,67 @@ async function route(request: ApiRequest, response: ApiResponse) {
     return json(response, 200, await profileDetail(request, profileDetailMatch[1] || ''));
   }
 
+  if (method === 'GET' && path === '/api/v4/social/me') {
+    return json(response, 200, await myGraph(request));
+  }
+  if (method === 'GET' && path === '/api/v4/social/feed') {
+    return json(response, 200, await followingFeed(request));
+  }
+
   const profileSocialMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/social$/);
   if (profileSocialMatch && method === 'GET') {
-    return json(response, 200, await profileSocial(request, profileSocialMatch[1] || ''));
+    return json(
+      response,
+      200,
+      await profileSocial(request, decodeURIComponent(profileSocialMatch[1] || '')),
+    );
   }
 
   const followMatch = path.match(/^\/api\/v4\/profiles\/([^/]+)\/follow$/);
   if (followMatch && method === 'POST') {
-    return json(response, 200, await setFollow(request, followMatch[1] || '', true));
+    return json(
+      response,
+      200,
+      await setFollow(request, decodeURIComponent(followMatch[1] || ''), true),
+    );
   }
   if (followMatch && method === 'DELETE') {
-    return json(response, 200, await setFollow(request, followMatch[1] || '', false));
+    return json(
+      response,
+      200,
+      await setFollow(request, decodeURIComponent(followMatch[1] || ''), false),
+    );
   }
 
-  if (method === 'GET' && path === '/api/v4/social/graph') {
-    return json(response, 200, await myGraph(request));
-  }
-  if (method === 'GET' && path === '/api/v4/social/following-feed') {
-    return json(response, 200, await followingFeed(request));
-  }
-
-  throw notFound('Rota não encontrada.');
+  throw notFound('Endpoint não encontrado.');
 }
 
-export async function handleRequest(request: ApiRequest, response: ApiResponse) {
+export async function handleApi(request: ApiRequest, response: ApiResponse) {
   try {
     await route(request, response);
-  } catch (error) {
-    if (error instanceof HttpError) {
-      return json(response, error.status, { error: error.message, code: error.code });
-    }
-    console.error(error);
-    return json(response, 500, { error: 'Erro interno do servidor.' });
+  } catch (cause) {
+    const record =
+      cause && typeof cause === 'object' ? (cause as { status?: unknown; code?: unknown }) : {};
+    const status =
+      cause instanceof HttpError
+        ? cause.status
+        : typeof record.status === 'number'
+          ? record.status
+          : 500;
+    const code =
+      cause instanceof HttpError
+        ? cause.code
+        : typeof record.code === 'string'
+          ? record.code
+          : undefined;
+    const publicMessage =
+      status >= 500
+        ? 'O serviço encontrou um erro inesperado.'
+        : cause instanceof Error
+          ? cause.message
+          : 'Não foi possível concluir a solicitação.';
+
+    if (status >= 500) console.error('[Lorion v4 API]', cause);
+    json(response, status, code ? { error: publicMessage, code } : { error: publicMessage });
   }
 }
