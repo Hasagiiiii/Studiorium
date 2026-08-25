@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   bookshelfStatusSchema,
+  commentBodySchema,
+  commentParentIdSchema,
   communityHubSchema,
   communityMembershipRequestSchema,
   communityMembershipResultSchema,
@@ -15,6 +17,7 @@ import {
   projectSchema,
   publicUserSchema,
   socialPostSchema,
+  updateCommentInputSchema,
 } from '../src/index.js';
 
 test('bootstrap aplica defaults seguros para payload vazio', () => {
@@ -161,6 +164,7 @@ test('post social preserva autor, comunidade opcional e visibilidade explícita'
 test('interações têm defaults consistentes e comentário exige texto válido', () => {
   const interactions = contentInteractionsSchema.parse({});
   const comment = createCommentInputSchema.parse({ body: '  Resposta útil  ' });
+  const update = updateCommentInputSchema.parse({ body: '  Texto editado  ' });
 
   assert.equal(interactions.likeCount, 0);
   assert.equal(interactions.commentCount, 0);
@@ -169,8 +173,18 @@ test('interações têm defaults consistentes e comentário exige texto válido'
   assert.deepEqual(interactions.comments, []);
   assert.equal(comment.body, 'Resposta útil');
   assert.equal(comment.parentId, null);
+  assert.equal(update.body, 'Texto editado');
+  assert.equal(commentBodySchema.parse('  válido  '), 'válido');
+  assert.equal(commentParentIdSchema.parse('  cmt_1  '), 'cmt_1');
+  assert.equal(commentParentIdSchema.parse(null), null);
+  assert.throws(() => commentBodySchema.parse(''));
+  assert.throws(() => commentBodySchema.parse('x'.repeat(2001)));
+  assert.throws(() => commentParentIdSchema.parse('   '));
+  assert.throws(() => commentParentIdSchema.parse('x'.repeat(181)));
   assert.throws(() => createCommentInputSchema.parse({ body: '' }));
   assert.throws(() => createCommentInputSchema.parse({ body: 'x'.repeat(2001) }));
+  assert.throws(() => updateCommentInputSchema.parse({ body: '' }));
+  assert.throws(() => updateCommentInputSchema.parse({ body: 'x'.repeat(2001) }));
 });
 
 test('detalhe de publicação reúne post e interações sem inventar contadores', () => {
