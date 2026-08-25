@@ -12,6 +12,12 @@ type Props = {
 type HubTab = 'all' | 'posts' | 'discussions';
 type DiscussionSort = 'recent' | 'active';
 
+function timestampValue(value: string | null): number {
+  if (!value) return 0;
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 export function CommunityHub({ slug, canAccess }: Props) {
   const { pushToast } = useToast();
   const [hub, setHub] = useState<CommunityHubData | null>(null);
@@ -63,9 +69,12 @@ export function CommunityHub({ slug, canAccess }: Props) {
     if (!hub) return [];
     const items = [...hub.discussions];
     if (discussionSort === 'active') {
-      return items.sort((a, b) => b.replyCount - a.replyCount || Date.parse(b.createdAt) - Date.parse(a.createdAt));
+      return items.sort(
+        (a, b) =>
+          b.replyCount - a.replyCount || timestampValue(b.createdAt) - timestampValue(a.createdAt),
+      );
     }
-    return items.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    return items.sort((a, b) => timestampValue(b.createdAt) - timestampValue(a.createdAt));
   }, [hub, discussionSort]);
 
   if (!canAccess) return null;
