@@ -1,4 +1,5 @@
 import {
+  assertPendingPostMedia,
   bindPendingPostMedia,
   createPendingPostMedia,
   createSocialPost,
@@ -87,6 +88,8 @@ export async function createPost(request: ApiRequest): Promise<SocialPost> {
   const user = await requireSessionUser(request);
   const parsed = createPostInputSchema.safeParse(await readJson(request));
   if (!parsed.success) throw badRequest('Revise o texto, o título, a mídia e a comunidade da publicação.');
+
+  await assertPendingPostMedia(user.id, parsed.data.mediaIds);
 
   let communityId: string | null = null;
   if (parsed.data.communitySlug) {
