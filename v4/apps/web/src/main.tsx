@@ -13,6 +13,7 @@ import './styles/bookshelf.css';
 import './styles/communities.css';
 import './styles/community-detail.css';
 import './styles/media.css';
+import './styles/social-ui.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
