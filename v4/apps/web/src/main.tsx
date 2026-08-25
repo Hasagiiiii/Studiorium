@@ -8,6 +8,7 @@ import './styles/index.css';
 import './styles/features.css';
 import './styles/typography.css';
 import './styles/motion.css';
+import './styles/polish.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
