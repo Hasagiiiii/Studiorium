@@ -8,6 +8,27 @@ function publicUrl(path: string): string {
   return database().storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+async function pendingMediaIds(ownerId: string, mediaIds: string[]): Promise<string[]> {
+  if (!mediaIds.length) return [];
+  const rows = queryList(
+    await database()
+      .from('post_media')
+      .select('id')
+      .eq('owner_id', ownerId)
+      .is('content_id', null)
+      .in('id', mediaIds),
+  ) as Array<{ id: string }>;
+  return rows.map((row) => row.id);
+}
+
+export async function assertPendingPostMedia(ownerId: string, mediaIds: string[]): Promise<void> {
+  if (!mediaIds.length) return;
+  const available = await pendingMediaIds(ownerId, mediaIds);
+  if (available.length !== mediaIds.length || new Set(mediaIds).size !== mediaIds.length) {
+    throw new Error('Uma ou mais mídias não estão disponíveis para esta publicação.');
+  }
+}
+
 export async function createPendingPostMedia(input: {
   id: string;
   ownerId: string;
@@ -66,19 +87,7 @@ export async function bindPendingPostMedia(input: {
   mediaIds: string[];
 }): Promise<void> {
   if (!input.mediaIds.length) return;
-
-  const rows = queryList(
-    await database()
-      .from('post_media')
-      .select('id')
-      .eq('owner_id', input.ownerId)
-      .is('content_id', null)
-      .in('id', input.mediaIds),
-  ) as Array<{ id: string }>;
-
-  if (rows.length !== input.mediaIds.length) {
-    throw new Error('Uma ou mais mídias não estão disponíveis para esta publicação.');
-  }
+  await assertPendingPostMedia(input.ownerId, input.mediaIds);
 
   for (const [position, id] of input.mediaIds.entries()) {
     const result = await database()
