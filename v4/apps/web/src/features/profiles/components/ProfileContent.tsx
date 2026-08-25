@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
 
 type Props = {
@@ -14,128 +14,141 @@ const shelfLabels: Record<string, string> = {
   abandoned: 'Abandonado',
 };
 
-export function ProfileContent({
-  detail,
-  updatingBookshelfPrivacy,
-  onBookshelfPrivacyChange,
-}: Props) {
+const tabs = [
+  ['posts', 'Publicações'],
+  ['research', 'Pesquisas'],
+  ['projects', 'Projetos'],
+  ['communities', 'Comunidades'],
+  ['books', 'Estante'],
+] as const;
+
+type Tab = (typeof tabs)[number][0];
+
+export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPrivacyChange }: Props) {
   const { profile } = detail;
+  const [params, setParams] = useSearchParams();
+  const requested = params.get('aba') as Tab | null;
+  const active: Tab = tabs.some(([value]) => value === requested) ? (requested as Tab) : 'posts';
+
+  function selectTab(tab: Tab) {
+    const next = new URLSearchParams(params);
+    if (tab === 'posts') next.delete('aba');
+    else next.set('aba', tab);
+    setParams(next, { replace: true });
+  }
 
   return (
-    <div className="profile-content-sections">
-      <section className="profile-content-section">
-        <h2>Publicações</h2>
-        {detail.posts.length ? (
-          <ul>
-            {detail.posts.map((post) => (
-              <li key={post.id}>
-                <div>
-                  <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>
-                    <strong>{post.title || 'Publicação'}</strong>
-                  </Link>
+    <section className="social-profile-content">
+      <nav className="social-profile-tabs" aria-label="Conteúdo do perfil">
+        {tabs.map(([value, label]) => (
+          <button
+            key={value}
+            className={active === value ? 'active' : ''}
+            type="button"
+            onClick={() => selectTab(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {active === 'posts' ? (
+        <section className="profile-content-section profile-post-grid" aria-label="Publicações">
+          {detail.posts.length ? (
+            detail.posts.map((post) => (
+              <article key={post.id} className="profile-social-post">
+                <div className="profile-social-post-meta">
+                  <strong>@{profile.username}</strong>
                   {post.community ? (
-                    <>
-                      <span> em </span>
-                      <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>
-                        {post.community.name}
-                      </Link>
-                    </>
+                    <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link>
                   ) : null}
                 </div>
+                {post.title ? <h2><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h2> : null}
                 <p>{post.body}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhuma publicação visível deste autor.</p>
-        )}
-      </section>
+                <Link className="profile-post-open" to={`/publicacoes/${encodeURIComponent(post.id)}`}>Ver publicação</Link>
+              </article>
+            ))
+          ) : (
+            <div className="empty-state"><h2>Nenhuma publicação ainda.</h2><p>As publicações visíveis deste perfil aparecerão aqui.</p></div>
+          )}
+        </section>
+      ) : null}
 
-      <section className="profile-content-section">
-        <h2>Pesquisas</h2>
-        {detail.publications.length ? (
-          <ul>
-            {detail.publications.map((publication) => (
-              <li key={publication.id}>
-                <Link to={`/pesquisas/${encodeURIComponent(publication.slug)}`}>
-                  {publication.title}
-                </Link>
-                {publication.area ? <span> · {publication.area}</span> : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhuma pesquisa publicada por este autor.</p>
-        )}
-      </section>
+      {active === 'research' ? (
+        <section className="profile-content-section">
+          <div className="resource-grid">
+            {detail.publications.length ? detail.publications.map((publication) => (
+              <article className="resource-card" key={publication.id}>
+                <span className="eyebrow">Pesquisa</span>
+                <h2><Link to={`/pesquisas/${encodeURIComponent(publication.slug)}`}>{publication.title}</Link></h2>
+                {publication.area ? <p>{publication.area}</p> : null}
+              </article>
+            )) : <div className="empty-state"><h2>Nenhuma pesquisa publicada.</h2></div>}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="profile-content-section">
-        <h2>Projetos públicos</h2>
-        {detail.projects.length ? (
-          <ul>
-            {detail.projects.map((project) => (
-              <li key={project.id}>
-                <Link to={`/projetos/${encodeURIComponent(project.id)}`}>{project.title}</Link>
-                {project.type ? <span> · {project.type}</span> : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhum projeto público disponível.</p>
-        )}
-      </section>
+      {active === 'projects' ? (
+        <section className="profile-content-section">
+          <div className="resource-grid">
+            {detail.projects.length ? detail.projects.map((project) => (
+              <article className="resource-card" key={project.id}>
+                <span className="eyebrow">Projeto</span>
+                <h2><Link to={`/projetos/${encodeURIComponent(project.id)}`}>{project.title}</Link></h2>
+                {project.type ? <p>{project.type}</p> : null}
+              </article>
+            )) : <div className="empty-state"><h2>Nenhum projeto público.</h2></div>}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="profile-content-section">
-        <h2>Comunidades</h2>
-        {detail.communities.length ? (
-          <ul>
-            {detail.communities.map((community) => (
-              <li key={community.id}>
-                <Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>
-                  {community.name}
-                </Link>
-                <span> · {community.role}</span>
-                {community.official ? <span> · oficial</span> : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhuma comunidade visível neste perfil.</p>
-        )}
-      </section>
+      {active === 'communities' ? (
+        <section className="profile-content-section">
+          <div className="resource-grid">
+            {detail.communities.length ? detail.communities.map((community) => (
+              <article className="resource-card" key={community.id}>
+                <span className="eyebrow">{community.official ? 'Comunidade oficial' : 'Comunidade'}</span>
+                <h2><Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>{community.name}</Link></h2>
+                <p>{community.area} · {community.role}</p>
+              </article>
+            )) : <div className="empty-state"><h2>Nenhuma comunidade visível.</h2></div>}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="profile-content-section">
-        <div className="profile-bookshelf-heading">
-          <h2>Estante</h2>
-          {detail.isOwnProfile ? (
-            <label>
-              <input
-                type="checkbox"
-                checked={profile.bookshelfPublic}
-                disabled={updatingBookshelfPrivacy}
-                onChange={(event) => onBookshelfPrivacyChange(event.target.checked)}
-              />{' '}
-              Exibir minha estante no perfil público
-            </label>
-          ) : null}
-        </div>
-
-        {!detail.isOwnProfile && !profile.bookshelfPublic ? (
-          <p>Esta estante é privada.</p>
-        ) : detail.bookshelf.length ? (
-          <ul>
-            {detail.bookshelf.map((item) => (
-              <li key={item.book.id}>
-                <Link to={`/livros/${encodeURIComponent(item.book.id)}`}>{item.book.title}</Link>
-                <span> · {item.book.author}</span>
-                <span> · {shelfLabels[item.shelfStatus] || item.shelfStatus}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>A estante ainda está vazia.</p>
-        )}
-      </section>
-    </div>
+      {active === 'books' ? (
+        <section className="profile-content-section">
+          <div className="profile-bookshelf-heading">
+            <h2>Estante</h2>
+            {detail.isOwnProfile ? (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={profile.bookshelfPublic}
+                  disabled={updatingBookshelfPrivacy}
+                  onChange={(event) => onBookshelfPrivacyChange(event.target.checked)}
+                />{' '}
+                Exibir publicamente
+              </label>
+            ) : null}
+          </div>
+          {!detail.isOwnProfile && !profile.bookshelfPublic ? (
+            <div className="empty-state"><h2>Estante privada.</h2></div>
+          ) : detail.bookshelf.length ? (
+            <div className="resource-grid">
+              {detail.bookshelf.map((item) => (
+                <article className="resource-card" key={item.book.id}>
+                  <span className="eyebrow">{shelfLabels[item.shelfStatus] || item.shelfStatus}</span>
+                  <h2><Link to={`/livros/${encodeURIComponent(item.book.id)}`}>{item.book.title}</Link></h2>
+                  <p>{item.book.author}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state"><h2>A estante ainda está vazia.</h2></div>
+          )}
+        </section>
+      ) : null}
+    </section>
   );
 }
