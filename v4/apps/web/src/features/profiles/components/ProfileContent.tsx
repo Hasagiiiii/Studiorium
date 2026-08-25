@@ -1,8 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
 import { BookCarousel } from '../../library/components/BookCarousel.js';
-import { PostActionBar } from '../../posts/components/PostActionBar.js';
-import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
+import { SocialPostCard } from '../../posts/components/SocialPostCard.js';
 
 type Props = {
   detail: ProfileDetail;
@@ -56,18 +55,7 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
       {active === 'posts' ? (
         <section className="profile-content-section profile-post-grid" aria-label="Publicações">
           {detail.posts.length ? (
-            detail.posts.map((post) => (
-              <article key={post.id} className="profile-social-post">
-                <div className="profile-social-post-meta">
-                  <strong>@{profile.username}</strong>
-                  {post.community ? <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link> : null}
-                </div>
-                {post.title ? <h2><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h2> : null}
-                {post.body ? <p>{post.body}</p> : null}
-                <PostMediaGallery media={post.media} />
-                <PostActionBar contentId={post.id} initial={post.interactions} compact />
-              </article>
-            ))
+            detail.posts.map((post) => <SocialPostCard key={post.id} post={post} compact showAuthor={false} />)
           ) : (
             <div className="empty-state"><h2>Nenhuma publicação ainda.</h2><p>As publicações visíveis deste perfil aparecerão aqui.</p></div>
           )}
