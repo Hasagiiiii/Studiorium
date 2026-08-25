@@ -1,6 +1,7 @@
 import { socialPostSchema, type SocialPost } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
+import { listPostMedia } from './media.js';
 
 type ContentItemRow = {
   id: string;
@@ -39,12 +40,13 @@ async function hydratePosts(items: ContentItemRow[]): Promise<SocialPost[]> {
     ...new Set(items.map((item) => item.community_id).filter((id): id is string => Boolean(id))),
   ];
 
-  const [postsResult, profilesResult, communitiesResult] = await Promise.all([
+  const [postsResult, profilesResult, communitiesResult, mediaByContent] = await Promise.all([
     database().from('posts').select('content_id,title,body').in('content_id', contentIds),
     database().from('profiles').select('user_id,username,display_name').in('user_id', authorIds),
     communityIds.length
       ? database().from('communities').select('id,slug,name').in('id', communityIds)
       : Promise.resolve({ data: [], error: null }),
+    listPostMedia(contentIds),
   ]);
 
   const posts = queryList(postsResult) as PostRow[];
@@ -69,6 +71,7 @@ async function hydratePosts(items: ContentItemRow[]): Promise<SocialPost[]> {
         authorName: profile.display_name || profile.username,
         title: post.title,
         body: post.body,
+        media: mediaByContent.get(item.id) || [],
         community: community
           ? { id: community.id, slug: community.slug, name: community.name }
           : null,
