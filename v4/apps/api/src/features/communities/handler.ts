@@ -20,6 +20,7 @@ import {
   type CommunityMembershipResult,
   type Discussion,
 } from '@lorion/contracts';
+import { communityCapabilities } from '@lorion/domain';
 import { requireSessionUser, sessionUser } from '../../auth/session.js';
 import { readJson } from '../../core/http/body.js';
 import type { ApiRequest } from '../../core/http/types.js';
@@ -46,14 +47,28 @@ async function activeCommunity(rawSlug: string) {
   return community;
 }
 
-async function requireCommunityModerator(request: ApiRequest, communityId: string) {
+function accessFor(
+  visibility: string,
+  membership: Awaited<ReturnType<typeof findCommunityMembership>>,
+) {
+  return communityCapabilities({
+    visibility,
+    membershipStatus: membership?.status,
+    moderationStatus: membership?.moderation_status,
+    role: membership?.role,
+  });
+}
+
+async function requireCommunityModerator(
+  request: ApiRequest,
+  communityId: string,
+  visibility: string,
+) {
   const user = await requireSessionUser(request);
   const membership = await findCommunityMembership(communityId, user.id);
-  const canModerate =
-    membership?.status === 'active' &&
-    membership.moderation_status !== 'removed' &&
-    (membership.role === 'leader' || membership.role === 'moderator');
-  if (!canModerate) throw forbidden('Você não pode gerenciar solicitações desta comunidade.');
+  if (!accessFor(visibility, membership).canModerateMembershipRequests) {
+    throw forbidden('Você não pode gerenciar solicitações desta comunidade.');
+  }
   return user;
 }
 
@@ -61,9 +76,9 @@ export async function communityHub(request: ApiRequest, rawSlug: string): Promis
   const community = await activeCommunity(rawSlug);
   const viewer = await sessionUser(request);
   const membership = viewer ? await findCommunityMembership(community.id, viewer.id) : null;
-  const isMember = membership?.status === 'active' && membership.moderation_status !== 'removed';
+  const access = accessFor(community.visibility, membership);
 
-  if (community.visibility !== 'public' && !isMember) {
+  if (!access.canReadHub) {
     throw forbidden('Entre na comunidade para acessar membros e discussões.');
   }
 
@@ -77,7 +92,7 @@ export async function communityHub(request: ApiRequest, rawSlug: string): Promis
     members,
     posts,
     discussions,
-    canCreateDiscussion: Boolean(isMember && membership?.moderation_status === 'clear'),
+    canCreateDiscussion: access.canCreateDiscussion,
   });
 }
 
@@ -88,7 +103,7 @@ export async function createDiscussionInCommunity(
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
   const membership = await findCommunityMembership(community.id, user.id);
-  if (membership?.status !== 'active' || membership.moderation_status !== 'clear') {
+  if (!accessFor(community.visibility, membership).canCreateDiscussion) {
     throw forbidden('Você precisa ser membro ativo para publicar nesta comunidade.');
   }
 
@@ -181,7 +196,7 @@ export async function pendingCommunityMembershipRequests(
   rawSlug: string,
 ): Promise<CommunityMembershipRequest[]> {
   const community = await activeCommunity(rawSlug);
-  await requireCommunityModerator(request, community.id);
+  await requireCommunityModerator(request, community.id, community.visibility);
   return listPendingCommunityMembershipRequests(community.id);
 }
 
@@ -192,7 +207,7 @@ export async function decideCommunityMembershipRequest(
   approve: boolean,
 ): Promise<CommunityMembershipResult> {
   const community = await activeCommunity(rawSlug);
-  await requireCommunityModerator(request, community.id);
+  await requireCommunityModerator(request, community.id, community.visibility);
   let userId = '';
   try {
     userId = decodeURIComponent(rawUserId || '').trim();
@@ -224,7 +239,7 @@ export async function leaveCommunityMembership(
       'COMMUNITY_LEADER_CANNOT_LEAVE',
     );
   }
-  if (membership.moderation_status === 'removed') {
+  if (!accessFor(community.visibility, membership).canLeaveCommunity) {
     throw new HttpError(
       403,
       'Sua participação nesta comunidade foi removida pela moderação.',
