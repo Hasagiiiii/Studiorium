@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Link } from 'react-router-dom';
 import { PostComposer } from '../../features/posts/components/PostComposer.js';
 
 type CreateLauncherProps = {
@@ -111,7 +110,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
               <div>
                 <span className="eyebrow">Criar</span>
                 <h2 id="create-launcher-title">
-                  {view === 'post' ? 'Nova publicação' : 'Comece algo novo'}
+                  {view === 'post' ? 'Nova publicação' : 'Compartilhe com a rede'}
                 </h2>
               </div>
               <button
@@ -135,14 +134,8 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
                   onClick={() => setView('post')}
                 >
                   <strong>Publicação</strong>
-                  <span>Compartilhe texto no seu perfil e, se quiser, em uma comunidade.</span>
+                  <span>Compartilhe texto, fotos ou vídeo no seu perfil e nas comunidades.</span>
                 </button>
-                <Link to="/projetos?criar=1" onClick={onClose} className="create-launcher-action">
-                  <strong>Projeto</strong>
-                  <span>
-                    Crie um projeto no seu workspace e escolha se ele será privado ou público.
-                  </span>
-                </Link>
               </div>
             )}
           </motion.section>
