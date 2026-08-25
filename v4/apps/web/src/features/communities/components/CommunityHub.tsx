@@ -10,6 +10,7 @@ type Props = {
 };
 
 type HubTab = 'all' | 'posts' | 'discussions';
+type DiscussionSort = 'recent' | 'active';
 
 export function CommunityHub({ slug, canAccess }: Props) {
   const { pushToast } = useToast();
@@ -21,6 +22,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
   const [category, setCategory] = useState('Geral');
   const [creating, setCreating] = useState(false);
   const [tab, setTab] = useState<HubTab>('all');
+  const [discussionSort, setDiscussionSort] = useState<DiscussionSort>('recent');
   const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
@@ -56,6 +58,15 @@ export function CommunityHub({ slug, canAccess }: Props) {
     () => (hub ? hub.posts.length + hub.discussions.length : 0),
     [hub],
   );
+
+  const discussions = useMemo(() => {
+    if (!hub) return [];
+    const items = [...hub.discussions];
+    if (discussionSort === 'active') {
+      return items.sort((a, b) => b.replyCount - a.replyCount || Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    }
+    return items.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }, [hub, discussionSort]);
 
   if (!canAccess) return null;
 
@@ -103,11 +114,19 @@ export function CommunityHub({ slug, canAccess }: Props) {
         ) : null}
       </div>
 
-      <nav className="community-feed-tabs" aria-label="Filtrar atividade da comunidade">
-        <button className={tab === 'all' ? 'active' : ''} type="button" onClick={() => setTab('all')}>Tudo</button>
-        <button className={tab === 'posts' ? 'active' : ''} type="button" onClick={() => setTab('posts')}>Publicações</button>
-        <button className={tab === 'discussions' ? 'active' : ''} type="button" onClick={() => setTab('discussions')}>Discussões</button>
-      </nav>
+      <div className="community-feed-controls">
+        <nav className="community-feed-tabs" aria-label="Filtrar atividade da comunidade">
+          <button className={tab === 'all' ? 'active' : ''} type="button" onClick={() => setTab('all')}>Tudo</button>
+          <button className={tab === 'posts' ? 'active' : ''} type="button" onClick={() => setTab('posts')}>Publicações</button>
+          <button className={tab === 'discussions' ? 'active' : ''} type="button" onClick={() => setTab('discussions')}>Discussões</button>
+        </nav>
+        {(tab === 'all' || tab === 'discussions') && hub?.discussions.length ? (
+          <div className="community-sort" aria-label="Ordenar discussões">
+            <button className={discussionSort === 'recent' ? 'active' : ''} type="button" onClick={() => setDiscussionSort('recent')}>Novas</button>
+            <button className={discussionSort === 'active' ? 'active' : ''} type="button" onClick={() => setDiscussionSort('active')}>Mais ativas</button>
+          </div>
+        ) : null}
+      </div>
 
       {status === 'loading' ? <p className="feed-status">Carregando atividade…</p> : null}
       {status === 'error' ? <p className="inline-error" role="alert">{error}</p> : null}
@@ -121,36 +140,11 @@ export function CommunityHub({ slug, canAccess }: Props) {
                   <span className="eyebrow">Criar tópico</span>
                   <h3>Comece uma discussão</h3>
                 </div>
-                <input
-                  required
-                  minLength={3}
-                  maxLength={160}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Título da discussão"
-                  aria-label="Título da discussão"
-                />
-                <textarea
-                  required
-                  minLength={1}
-                  maxLength={8000}
-                  rows={5}
-                  value={body}
-                  onChange={(event) => setBody(event.target.value)}
-                  placeholder="Desenvolva sua ideia, pergunta ou proposta…"
-                  aria-label="Texto da discussão"
-                />
+                <input required minLength={3} maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Título da discussão" aria-label="Título da discussão" />
+                <textarea required minLength={1} maxLength={8000} rows={5} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Desenvolva sua ideia, pergunta ou proposta…" aria-label="Texto da discussão" />
                 <div className="community-composer-footer">
-                  <input
-                    maxLength={60}
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                    placeholder="Categoria"
-                    aria-label="Categoria"
-                  />
-                  <button className="button primary" type="submit" disabled={creating}>
-                    {creating ? 'Publicando…' : 'Publicar discussão'}
-                  </button>
+                  <input maxLength={60} value={category} onChange={(event) => setCategory(event.target.value)} placeholder="Categoria" aria-label="Categoria" />
+                  <button className="button primary" type="submit" disabled={creating}>{creating ? 'Publicando…' : 'Publicar discussão'}</button>
                 </div>
               </form>
             ) : null}
@@ -166,23 +160,23 @@ export function CommunityHub({ slug, canAccess }: Props) {
                     </div>
                     {post.title ? <h3><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h3> : null}
                     <p>{post.body}</p>
-                    <div className="community-feed-actions">
-                      <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>Abrir publicação</Link>
-                    </div>
+                    <div className="community-feed-actions"><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>Abrir publicação</Link></div>
                   </article>
                 ))}
               </section>
             ) : null}
 
-            {(tab === 'all' || tab === 'discussions') && hub.discussions.length ? (
+            {(tab === 'all' || tab === 'discussions') && discussions.length ? (
               <section className="community-feed-group" aria-label="Discussões">
-                {hub.discussions.map((discussion) => (
+                {discussions.map((discussion) => (
                   <article className="community-feed-item community-discussion-item" key={discussion.id}>
                     <div className="community-feed-type">{discussion.category || 'Discussão'}</div>
                     <div className="community-feed-author"><span>por {discussion.authorName}</span></div>
                     <h3><Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>{discussion.title}</Link></h3>
                     {discussion.body ? <p>{discussion.body}</p> : null}
                     <div className="community-feed-actions">
+                      <Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>{discussion.replyCount} {discussion.replyCount === 1 ? 'resposta' : 'respostas'}</Link>
+                      <span>·</span>
                       <Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>Entrar na conversa</Link>
                     </div>
                   </article>
@@ -204,10 +198,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
                   {hub.members.slice(0, 8).map((member) => (
                     <li key={member.userId}>
                       <span className="community-member-avatar">{member.displayName.slice(0, 1).toUpperCase()}</span>
-                      <div>
-                        {member.username ? <Link to={`/perfil/${encodeURIComponent(member.username)}`}>{member.displayName}</Link> : <strong>{member.displayName}</strong>}
-                        <small>{member.role}</small>
-                      </div>
+                      <div>{member.username ? <Link to={`/perfil/${encodeURIComponent(member.username)}`}>{member.displayName}</Link> : <strong>{member.displayName}</strong>}<small>{member.role}</small></div>
                     </li>
                   ))}
                 </ul>
