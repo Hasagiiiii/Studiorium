@@ -117,3 +117,45 @@ export function decideEditorialAnalysis(input: EditorialAnalysisInput): Editoria
 
   return { allowed: true, reason: 'analysis_allowed' };
 }
+
+export type MatchHighlightKind =
+  | 'goal'
+  | 'assist'
+  | 'big_chance'
+  | 'key_save'
+  | 'card'
+  | 'red_card'
+  | 'substitution'
+  | 'tactical_shift'
+  | 'var'
+  | 'turning_point'
+  | 'player_of_match';
+
+export type MatchHighlight = {
+  kind: MatchHighlightKind;
+  minute?: number | null;
+  title: string;
+  description: string;
+  officialFact: boolean;
+};
+
+export function selectMatchHighlights(highlights: MatchHighlight[], limit = 8): MatchHighlight[] {
+  const priority: Record<MatchHighlightKind, number> = {
+    goal: 100,
+    red_card: 95,
+    turning_point: 90,
+    var: 85,
+    key_save: 80,
+    big_chance: 75,
+    assist: 70,
+    tactical_shift: 65,
+    substitution: 60,
+    player_of_match: 55,
+    card: 40,
+  };
+
+  return highlights
+    .filter((highlight) => highlight.officialFact)
+    .sort((a, b) => priority[b.kind] - priority[a.kind] || (a.minute ?? 999) - (b.minute ?? 999))
+    .slice(0, Math.max(1, limit));
+}
