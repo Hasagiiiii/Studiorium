@@ -14,6 +14,7 @@ export * from './repositories/library/read.js';
 export * from './repositories/news/read.js';
 export * from './repositories/notifications/read.js';
 export * from './repositories/notifications/write.js';
+export * from './repositories/posts/media.js';
 export * from './repositories/posts/read.js';
 export * from './repositories/posts/write.js';
 export * from './repositories/profiles/read.js';
