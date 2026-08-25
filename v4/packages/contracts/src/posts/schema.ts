@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
+import { contentInteractionSummarySchema } from '../interactions/schema.js';
 
 export const MAX_POST_MEDIA = 10;
 export const MAX_POST_VIDEO_DURATION_SECONDS = 60;
@@ -64,6 +65,12 @@ export const socialPostSchema = z.object({
   title: z.string().default(''),
   body: z.string(),
   media: postMediaCollectionSchema,
+  interactions: contentInteractionSummarySchema.default({
+    likeCount: 0,
+    commentCount: 0,
+    viewerLiked: false,
+    canInteract: false,
+  }),
   community: postCommunitySchema,
   visibility: socialContentVisibilitySchema,
   moderationStatus: socialContentModerationSchema,
