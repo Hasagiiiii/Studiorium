@@ -42,38 +42,38 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
         delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035,
       }}
     >
-      <span className="eyebrow">{label(entry)}</span>
-
       {entry.type === 'post' ? (
-        <div className="feed-post-meta">
-          <Link to={`/perfil/${encodeURIComponent(entry.item.authorUsername)}`}>
-            {entry.item.authorName}
-          </Link>
-          {entry.item.community ? (
-            <>
-              <span> em </span>
-              <Link to={`/comunidades/${encodeURIComponent(entry.item.community.slug)}`}>
-                {entry.item.community.name}
+        <header className="social-post-header">
+          <div className="social-avatar" aria-hidden="true">
+            {entry.item.authorName.trim().charAt(0).toUpperCase() || '?'}
+          </div>
+          <div className="social-author-block">
+            <Link className="social-author-name" to={`/perfil/${encodeURIComponent(entry.item.authorUsername)}`}>
+              {entry.item.authorName}
+            </Link>
+            <span>@{entry.item.authorUsername}</span>
+            {entry.item.community ? (
+              <Link className="social-community-link" to={`/comunidades/${encodeURIComponent(entry.item.community.slug)}`}>
+                em {entry.item.community.name}
               </Link>
-            </>
-          ) : null}
-        </div>
-      ) : null}
+            ) : null}
+          </div>
+        </header>
+      ) : (
+        <span className="social-content-badge">{label(entry)}</span>
+      )}
 
       {entry.item.title ? (
         <h2>
           <Link to={link}>{entry.item.title}</Link>
         </h2>
       ) : null}
-      {text ? <p>{text.slice(0, 340)}</p> : null}
-      {entry.type === 'post' ? (
-        <footer>
-          <Link to={link}>Abrir publicação e interações</Link>
-        </footer>
-      ) : null}
-      {entry.type === 'news' && entry.item.likeCount > 0 ? (
-        <footer>{entry.item.likeCount} curtidas</footer>
-      ) : null}
+      {text ? <p className="social-feed-copy">{text.slice(0, 340)}</p> : null}
+
+      <footer className="social-card-actions">
+        <Link to={link}>{entry.type === 'post' ? 'Conversar' : 'Abrir'}</Link>
+        {entry.type === 'news' && entry.item.likeCount > 0 ? <span>{entry.item.likeCount} curtidas</span> : null}
+      </footer>
     </motion.article>
   );
 }
