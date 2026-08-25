@@ -9,6 +9,7 @@ export const discussionSchema = z.object({
   body: optionalText,
   category: z.string().default('Geral'),
   status: z.string(),
+  replyCount: z.number().int().nonnegative().default(0),
   createdAt: timestamp,
   updatedAt: timestamp,
 });
