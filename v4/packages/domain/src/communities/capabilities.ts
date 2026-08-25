@@ -1,7 +1,7 @@
-export type CommunityVisibility = 'public' | 'restricted' | 'private' | string;
-export type CommunityMembershipStatus = 'active' | 'left' | 'pending' | 'rejected' | null | undefined;
-export type CommunityMemberRole = 'leader' | 'moderator' | 'member' | string | null | undefined;
-export type CommunityModerationStatus = 'clear' | 'removed' | string | null | undefined;
+export type CommunityVisibility = string;
+export type CommunityMembershipStatus = string | null | undefined;
+export type CommunityMemberRole = string | null | undefined;
+export type CommunityModerationStatus = string | null | undefined;
 
 export type CommunityAccessContext = {
   visibility: CommunityVisibility;
