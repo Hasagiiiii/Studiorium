@@ -2,7 +2,6 @@ import {
   assertAuthRateLimitAllowed,
   contentInteractionCounts,
   createContentComment,
-  createNotification,
   deleteOwnContentComment,
   findAccessibleContentItem,
   findContentCommentById,
@@ -30,6 +29,7 @@ import { readJson } from '../../core/http/body.js';
 import { badRequest, HttpError, notFound } from '../../core/http/errors.js';
 import type { ApiRequest } from '../../core/http/types.js';
 import { entityId } from '../../core/security/token.js';
+import { notifyContentInteraction } from '../notifications/service.js';
 
 const COMMENT_POLICY = {
   scope: 'content_comment',
@@ -43,19 +43,6 @@ function contentId(value: string): string {
     return decodeURIComponent(value || '').trim();
   } catch {
     return '';
-  }
-}
-
-function contentLink(type: string, id: string): string {
-  if (type === 'post') return `/publicacoes/${encodeURIComponent(id)}`;
-  return '/';
-}
-
-async function notifySafely(input: Parameters<typeof createNotification>[0]) {
-  try {
-    await createNotification(input);
-  } catch (cause) {
-    console.error('[Lorion v4 notification]', cause);
   }
 }
 
@@ -87,13 +74,13 @@ export async function setLike(
 
   if (liked && mutation.changed && access.authorId !== user.id) {
     const actor = await publicSessionUser(request);
-    await notifySafely({
-      id: entityId('ntf'),
-      userId: access.authorId,
-      type: 'like',
-      title: 'Nova curtida',
-      message: `${actor?.displayName || 'Alguém'} curtiu seu conteúdo.`,
-      link: contentLink(access.type, id),
+    await notifyContentInteraction({
+      actorId: user.id,
+      actorDisplayName: actor?.displayName,
+      targetUserId: access.authorId,
+      kind: 'like',
+      contentType: access.type,
+      contentId: id,
     });
   }
 
@@ -148,14 +135,13 @@ export async function createComment(
   });
   if (notification) {
     const actor = await publicSessionUser(request);
-    const isReply = notification.kind === 'reply';
-    await notifySafely({
-      id: entityId('ntf'),
-      userId: notification.targetUserId,
-      type: notification.kind,
-      title: isReply ? 'Nova resposta' : 'Novo comentário',
-      message: `${actor?.displayName || 'Alguém'} ${isReply ? 'respondeu seu comentário' : 'comentou no seu conteúdo'}.`,
-      link: contentLink(access.type, id),
+    await notifyContentInteraction({
+      actorId: user.id,
+      actorDisplayName: actor?.displayName,
+      targetUserId: notification.targetUserId,
+      kind: notification.kind,
+      contentType: access.type,
+      contentId: id,
     });
   }
 
