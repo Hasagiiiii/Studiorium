@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
 import { BookCarousel } from '../../library/components/BookCarousel.js';
+import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
 
 type Props = {
   detail: ProfileDetail;
@@ -45,12 +46,7 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
     <section className="social-profile-content">
       <nav className="social-profile-tabs" aria-label="Conteúdo do perfil">
         {tabs.map(([value, label]) => (
-          <button
-            key={value}
-            className={active === value ? 'active' : ''}
-            type="button"
-            onClick={() => selectTab(value)}
-          >
+          <button key={value} className={active === value ? 'active' : ''} type="button" onClick={() => selectTab(value)}>
             {label}
           </button>
         ))}
@@ -63,12 +59,11 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
               <article key={post.id} className="profile-social-post">
                 <div className="profile-social-post-meta">
                   <strong>@{profile.username}</strong>
-                  {post.community ? (
-                    <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link>
-                  ) : null}
+                  {post.community ? <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link> : null}
                 </div>
                 {post.title ? <h2><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h2> : null}
-                <p>{post.body}</p>
+                {post.body ? <p>{post.body}</p> : null}
+                <PostMediaGallery media={post.media} />
                 <Link className="profile-post-open" to={`/publicacoes/${encodeURIComponent(post.id)}`}>Ver publicação</Link>
               </article>
             ))
@@ -129,12 +124,7 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
             </div>
             {detail.isOwnProfile ? (
               <label>
-                <input
-                  type="checkbox"
-                  checked={profile.bookshelfPublic}
-                  disabled={updatingBookshelfPrivacy}
-                  onChange={(event) => onBookshelfPrivacyChange(event.target.checked)}
-                />{' '}
+                <input type="checkbox" checked={profile.bookshelfPublic} disabled={updatingBookshelfPrivacy} onChange={(event) => onBookshelfPrivacyChange(event.target.checked)} />{' '}
                 Exibir publicamente
               </label>
             ) : null}
@@ -148,12 +138,7 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
                 const items = detail.bookshelf.filter((item) => item.shelfStatus === status);
                 const label = shelfLabels[status];
                 return items.length ? (
-                  <BookCarousel
-                    key={status}
-                    title={label}
-                    items={items.map((item) => ({ book: item.book }))}
-                    ariaLabel={`${label} de ${profile.displayName}`}
-                  />
+                  <BookCarousel key={status} title={label} items={items.map((item) => ({ book: item.book }))} ariaLabel={`${label} de ${profile.displayName}`} />
                 ) : null;
               })}
             </div>
