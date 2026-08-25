@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { CommunityHub as CommunityHubData } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
+import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
 
 type Props = {
   slug: string;
@@ -168,7 +169,8 @@ export function CommunityHub({ slug, canAccess }: Props) {
                       <span>@{post.authorUsername}</span>
                     </div>
                     {post.title ? <h3><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h3> : null}
-                    <p>{post.body}</p>
+                    {post.body ? <p>{post.body}</p> : null}
+                    <PostMediaGallery media={post.media} />
                     <div className="community-feed-actions"><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>Abrir publicação</Link></div>
                   </article>
                 ))}
