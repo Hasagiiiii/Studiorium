@@ -3,13 +3,10 @@ import { Link } from 'react-router-dom';
 import type { CommunityHub as CommunityHubData } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
+import { PostActionBar } from '../../posts/components/PostActionBar.js';
 import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
 
-type Props = {
-  slug: string;
-  canAccess: boolean;
-};
-
+type Props = { slug: string; canAccess: boolean };
 type HubTab = 'all' | 'posts' | 'discussions';
 type DiscussionSort = 'recent' | 'active';
 
@@ -39,12 +36,10 @@ export function CommunityHub({ slug, canAccess }: Props) {
       setError('');
       return;
     }
-
     let active = true;
     setStatus('loading');
     setError('');
-    void services.communities
-      .hub(slug)
+    void services.communities.hub(slug)
       .then((value) => {
         if (!active) return;
         setHub(value);
@@ -55,25 +50,15 @@ export function CommunityHub({ slug, canAccess }: Props) {
         setStatus('error');
         setError(cause instanceof Error ? cause.message : 'Não foi possível carregar a comunidade.');
       });
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [canAccess, slug]);
 
-  const activityCount = useMemo(
-    () => (hub ? hub.posts.length + hub.discussions.length : 0),
-    [hub],
-  );
-
+  const activityCount = useMemo(() => (hub ? hub.posts.length + hub.discussions.length : 0), [hub]);
   const discussions = useMemo(() => {
     if (!hub) return [];
     const items = [...hub.discussions];
     if (discussionSort === 'active') {
-      return items.sort(
-        (a, b) =>
-          b.replyCount - a.replyCount || timestampValue(b.createdAt) - timestampValue(a.createdAt),
-      );
+      return items.sort((a, b) => b.replyCount - a.replyCount || timestampValue(b.createdAt) - timestampValue(a.createdAt));
     }
     return items.sort((a, b) => timestampValue(b.createdAt) - timestampValue(a.createdAt));
   }, [hub, discussionSort]);
@@ -91,9 +76,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
         body: body.trim(),
         category: category.trim() || 'Geral',
       });
-      setHub((current) =>
-        current ? { ...current, discussions: [discussion, ...current.discussions] } : current,
-      );
+      setHub((current) => current ? { ...current, discussions: [discussion, ...current.discussions] } : current);
       setTitle('');
       setBody('');
       setCategory('Geral');
@@ -146,10 +129,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
           <main className="community-feed-column">
             {composerOpen && hub.canCreateDiscussion ? (
               <form className="community-discussion-composer" onSubmit={submitDiscussion}>
-                <div>
-                  <span className="eyebrow">Criar tópico</span>
-                  <h3>Comece uma discussão</h3>
-                </div>
+                <div><span className="eyebrow">Criar tópico</span><h3>Comece uma discussão</h3></div>
                 <input required minLength={3} maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Título da discussão" aria-label="Título da discussão" />
                 <textarea required minLength={1} maxLength={8000} rows={5} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Desenvolva sua ideia, pergunta ou proposta…" aria-label="Texto da discussão" />
                 <div className="community-composer-footer">
@@ -171,7 +151,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
                     {post.title ? <h3><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h3> : null}
                     {post.body ? <p>{post.body}</p> : null}
                     <PostMediaGallery media={post.media} />
-                    <div className="community-feed-actions"><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>Abrir publicação</Link></div>
+                    <PostActionBar contentId={post.id} initial={post.interactions} compact />
                   </article>
                 ))}
               </section>
