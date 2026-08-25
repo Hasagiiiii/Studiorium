@@ -1,8 +1,7 @@
 import type { FeedEntry } from '@lorion/contracts';
 import { motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { PostActionBar } from '../../posts/components/PostActionBar.js';
-import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
+import { SocialPostCard } from '../../posts/components/SocialPostCard.js';
 
 function destination(entry: FeedEntry): string {
   if (entry.type === 'post') return `/publicacoes/${encodeURIComponent(entry.item.id)}`;
@@ -13,7 +12,6 @@ function destination(entry: FeedEntry): string {
 }
 
 function label(entry: FeedEntry): string {
-  if (entry.type === 'post') return 'Publicação';
   if (entry.type === 'publication') return 'Pesquisa';
   if (entry.type === 'discussion') return 'Discussão';
   if (entry.type === 'news') return 'Notícia';
@@ -21,17 +19,32 @@ function label(entry: FeedEntry): string {
 }
 
 function summary(entry: FeedEntry): string {
-  if (entry.type === 'post') return entry.item.body;
   if (entry.type === 'publication') return entry.item.abstract;
   if (entry.type === 'discussion') return entry.item.body;
   if (entry.type === 'news') return entry.item.summary;
-  return entry.item.notes || 'Projeto compartilhado com a comunidade.';
+  if (entry.type === 'project') return entry.item.notes || 'Projeto compartilhado com a comunidade.';
+  return '';
 }
 
 export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: number }) {
-  const text = summary(entry);
   const reduceMotion = useReducedMotion();
+
+  if (entry.type === 'post') {
+    return (
+      <motion.div
+        className="feed-card feed-post"
+        layout={!reduceMotion}
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
+      >
+        <SocialPostCard post={entry.item} />
+      </motion.div>
+    );
+  }
+
   const link = destination(entry);
+  const text = summary(entry);
 
   return (
     <motion.article
@@ -41,37 +54,13 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
     >
-      {entry.type === 'post' ? (
-        <header className="social-post-header">
-          <div className="social-avatar" aria-hidden="true">
-            {entry.item.authorName.trim().charAt(0).toUpperCase() || '?'}
-          </div>
-          <div className="social-author-block">
-            <Link className="social-author-name" to={`/perfil/${encodeURIComponent(entry.item.authorUsername)}`}>
-              {entry.item.authorName}
-            </Link>
-            <span>@{entry.item.authorUsername}</span>
-            {entry.item.community ? (
-              <Link className="social-community-link" to={`/comunidades/${encodeURIComponent(entry.item.community.slug)}`}>
-                em {entry.item.community.name}
-              </Link>
-            ) : null}
-          </div>
-        </header>
-      ) : <span className="social-content-badge">{label(entry)}</span>}
-
+      <span className="social-content-badge">{label(entry)}</span>
       {entry.item.title ? <h2><Link to={link}>{entry.item.title}</Link></h2> : null}
       {text ? <p className="social-feed-copy">{text.slice(0, 340)}</p> : null}
-      {entry.type === 'post' ? <PostMediaGallery media={entry.item.media} /> : null}
-
-      {entry.type === 'post' ? (
-        <PostActionBar contentId={entry.item.id} initial={entry.item.interactions} />
-      ) : (
-        <footer className="social-card-actions">
-          <Link to={link}>Abrir</Link>
-          {entry.type === 'news' && entry.item.likeCount > 0 ? <span>{entry.item.likeCount} curtidas</span> : null}
-        </footer>
-      )}
+      <footer className="social-card-actions">
+        <Link to={link}>Abrir</Link>
+        {entry.type === 'news' && entry.item.likeCount > 0 ? <span>{entry.item.likeCount} curtidas</span> : null}
+      </footer>
     </motion.article>
   );
 }
