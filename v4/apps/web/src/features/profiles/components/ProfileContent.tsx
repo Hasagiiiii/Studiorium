@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
 import { BookCarousel } from '../../library/components/BookCarousel.js';
+import { PostActionBar } from '../../posts/components/PostActionBar.js';
 import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
 
 type Props = {
@@ -64,7 +65,7 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
                 {post.title ? <h2><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h2> : null}
                 {post.body ? <p>{post.body}</p> : null}
                 <PostMediaGallery media={post.media} />
-                <Link className="profile-post-open" to={`/publicacoes/${encodeURIComponent(post.id)}`}>Ver publicação</Link>
+                <PostActionBar contentId={post.id} initial={post.interactions} compact />
               </article>
             ))
           ) : (
