@@ -45,6 +45,7 @@ export const postMediaSchema = z
   });
 
 export const postMediaCollectionSchema = z.array(postMediaSchema).max(MAX_POST_MEDIA).default([]);
+export const postMediaDeleteResultSchema = z.object({ deleted: z.boolean() });
 
 export const postCommunitySchema = z
   .object({
@@ -89,6 +90,7 @@ export const createPostInputSchema = z
 
 export type PostMediaType = z.infer<typeof postMediaTypeSchema>;
 export type PostMedia = z.infer<typeof postMediaSchema>;
+export type PostMediaDeleteResult = z.infer<typeof postMediaDeleteResultSchema>;
 export type SocialPost = z.infer<typeof socialPostSchema>;
 export type CreatePostInput = z.infer<typeof createPostInputSchema>;
 export type SocialContentVisibility = z.infer<typeof socialContentVisibilitySchema>;
