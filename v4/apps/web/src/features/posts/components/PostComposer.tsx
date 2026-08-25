@@ -4,8 +4,8 @@ import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 
 type Props = {
-  onCancel(): void;
-  onCreated(): void;
+  onCancel?(): void;
+  onCreated?(): void;
 };
 
 export function PostComposer({ onCancel, onCreated }: Props) {
@@ -40,8 +40,11 @@ export function PostComposer({ onCancel, onCreated }: Props) {
         communitySlug: communitySlug || null,
       });
       await reload();
+      setTitle('');
+      setBody('');
+      setCommunitySlug('');
       pushToast({ message: 'Publicação criada.', tone: 'success' });
-      onCreated();
+      onCreated?.();
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Não foi possível publicar.';
       setError(message);
@@ -74,7 +77,7 @@ export function PostComposer({ onCancel, onCreated }: Props) {
           required
           minLength={1}
           maxLength={4000}
-          rows={7}
+          rows={5}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           placeholder="O que você quer compartilhar?"
@@ -107,9 +110,11 @@ export function PostComposer({ onCancel, onCreated }: Props) {
       ) : null}
 
       <div className="form-actions">
-        <button className="button secondary" type="button" disabled={submitting} onClick={onCancel}>
-          Voltar
-        </button>
+        {onCancel ? (
+          <button className="button secondary" type="button" disabled={submitting} onClick={onCancel}>
+            Voltar
+          </button>
+        ) : null}
         <button className="button primary" type="submit" disabled={submitting || !body.trim()}>
           {submitting ? 'Publicando…' : 'Publicar'}
         </button>
