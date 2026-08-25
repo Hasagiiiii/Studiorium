@@ -8,6 +8,8 @@
   --text-xl: 1.3rem;
   --text-2xl: clamp(1.55rem, 3vw, 2.1rem);
   --text-display: clamp(2rem, 5vw, 3.6rem);
+  --measure-social: 64ch;
+  --measure-reading: 68ch;
 }
 
 html,
@@ -54,9 +56,14 @@ h3 {
   line-height: 1.16;
 }
 
+/* Paragraph rhythm is contextual: social copy, UI descriptions and long reading
+   should not share the same spacing or line-height. */
 p {
-  margin-block: 0.65em;
-  line-height: 1.62;
+  margin: 0;
+}
+
+p + p {
+  margin-top: 0.8em;
 }
 
 .feature-heading {
@@ -77,7 +84,7 @@ p {
   margin: 0;
   color: var(--muted);
   font-size: var(--text-lg);
-  line-height: 1.58;
+  line-height: 1.55;
 }
 
 .eyebrow {
@@ -129,12 +136,58 @@ p {
   font-size: var(--text-xl);
 }
 
+/* UI descriptions: concise and compact. */
 .resource-card p,
-.feed-card p,
-.empty-state p {
+.search-result-card p,
+.empty-state p,
+.feed-status,
+.create-launcher-note,
+.notification-item p {
+  max-width: 64ch;
   font-family: var(--font-ui);
   font-size: var(--text-base);
-  line-height: 1.58;
+  line-height: 1.5;
+}
+
+/* Social posts/captions: readable at scan speed, preserve author line breaks. */
+.social-feed-copy,
+.social-post-detail-copy,
+.profile-content-section li p {
+  max-width: var(--measure-social);
+  white-space: pre-wrap;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.52;
+  letter-spacing: -0.004em;
+}
+
+.social-feed-copy {
+  margin-top: 0.45rem;
+}
+
+.social-post-detail-copy {
+  margin-top: 0.25rem;
+}
+
+/* Comments need slightly tighter rhythm than a post so threads stay compact. */
+.post-comment p {
+  max-width: 62ch;
+  white-space: pre-wrap;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  line-height: 1.48;
+}
+
+.post-comment p + p {
+  margin-top: 0.65em;
+}
+
+/* Bios and small profile descriptions should never look like article prose. */
+.profile-identity p,
+.profile-social p,
+.profile-overview > p {
+  max-width: 58ch;
+  line-height: 1.48;
 }
 
 .social-author-name,
@@ -147,13 +200,6 @@ p {
 .feed-post-meta,
 .social-card-actions {
   font-size: var(--text-sm);
-}
-
-.social-feed-copy {
-  max-width: 66ch;
-  font-size: 1rem;
-  line-height: 1.58;
-  letter-spacing: -0.006em;
 }
 
 .profile-social strong {
@@ -174,6 +220,7 @@ textarea::placeholder {
   font-weight: 430;
 }
 
+/* Editorial content gets a longer measure and stronger paragraph separation. */
 .longform-content,
 .longform-content p,
 .longform-content blockquote {
@@ -188,14 +235,27 @@ textarea::placeholder {
 }
 
 .longform-content p {
-  max-width: 68ch;
+  max-width: var(--measure-reading);
   font-size: 1.04rem;
-  line-height: 1.78;
+  line-height: 1.76;
+}
+
+.longform-content p + p {
+  margin-top: 1.05em;
 }
 
 .longform-content .lead {
+  max-width: 62ch;
   font-size: 1.18rem;
-  line-height: 1.66;
+  line-height: 1.64;
+}
+
+.longform-content blockquote {
+  max-width: 62ch;
+  margin: 1.4rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+  line-height: 1.7;
 }
 
 @media (max-width: 620px) {
@@ -211,6 +271,7 @@ textarea::placeholder {
   .feature-heading p,
   .system-state p {
     font-size: 1rem;
+    line-height: 1.5;
   }
 
   .resource-card h2,
@@ -218,7 +279,18 @@ textarea::placeholder {
     font-size: 1.15rem;
   }
 
-  .social-feed-copy {
+  .social-feed-copy,
+  .social-post-detail-copy {
     font-size: 0.975rem;
+    line-height: 1.5;
+  }
+
+  .post-comment p {
+    font-size: 0.925rem;
+  }
+
+  .longform-content p {
+    font-size: 1rem;
+    line-height: 1.7;
   }
 }
