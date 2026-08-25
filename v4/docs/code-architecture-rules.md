@@ -67,6 +67,29 @@ Uma superfície ativa deve possuir, conforme aplicável:
 
 Funcionalidades incompletas não devem aparecer como controles ativos apenas para simular progresso.
 
-## 10. Referências open source são padrões, não fonte para cópia
+## 10. Benchmark open source é etapa obrigatória
+
+Antes de criar ou alterar de forma relevante uma feature, pesquisar projetos open source maduros que resolvam problema semelhante. A comparação deve acontecer de forma contínua ao longo da evolução da v4, e não apenas no início de uma feature.
+
+O objetivo é entender:
+
+- como a responsabilidade é separada;
+- quais contratos e políticas são explícitos;
+- como autorização e moderação são aplicadas;
+- como estados de erro, vazio, loading e concorrência são tratados;
+- quais decisões foram tomadas para escala, manutenção e segurança;
+- quais abstrações são realmente necessárias e quais seriam excesso para o Studiorium.
+
+Sempre que possível, comparar mais de uma referência. Para funcionalidades sociais, priorizar redes sociais e comunidades open source maduras; para conhecimento e acervo, priorizar knowledge bases, fóruns e plataformas colaborativas; para infraestrutura, observar projetos consolidados da mesma stack ou de arquitetura equivalente.
+
+## 11. Referências open source são padrões, não fonte para cópia
 
 Projetos externos podem orientar separação de serviços, políticas, moderação, notificações, busca e organização do conhecimento. O Studiorium deve reaplicar o padrão de acordo com seu domínio e sua stack, sem transplantar código, nomes internos ou complexidade que não resolva um problema real do produto.
+
+Antes de reutilizar uma ideia, responder três perguntas:
+
+1. Qual problema real do Studiorium isso resolve?
+2. Qual é a menor adaptação que preserva o benefício?
+3. A mudança melhora manutenção, segurança, experiência ou escala sem criar complexidade desnecessária?
+
+Se a resposta não for clara, a ideia não entra apenas porque outro projeto a utiliza.
