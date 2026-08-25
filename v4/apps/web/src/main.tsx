@@ -11,7 +11,7 @@ import './styles/motion.css';
 import './styles/polish.css';
 import './styles/bookshelf.css';
 import './styles/communities.css';
-import './styles/community-interior.css';
+import './styles/community-detail.css';
 import './styles/media.css';
 
 const root = document.getElementById('root');
