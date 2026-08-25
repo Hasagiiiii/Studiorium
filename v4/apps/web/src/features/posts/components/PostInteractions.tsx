@@ -143,7 +143,7 @@ export function PostInteractions({ contentId, initial }: Props) {
   }
 
   return (
-    <section className="post-interactions" aria-labelledby="post-interactions-title">
+    <section id="comentarios" className="post-interactions" aria-labelledby="post-interactions-title">
       <div className="post-interaction-summary">
         <h2 id="post-interactions-title">Interações</h2>
         <span>{interactions.likeCount} curtidas</span>
@@ -178,14 +178,7 @@ export function PostInteractions({ contentId, initial }: Props) {
           ) : null}
           <label>
             Texto
-            <textarea
-              required
-              minLength={1}
-              maxLength={2000}
-              rows={4}
-              value={commentBody}
-              onChange={(event) => setCommentBody(event.target.value)}
-            />
+            <textarea required minLength={1} maxLength={2000} rows={4} value={commentBody} onChange={(event) => setCommentBody(event.target.value)} />
           </label>
           <button className="button primary" type="submit" disabled={commenting}>
             {commenting ? 'Publicando…' : replyTo ? 'Publicar resposta' : 'Comentar'}
@@ -195,96 +188,32 @@ export function PostInteractions({ contentId, initial }: Props) {
 
       <div className="post-comment-list">
         <h3>Comentários</h3>
-        {interactions.comments.length ? (
-          interactions.comments.map((comment) => {
-            const parent = comment.parentId ? commentById.get(comment.parentId) : null;
-            const editing = editingId === comment.id;
-            return (
-              <article
-                key={comment.id}
-                className={comment.parentId ? 'post-comment post-comment-reply' : 'post-comment'}
-              >
-                <header>
-                  <Link to={`/perfil/${encodeURIComponent(comment.authorUsername)}`}>
-                    {comment.authorName}
-                  </Link>
-                  {parent ? <span> respondeu {parent.authorName}</span> : null}
-                </header>
-
-                {editing ? (
-                  <div className="post-comment-editor">
-                    <textarea
-                      minLength={1}
-                      maxLength={2000}
-                      rows={3}
-                      value={editingBody}
-                      onChange={(event) => setEditingBody(event.target.value)}
-                    />
-                    <div className="post-comment-actions">
-                      <button
-                        className="button primary"
-                        type="button"
-                        disabled={savingComment}
-                        onClick={() => void saveComment(comment.id)}
-                      >
-                        {savingComment ? 'Salvando…' : 'Salvar'}
-                      </button>
-                      <button
-                        className="button secondary"
-                        type="button"
-                        disabled={savingComment}
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditingBody('');
-                        }}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
+        {interactions.comments.length ? interactions.comments.map((comment) => {
+          const parent = comment.parentId ? commentById.get(comment.parentId) : null;
+          const editing = editingId === comment.id;
+          return (
+            <article key={comment.id} className={comment.parentId ? 'post-comment post-comment-reply' : 'post-comment'}>
+              <header>
+                <Link to={`/perfil/${encodeURIComponent(comment.authorUsername)}`}>{comment.authorName}</Link>
+                {parent ? <span> respondeu {parent.authorName}</span> : null}
+              </header>
+              {editing ? (
+                <div className="post-comment-editor">
+                  <textarea minLength={1} maxLength={2000} rows={3} value={editingBody} onChange={(event) => setEditingBody(event.target.value)} />
+                  <div className="post-comment-actions">
+                    <button className="button primary" type="button" disabled={savingComment} onClick={() => void saveComment(comment.id)}>{savingComment ? 'Salvando…' : 'Salvar'}</button>
+                    <button className="button secondary" type="button" disabled={savingComment} onClick={() => { setEditingId(null); setEditingBody(''); }}>Cancelar</button>
                   </div>
-                ) : (
-                  <p>{comment.body}</p>
-                )}
-
-                <footer className="post-comment-actions">
-                  {data?.user && interactions.canInteract ? (
-                    <button
-                      className="inline-action"
-                      type="button"
-                      onClick={() => setReplyTo(comment.id)}
-                    >
-                      Responder
-                    </button>
-                  ) : null}
-                  {comment.canEdit && !editing ? (
-                    <button
-                      className="inline-action"
-                      type="button"
-                      onClick={() => {
-                        setEditingId(comment.id);
-                        setEditingBody(comment.body);
-                      }}
-                    >
-                      Editar
-                    </button>
-                  ) : null}
-                  {comment.canEdit ? (
-                    <button
-                      className="inline-action danger"
-                      type="button"
-                      disabled={deletingCommentId === comment.id}
-                      onClick={() => void removeComment(comment.id)}
-                    >
-                      {deletingCommentId === comment.id ? 'Excluindo…' : 'Excluir'}
-                    </button>
-                  ) : null}
-                </footer>
-              </article>
-            );
-          })
-        ) : (
-          <p>Ainda não há comentários nesta publicação.</p>
-        )}
+                </div>
+              ) : <p>{comment.body}</p>}
+              <footer className="post-comment-actions">
+                {data?.user && interactions.canInteract ? <button className="inline-action" type="button" onClick={() => setReplyTo(comment.id)}>Responder</button> : null}
+                {comment.canEdit && !editing ? <button className="inline-action" type="button" onClick={() => { setEditingId(comment.id); setEditingBody(comment.body); }}>Editar</button> : null}
+                {comment.canEdit ? <button className="inline-action danger" type="button" disabled={deletingCommentId === comment.id} onClick={() => void removeComment(comment.id)}>{deletingCommentId === comment.id ? 'Excluindo…' : 'Excluir'}</button> : null}
+              </footer>
+            </article>
+          );
+        }) : <p>Ainda não há comentários nesta publicação.</p>}
       </div>
     </section>
   );
