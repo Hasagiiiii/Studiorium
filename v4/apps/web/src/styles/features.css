@@ -307,6 +307,339 @@ button.create-launcher-action {
   line-height: 1.55;
 }
 
+.social-profile-page,
+.social-explore-page {
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  font-family: system-ui, sans-serif;
+}
+
+.social-profile-header {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.social-profile-cover {
+  min-height: clamp(8rem, 23vw, 15rem);
+  background:
+    radial-gradient(circle at 20% 30%, rgb(185 147 78 / 28%), transparent 34%),
+    radial-gradient(circle at 80% 20%, rgb(97 115 93 / 30%), transparent 32%),
+    linear-gradient(135deg, var(--surface-soft), #0e0c0a);
+}
+
+.social-profile-body {
+  position: relative;
+  padding: 0 clamp(1rem, 3vw, 2rem) 1.5rem;
+}
+
+.social-profile-avatar {
+  display: grid;
+  width: clamp(5.5rem, 13vw, 8.5rem);
+  height: clamp(5.5rem, 13vw, 8.5rem);
+  margin-top: clamp(-4.25rem, -7vw, -3rem);
+  place-items: center;
+  border: 4px solid var(--surface);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  font-size: clamp(1.7rem, 5vw, 2.7rem);
+  font-weight: 800;
+}
+
+.social-profile-topline {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.social-profile-name-row {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.social-profile-name-row h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.verified-badge {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #120f0b;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.social-profile-handle,
+.social-profile-bio p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.social-profile-actions,
+.social-profile-stats,
+.social-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.1rem;
+  align-items: center;
+}
+
+.social-profile-stats {
+  margin: 1.25rem 0;
+}
+
+.social-profile-stats span {
+  color: var(--muted);
+}
+
+.social-profile-stats strong {
+  color: var(--text);
+}
+
+.social-profile-bio {
+  max-width: 48rem;
+}
+
+.social-profile-meta {
+  margin-top: 0.8rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.social-profile-meta span {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.social-profile-content {
+  margin-top: 1rem;
+}
+
+.social-profile-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.social-profile-tabs button {
+  min-width: 7rem;
+  padding: 0.9rem 0.7rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.social-profile-tabs button.active {
+  border-bottom-color: var(--accent);
+  color: var(--text);
+}
+
+.profile-content-section {
+  padding-top: 1rem;
+}
+
+.profile-post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--line);
+}
+
+.profile-social-post {
+  min-height: 15rem;
+  padding: 1rem;
+  background: var(--surface);
+}
+
+.profile-social-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.profile-social-post h2 {
+  margin: 0.8rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.profile-social-post p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.profile-post-open {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.social-explore-header {
+  display: grid;
+  grid-template-columns: minmax(0, 0.65fr) minmax(18rem, 1.35fr);
+  gap: 1.5rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.social-explore-header h1 {
+  margin: 0.15rem 0 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.social-explore-search {
+  margin: 0;
+}
+
+.social-explore-filters {
+  margin-bottom: 1rem;
+}
+
+.social-discovery-section {
+  margin-top: 1.5rem;
+}
+
+.social-discovery-section > header {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.social-discovery-section > header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.social-discovery-section > header span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.social-person-strip,
+.social-community-strip {
+  display: grid;
+  grid-auto-columns: minmax(13.5rem, 1fr);
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scroll-snap-type: x proximity;
+}
+
+.social-person-card,
+.social-community-card {
+  scroll-snap-align: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.social-person-card {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+  padding: 1.2rem;
+  text-align: center;
+}
+
+.social-person-avatar {
+  display: grid;
+  width: 4.25rem;
+  height: 4.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.social-person-card h3,
+.social-community-card h3 {
+  margin: 0;
+}
+
+.social-person-card p,
+.social-community-card p,
+.social-explore-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.social-community-card {
+  min-height: 10rem;
+  padding: 1rem;
+}
+
+.social-community-card h3 {
+  margin-top: 0.45rem;
+}
+
+.social-community-card > a:last-child {
+  display: inline-block;
+  margin-top: 0.9rem;
+  color: var(--accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.social-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.75rem;
+}
+
+.social-explore-card {
+  min-height: 13rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.social-explore-card h2 {
+  margin: 0.55rem 0;
+  font-size: 1.15rem;
+}
+
+.social-explore-open {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .post-detail,
 .post-interactions {
   max-width: 52rem;
@@ -411,6 +744,17 @@ button.create-launcher-action {
   opacity: 0.6;
 }
 
+@media (max-width: 760px) {
+  .social-explore-header {
+    grid-template-columns: 1fr;
+  }
+
+  .social-profile-topline {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 620px) {
   .notification-item {
     grid-template-columns: 1fr;
@@ -439,5 +783,22 @@ button.create-launcher-action {
   .social-join-prompt {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .social-profile-header {
+    border-inline: 0;
+    border-radius: 0;
+  }
+
+  .social-profile-tabs {
+    grid-template-columns: repeat(5, max-content);
+  }
+
+  .social-profile-tabs button {
+    min-width: 6.5rem;
+  }
+
+  .social-explore-search {
+    grid-template-columns: 1fr;
   }
 }
