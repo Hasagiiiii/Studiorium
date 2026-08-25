@@ -70,11 +70,22 @@ export const socialPostSchema = z.object({
   updatedAt: timestamp,
 });
 
-export const createPostInputSchema = z.object({
-  title: z.string().trim().max(160).default(''),
-  body: z.string().trim().min(1).max(4000),
-  communitySlug: z.string().trim().min(1).max(160).nullable().default(null),
-});
+export const createPostInputSchema = z
+  .object({
+    title: z.string().trim().max(160).default(''),
+    body: z.string().trim().max(4000).default(''),
+    communitySlug: z.string().trim().min(1).max(160).nullable().default(null),
+    mediaIds: z.array(z.string().trim().min(1).max(180)).max(MAX_POST_MEDIA).default([]),
+  })
+  .superRefine((input, context) => {
+    if (!input.body && !input.mediaIds.length) {
+      context.addIssue({
+        code: 'custom',
+        path: ['body'],
+        message: 'A publicação precisa ter texto ou mídia.',
+      });
+    }
+  });
 
 export type PostMediaType = z.infer<typeof postMediaTypeSchema>;
 export type PostMedia = z.infer<typeof postMediaSchema>;
