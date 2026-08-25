@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
+import { BookCover } from '../../library/components/BookCover.js';
 
 type Props = {
   detail: ProfileDetail;
@@ -135,12 +136,17 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
           {!detail.isOwnProfile && !profile.bookshelfPublic ? (
             <div className="empty-state"><h2>Estante privada.</h2></div>
           ) : detail.bookshelf.length ? (
-            <div className="resource-grid">
+            <div className="book-rail profile-book-rail" aria-label="Livros da estante">
               {detail.bookshelf.map((item) => (
-                <article className="resource-card" key={item.book.id}>
-                  <span className="eyebrow">{shelfLabels[item.shelfStatus] || item.shelfStatus}</span>
-                  <h2><Link to={`/livros/${encodeURIComponent(item.book.id)}`}>{item.book.title}</Link></h2>
-                  <p>{item.book.author}</p>
+                <article className="book-tile" key={item.book.id}>
+                  <Link className="book-cover-link" to={`/livros/${encodeURIComponent(item.book.id)}`}>
+                    <BookCover book={item.book} />
+                  </Link>
+                  <div className="book-tile-copy">
+                    <span className="eyebrow">{shelfLabels[item.shelfStatus] || item.shelfStatus}</span>
+                    <h3><Link to={`/livros/${encodeURIComponent(item.book.id)}`}>{item.book.title}</Link></h3>
+                    <p>{item.book.author}</p>
+                  </div>
                 </article>
               ))}
             </div>
