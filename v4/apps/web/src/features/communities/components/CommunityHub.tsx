@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { CommunityHub as CommunityHubData } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
@@ -9,6 +9,8 @@ type Props = {
   canAccess: boolean;
 };
 
+type HubTab = 'all' | 'posts' | 'discussions';
+
 export function CommunityHub({ slug, canAccess }: Props) {
   const { pushToast } = useToast();
   const [hub, setHub] = useState<CommunityHubData | null>(null);
@@ -18,6 +20,8 @@ export function CommunityHub({ slug, canAccess }: Props) {
   const [body, setBody] = useState('');
   const [category, setCategory] = useState('Geral');
   const [creating, setCreating] = useState(false);
+  const [tab, setTab] = useState<HubTab>('all');
+  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     if (!canAccess) {
@@ -40,15 +44,18 @@ export function CommunityHub({ slug, canAccess }: Props) {
       .catch((cause) => {
         if (!active) return;
         setStatus('error');
-        setError(
-          cause instanceof Error ? cause.message : 'Não foi possível carregar a comunidade.',
-        );
+        setError(cause instanceof Error ? cause.message : 'Não foi possível carregar a comunidade.');
       });
 
     return () => {
       active = false;
     };
   }, [canAccess, slug]);
+
+  const activityCount = useMemo(
+    () => (hub ? hub.posts.length + hub.discussions.length : 0),
+    [hub],
+  );
 
   if (!canAccess) return null;
 
@@ -69,6 +76,8 @@ export function CommunityHub({ slug, canAccess }: Props) {
       setTitle('');
       setBody('');
       setCategory('Geral');
+      setComposerOpen(false);
+      setTab('discussions');
       pushToast({ message: 'Discussão publicada na comunidade.', tone: 'success' });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Não foi possível publicar.';
@@ -81,126 +90,134 @@ export function CommunityHub({ slug, canAccess }: Props) {
 
   return (
     <section className="community-hub">
-      <h2>Espaço da comunidade</h2>
-      {status === 'loading' ? <p>Carregando membros, publicações e discussões…</p> : null}
-      {status === 'error' ? (
-        <p className="inline-error" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <div className="community-hub-toolbar">
+        <div>
+          <span className="eyebrow">Atividade</span>
+          <h2>Conversas da comunidade</h2>
+          {hub ? <p>{activityCount} itens recentes · {hub.members.length} membros ativos listados</p> : null}
+        </div>
+        {hub?.canCreateDiscussion ? (
+          <button className="button primary" type="button" onClick={() => setComposerOpen((value) => !value)}>
+            {composerOpen ? 'Fechar' : 'Nova discussão'}
+          </button>
+        ) : null}
+      </div>
+
+      <nav className="community-feed-tabs" aria-label="Filtrar atividade da comunidade">
+        <button className={tab === 'all' ? 'active' : ''} type="button" onClick={() => setTab('all')}>Tudo</button>
+        <button className={tab === 'posts' ? 'active' : ''} type="button" onClick={() => setTab('posts')}>Publicações</button>
+        <button className={tab === 'discussions' ? 'active' : ''} type="button" onClick={() => setTab('discussions')}>Discussões</button>
+      </nav>
+
+      {status === 'loading' ? <p className="feed-status">Carregando atividade…</p> : null}
+      {status === 'error' ? <p className="inline-error" role="alert">{error}</p> : null}
 
       {hub ? (
-        <>
-          <div className="community-posts">
-            <h3>Publicações</h3>
-            {hub.posts.length ? (
-              <ul>
-                {hub.posts.map((post) => (
-                  <li key={post.id}>
-                    <div>
-                      <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>
-                        {post.authorName}
-                      </Link>
-                      <span> · </span>
-                      <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>
-                        {post.title || 'Publicação'}
-                      </Link>
-                    </div>
-                    <p>{post.body}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Ainda não há publicações nesta comunidade.</p>
-            )}
-          </div>
-
-          {hub.canCreateDiscussion ? (
-            <form className="auth-form community-discussion-form" onSubmit={submitDiscussion}>
-              <h3>Nova discussão</h3>
-              <label>
-                Título
+        <div className="community-hub-layout">
+          <main className="community-feed-column">
+            {composerOpen && hub.canCreateDiscussion ? (
+              <form className="community-discussion-composer" onSubmit={submitDiscussion}>
+                <div>
+                  <span className="eyebrow">Criar tópico</span>
+                  <h3>Comece uma discussão</h3>
+                </div>
                 <input
                   required
                   minLength={3}
                   maxLength={160}
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Título da discussão"
+                  aria-label="Título da discussão"
                 />
-              </label>
-              <label>
-                Categoria
-                <input
-                  maxLength={60}
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                />
-              </label>
-              <label>
-                Texto
                 <textarea
                   required
                   minLength={1}
                   maxLength={8000}
-                  rows={6}
+                  rows={5}
                   value={body}
                   onChange={(event) => setBody(event.target.value)}
+                  placeholder="Desenvolva sua ideia, pergunta ou proposta…"
+                  aria-label="Texto da discussão"
                 />
-              </label>
-              <button className="button primary" type="submit" disabled={creating}>
-                {creating ? 'Publicando…' : 'Publicar discussão'}
-              </button>
-            </form>
-          ) : null}
+                <div className="community-composer-footer">
+                  <input
+                    maxLength={60}
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    placeholder="Categoria"
+                    aria-label="Categoria"
+                  />
+                  <button className="button primary" type="submit" disabled={creating}>
+                    {creating ? 'Publicando…' : 'Publicar discussão'}
+                  </button>
+                </div>
+              </form>
+            ) : null}
 
-          <div className="community-discussions">
-            <h3>Discussões</h3>
-            {hub.discussions.length ? (
-              <ul>
+            {(tab === 'all' || tab === 'posts') && hub.posts.length ? (
+              <section className="community-feed-group" aria-label="Publicações">
+                {hub.posts.map((post) => (
+                  <article className="community-feed-item" key={post.id}>
+                    <div className="community-feed-type">Publicação</div>
+                    <div className="community-feed-author">
+                      <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>{post.authorName}</Link>
+                      <span>@{post.authorUsername}</span>
+                    </div>
+                    {post.title ? <h3><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h3> : null}
+                    <p>{post.body}</p>
+                    <div className="community-feed-actions">
+                      <Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>Abrir publicação</Link>
+                    </div>
+                  </article>
+                ))}
+              </section>
+            ) : null}
+
+            {(tab === 'all' || tab === 'discussions') && hub.discussions.length ? (
+              <section className="community-feed-group" aria-label="Discussões">
                 {hub.discussions.map((discussion) => (
-                  <li key={discussion.id}>
-                    <Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>
-                      {discussion.title}
-                    </Link>
-                    <span> por {discussion.authorName}</span>
-                    {discussion.category ? <span> · {discussion.category}</span> : null}
-                  </li>
+                  <article className="community-feed-item community-discussion-item" key={discussion.id}>
+                    <div className="community-feed-type">{discussion.category || 'Discussão'}</div>
+                    <div className="community-feed-author"><span>por {discussion.authorName}</span></div>
+                    <h3><Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>{discussion.title}</Link></h3>
+                    {discussion.body ? <p>{discussion.body}</p> : null}
+                    <div className="community-feed-actions">
+                      <Link to={`/discussoes/${encodeURIComponent(discussion.id)}`}>Entrar na conversa</Link>
+                    </div>
+                  </article>
                 ))}
-              </ul>
-            ) : (
-              <p>Ainda não há discussões nesta comunidade.</p>
-            )}
-          </div>
+              </section>
+            ) : null}
 
-          <div className="community-members">
-            <h3>Membros</h3>
-            {hub.members.length ? (
-              <ul>
-                {hub.members.map((member) => (
-                  <li key={member.userId}>
-                    {member.username ? (
-                      <Link to={`/perfil/${encodeURIComponent(member.username)}`}>
-                        {member.displayName}
-                      </Link>
-                    ) : (
-                      <span>{member.displayName}</span>
-                    )}
-                    <span> · {member.role}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>A comunidade ainda não possui membros ativos.</p>
-            )}
-          </div>
+            {(tab === 'posts' && !hub.posts.length) || (tab === 'discussions' && !hub.discussions.length) || (tab === 'all' && !activityCount) ? (
+              <div className="empty-state"><h3>Nada por aqui ainda.</h3><p>As próximas conversas da comunidade aparecerão neste feed.</p></div>
+            ) : null}
+          </main>
 
-          {error && status !== 'error' ? (
-            <p className="inline-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-        </>
+          <aside className="community-hub-sidebar" aria-label="Membros da comunidade">
+            <section>
+              <span className="eyebrow">Pessoas</span>
+              <h3>Membros ativos</h3>
+              {hub.members.length ? (
+                <ul className="community-member-list">
+                  {hub.members.slice(0, 8).map((member) => (
+                    <li key={member.userId}>
+                      <span className="community-member-avatar">{member.displayName.slice(0, 1).toUpperCase()}</span>
+                      <div>
+                        {member.username ? <Link to={`/perfil/${encodeURIComponent(member.username)}`}>{member.displayName}</Link> : <strong>{member.displayName}</strong>}
+                        <small>{member.role}</small>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p>Nenhum membro ativo listado.</p>}
+            </section>
+          </aside>
+        </div>
       ) : null}
+
+      {error && status !== 'error' ? <p className="inline-error" role="alert">{error}</p> : null}
     </section>
   );
 }
