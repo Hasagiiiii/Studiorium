@@ -93,6 +93,206 @@ button.create-launcher-action {
   font-size: 0.9rem;
 }
 
+.social-home {
+  width: min(100%, 46rem);
+  margin: 0 auto;
+}
+
+.social-stream-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.social-stream-header h1 {
+  margin: 0.15rem 0;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(1.55rem, 4vw, 2.1rem);
+  line-height: 1.1;
+}
+
+.social-stream-header p,
+.social-join-prompt span,
+.social-author-block span,
+.social-card-actions {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+}
+
+.social-stream-header p {
+  margin: 0;
+}
+
+.social-discover-link {
+  flex: 0 0 auto;
+  color: var(--accent-strong);
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.social-composer-shell {
+  margin-bottom: 1rem;
+}
+
+.social-composer-shell .post-composer {
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.social-composer-shell .post-composer h3 {
+  margin: 0.15rem 0 0;
+  font-family: system-ui, sans-serif;
+}
+
+.social-composer-shell .post-composer textarea {
+  min-height: 7rem;
+}
+
+.social-join-prompt {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.social-join-prompt div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.social-feed-tabs {
+  position: sticky;
+  z-index: 10;
+  top: 4.9rem;
+  margin-bottom: 0;
+  padding: 0.65rem 0;
+  background: rgb(16 14 12 / 88%);
+  backdrop-filter: blur(16px);
+}
+
+.social-feed-tabs a {
+  border: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+}
+
+.social-feed-tabs a.active {
+  border: 0;
+  background: var(--surface-raised);
+}
+
+.social-feed-list {
+  gap: 0;
+  max-width: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.social-feed-list .feed-card {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.social-feed-list .feed-card:last-child {
+  border-bottom: 0;
+}
+
+.social-feed-list .feed-card:hover {
+  transform: none;
+  border-color: var(--line);
+  background: var(--surface-raised);
+}
+
+.social-post-header {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.social-avatar {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid rgb(185 147 78 / 38%);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  font-family: system-ui, sans-serif;
+  font-weight: 800;
+}
+
+.social-author-block {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.5rem;
+  align-items: baseline;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.social-author-name {
+  color: var(--text);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.social-community-link {
+  width: 100%;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.social-content-badge {
+  display: inline-flex;
+  margin-bottom: 0.65rem;
+  color: var(--accent-strong);
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.social-feed-copy {
+  margin: 0.55rem 0 0;
+  white-space: pre-wrap;
+  color: var(--text) !important;
+  font-size: 1rem;
+  line-height: 1.58 !important;
+}
+
+.social-card-actions {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(58 48 37 / 60%);
+  font-size: 0.88rem;
+}
+
+.social-card-actions a {
+  color: var(--muted);
+  font-weight: 650;
+  text-decoration: none;
+}
+
 .community-posts ul,
 .profile-content-section ul {
   display: grid;
@@ -222,5 +422,22 @@ button.create-launcher-action {
 
   .post-comment-reply {
     margin-left: 0.5rem;
+  }
+
+  .social-stream-header {
+    align-items: center;
+  }
+
+  .social-stream-header p {
+    display: none;
+  }
+
+  .social-feed-tabs {
+    top: 4.2rem;
+  }
+
+  .social-join-prompt {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
