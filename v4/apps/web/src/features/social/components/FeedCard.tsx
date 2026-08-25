@@ -1,6 +1,7 @@
 import type { FeedEntry } from '@lorion/contracts';
 import { motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
 
 function destination(entry: FeedEntry): string {
   if (entry.type === 'post') return `/publicacoes/${encodeURIComponent(entry.item.id)}`;
@@ -63,12 +64,9 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
         <span className="social-content-badge">{label(entry)}</span>
       )}
 
-      {entry.item.title ? (
-        <h2>
-          <Link to={link}>{entry.item.title}</Link>
-        </h2>
-      ) : null}
+      {entry.item.title ? <h2><Link to={link}>{entry.item.title}</Link></h2> : null}
       {text ? <p className="social-feed-copy">{text.slice(0, 340)}</p> : null}
+      {entry.type === 'post' ? <PostMediaGallery media={entry.item.media} /> : null}
 
       <footer className="social-card-actions">
         <Link to={link}>{entry.type === 'post' ? 'Conversar' : 'Abrir'}</Link>
