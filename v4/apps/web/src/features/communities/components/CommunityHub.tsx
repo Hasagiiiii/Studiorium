@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import type { CommunityHub as CommunityHubData } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { PostActionBar } from '../../posts/components/PostActionBar.js';
-import { PostMediaGallery } from '../../posts/components/PostMediaGallery.js';
+import { SocialPostCard } from '../../posts/components/SocialPostCard.js';
 
 type Props = { slug: string; canAccess: boolean };
 type HubTab = 'all' | 'posts' | 'discussions';
@@ -141,19 +140,7 @@ export function CommunityHub({ slug, canAccess }: Props) {
 
             {(tab === 'all' || tab === 'posts') && hub.posts.length ? (
               <section className="community-feed-group" aria-label="Publicações">
-                {hub.posts.map((post) => (
-                  <article className="community-feed-item" key={post.id}>
-                    <div className="community-feed-type">Publicação</div>
-                    <div className="community-feed-author">
-                      <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>{post.authorName}</Link>
-                      <span>@{post.authorUsername}</span>
-                    </div>
-                    {post.title ? <h3><Link to={`/publicacoes/${encodeURIComponent(post.id)}`}>{post.title}</Link></h3> : null}
-                    {post.body ? <p>{post.body}</p> : null}
-                    <PostMediaGallery media={post.media} />
-                    <PostActionBar contentId={post.id} initial={post.interactions} compact />
-                  </article>
-                ))}
+                {hub.posts.map((post) => <SocialPostCard key={post.id} post={post} compact />)}
               </section>
             ) : null}
 
