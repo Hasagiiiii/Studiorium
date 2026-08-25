@@ -8,6 +8,9 @@ export const commentModerationStatusSchema = z.enum([
   'removed',
 ]);
 
+export const commentBodySchema = z.string().trim().min(1).max(2000);
+export const commentParentIdSchema = z.string().trim().min(1).max(180).nullable().default(null);
+
 export const contentCommentSchema = z.object({
   id: z.string(),
   contentId: z.string(),
@@ -23,12 +26,12 @@ export const contentCommentSchema = z.object({
 });
 
 export const createCommentInputSchema = z.object({
-  body: z.string().trim().min(1).max(2000),
-  parentId: z.string().trim().min(1).max(180).nullable().default(null),
+  body: commentBodySchema,
+  parentId: commentParentIdSchema,
 });
 
 export const updateCommentInputSchema = z.object({
-  body: z.string().trim().min(1).max(2000),
+  body: commentBodySchema,
 });
 
 export const contentInteractionSummarySchema = z.object({
