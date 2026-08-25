@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { BookCover } from '../components/BookCover.js';
 
 export function LibraryPage() {
   const { data } = useAppState();
@@ -17,14 +18,19 @@ export function LibraryPage() {
           <h2>Livros</h2>
         </header>
         {books.length ? (
-          <div className="resource-grid">
+          <div className="book-rail" aria-label="Livros disponíveis">
             {books.map((book) => (
-              <article key={book.id} className="resource-card book-card">
-                <span className="eyebrow">{book.category}</span>
-                <h3>
-                  <Link to={`/livros/${encodeURIComponent(book.id)}`}>{book.title}</Link>
-                </h3>
-                <p>{book.author}</p>
+              <article key={book.id} className="book-tile">
+                <Link className="book-cover-link" to={`/livros/${encodeURIComponent(book.id)}`}>
+                  <BookCover book={book} />
+                </Link>
+                <div className="book-tile-copy">
+                  <span className="eyebrow">{book.category}</span>
+                  <h3>
+                    <Link to={`/livros/${encodeURIComponent(book.id)}`}>{book.title}</Link>
+                  </h3>
+                  <p>{book.author}</p>
+                </div>
               </article>
             ))}
           </div>
