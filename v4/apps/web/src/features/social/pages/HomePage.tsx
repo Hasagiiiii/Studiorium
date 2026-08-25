@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { FeedSkeleton } from '../../../components/feedback/skeleton/Skeleton.js';
+import { PostComposer } from '../../posts/components/PostComposer.js';
 import { FeedCard } from '../components/FeedCard.js';
 import { useFeed } from '../state/useFeed.js';
 import { useProgressiveFeed } from '../state/useProgressiveFeed.js';
@@ -20,13 +21,34 @@ export function HomePage() {
 
   return (
     <main id="main-content" className="social-home">
-      <header className="social-home-heading">
-        <span className="eyebrow">Lorion</span>
-        <h1>Conhecimento conecta.</h1>
-        <p>Pessoas, projetos, pesquisas e comunidades na mesma rede.</p>
+      <header className="social-stream-header">
+        <div>
+          <span className="eyebrow">Lorion</span>
+          <h1>Início</h1>
+          <p>Conhecimento, pessoas e comunidades em movimento.</p>
+        </div>
+        <Link className="social-discover-link" to="/explorar">
+          Explorar
+        </Link>
       </header>
 
-      <nav className="feed-tabs" aria-label="Filtros do feed">
+      {data?.user ? (
+        <section className="social-composer-shell" aria-label="Criar publicação">
+          <PostComposer />
+        </section>
+      ) : (
+        <section className="social-join-prompt">
+          <div>
+            <strong>Entre na conversa.</strong>
+            <span>Siga pessoas, participe de comunidades e publique no Lorion.</span>
+          </div>
+          <Link className="button primary" to="/entrar">
+            Entrar
+          </Link>
+        </section>
+      )}
+
+      <nav className="feed-tabs social-feed-tabs" aria-label="Filtros do feed">
         {tabs
           .filter(([value]) => value !== 'following' || data?.user)
           .map(([value, label]) => (
@@ -53,7 +75,7 @@ export function HomePage() {
       ) : null}
 
       {status === 'ready' ? (
-        <section className="feed-list" aria-live="polite">
+        <section className="feed-list social-feed-list" aria-live="polite">
           {visibleItems.length ? (
             <>
               {visibleItems.map((entry, index) => (
