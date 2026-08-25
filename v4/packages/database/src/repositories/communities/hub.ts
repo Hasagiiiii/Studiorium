@@ -15,7 +15,9 @@ type ProfileRow = {
   display_name: string;
 };
 
-function mapDiscussion(row: Record<string, unknown>): Discussion {
+type ReplyRow = { discussion_id: string };
+
+function mapDiscussion(row: Record<string, unknown>, replyCount = 0): Discussion {
   return discussionSchema.parse({
     id: row.id,
     authorId: row.author_id,
@@ -24,9 +26,25 @@ function mapDiscussion(row: Record<string, unknown>): Discussion {
     body: row.body,
     category: row.category,
     status: row.status,
+    replyCount,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   });
+}
+
+async function replyCounts(ids: string[]): Promise<Map<string, number>> {
+  if (!ids.length) return new Map();
+  const rows = queryList(
+    await database()
+      .from('replies')
+      .select('discussion_id')
+      .in('discussion_id', ids)
+      .eq('status', 'published')
+      .is('deleted_at', null),
+  ) as ReplyRow[];
+  const counts = new Map<string, number>();
+  for (const row of rows) counts.set(row.discussion_id, (counts.get(row.discussion_id) || 0) + 1);
+  return counts;
 }
 
 export async function listCommunityMembers(communityId: string): Promise<CommunityMember[]> {
@@ -46,10 +64,7 @@ export async function listCommunityMembers(communityId: string): Promise<Communi
     await database()
       .from('profiles')
       .select('user_id,username,display_name')
-      .in(
-        'user_id',
-        members.map((member) => member.user_id),
-      ),
+      .in('user_id', members.map((member) => member.user_id)),
   ) as ProfileRow[];
   const profilesByUser = new Map(profiles.map((profile) => [profile.user_id, profile]));
 
@@ -76,31 +91,37 @@ export async function listCommunityDiscussions(communityId: string): Promise<Dis
   ) as Array<{ content_id: string }>;
 
   if (!links.length) return [];
+  const ids = links.map((link) => link.content_id);
+  const [result, counts] = await Promise.all([
+    database()
+      .from('discussions')
+      .select('*')
+      .in('id', ids)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
+    replyCounts(ids),
+  ]);
 
-  const result = await database()
-    .from('discussions')
-    .select('*')
-    .in(
-      'id',
-      links.map((link) => link.content_id),
-    )
-    .eq('status', 'published')
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false });
-
-  return queryList(result).map((row) => mapDiscussion(row as Record<string, unknown>));
+  return queryList(result).map((row) => {
+    const record = row as Record<string, unknown>;
+    return mapDiscussion(record, counts.get(String(record.id)) || 0);
+  });
 }
 
 export async function findDiscussionById(id: string): Promise<Discussion | null> {
-  const result = await database()
-    .from('discussions')
-    .select('*')
-    .eq('id', id)
-    .eq('status', 'published')
-    .is('deleted_at', null)
-    .maybeSingle();
+  const [result, counts] = await Promise.all([
+    database()
+      .from('discussions')
+      .select('*')
+      .eq('id', id)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .maybeSingle(),
+    replyCounts([id]),
+  ]);
   if (result.error) throw new Error(result.error.message);
-  return result.data ? mapDiscussion(result.data as Record<string, unknown>) : null;
+  return result.data ? mapDiscussion(result.data as Record<string, unknown>, counts.get(id) || 0) : null;
 }
 
 export async function createCommunityDiscussion(input: {
