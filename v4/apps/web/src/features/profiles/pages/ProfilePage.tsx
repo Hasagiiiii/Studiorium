@@ -17,20 +17,21 @@ type DetailState =
   | { status: 'ready'; value: ProfileDetail; error: null }
   | { status: 'error'; value: ProfileDetail | null; error: string };
 
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
+}
+
 export function ProfilePage() {
   const { username = '' } = useParams();
   const { data } = useAppState();
   const { pushToast } = useToast();
-  const [detail, setDetail] = useState<DetailState>({
-    status: 'loading',
-    value: null,
-    error: null,
-  });
-  const [social, setSocial] = useState<SocialState>({
-    status: 'loading',
-    value: null,
-    error: null,
-  });
+  const [detail, setDetail] = useState<DetailState>({ status: 'loading', value: null, error: null });
+  const [social, setSocial] = useState<SocialState>({ status: 'loading', value: null, error: null });
   const [updatingFollow, setUpdatingFollow] = useState(false);
   const [updatingBookshelfPrivacy, setUpdatingBookshelfPrivacy] = useState(false);
 
@@ -96,8 +97,7 @@ export function ProfilePage() {
         tone: 'success',
       });
     } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
+      const message = cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
       setSocial((current) => ({ status: 'error', value: current.value, error: message }));
       pushToast({ message, tone: 'error' });
     } finally {
@@ -112,11 +112,7 @@ export function ProfilePage() {
       const updatedProfile = await services.profiles.updateBookshelfPrivacy(bookshelfPublic);
       setDetail((current) =>
         current.value
-          ? {
-              status: 'ready',
-              error: null,
-              value: { ...current.value, profile: updatedProfile },
-            }
+          ? { status: 'ready', error: null, value: { ...current.value, profile: updatedProfile } }
           : current,
       );
       pushToast({
@@ -124,33 +120,23 @@ export function ProfilePage() {
         tone: 'success',
       });
     } catch (cause) {
-      const message =
-        cause instanceof Error
-          ? cause.message
-          : 'Não foi possível alterar a privacidade da estante.';
-      pushToast({ message, tone: 'error' });
+      pushToast({
+        message:
+          cause instanceof Error ? cause.message : 'Não foi possível alterar a privacidade da estante.',
+        tone: 'error',
+      });
     } finally {
       setUpdatingBookshelfPrivacy(false);
     }
   }
 
   if (detail.status === 'loading' && !detail.value) {
-    return (
-      <FeaturePage
-        eyebrow="Perfil"
-        title="Carregando perfil…"
-        description="Buscando dados públicos."
-      />
-    );
+    return <FeaturePage eyebrow="Perfil" title="Carregando perfil…" description="Buscando dados públicos." />;
   }
 
   if (detail.status === 'error' && !detail.value) {
     return (
-      <FeaturePage
-        eyebrow="Perfil"
-        title="Perfil indisponível"
-        description={detail.error || 'Este perfil não está disponível para você.'}
-      >
+      <FeaturePage eyebrow="Perfil" title="Perfil indisponível" description={detail.error || 'Este perfil não está disponível para você.'}>
         <div className="inline-feedback" role="alert">
           <button className="button secondary" type="button" onClick={() => void loadDetail()}>
             Tentar novamente
@@ -163,99 +149,80 @@ export function ProfilePage() {
 
   if (!profile || !detail.value) {
     return (
-      <FeaturePage
-        eyebrow="Perfil"
-        title="Perfil não encontrado"
-        description="Este usuário não existe ou o perfil não está disponível para você."
-      >
+      <FeaturePage eyebrow="Perfil" title="Perfil não encontrado" description="Este usuário não existe ou o perfil não está disponível para você.">
         <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
       </FeaturePage>
     );
   }
 
   return (
-    <FeaturePage
-      eyebrow={profile.verificationStatus === 'verified' ? 'Perfil verificado' : 'Perfil'}
-      title={profile.displayName}
-      description={profile.bio || 'Membro da rede Lorion.'}
-    >
-      <section className="profile-overview">
-        <div className="profile-identity">
-          <strong>@{profile.username}</strong>
-          <span>{profile.profileType}</span>
-          {profile.institution ? <span>{profile.institution}</span> : null}
-          {profile.course ? <span>{profile.course}</span> : null}
-          {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
-          {!profile.isPublic && isOwnProfile ? <span>Perfil privado</span> : null}
+    <main id="main-content" className="social-profile-page">
+      <section className="social-profile-header">
+        <div className="social-profile-cover" aria-hidden="true" />
+        <div className="social-profile-body">
+          <div className="social-profile-avatar" aria-label={`Avatar de ${profile.displayName}`}>
+            {initials(profile.displayName) || '?'}
+          </div>
+
+          <div className="social-profile-topline">
+            <div>
+              <div className="social-profile-name-row">
+                <h1>{profile.displayName}</h1>
+                {profile.verificationStatus === 'verified' ? (
+                  <span className="verified-badge" title="Perfil verificado" aria-label="Perfil verificado">✓</span>
+                ) : null}
+              </div>
+              <p className="social-profile-handle">@{profile.username}</p>
+            </div>
+
+            <div className="social-profile-actions">
+              {isOwnProfile ? (
+                <Link className="button secondary" to="/conta/seguranca">Configurações</Link>
+              ) : social.value?.canFollow ? (
+                data?.user ? (
+                  <button className={social.value.isFollowing ? 'button secondary' : 'button primary'} type="button" disabled={updatingFollow} onClick={() => void toggleFollow()}>
+                    {updatingFollow ? 'Atualizando…' : social.value.isFollowing ? 'Seguindo' : 'Seguir'}
+                  </button>
+                ) : (
+                  <Link className="button primary" to={`/entrar?retorno=${encodeURIComponent(`/perfil/${profile.username}`)}`}>
+                    Seguir
+                  </Link>
+                )
+              ) : null}
+            </div>
+          </div>
+
+          <div className="social-profile-stats" aria-label="Estatísticas do perfil">
+            <span><strong>{detail.value.posts.length}</strong> publicações</span>
+            <span><strong>{social.value?.followerCount ?? '—'}</strong> seguidores</span>
+            <span><strong>{social.value?.followingCount ?? '—'}</strong> seguindo</span>
+          </div>
+
+          <div className="social-profile-bio">
+            {profile.bio ? <p>{profile.bio}</p> : <p>Membro da rede Lorion.</p>}
+            <div className="social-profile-meta">
+              <span>{profile.profileType}</span>
+              {profile.institution ? <span>{profile.institution}</span> : null}
+              {profile.course ? <span>{profile.course}</span> : null}
+              {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
+              {!profile.isPublic && isOwnProfile ? <span>Perfil privado</span> : null}
+            </div>
+          </div>
+
+          {social.status === 'error' ? (
+            <div className="inline-feedback" role="alert">
+              <p className="inline-error">{social.error}</p>
+              <button className="button secondary" type="button" onClick={() => void loadSocial()}>Tentar novamente</button>
+            </div>
+          ) : null}
         </div>
-
-        {isOwnProfile ? (
-          <p>
-            <Link className="button secondary" to="/conta/seguranca">
-              Segurança da conta
-            </Link>
-          </p>
-        ) : null}
-
-        {social.value ? (
-          <div className="profile-social">
-            <span>
-              <strong>{social.value.followerCount}</strong> seguidores
-            </span>
-            <span>
-              <strong>{social.value.followingCount}</strong> seguindo
-            </span>
-            {!isOwnProfile && social.value.canFollow ? (
-              data?.user ? (
-                <button
-                  className="button primary"
-                  type="button"
-                  disabled={updatingFollow}
-                  onClick={() => void toggleFollow()}
-                >
-                  {updatingFollow
-                    ? 'Atualizando…'
-                    : social.value.isFollowing
-                      ? 'Deixar de seguir'
-                      : 'Seguir'}
-                </button>
-              ) : (
-                <Link
-                  className="button primary"
-                  to={`/entrar?retorno=${encodeURIComponent(`/perfil/${profile.username}`)}`}
-                >
-                  Entre para seguir
-                </Link>
-              )
-            ) : null}
-          </div>
-        ) : null}
-
-        {social.status === 'loading' && !social.value ? (
-          <p className="feed-status">Carregando conexões…</p>
-        ) : null}
-
-        {social.status === 'error' ? (
-          <div className="inline-feedback" role="alert">
-            <p className="inline-error">{social.error}</p>
-            <button className="button secondary" type="button" onClick={() => void loadSocial()}>
-              Tentar novamente
-            </button>
-          </div>
-        ) : null}
-
-        {detail.status === 'error' ? (
-          <p className="inline-error" role="alert">
-            {detail.error}
-          </p>
-        ) : null}
-
-        <ProfileContent
-          detail={detail.value}
-          updatingBookshelfPrivacy={updatingBookshelfPrivacy}
-          onBookshelfPrivacyChange={(value) => void updateBookshelfPrivacy(value)}
-        />
       </section>
-    </FeaturePage>
+
+      <ProfileContent
+        detail={detail.value}
+        updatingBookshelfPrivacy={updatingBookshelfPrivacy}
+        onBookshelfPrivacyChange={(value) => void updateBookshelfPrivacy(value)}
+      />
+    </main>
   );
 }
