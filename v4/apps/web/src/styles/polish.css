@@ -1,0 +1,272 @@
+/* Final social polish layer. Keep interface calm, dense and readable. */
+
+.feature-page {
+  width: min(100%, 68rem);
+  margin: 0 auto;
+}
+
+.feature-heading {
+  max-width: 44rem;
+  margin-bottom: 1.35rem;
+}
+
+.feature-heading h1,
+.system-state h1 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.feature-heading p {
+  max-width: 62ch;
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+
+.resource-card,
+.feed-card,
+.empty-state,
+.book-detail,
+.profile-overview,
+.community-overview,
+.project-detail,
+.auth-form,
+.longform-content,
+.post-detail,
+.post-interactions {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.resource-card,
+.empty-state,
+.book-detail,
+.community-overview,
+.project-detail,
+.longform-content {
+  border-color: rgb(58 48 37 / 72%);
+}
+
+.resource-card:hover {
+  border-color: rgb(185 147 78 / 38%);
+}
+
+.resource-card h2,
+.resource-card h3,
+.feed-card h2 {
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.resource-card p,
+.search-result-card p {
+  margin-top: 0.45rem;
+  line-height: 1.52;
+}
+
+.button {
+  min-height: 2.55rem;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.button.secondary {
+  background: transparent;
+}
+
+input,
+textarea,
+select {
+  border-radius: 0.8rem;
+  background: rgb(13 11 9 / 88%);
+  line-height: 1.45;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgb(185 147 78 / 58%);
+}
+
+.topbar {
+  min-height: 4.25rem;
+  padding-block: 0.55rem;
+}
+
+.brand-mark {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
+.primary-nav a,
+.topbar-actions a,
+.bottom-nav a,
+.bottom-nav button {
+  min-height: 2.5rem;
+  font-size: 0.88rem;
+}
+
+.shell-body {
+  padding-top: clamp(1rem, 2.5vw, 2.25rem);
+}
+
+.profile-shell,
+.explore-social,
+.social-home {
+  min-width: 0;
+}
+
+.profile-overview {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding-inline: 0;
+}
+
+.profile-tabs,
+.social-feed-tabs,
+.explore-filters {
+  border-bottom: 1px solid var(--line);
+}
+
+.profile-tabs a,
+.social-feed-tabs a,
+.explore-filters a {
+  border-radius: 0.7rem;
+}
+
+.social-feed-list {
+  border-color: rgb(58 48 37 / 72%);
+  border-radius: 1rem;
+}
+
+.social-feed-list .feed-card {
+  padding: 1rem 1.05rem;
+}
+
+.social-content-badge {
+  margin-bottom: 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+}
+
+.social-feed-copy {
+  max-width: 68ch;
+  font-size: 0.98rem;
+  line-height: 1.52 !important;
+}
+
+.social-card-actions {
+  margin-top: 0.8rem;
+  padding-top: 0.65rem;
+}
+
+.post-composer {
+  border-radius: 1rem;
+}
+
+.post-composer > div:first-child h3 {
+  margin: 0.15rem 0 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+}
+
+.post-composer label {
+  gap: 0.35rem;
+  font-size: 0.84rem;
+}
+
+.post-composer textarea {
+  min-height: 6.5rem;
+}
+
+.social-post-detail-page {
+  width: min(100%, 46rem);
+  margin: 0 auto;
+}
+
+.social-post-detail-back {
+  display: inline-flex;
+  margin-bottom: 0.9rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.social-post-detail-card {
+  padding: 1rem 1.05rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.social-post-detail-header {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.social-post-detail-title {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.social-post-detail-copy {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  line-height: 1.58;
+}
+
+.social-post-detail-page .post-interactions {
+  max-width: none;
+  margin-top: 0.75rem;
+  border-radius: 1rem;
+}
+
+.post-interaction-summary h2,
+.post-comment-list > h3,
+.post-comment-form h3 {
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.post-comment {
+  border-radius: 0.9rem;
+}
+
+@media (max-width: 620px) {
+  .feature-heading h1,
+  .system-state h1 {
+    font-size: clamp(1.65rem, 8vw, 2.2rem);
+  }
+
+  .feature-heading {
+    margin-bottom: 1rem;
+  }
+
+  .social-feed-list,
+  .social-post-detail-card,
+  .social-post-detail-page .post-interactions {
+    border-radius: 0.8rem;
+  }
+
+  .social-feed-list .feed-card,
+  .social-post-detail-card {
+    padding-inline: 0.9rem;
+  }
+}
