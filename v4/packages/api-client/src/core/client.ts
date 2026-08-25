@@ -28,6 +28,19 @@ function isRuntimeValidationError(error: unknown): boolean {
   return Boolean(error && typeof error === 'object' && 'issues' in error);
 }
 
+async function responsePayload(response: Response): Promise<unknown> {
+  return response.status === 204 ? {} : response.json().catch(() => ({}));
+}
+
+function apiError(payload: unknown, status: number): ApiError {
+  const record = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
+  return new ApiError(
+    typeof record.error === 'string' ? record.error : 'Não foi possível concluir a ação.',
+    status,
+    typeof record.code === 'string' ? record.code : undefined,
+  );
+}
+
 export class ApiClient {
   constructor(private readonly baseUrl = '') {}
 
@@ -57,17 +70,10 @@ export class ApiClient {
         }
 
         const response = await fetch(`${this.baseUrl}${path}`, init);
-        const payload = response.status === 204 ? {} : await response.json().catch(() => ({}));
+        const payload = await responsePayload(response);
 
         if (!response.ok) {
-          const record =
-            payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
-          const error = new ApiError(
-            typeof record.error === 'string' ? record.error : 'Não foi possível concluir a ação.',
-            response.status,
-            typeof record.code === 'string' ? record.code : undefined,
-          );
-
+          const error = apiError(payload, response.status);
           if (
             method === 'GET' &&
             attempt < attempts &&
@@ -96,5 +102,24 @@ export class ApiClient {
     }
 
     throw lastError instanceof Error ? lastError : new Error('Falha de rede.');
+  }
+
+  async upload<T>(
+    path: string,
+    schema: RuntimeSchema<T>,
+    body: Blob,
+    headers?: HeadersInit,
+  ): Promise<T> {
+    const uploadHeaders = new Headers(headers);
+    if (body.type) uploadHeaders.set('Content-Type', body.type);
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: 'POST',
+      body,
+      headers: uploadHeaders,
+      credentials: 'same-origin',
+    });
+    const payload = await responsePayload(response);
+    if (!response.ok) throw apiError(payload, response.status);
+    return schema.parse(payload);
   }
 }
