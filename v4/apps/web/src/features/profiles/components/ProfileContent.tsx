@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import type { ProfileDetail } from '@lorion/contracts';
-import { BookCover } from '../../library/components/BookCover.js';
+import { BookCarousel } from '../../library/components/BookCarousel.js';
 
 type Props = {
   detail: ProfileDetail;
@@ -11,9 +11,11 @@ type Props = {
 const shelfLabels: Record<string, string> = {
   want_to_read: 'Quero ler',
   reading: 'Lendo',
-  read: 'Lido',
-  abandoned: 'Abandonado',
+  read: 'Lidos',
+  abandoned: 'Abandonados',
 };
+
+const shelfOrder = ['reading', 'want_to_read', 'read', 'abandoned'] as const;
 
 const tabs = [
   ['posts', 'Publicações'],
@@ -118,9 +120,12 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
       ) : null}
 
       {active === 'books' ? (
-        <section className="profile-content-section">
+        <section className="profile-content-section profile-bookshelf-section">
           <div className="profile-bookshelf-heading">
-            <h2>Estante</h2>
+            <div>
+              <h2>Estante</h2>
+              <p>{detail.bookshelf.length} {detail.bookshelf.length === 1 ? 'livro salvo' : 'livros salvos'}</p>
+            </div>
             {detail.isOwnProfile ? (
               <label>
                 <input
@@ -133,22 +138,22 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
               </label>
             ) : null}
           </div>
+
           {!detail.isOwnProfile && !profile.bookshelfPublic ? (
             <div className="empty-state"><h2>Estante privada.</h2></div>
           ) : detail.bookshelf.length ? (
-            <div className="book-rail profile-book-rail" aria-label="Livros da estante">
-              {detail.bookshelf.map((item) => (
-                <article className="book-tile" key={item.book.id}>
-                  <Link className="book-cover-link" to={`/livros/${encodeURIComponent(item.book.id)}`}>
-                    <BookCover book={item.book} />
-                  </Link>
-                  <div className="book-tile-copy">
-                    <span className="eyebrow">{shelfLabels[item.shelfStatus] || item.shelfStatus}</span>
-                    <h3><Link to={`/livros/${encodeURIComponent(item.book.id)}`}>{item.book.title}</Link></h3>
-                    <p>{item.book.author}</p>
-                  </div>
-                </article>
-              ))}
+            <div className="profile-bookshelf-groups">
+              {shelfOrder.map((status) => {
+                const items = detail.bookshelf.filter((item) => item.shelfStatus === status);
+                return items.length ? (
+                  <BookCarousel
+                    key={status}
+                    title={shelfLabels[status]}
+                    items={items.map((item) => ({ book: item.book }))}
+                    ariaLabel={`${shelfLabels[status]} de ${profile.displayName}`}
+                  />
+                ) : null;
+              })}
             </div>
           ) : (
             <div className="empty-state"><h2>A estante ainda está vazia.</h2></div>
