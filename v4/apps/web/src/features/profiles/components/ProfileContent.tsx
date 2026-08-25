@@ -8,14 +8,15 @@ type Props = {
   onBookshelfPrivacyChange: (value: boolean) => void;
 };
 
-const shelfLabels: Record<string, string> = {
+const shelfOrder = ['reading', 'want_to_read', 'read', 'abandoned'] as const;
+type ShelfSection = (typeof shelfOrder)[number];
+
+const shelfLabels: Record<ShelfSection, string> = {
   want_to_read: 'Quero ler',
   reading: 'Lendo',
   read: 'Lidos',
   abandoned: 'Abandonados',
 };
-
-const shelfOrder = ['reading', 'want_to_read', 'read', 'abandoned'] as const;
 
 const tabs = [
   ['posts', 'Publicações'],
@@ -145,12 +146,13 @@ export function ProfileContent({ detail, updatingBookshelfPrivacy, onBookshelfPr
             <div className="profile-bookshelf-groups">
               {shelfOrder.map((status) => {
                 const items = detail.bookshelf.filter((item) => item.shelfStatus === status);
+                const label = shelfLabels[status];
                 return items.length ? (
                   <BookCarousel
                     key={status}
-                    title={shelfLabels[status]}
+                    title={label}
                     items={items.map((item) => ({ book: item.book }))}
-                    ariaLabel={`${shelfLabels[status]} de ${profile.displayName}`}
+                    ariaLabel={`${label} de ${profile.displayName}`}
                   />
                 ) : null;
               })}
