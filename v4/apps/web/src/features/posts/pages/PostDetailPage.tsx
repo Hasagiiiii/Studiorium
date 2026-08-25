@@ -10,6 +10,15 @@ type State =
   | { status: 'ready'; value: PostDetail; error: null }
   | { status: 'error'; value: PostDetail | null; error: string };
 
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+}
+
 export function PostDetailPage() {
   const { id = '' } = useParams();
   const [state, setState] = useState<State>({ status: 'loading', value: null, error: null });
@@ -38,7 +47,7 @@ export function PostDetailPage() {
       <FeaturePage
         eyebrow="Publicação"
         title="Carregando publicação…"
-        description="Buscando conteúdo e interações."
+        description="Buscando conteúdo e conversa."
       />
     );
   }
@@ -61,28 +70,40 @@ export function PostDetailPage() {
   const { post } = detail;
 
   return (
-    <FeaturePage
-      eyebrow="Publicação"
-      title={post.title || `Publicação de ${post.authorName}`}
-      description="Conteúdo social do Lorion."
-    >
-      <article className="post-detail">
-        <header className="post-detail-meta">
-          <Link to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>{post.authorName}</Link>
-          {post.community ? (
-            <>
-              <span> em </span>
-              <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>
+    <main id="main-content" className="social-post-detail-page">
+      <Link className="social-post-detail-back" to="/">
+        ← Voltar para o feed
+      </Link>
+
+      <article className="social-post-detail-card">
+        <header className="social-post-detail-header">
+          <span className="social-avatar" aria-hidden="true">
+            {initials(post.authorName)}
+          </span>
+          <div className="social-author-block">
+            <Link
+              className="social-author-name"
+              to={`/perfil/${encodeURIComponent(post.authorUsername)}`}
+            >
+              {post.authorName}
+            </Link>
+            <span>@{post.authorUsername}</span>
+            {post.community ? (
+              <Link
+                className="social-community-link"
+                to={`/comunidades/${encodeURIComponent(post.community.slug)}`}
+              >
                 {post.community.name}
               </Link>
-            </>
-          ) : null}
+            ) : null}
+          </div>
         </header>
-        {post.title ? <h2>{post.title}</h2> : null}
-        <p className="post-detail-body">{post.body}</p>
+
+        {post.title ? <h1 className="social-post-detail-title">{post.title}</h1> : null}
+        <p className="social-post-detail-copy">{post.body}</p>
       </article>
 
       <PostInteractions contentId={post.id} initial={detail.interactions} />
-    </FeaturePage>
+    </main>
   );
 }
