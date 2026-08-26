@@ -10,6 +10,7 @@ import {
   contentInteractionsSchema,
   createCommentInputSchema,
   createPostInputSchema,
+  newsArticleStatusSchema,
   parseBootstrap,
   postDetailSchema,
   profileDetailSchema,
@@ -251,6 +252,13 @@ test('estante aceita todos os estados funcionais definidos pelo produto', () => 
   assert.equal(bookshelfStatusSchema.parse('read'), 'read');
   assert.equal(bookshelfStatusSchema.parse('abandoned'), 'abandoned');
   assert.throws(() => bookshelfStatusSchema.parse('unknown'));
+});
+
+test('notícia aceita somente estados editoriais definidos pelo domínio', () => {
+  assert.equal(newsArticleStatusSchema.parse('draft'), 'draft');
+  assert.equal(newsArticleStatusSchema.parse('published'), 'published');
+  assert.equal(newsArticleStatusSchema.parse('archived'), 'archived');
+  assert.throws(() => newsArticleStatusSchema.parse('unknown'));
 });
 
 test('projeto v4 exige ownerId e não aceita o contrato legado userId sozinho', () => {
