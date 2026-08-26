@@ -50,13 +50,11 @@ export function newsFingerprint(title: string, summary = ''): string {
 export type NewsDeduplicationInput = {
   candidateFingerprint: string;
   existingFingerprints: string[];
-  semanticSimilarity?: number;
-  semanticThreshold?: number;
 };
 
 export type NewsDeduplicationDecision = {
   duplicate: boolean;
-  reason: 'unique' | 'same_fingerprint' | 'same_meaning';
+  reason: 'unique' | 'same_fingerprint';
 };
 
 export function decideNewsDuplicate(input: NewsDeduplicationInput): NewsDeduplicationDecision {
@@ -64,58 +62,7 @@ export function decideNewsDuplicate(input: NewsDeduplicationInput): NewsDeduplic
     return { duplicate: true, reason: 'same_fingerprint' };
   }
 
-  const threshold = input.semanticThreshold ?? 0.86;
-  if (typeof input.semanticSimilarity === 'number' && input.semanticSimilarity >= threshold) {
-    return { duplicate: true, reason: 'same_meaning' };
-  }
-
   return { duplicate: false, reason: 'unique' };
-}
-
-export type EditorialTopic = 'sports' | 'education' | 'politics' | 'general';
-
-export type EditorialAnalysisInput = {
-  topic: EditorialTopic;
-  officialFactsVerified: boolean;
-  reactionSourceCount: number;
-  distinctViewpointCount: number;
-  supportsPartyOrCandidate?: boolean;
-  clearlyLabeledAsAiAnalysis: boolean;
-};
-
-export type EditorialAnalysisDecision = {
-  allowed: boolean;
-  reason:
-    | 'analysis_allowed'
-    | 'facts_not_verified'
-    | 'insufficient_reactions'
-    | 'insufficient_viewpoints'
-    | 'political_endorsement_not_allowed'
-    | 'ai_label_required';
-};
-
-export function decideEditorialAnalysis(input: EditorialAnalysisInput): EditorialAnalysisDecision {
-  if (!input.officialFactsVerified) {
-    return { allowed: false, reason: 'facts_not_verified' };
-  }
-
-  if (!input.clearlyLabeledAsAiAnalysis) {
-    return { allowed: false, reason: 'ai_label_required' };
-  }
-
-  if (input.reactionSourceCount < 3) {
-    return { allowed: false, reason: 'insufficient_reactions' };
-  }
-
-  if (input.distinctViewpointCount < 2) {
-    return { allowed: false, reason: 'insufficient_viewpoints' };
-  }
-
-  if (input.topic === 'politics' && input.supportsPartyOrCandidate) {
-    return { allowed: false, reason: 'political_endorsement_not_allowed' };
-  }
-
-  return { allowed: true, reason: 'analysis_allowed' };
 }
 
 export type MatchHighlightKind =
