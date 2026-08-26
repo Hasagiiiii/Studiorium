@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
 
+export const newsArticleStatusSchema = z.enum(['draft', 'published', 'archived']);
+
 export const newsArticleSchema = z.object({
   id: z.string(),
   contributorId: z.string().nullable().default(null),
@@ -10,7 +12,7 @@ export const newsArticleSchema = z.object({
   summary: optionalText,
   body: optionalText,
   category: z.string().default('Atualizações'),
-  status: z.string(),
+  status: newsArticleStatusSchema,
   featured: z.boolean().default(false),
   likeCount: z.number().int().nonnegative().default(0),
   certifiedBy: z.string().nullable().default(null),
@@ -20,4 +22,5 @@ export const newsArticleSchema = z.object({
   updatedAt: timestamp,
 });
 
+export type NewsArticleStatus = z.infer<typeof newsArticleStatusSchema>;
 export type NewsArticle = z.infer<typeof newsArticleSchema>;
