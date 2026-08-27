@@ -106,9 +106,12 @@ export function AppShell({ children }: PropsWithChildren) {
             ⌕
           </Link>
           {me ? (
-            <Link to="/notificacoes" aria-label="Notificações">
-              ◇
-            </Link>
+            <>
+              <Link to="/notificacoes" aria-label="Notificações">
+                ◇
+              </Link>
+              <Link to="/escrivaninha">Escrivaninha</Link>
+            </>
           ) : null}
           {me?.username ? (
             <>
@@ -147,9 +150,7 @@ export function AppShell({ children }: PropsWithChildren) {
           +
         </motion.button>
         <Link to="/comunidades">Comunidades</Link>
-        <Link to={me?.username ? `/perfil/${encodeURIComponent(me.username)}` : '/entrar'}>
-          Perfil
-        </Link>
+        <Link to={me ? '/escrivaninha' : '/entrar'}>{me ? 'Mesa' : 'Entrar'}</Link>
       </nav>
       {me ? <CreateLauncher open={createOpen} onClose={() => setCreateOpen(false)} /> : null}
     </div>

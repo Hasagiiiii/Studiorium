@@ -1,0 +1,256 @@
+.desk-page {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 64px) 0 calc(110px + env(safe-area-inset-bottom));
+}
+
+.desk-page--guest {
+  display: grid;
+  min-height: 68vh;
+  place-items: center;
+}
+
+.desk-hero,
+.desk-admin,
+.desk-empty {
+  border: 1px solid var(--line, rgba(171, 145, 101, 0.24));
+  background: color-mix(in srgb, var(--surface, #171512) 94%, transparent);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+}
+
+.desk-hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(22px, 4vw, 38px);
+  border-radius: 22px;
+}
+
+.desk-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted, #b7aa91);
+}
+
+.desk-hero h1,
+.desk-empty h1,
+.desk-admin h2 {
+  margin: 0;
+  max-width: 18ch;
+  line-height: 1.06;
+}
+
+.desk-hero h1 {
+  font-size: clamp(2rem, 6vw, 4.2rem);
+}
+
+.desk-hero p,
+.desk-empty p,
+.desk-admin p,
+.desk-card p {
+  color: var(--muted, #b7aa91);
+}
+
+.desk-hero p {
+  max-width: 62ch;
+  margin: 14px 0 0;
+}
+
+.desk-primary-action,
+.desk-secondary-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.desk-primary-action {
+  background: var(--accent, #c6a66a);
+  color: #14110d;
+}
+
+.desk-secondary-action {
+  border: 1px solid var(--line, rgba(171, 145, 101, 0.28));
+  color: inherit;
+}
+
+.desk-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.desk-metrics article {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line, rgba(171, 145, 101, 0.2));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface, #171512) 88%, transparent);
+}
+
+.desk-metrics strong,
+.desk-metrics span {
+  display: block;
+}
+
+.desk-metrics strong {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.desk-metrics span {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--muted, #b7aa91);
+}
+
+.desk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.desk-card {
+  display: block;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line, rgba(171, 145, 101, 0.2));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface, #171512) 84%, transparent);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.desk-card > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted, #b7aa91);
+}
+
+.desk-card strong {
+  font-size: 1.12rem;
+}
+
+.desk-card p {
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+.desk-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent, #c6a66a) 48%, transparent);
+}
+
+.desk-card:focus-visible,
+.desk-primary-action:focus-visible,
+.desk-secondary-action:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent, #c6a66a) 66%, white 10%);
+  outline-offset: 3px;
+}
+
+.desk-admin {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 16px;
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.desk-admin h2 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.desk-admin p {
+  max-width: 68ch;
+  margin: 10px 0 0;
+  line-height: 1.58;
+}
+
+.desk-admin-status {
+  align-self: flex-start;
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 1px solid var(--line, rgba(171, 145, 101, 0.28));
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--muted, #b7aa91);
+}
+
+.desk-empty {
+  width: min(620px, 100%);
+  padding: clamp(24px, 6vw, 44px);
+  border-radius: 22px;
+}
+
+.desk-empty p {
+  max-width: 52ch;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .desk-page {
+    width: min(100% - 20px, 1120px);
+    padding-top: 18px;
+  }
+
+  .desk-hero,
+  .desk-admin {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .desk-hero h1 {
+    font-size: clamp(1.85rem, 11vw, 3rem);
+  }
+
+  .desk-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .desk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .desk-card,
+  .desk-metrics article {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .desk-page {
+    width: min(100% - 14px, 1120px);
+  }
+
+  .desk-hero,
+  .desk-empty {
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-card {
+    transition: none;
+  }
+
+  .desk-card:hover {
+    transform: none;
+  }
+}
