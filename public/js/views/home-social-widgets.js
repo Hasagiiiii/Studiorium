@@ -230,18 +230,22 @@ function memberComposer() {
   const initial = E((state.me.displayName || 'S').slice(0, 1));
 
   return [
-    '<div class="social-composer">',
+    '<details class="social-composer social-composer-sheet">',
+    '<summary class="social-composer-trigger">',
     `<span class="social-avatar">${initial}</span>`,
-    '<div>',
+    '<span class="social-composer-prompt">',
     '<strong>Compartilhe algo com a comunidade</strong>',
-    '<p>Publique uma pesquisa, abra uma discussão, mostre um projeto ou crie um material.</p>',
+    '<small>Pesquisa, discussão, projeto ou criação</small>',
+    '</span>',
+    '<span class="social-composer-plus" aria-hidden="true">+</span>',
+    '</summary>',
+    '<div class="social-composer-options" aria-label="Opções de publicação">',
+    link('/publicar', '<b>⌕</b><span><strong>Pesquisa</strong><small>Publique um trabalho ou descoberta</small></span>', 'social-compose-option'),
+    link('/comunidades', '<b>◌</b><span><strong>Discussão</strong><small>Abra uma conversa em comunidade</small></span>', 'social-compose-option'),
+    link('/escrivaninha', '<b>⌘</b><span><strong>Projeto</strong><small>Continue ou compartilhe um projeto</small></span>', 'social-compose-option'),
+    link('/comunidades/design-templates', '<b>✦</b><span><strong>Criação</strong><small>Material, template ou ideia visual</small></span>', 'social-compose-option'),
     '</div>',
-    '<div class="actions">',
-    link('/publicar', 'Publicar', 'solid'),
-    link('/comunidades/design-templates', 'Criar', 'soft'),
-    link('/comunidades', 'Discutir', 'soft'),
-    '</div>',
-    '</div>',
+    '</details>',
   ].join('');
 }
 
