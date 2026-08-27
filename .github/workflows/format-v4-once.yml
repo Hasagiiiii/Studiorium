@@ -10,19 +10,17 @@ permissions:
 
 jobs:
   format:
-    if: ${{ !contains(github.event.head_commit.message, 'style(v4): apply prettier baseline') }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           ref: feat/v4-ui-social-first-audit
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
@@ -30,7 +28,7 @@ jobs:
       - name: Format V4
         run: npx prettier --write v4
 
-      - name: Commit formatting
+      - name: Commit formatting if needed
         run: |
           if git diff --quiet -- v4; then
             echo "V4 already formatted."
