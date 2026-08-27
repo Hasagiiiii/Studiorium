@@ -1,0 +1,43 @@
+name: Format V4 Once
+
+on:
+  push:
+    branches:
+      - feat/v4-ui-social-first-audit
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: ${{ !contains(github.event.head_commit.message, 'style(v4): apply prettier baseline') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feat/v4-ui-social-first-audit
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Format V4
+        run: npx prettier --write v4
+
+      - name: Commit formatting
+        run: |
+          if git diff --quiet -- v4; then
+            echo "V4 already formatted."
+            exit 0
+          fi
+          git config user.name "studiorium-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add v4
+          git commit -m "style(v4): apply prettier baseline"
+          git push origin HEAD:feat/v4-ui-social-first-audit
