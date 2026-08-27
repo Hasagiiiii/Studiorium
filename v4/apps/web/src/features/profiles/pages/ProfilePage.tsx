@@ -72,6 +72,9 @@ export function ProfilePage() {
 
   const profile = detail.value?.profile || null;
   const isOwnProfile = detail.value?.isOwnProfile || false;
+  const isOwnAdmin = Boolean(
+    isOwnProfile && profile && data?.user?.id === profile.userId && data.user.role === 'admin',
+  );
 
   async function toggleFollow() {
     if (!profile || !social.value?.canFollow || updatingFollow) return;
@@ -171,6 +174,15 @@ export function ProfilePage() {
                 {profile.verificationStatus === 'verified' ? (
                   <span className="verified-badge" title="Perfil verificado" aria-label="Perfil verificado">✓</span>
                 ) : null}
+                {isOwnAdmin ? (
+                  <span
+                    className="verified-badge"
+                    title="Conta administrativa"
+                    aria-label="Conta administrativa"
+                  >
+                    ADM
+                  </span>
+                ) : null}
               </div>
               <p className="social-profile-handle">@{profile.username}</p>
             </div>
@@ -201,7 +213,7 @@ export function ProfilePage() {
           <div className="social-profile-bio">
             {profile.bio ? <p>{profile.bio}</p> : <p>Membro da rede Lorion.</p>}
             <div className="social-profile-meta">
-              <span>{profile.profileType}</span>
+              <span>{isOwnAdmin ? 'Administrador' : profile.profileType}</span>
               {profile.institution ? <span>{profile.institution}</span> : null}
               {profile.course ? <span>{profile.course}</span> : null}
               {profile.verifiedSpecialty ? <span>{profile.verifiedSpecialty}</span> : null}
