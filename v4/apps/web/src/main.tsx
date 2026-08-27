@@ -18,6 +18,7 @@ import './styles/social-discovery.css';
 import './styles/comments.css';
 import './styles/news.css';
 import './styles/desk.css';
+import './styles/async-states.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
