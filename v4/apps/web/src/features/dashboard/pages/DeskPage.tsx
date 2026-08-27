@@ -25,7 +25,8 @@ export function DeskPage() {
     : null;
   const ownProjects = data?.projects.filter((project) => project.ownerId === me.id) ?? [];
   const ownPosts = data?.posts.filter((post) => post.authorId === me.id) ?? [];
-  const ownDiscussions = data?.discussions.filter((discussion) => discussion.authorId === me.id) ?? [];
+  const ownDiscussions =
+    data?.discussions.filter((discussion) => discussion.authorId === me.id) ?? [];
   const isAdmin = me.role === 'admin';
 
   return (
@@ -91,8 +92,8 @@ export function DeskPage() {
             <span className="desk-kicker">Administração</span>
             <h2 id="desk-admin-title">Painel administrativo separado da experiência social.</h2>
             <p>
-              Sua conta tem papel administrativo. Esta entrada fica isolada do perfil público e será a
-              base para moderação, métricas e controles próprios do ADM.
+              Sua conta tem papel administrativo. Esta entrada fica isolada do perfil público e será
+              a base para moderação, métricas e controles próprios do ADM.
             </p>
           </div>
           <span className="desk-admin-status" aria-label="Área administrativa em preparação">
