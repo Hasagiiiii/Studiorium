@@ -31,7 +31,9 @@ export function BookCarousel({ title, items, ariaLabel = title }: Props) {
       <header className="book-carousel-heading">
         <div>
           <h2>{title}</h2>
-          <span>{items.length} {items.length === 1 ? 'livro' : 'livros'}</span>
+          <span>
+            {items.length} {items.length === 1 ? 'livro' : 'livros'}
+          </span>
         </div>
         <div className="book-carousel-controls" aria-label={`Navegar em ${title}`}>
           <button type="button" aria-label="Livros anteriores" onClick={() => scroll(-1)}>

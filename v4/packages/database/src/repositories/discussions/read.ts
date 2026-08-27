@@ -39,7 +39,8 @@ export async function listPublishedDiscussions(): Promise<Discussion[]> {
       .is('deleted_at', null),
   ) as ReplyRow[];
   const counts = new Map<string, number>();
-  for (const reply of replies) counts.set(reply.discussion_id, (counts.get(reply.discussion_id) || 0) + 1);
+  for (const reply of replies)
+    counts.set(reply.discussion_id, (counts.get(reply.discussion_id) || 0) + 1);
 
   return rows.map((row) => mapDiscussion(row, counts.get(String(row.id)) || 0));
 }

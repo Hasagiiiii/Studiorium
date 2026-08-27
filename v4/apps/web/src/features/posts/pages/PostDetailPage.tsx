@@ -44,13 +44,25 @@ export function PostDetailPage() {
   }, [load]);
 
   if (state.status === 'loading') {
-    return <FeaturePage eyebrow="Publicação" title="Carregando publicação…" description="Buscando conteúdo e conversa." />;
+    return (
+      <FeaturePage
+        eyebrow="Publicação"
+        title="Carregando publicação…"
+        description="Buscando conteúdo e conversa."
+      />
+    );
   }
 
   if (state.status === 'error') {
     return (
-      <FeaturePage eyebrow="Publicação" title="Publicação indisponível" description={state.error || 'Este conteúdo não está disponível para você.'}>
-        <button className="button secondary" type="button" onClick={() => void load()}>Tentar novamente</button>
+      <FeaturePage
+        eyebrow="Publicação"
+        title="Publicação indisponível"
+        description={state.error || 'Este conteúdo não está disponível para você.'}
+      >
+        <button className="button secondary" type="button" onClick={() => void load()}>
+          Tentar novamente
+        </button>
       </FeaturePage>
     );
   }
@@ -60,16 +72,30 @@ export function PostDetailPage() {
 
   return (
     <main id="main-content" className="social-post-detail-page">
-      <Link className="social-post-detail-back" to="/">← Voltar para o feed</Link>
+      <Link className="social-post-detail-back" to="/">
+        ← Voltar para o feed
+      </Link>
 
       <article className="social-post-detail-card">
         <header className="social-post-detail-header">
-          <span className="social-avatar" aria-hidden="true">{initials(post.authorName)}</span>
+          <span className="social-avatar" aria-hidden="true">
+            {initials(post.authorName)}
+          </span>
           <div className="social-author-block">
-            <Link className="social-author-name" to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>{post.authorName}</Link>
+            <Link
+              className="social-author-name"
+              to={`/perfil/${encodeURIComponent(post.authorUsername)}`}
+            >
+              {post.authorName}
+            </Link>
             <span>@{post.authorUsername}</span>
             {post.community ? (
-              <Link className="social-community-link" to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link>
+              <Link
+                className="social-community-link"
+                to={`/comunidades/${encodeURIComponent(post.community.slug)}`}
+              >
+                {post.community.name}
+              </Link>
             ) : null}
           </div>
         </header>

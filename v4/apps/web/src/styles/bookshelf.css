@@ -90,7 +90,9 @@
   background: var(--surface-soft);
   box-shadow: 0 14px 32px rgb(0 0 0 / 32%);
   object-fit: cover;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .book-cover-link:hover .book-cover {
@@ -102,8 +104,7 @@
   place-items: center;
   background:
     radial-gradient(circle at 30% 15%, rgb(213 181 111 / 28%), transparent 38%),
-    linear-gradient(145deg, rgb(185 147 78 / 18%), transparent 60%),
-    var(--surface-raised);
+    linear-gradient(145deg, rgb(185 147 78 / 18%), transparent 60%), var(--surface-raised);
   color: var(--accent-strong);
 }
 

@@ -3,15 +3,12 @@ import test from 'node:test';
 import { communityCapabilities } from '../src/index.js';
 
 test('visitante pode ler comunidade pública, mas não publicar ou moderar', () => {
-  assert.deepEqual(
-    communityCapabilities({ visibility: 'public' }),
-    {
-      canReadHub: true,
-      canCreateDiscussion: false,
-      canModerateMembershipRequests: false,
-      canLeaveCommunity: false,
-    },
-  );
+  assert.deepEqual(communityCapabilities({ visibility: 'public' }), {
+    canReadHub: true,
+    canCreateDiscussion: false,
+    canModerateMembershipRequests: false,
+    canLeaveCommunity: false,
+  });
 });
 
 test('membro ativo e regular pode acessar, publicar e sair', () => {

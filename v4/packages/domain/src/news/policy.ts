@@ -8,7 +8,11 @@ export type NewsSourcePolicyInput = {
 
 export type NewsSourceDecision = {
   allowed: boolean;
-  reason: 'official_source' | 'primary_source' | 'corroborated_secondary' | 'official_source_required';
+  reason:
+    | 'official_source'
+    | 'primary_source'
+    | 'corroborated_secondary'
+    | 'official_source_required';
 };
 
 export function decideNewsSource(input: NewsSourcePolicyInput): NewsSourceDecision {

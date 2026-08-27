@@ -29,7 +29,9 @@ import { entityId } from '../../core/security/token.js';
 
 function normalizedSlug(value: string): string {
   try {
-    return decodeURIComponent(value || '').trim().toLowerCase();
+    return decodeURIComponent(value || '')
+      .trim()
+      .toLowerCase();
   } catch {
     throw notFound('Comunidade não encontrada.');
   }
@@ -45,7 +47,10 @@ async function activeCommunity(rawSlug: string) {
   return community;
 }
 
-function accessFor(visibility: string, membership: Awaited<ReturnType<typeof findCommunityMembership>>) {
+function accessFor(
+  visibility: string,
+  membership: Awaited<ReturnType<typeof findCommunityMembership>>,
+) {
   return communityCapabilities({
     visibility,
     membershipStatus: membership?.status,
@@ -54,7 +59,11 @@ function accessFor(visibility: string, membership: Awaited<ReturnType<typeof fin
   });
 }
 
-async function requireCommunityModerator(request: ApiRequest, communityId: string, visibility: string) {
+async function requireCommunityModerator(
+  request: ApiRequest,
+  communityId: string,
+  visibility: string,
+) {
   const user = await requireSessionUser(request);
   const membership = await findCommunityMembership(communityId, user.id);
   if (!accessFor(visibility, membership).canModerateMembershipRequests) {
@@ -77,10 +86,18 @@ export async function communityHub(request: ApiRequest, rawSlug: string): Promis
     listCommunityDiscussions(community.id),
   ]);
 
-  return communityHubSchema.parse({ members, posts, discussions, canCreateDiscussion: access.canCreateDiscussion });
+  return communityHubSchema.parse({
+    members,
+    posts,
+    discussions,
+    canCreateDiscussion: access.canCreateDiscussion,
+  });
 }
 
-export async function createDiscussionInCommunity(request: ApiRequest, rawSlug: string): Promise<Discussion> {
+export async function createDiscussionInCommunity(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<Discussion> {
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
   const membership = await findCommunityMembership(community.id, user.id);
@@ -92,8 +109,10 @@ export async function createDiscussionInCommunity(request: ApiRequest, rawSlug: 
   const title = String(body.title || '').trim();
   const content = String(body.body || '').trim();
   const category = String(body.category || 'Geral').trim() || 'Geral';
-  if (title.length < 3 || title.length > 160) throw badRequest('O título precisa ter entre 3 e 160 caracteres.');
-  if (content.length < 1 || content.length > 8000) throw badRequest('A discussão precisa ter entre 1 e 8000 caracteres.');
+  if (title.length < 3 || title.length > 160)
+    throw badRequest('O título precisa ter entre 3 e 160 caracteres.');
+  if (content.length < 1 || content.length > 8000)
+    throw badRequest('A discussão precisa ter entre 1 e 8000 caracteres.');
   if (category.length > 60) throw badRequest('A categoria é muito longa.');
 
   const publicUser = await toPublicUser(user);
@@ -114,33 +133,58 @@ export async function createDiscussionInCommunity(request: ApiRequest, rawSlug: 
   return discussion;
 }
 
-export async function joinCommunity(request: ApiRequest, rawSlug: string): Promise<CommunityMembershipResult> {
+export async function joinCommunity(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<CommunityMembershipResult> {
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
-  if (community.visibility !== 'public') throw forbidden('Esta comunidade exige aprovação para entrada.');
+  if (community.visibility !== 'public')
+    throw forbidden('Esta comunidade exige aprovação para entrada.');
 
   const membership = await findCommunityMembership(community.id, user.id);
   if (membership?.moderation_status === 'removed') {
-    throw new HttpError(403, 'Sua participação nesta comunidade foi removida pela moderação.', 'COMMUNITY_MEMBERSHIP_REMOVED');
+    throw new HttpError(
+      403,
+      'Sua participação nesta comunidade foi removida pela moderação.',
+      'COMMUNITY_MEMBERSHIP_REMOVED',
+    );
   }
   return joinPublicCommunity(community.id, user.id, membership);
 }
 
-export async function requestCommunityMembership(request: ApiRequest, rawSlug: string): Promise<CommunityMembershipResult> {
+export async function requestCommunityMembership(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<CommunityMembershipResult> {
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
-  if (community.visibility === 'public') throw new HttpError(409, 'Esta comunidade é pública. Entre diretamente.', 'COMMUNITY_IS_PUBLIC');
-  if (community.visibility === 'private') throw forbidden('Esta comunidade não aceita solicitações públicas de entrada.');
+  if (community.visibility === 'public')
+    throw new HttpError(
+      409,
+      'Esta comunidade é pública. Entre diretamente.',
+      'COMMUNITY_IS_PUBLIC',
+    );
+  if (community.visibility === 'private')
+    throw forbidden('Esta comunidade não aceita solicitações públicas de entrada.');
 
   const membership = await findCommunityMembership(community.id, user.id);
   if (membership?.moderation_status === 'removed') {
-    throw new HttpError(403, 'Sua participação nesta comunidade foi removida pela moderação.', 'COMMUNITY_MEMBERSHIP_REMOVED');
+    throw new HttpError(
+      403,
+      'Sua participação nesta comunidade foi removida pela moderação.',
+      'COMMUNITY_MEMBERSHIP_REMOVED',
+    );
   }
-  if (membership?.status === 'active') throw new HttpError(409, 'Você já participa desta comunidade.', 'ALREADY_A_COMMUNITY_MEMBER');
+  if (membership?.status === 'active')
+    throw new HttpError(409, 'Você já participa desta comunidade.', 'ALREADY_A_COMMUNITY_MEMBER');
   return requestRestrictedCommunity(community.id, user.id, membership);
 }
 
-export async function pendingCommunityMembershipRequests(request: ApiRequest, rawSlug: string): Promise<CommunityMembershipRequest[]> {
+export async function pendingCommunityMembershipRequests(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<CommunityMembershipRequest[]> {
   const community = await activeCommunity(rawSlug);
   await requireCommunityModerator(request, community.id, community.visibility);
   return listPendingCommunityMembershipRequests(community.id);
@@ -155,7 +199,11 @@ export async function decideCommunityMembershipRequest(
   const community = await activeCommunity(rawSlug);
   await requireCommunityModerator(request, community.id, community.visibility);
   let userId = '';
-  try { userId = decodeURIComponent(rawUserId || '').trim(); } catch { throw notFound('Solicitação não encontrada.'); }
+  try {
+    userId = decodeURIComponent(rawUserId || '').trim();
+  } catch {
+    throw notFound('Solicitação não encontrada.');
+  }
   if (!userId) throw notFound('Solicitação não encontrada.');
 
   const result = await resolveCommunityMembershipRequest(community.id, userId, approve);
@@ -163,14 +211,27 @@ export async function decideCommunityMembershipRequest(
   return result;
 }
 
-export async function leaveCommunityMembership(request: ApiRequest, rawSlug: string): Promise<CommunityMembershipResult> {
+export async function leaveCommunityMembership(
+  request: ApiRequest,
+  rawSlug: string,
+): Promise<CommunityMembershipResult> {
   const user = await requireSessionUser(request);
   const community = await activeCommunity(rawSlug);
   const membership = await findCommunityMembership(community.id, user.id);
-  if (!membership || membership.status !== 'active') throw new HttpError(409, 'Você não participa desta comunidade.', 'NOT_A_COMMUNITY_MEMBER');
-  if (membership.role === 'leader') throw new HttpError(409, 'Transfira a liderança antes de sair da comunidade.', 'COMMUNITY_LEADER_CANNOT_LEAVE');
+  if (!membership || membership.status !== 'active')
+    throw new HttpError(409, 'Você não participa desta comunidade.', 'NOT_A_COMMUNITY_MEMBER');
+  if (membership.role === 'leader')
+    throw new HttpError(
+      409,
+      'Transfira a liderança antes de sair da comunidade.',
+      'COMMUNITY_LEADER_CANNOT_LEAVE',
+    );
   if (!accessFor(community.visibility, membership).canLeaveCommunity) {
-    throw new HttpError(403, 'Sua participação nesta comunidade foi removida pela moderação.', 'COMMUNITY_MEMBERSHIP_REMOVED');
+    throw new HttpError(
+      403,
+      'Sua participação nesta comunidade foi removida pela moderação.',
+      'COMMUNITY_MEMBERSHIP_REMOVED',
+    );
   }
   return leaveCommunity(community.id, user.id, membership);
 }
