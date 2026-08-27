@@ -1,0 +1,145 @@
+.loading-shell {
+  min-height: 100vh;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+.loading-shell-topbar {
+  display: flex;
+  min-height: 4.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem clamp(1rem, 4vw, 4rem);
+  border-bottom: 1px solid rgb(185 147 78 / 18%);
+  background: rgb(16 14 12 / 92%);
+}
+
+.loading-shell-brand,
+.loading-shell-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loading-shell-mark,
+.loading-shell-avatar {
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid rgb(185 147 78 / 26%);
+  border-radius: 50%;
+  background: var(--surface-raised);
+}
+
+.loading-shell-brand-title {
+  width: 7rem;
+  height: 0.9rem;
+}
+
+.loading-shell-brand-copy {
+  width: 10rem;
+  height: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.loading-shell-action {
+  width: 6.5rem;
+  height: 2.35rem;
+  border-radius: 999px;
+}
+
+.loading-shell-body {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 4rem) 0 2rem;
+}
+
+.loading-screen-heading {
+  max-width: 48rem;
+  margin-bottom: 2rem;
+}
+
+.skeleton-hero-title {
+  width: min(32rem, 78vw);
+  height: clamp(2.5rem, 7vw, 4.5rem);
+  margin-top: 0.55rem;
+}
+
+.skeleton-hero-copy {
+  width: min(38rem, 88vw);
+  height: 1rem;
+  margin-top: 0.8rem;
+}
+
+.loading-shell-status {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.82rem;
+}
+
+.system-state-error {
+  min-height: 100vh;
+  padding-top: max(2rem, env(safe-area-inset-top));
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+.system-state-help {
+  max-width: 44rem;
+  margin-top: 0;
+  font-size: 0.95rem;
+}
+
+.system-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 620px) {
+  .loading-shell-topbar {
+    min-height: 4.2rem;
+    padding-inline: 0.85rem;
+  }
+
+  .loading-shell-brand-copy,
+  .loading-shell-action {
+    display: none;
+  }
+
+  .loading-shell-body,
+  .loading-shell-status {
+    width: min(100% - 1.4rem, 1180px);
+  }
+
+  .loading-shell-body {
+    padding-top: 1.4rem;
+  }
+
+  .loading-screen-heading {
+    margin-bottom: 1.25rem;
+  }
+
+  .system-state-error {
+    width: min(100% - 1.4rem, 620px);
+    min-height: 100svh;
+  }
+
+  .system-state-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .system-state-actions .button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-shell .skeleton {
+    animation: none;
+  }
+}
