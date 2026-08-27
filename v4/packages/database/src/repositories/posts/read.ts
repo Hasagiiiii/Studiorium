@@ -19,14 +19,26 @@ type CommunityRow = { id: string; slug: string; name: string };
 type LikeRow = { content_id: string; user_id: string };
 type CommentRow = { content_id: string };
 
-async function hydratePosts(items: ContentItemRow[], viewerId?: string | null): Promise<SocialPost[]> {
+async function hydratePosts(
+  items: ContentItemRow[],
+  viewerId?: string | null,
+): Promise<SocialPost[]> {
   if (!items.length) return [];
 
   const contentIds = items.map((item) => item.id);
   const authorIds = [...new Set(items.map((item) => item.author_id))];
-  const communityIds = [...new Set(items.map((item) => item.community_id).filter((id): id is string => Boolean(id)))];
+  const communityIds = [
+    ...new Set(items.map((item) => item.community_id).filter((id): id is string => Boolean(id))),
+  ];
 
-  const [postsResult, profilesResult, communitiesResult, mediaByContent, likesResult, commentsResult] = await Promise.all([
+  const [
+    postsResult,
+    profilesResult,
+    communitiesResult,
+    mediaByContent,
+    likesResult,
+    commentsResult,
+  ] = await Promise.all([
     database().from('posts').select('content_id,title,body').in('content_id', contentIds),
     database().from('profiles').select('user_id,username,display_name').in('user_id', authorIds),
     communityIds.length
@@ -69,26 +81,30 @@ async function hydratePosts(items: ContentItemRow[], viewerId?: string | null): 
     const community = item.community_id ? communityById.get(item.community_id) : null;
     if (item.visibility === 'community' && !community) return [];
 
-    return [socialPostSchema.parse({
-      id: item.id,
-      authorId: item.author_id,
-      authorUsername: profile.username,
-      authorName: profile.display_name || profile.username,
-      title: post.title,
-      body: post.body,
-      media: mediaByContent.get(item.id) || [],
-      interactions: {
-        likeCount: likeCount.get(item.id) || 0,
-        commentCount: commentCount.get(item.id) || 0,
-        viewerLiked: viewerLikes.has(item.id),
-        canInteract: Boolean(viewerId),
-      },
-      community: community ? { id: community.id, slug: community.slug, name: community.name } : null,
-      visibility: item.visibility,
-      moderationStatus: item.moderation_status,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-    })];
+    return [
+      socialPostSchema.parse({
+        id: item.id,
+        authorId: item.author_id,
+        authorUsername: profile.username,
+        authorName: profile.display_name || profile.username,
+        title: post.title,
+        body: post.body,
+        media: mediaByContent.get(item.id) || [],
+        interactions: {
+          likeCount: likeCount.get(item.id) || 0,
+          commentCount: commentCount.get(item.id) || 0,
+          viewerLiked: viewerLikes.has(item.id),
+          canInteract: Boolean(viewerId),
+        },
+        community: community
+          ? { id: community.id, slug: community.slug, name: community.name }
+          : null,
+        visibility: item.visibility,
+        moderationStatus: item.moderation_status,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      }),
+    ];
   });
 }
 
@@ -104,7 +120,10 @@ async function contentItemsByAuthor(authorId: string): Promise<ContentItemRow[]>
   ) as ContentItemRow[];
 }
 
-export async function listPublicSocialPosts(limit = 200, viewerId?: string | null): Promise<SocialPost[]> {
+export async function listPublicSocialPosts(
+  limit = 200,
+  viewerId?: string | null,
+): Promise<SocialPost[]> {
   const items = queryList(
     await database()
       .from('content_items')
@@ -118,7 +137,10 @@ export async function listPublicSocialPosts(limit = 200, viewerId?: string | nul
   return hydratePosts(items, viewerId);
 }
 
-export async function listCommunitySocialPosts(communityId: string, viewerId?: string | null): Promise<SocialPost[]> {
+export async function listCommunitySocialPosts(
+  communityId: string,
+  viewerId?: string | null,
+): Promise<SocialPost[]> {
   const items = queryList(
     await database()
       .from('content_items')
@@ -131,7 +153,10 @@ export async function listCommunitySocialPosts(communityId: string, viewerId?: s
   return hydratePosts(items, viewerId);
 }
 
-export async function listProfileSocialPosts(authorId: string, viewerId?: string | null): Promise<SocialPost[]> {
+export async function listProfileSocialPosts(
+  authorId: string,
+  viewerId?: string | null,
+): Promise<SocialPost[]> {
   const items = await contentItemsByAuthor(authorId);
   if (!items.length) return [];
   if (viewerId === authorId) return hydratePosts(items, viewerId);
@@ -150,12 +175,19 @@ export async function listProfileSocialPosts(authorId: string, viewerId?: string
   }
 
   return hydratePosts(
-    items.filter((item) => item.visibility === 'public' || Boolean(item.community_id && allowedCommunityIds.has(item.community_id))),
+    items.filter(
+      (item) =>
+        item.visibility === 'public' ||
+        Boolean(item.community_id && allowedCommunityIds.has(item.community_id)),
+    ),
     viewerId,
   );
 }
 
-export async function findSocialPostById(contentId: string, viewerId?: string | null): Promise<SocialPost | null> {
+export async function findSocialPostById(
+  contentId: string,
+  viewerId?: string | null,
+): Promise<SocialPost | null> {
   const result = await database()
     .from('content_items')
     .select('id,author_id,community_id,visibility,moderation_status,created_at,updated_at')

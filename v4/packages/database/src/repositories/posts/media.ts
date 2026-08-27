@@ -105,7 +105,9 @@ export async function listPostMedia(contentIds: string[]): Promise<Map<string, P
   const rows = queryList(
     await database()
       .from('post_media')
-      .select('id,content_id,media_type,storage_path,caption,width,height,duration_seconds,position')
+      .select(
+        'id,content_id,media_type,storage_path,caption,width,height,duration_seconds,position',
+      )
       .in('content_id', contentIds)
       .order('position', { ascending: true }),
   ) as Array<Record<string, unknown>>;

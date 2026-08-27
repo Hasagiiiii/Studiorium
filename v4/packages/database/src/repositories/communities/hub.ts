@@ -64,7 +64,10 @@ export async function listCommunityMembers(communityId: string): Promise<Communi
     await database()
       .from('profiles')
       .select('user_id,username,display_name')
-      .in('user_id', members.map((member) => member.user_id)),
+      .in(
+        'user_id',
+        members.map((member) => member.user_id),
+      ),
   ) as ProfileRow[];
   const profilesByUser = new Map(profiles.map((profile) => [profile.user_id, profile]));
 
@@ -121,7 +124,9 @@ export async function findDiscussionById(id: string): Promise<Discussion | null>
     replyCounts([id]),
   ]);
   if (result.error) throw new Error(result.error.message);
-  return result.data ? mapDiscussion(result.data as Record<string, unknown>, counts.get(id) || 0) : null;
+  return result.data
+    ? mapDiscussion(result.data as Record<string, unknown>, counts.get(id) || 0)
+    : null;
 }
 
 export async function createCommunityDiscussion(input: {

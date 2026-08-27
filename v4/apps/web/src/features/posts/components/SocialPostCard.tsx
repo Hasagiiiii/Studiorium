@@ -20,16 +20,26 @@ export function SocialPostCard({ post, compact = false, showAuthor = true }: Pro
     <article className={compact ? 'social-post-card is-compact' : 'social-post-card'}>
       {showAuthor ? (
         <header className="social-post-header">
-          <Link className="social-avatar" to={`/perfil/${encodeURIComponent(post.authorUsername)}`} aria-label={`Perfil de ${post.authorName}`}>
+          <Link
+            className="social-avatar"
+            to={`/perfil/${encodeURIComponent(post.authorUsername)}`}
+            aria-label={`Perfil de ${post.authorName}`}
+          >
             {authorInitial(post)}
           </Link>
           <div className="social-author-block">
-            <Link className="social-author-name" to={`/perfil/${encodeURIComponent(post.authorUsername)}`}>
+            <Link
+              className="social-author-name"
+              to={`/perfil/${encodeURIComponent(post.authorUsername)}`}
+            >
               {post.authorName}
             </Link>
             <span>@{post.authorUsername}</span>
             {post.community ? (
-              <Link className="social-community-link" to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>
+              <Link
+                className="social-community-link"
+                to={`/comunidades/${encodeURIComponent(post.community.slug)}`}
+              >
                 em {post.community.name}
               </Link>
             ) : null}
@@ -37,12 +47,18 @@ export function SocialPostCard({ post, compact = false, showAuthor = true }: Pro
         </header>
       ) : post.community ? (
         <div className="social-post-context">
-          <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>{post.community.name}</Link>
+          <Link to={`/comunidades/${encodeURIComponent(post.community.slug)}`}>
+            {post.community.name}
+          </Link>
         </div>
       ) : null}
 
       <div className="social-post-content">
-        {post.title ? <h2><Link to={postPath}>{post.title}</Link></h2> : null}
+        {post.title ? (
+          <h2>
+            <Link to={postPath}>{post.title}</Link>
+          </h2>
+        ) : null}
         {post.body ? <p className="social-feed-copy">{post.body}</p> : null}
         <PostMediaGallery media={post.media} />
       </div>

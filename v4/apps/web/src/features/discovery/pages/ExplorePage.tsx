@@ -46,18 +46,32 @@ export function ExplorePage() {
 
   const entries = useMemo(() => (data ? buildSearchIndex(data) : []), [data]);
   const counts = useMemo(
-    () => Object.fromEntries(TYPES.map((type) => [type, entries.filter((entry) => entry.type === type).length])) as Record<SearchEntry['type'], number>,
+    () =>
+      Object.fromEntries(
+        TYPES.map((type) => [type, entries.filter((entry) => entry.type === type).length]),
+      ) as Record<SearchEntry['type'], number>,
     [entries],
   );
 
-  const searched = useMemo(() => (query ? searchEntries(entries, query) : entries), [entries, query]);
+  const searched = useMemo(
+    () => (query ? searchEntries(entries, query) : entries),
+    [entries, query],
+  );
   const visibleEntries = useMemo(() => {
-    const filtered = selectedType ? searched.filter((entry) => entry.type === selectedType) : searched;
+    const filtered = selectedType
+      ? searched.filter((entry) => entry.type === selectedType)
+      : searched;
     return filtered.slice(0, query || selectedType ? 50 : 24);
   }, [searched, query, selectedType]);
 
-  const people = useMemo(() => searched.filter((entry) => entry.type === 'Pessoa').slice(0, 8), [searched]);
-  const communities = useMemo(() => searched.filter((entry) => entry.type === 'Comunidade').slice(0, 8), [searched]);
+  const people = useMemo(
+    () => searched.filter((entry) => entry.type === 'Pessoa').slice(0, 8),
+    [searched],
+  );
+  const communities = useMemo(
+    () => searched.filter((entry) => entry.type === 'Comunidade').slice(0, 8),
+    [searched],
+  );
   const content = useMemo(
     () => visibleEntries.filter((entry) => entry.type !== 'Pessoa' && entry.type !== 'Comunidade'),
     [visibleEntries],
@@ -96,16 +110,25 @@ export function ExplorePage() {
             placeholder="Pesquisar pessoas, comunidades e conteúdo"
             aria-label="Pesquisar no Lorion"
           />
-          <button type="submit" className="button primary">Pesquisar</button>
+          <button type="submit" className="button primary">
+            Pesquisar
+          </button>
         </form>
       </header>
 
       <nav className="explore-filters social-explore-filters" aria-label="Filtrar descoberta">
-        <Link className={!selectedType ? 'active' : ''} to={query ? `/explorar?q=${encodeURIComponent(query)}` : '/explorar'}>
+        <Link
+          className={!selectedType ? 'active' : ''}
+          to={query ? `/explorar?q=${encodeURIComponent(query)}` : '/explorar'}
+        >
           Tudo <span>{entries.length}</span>
         </Link>
         {TYPES.map((type) => (
-          <Link key={type} className={selectedType === type ? 'active' : ''} to={categoryHref(type)}>
+          <Link
+            key={type}
+            className={selectedType === type ? 'active' : ''}
+            to={categoryHref(type)}
+          >
             {type} <span>{counts[type]}</span>
           </Link>
         ))}
@@ -113,59 +136,95 @@ export function ExplorePage() {
 
       {!selectedType || selectedType === 'Pessoa' ? (
         <section className="social-discovery-section">
-          <header><h2>{query ? 'Pessoas encontradas' : 'Pessoas para descobrir'}</h2></header>
+          <header>
+            <h2>{query ? 'Pessoas encontradas' : 'Pessoas para descobrir'}</h2>
+          </header>
           {people.length ? (
             <div className="social-person-strip">
               {people.map((entry) => (
                 <article key={entry.id} className="social-person-card">
-                  <div className="social-person-avatar" aria-hidden="true">{initials(entry.title)}</div>
-                  <h3><Link to={entry.href}>{entry.title}</Link></h3>
+                  <div className="social-person-avatar" aria-hidden="true">
+                    {initials(entry.title)}
+                  </div>
+                  <h3>
+                    <Link to={entry.href}>{entry.title}</Link>
+                  </h3>
                   <p>{entry.description}</p>
-                  <Link className="button secondary" to={entry.href}>Ver perfil</Link>
+                  <Link className="button secondary" to={entry.href}>
+                    Ver perfil
+                  </Link>
                 </article>
               ))}
             </div>
-          ) : <div className="empty-state"><p>Nenhuma pessoa encontrada.</p></div>}
+          ) : (
+            <div className="empty-state">
+              <p>Nenhuma pessoa encontrada.</p>
+            </div>
+          )}
         </section>
       ) : null}
 
       {!selectedType || selectedType === 'Comunidade' ? (
         <section className="social-discovery-section">
-          <header><h2>{query ? 'Comunidades encontradas' : 'Comunidades em destaque'}</h2></header>
+          <header>
+            <h2>{query ? 'Comunidades encontradas' : 'Comunidades em destaque'}</h2>
+          </header>
           {communities.length ? (
             <div className="social-community-strip">
               {communities.map((entry) => (
                 <article key={entry.id} className="social-community-card">
                   <span className="eyebrow">Comunidade</span>
-                  <h3><Link to={entry.href}>{entry.title}</Link></h3>
+                  <h3>
+                    <Link to={entry.href}>{entry.title}</Link>
+                  </h3>
                   <p>{entry.description}</p>
                   <Link to={entry.href}>Abrir comunidade</Link>
                 </article>
               ))}
             </div>
-          ) : <div className="empty-state"><p>Nenhuma comunidade encontrada.</p></div>}
+          ) : (
+            <div className="empty-state">
+              <p>Nenhuma comunidade encontrada.</p>
+            </div>
+          )}
         </section>
       ) : null}
 
       {selectedType === 'Pessoa' || selectedType === 'Comunidade' ? null : (
         <section className="social-discovery-section search-results" aria-live="polite">
           <header>
-            <h2>{query ? `Resultados para “${query}”` : selectedType ? selectedType : 'Conteúdo para você explorar'}</h2>
+            <h2>
+              {query
+                ? `Resultados para “${query}”`
+                : selectedType
+                  ? selectedType
+                  : 'Conteúdo para você explorar'}
+            </h2>
             <span>{content.length} itens</span>
           </header>
           {content.length ? (
             <div className="social-explore-grid">
               {content.map((entry) => (
-                <article key={entry.id} className={`social-explore-card explore-${entry.type.toLowerCase()}`}>
+                <article
+                  key={entry.id}
+                  className={`social-explore-card explore-${entry.type.toLowerCase()}`}
+                >
                   <span className="eyebrow">{entry.type}</span>
-                  <h2><Link to={entry.href}>{entry.title}</Link></h2>
+                  <h2>
+                    <Link to={entry.href}>{entry.title}</Link>
+                  </h2>
                   <p>{entry.description}</p>
-                  <Link className="social-explore-open" to={entry.href}>Abrir</Link>
+                  <Link className="social-explore-open" to={entry.href}>
+                    Abrir
+                  </Link>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="empty-state"><h2>Nenhum resultado encontrado.</h2><p>Tente outro termo ou remova o filtro atual.</p></div>
+            <div className="empty-state">
+              <h2>Nenhum resultado encontrado.</h2>
+              <p>Tente outro termo ou remova o filtro atual.</p>
+            </div>
           )}
         </section>
       )}

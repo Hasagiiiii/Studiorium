@@ -23,7 +23,11 @@ function commentTime(value: string | null): string {
 }
 
 function initialOf(comment: ContentComment): string {
-  return (comment.authorName.trim().charAt(0) || comment.authorUsername.trim().charAt(0) || '?').toUpperCase();
+  return (
+    comment.authorName.trim().charAt(0) ||
+    comment.authorUsername.trim().charAt(0) ||
+    '?'
+  ).toUpperCase();
 }
 
 export function PostInteractions({ contentId, initial }: Props) {
@@ -61,7 +65,10 @@ export function PostInteractions({ contentId, initial }: Props) {
   }, [commentById, interactions.comments]);
 
   const rootComments = useMemo(
-    () => interactions.comments.filter((comment) => !comment.parentId || !commentById.has(comment.parentId)),
+    () =>
+      interactions.comments.filter(
+        (comment) => !comment.parentId || !commentById.has(comment.parentId),
+      ),
     [commentById, interactions.comments],
   );
 
@@ -108,7 +115,9 @@ export function PostInteractions({ contentId, initial }: Props) {
       setInteractions((current) => ({
         ...current,
         commentCount: result.commentCount,
-        comments: current.comments.map((comment) => comment.id === commentId ? result.comment : comment),
+        comments: current.comments.map((comment) =>
+          comment.id === commentId ? result.comment : comment,
+        ),
       }));
       setEditingId(null);
       setEditingBody('');
@@ -155,15 +164,29 @@ export function PostInteractions({ contentId, initial }: Props) {
     if (!data?.user || !interactions.canInteract) return null;
 
     return (
-      <form className={replying ? 'comment-composer is-reply' : 'comment-composer'} onSubmit={submitComment}>
+      <form
+        className={replying ? 'comment-composer is-reply' : 'comment-composer'}
+        onSubmit={submitComment}
+      >
         <div className="comment-composer-avatar" aria-hidden="true">
-          {(data.user.displayName || data.user.username || '?').trim().charAt(0).toUpperCase() || '?'}
+          {(data.user.displayName || data.user.username || '?').trim().charAt(0).toUpperCase() ||
+            '?'}
         </div>
         <div className="comment-composer-body">
           {replying ? (
             <div className="comment-reply-context">
-              <span>Respondendo a <strong>{parent?.authorName || 'comentário'}</strong></span>
-              <button type="button" onClick={() => { setReplyTo(null); setCommentBody(''); }}>Cancelar</button>
+              <span>
+                Respondendo a <strong>{parent?.authorName || 'comentário'}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setReplyTo(null);
+                  setCommentBody('');
+                }}
+              >
+                Cancelar
+              </button>
             </div>
           ) : null}
           <textarea
@@ -178,7 +201,11 @@ export function PostInteractions({ contentId, initial }: Props) {
           />
           <div className="comment-composer-footer">
             <span>{commentBody.length}/2000</span>
-            <button className="button primary" type="submit" disabled={commenting || !commentBody.trim()}>
+            <button
+              className="button primary"
+              type="submit"
+              disabled={commenting || !commentBody.trim()}
+            >
               {commenting ? 'Publicando…' : replying ? 'Responder' : 'Comentar'}
             </button>
           </div>
@@ -196,12 +223,18 @@ export function PostInteractions({ contentId, initial }: Props) {
     return (
       <div className={`comment-thread-node ${depthClass}`} key={comment.id}>
         <article className="social-comment">
-          <div className="social-comment-avatar" aria-hidden="true">{initialOf(comment)}</div>
+          <div className="social-comment-avatar" aria-hidden="true">
+            {initialOf(comment)}
+          </div>
           <div className="social-comment-main">
             <header className="social-comment-header">
-              <Link to={`/perfil/${encodeURIComponent(comment.authorUsername)}`}>{comment.authorName}</Link>
+              <Link to={`/perfil/${encodeURIComponent(comment.authorUsername)}`}>
+                {comment.authorName}
+              </Link>
               <span>@{comment.authorUsername}</span>
-              {comment.createdAt ? <time dateTime={comment.createdAt}>{commentTime(comment.createdAt)}</time> : null}
+              {comment.createdAt ? (
+                <time dateTime={comment.createdAt}>{commentTime(comment.createdAt)}</time>
+              ) : null}
             </header>
 
             {editing ? (
@@ -215,25 +248,61 @@ export function PostInteractions({ contentId, initial }: Props) {
                   aria-label="Editar comentário"
                 />
                 <div className="comment-editor-actions">
-                  <button className="button primary" type="button" disabled={savingComment || !editingBody.trim()} onClick={() => void saveComment(comment.id)}>
+                  <button
+                    className="button primary"
+                    type="button"
+                    disabled={savingComment || !editingBody.trim()}
+                    onClick={() => void saveComment(comment.id)}
+                  >
                     {savingComment ? 'Salvando…' : 'Salvar'}
                   </button>
-                  <button className="button secondary" type="button" disabled={savingComment} onClick={() => { setEditingId(null); setEditingBody(''); }}>
+                  <button
+                    className="button secondary"
+                    type="button"
+                    disabled={savingComment}
+                    onClick={() => {
+                      setEditingId(null);
+                      setEditingBody('');
+                    }}
+                  >
                     Cancelar
                   </button>
                 </div>
               </div>
-            ) : <p>{comment.body}</p>}
+            ) : (
+              <p>{comment.body}</p>
+            )}
 
             <footer className="social-comment-actions">
               {data?.user && interactions.canInteract ? (
-                <button type="button" onClick={() => { setReplyTo(comment.id); setCommentBody(''); }}>Responder</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyTo(comment.id);
+                    setCommentBody('');
+                  }}
+                >
+                  Responder
+                </button>
               ) : null}
               {comment.canEdit && !editing ? (
-                <button type="button" onClick={() => { setEditingId(comment.id); setEditingBody(comment.body); }}>Editar</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingId(comment.id);
+                    setEditingBody(comment.body);
+                  }}
+                >
+                  Editar
+                </button>
               ) : null}
               {comment.canEdit ? (
-                <button className="danger" type="button" disabled={deletingCommentId === comment.id} onClick={() => void removeComment(comment.id)}>
+                <button
+                  className="danger"
+                  type="button"
+                  disabled={deletingCommentId === comment.id}
+                  onClick={() => void removeComment(comment.id)}
+                >
                   {deletingCommentId === comment.id ? 'Excluindo…' : 'Excluir'}
                 </button>
               ) : null}
@@ -253,23 +322,40 @@ export function PostInteractions({ contentId, initial }: Props) {
   }
 
   return (
-    <section id="comentarios" className="post-interactions comment-section" aria-labelledby="post-comments-title">
+    <section
+      id="comentarios"
+      className="post-interactions comment-section"
+      aria-labelledby="post-comments-title"
+    >
       <header className="comment-section-header">
         <div>
           <h2 id="post-comments-title">Comentários</h2>
-          <p>{interactions.commentCount === 0 ? 'Seja a primeira pessoa a entrar na conversa.' : `${interactions.commentCount} ${interactions.commentCount === 1 ? 'comentário' : 'comentários'}`}</p>
+          <p>
+            {interactions.commentCount === 0
+              ? 'Seja a primeira pessoa a entrar na conversa.'
+              : `${interactions.commentCount} ${interactions.commentCount === 1 ? 'comentário' : 'comentários'}`}
+          </p>
         </div>
       </header>
 
       {!data?.user ? (
         <div className="comment-login-callout">
           <p>Entre para comentar, responder e participar da conversa.</p>
-          <Link className="button secondary" to={`/entrar?retorno=${encodeURIComponent(returnPath)}`}>Entrar</Link>
+          <Link
+            className="button secondary"
+            to={`/entrar?retorno=${encodeURIComponent(returnPath)}`}
+          >
+            Entrar
+          </Link>
         </div>
-      ) : replyTo ? null : composer()}
+      ) : replyTo ? null : (
+        composer()
+      )}
 
       <div className="comment-thread-list">
-        {rootComments.length ? rootComments.map((comment) => renderComment(comment)) : (
+        {rootComments.length ? (
+          rootComments.map((comment) => renderComment(comment))
+        ) : (
           <div className="comment-empty-state">
             <div aria-hidden="true">💬</div>
             <strong>Nenhum comentário ainda</strong>

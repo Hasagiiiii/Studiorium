@@ -12,19 +12,49 @@ type Props = {
 };
 
 function Icon({ children }: { children: ReactNode }) {
-  return <svg className="post-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
+  return (
+    <svg
+      className="post-action-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
 }
 
 function HeartIcon({ filled }: { filled: boolean }) {
-  return <Icon><path fill={filled ? 'currentColor' : 'none'} d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></Icon>;
+  return (
+    <Icon>
+      <path
+        fill={filled ? 'currentColor' : 'none'}
+        d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"
+      />
+    </Icon>
+  );
 }
 
 function CommentIcon() {
-  return <Icon><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /></Icon>;
+  return (
+    <Icon>
+      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+    </Icon>
+  );
 }
 
 function ShareIcon() {
-  return <Icon><path d="M12 16V3" /><path d="m7 8 5-5 5 5" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></Icon>;
+  return (
+    <Icon>
+      <path d="M12 16V3" />
+      <path d="m7 8 5-5 5 5" />
+      <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+    </Icon>
+  );
 }
 
 export function PostActionBar({ contentId, initial, compact = false }: Props) {
@@ -41,9 +71,16 @@ export function PostActionBar({ contentId, initial, compact = false }: Props) {
       const result = summary.viewerLiked
         ? await services.interactions.unlike(contentId)
         : await services.interactions.like(contentId);
-      setSummary((current) => ({ ...current, viewerLiked: result.liked, likeCount: result.likeCount }));
+      setSummary((current) => ({
+        ...current,
+        viewerLiked: result.liked,
+        likeCount: result.likeCount,
+      }));
     } catch (cause) {
-      pushToast({ message: cause instanceof Error ? cause.message : 'Não foi possível atualizar a curtida.', tone: 'error' });
+      pushToast({
+        message: cause instanceof Error ? cause.message : 'Não foi possível atualizar a curtida.',
+        tone: 'error',
+      });
     } finally {
       setLiking(false);
     }
@@ -64,18 +101,36 @@ export function PostActionBar({ contentId, initial, compact = false }: Props) {
     }
   }
 
-  const likeLabel = summary.likeCount ? `${summary.likeCount} ${summary.likeCount === 1 ? 'curtida' : 'curtidas'}` : 'Curtir';
-  const commentLabel = summary.commentCount ? `${summary.commentCount} ${summary.commentCount === 1 ? 'comentário' : 'comentários'}` : 'Comentar';
+  const likeLabel = summary.likeCount
+    ? `${summary.likeCount} ${summary.likeCount === 1 ? 'curtida' : 'curtidas'}`
+    : 'Curtir';
+  const commentLabel = summary.commentCount
+    ? `${summary.commentCount} ${summary.commentCount === 1 ? 'comentário' : 'comentários'}`
+    : 'Comentar';
 
   return (
-    <div className={compact ? 'post-action-bar is-compact' : 'post-action-bar'} aria-label="Ações da publicação">
+    <div
+      className={compact ? 'post-action-bar is-compact' : 'post-action-bar'}
+      aria-label="Ações da publicação"
+    >
       {data?.user ? (
-        <button type="button" className={summary.viewerLiked ? 'post-action is-active' : 'post-action'} aria-pressed={summary.viewerLiked} aria-label={likeLabel} disabled={liking || !summary.canInteract} onClick={() => void toggleLike()}>
+        <button
+          type="button"
+          className={summary.viewerLiked ? 'post-action is-active' : 'post-action'}
+          aria-pressed={summary.viewerLiked}
+          aria-label={likeLabel}
+          disabled={liking || !summary.canInteract}
+          onClick={() => void toggleLike()}
+        >
           <HeartIcon filled={summary.viewerLiked} />
           <span>{summary.likeCount || 'Curtir'}</span>
         </button>
       ) : (
-        <Link className="post-action" aria-label={likeLabel} to={`/entrar?retorno=${encodeURIComponent(postPath)}`}>
+        <Link
+          className="post-action"
+          aria-label={likeLabel}
+          to={`/entrar?retorno=${encodeURIComponent(postPath)}`}
+        >
           <HeartIcon filled={false} />
           <span>{summary.likeCount || 'Curtir'}</span>
         </Link>
@@ -86,7 +141,12 @@ export function PostActionBar({ contentId, initial, compact = false }: Props) {
         <span>{summary.commentCount || 'Comentar'}</span>
       </Link>
 
-      <button className="post-action" type="button" aria-label="Compartilhar publicação" onClick={() => void share()}>
+      <button
+        className="post-action"
+        type="button"
+        aria-label="Compartilhar publicação"
+        onClick={() => void share()}
+      >
         <ShareIcon />
         <span>Compartilhar</span>
       </button>

@@ -22,7 +22,8 @@ function summary(entry: FeedEntry): string {
   if (entry.type === 'publication') return entry.item.abstract;
   if (entry.type === 'discussion') return entry.item.body;
   if (entry.type === 'news') return entry.item.summary;
-  if (entry.type === 'project') return entry.item.notes || 'Projeto compartilhado com a comunidade.';
+  if (entry.type === 'project')
+    return entry.item.notes || 'Projeto compartilhado com a comunidade.';
   return '';
 }
 
@@ -36,7 +37,10 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
         layout={!reduceMotion}
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
+        transition={{
+          duration: reduceMotion ? 0.01 : 0.24,
+          delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035,
+        }}
       >
         <SocialPostCard post={entry.item} />
       </motion.div>
@@ -52,14 +56,23 @@ export function FeedCard({ entry, index = 0 }: { entry: FeedEntry; index?: numbe
       layout={!reduceMotion}
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0.01 : 0.24, delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035 }}
+      transition={{
+        duration: reduceMotion ? 0.01 : 0.24,
+        delay: reduceMotion ? 0 : Math.min(index, 6) * 0.035,
+      }}
     >
       <span className="social-content-badge">{label(entry)}</span>
-      {entry.item.title ? <h2><Link to={link}>{entry.item.title}</Link></h2> : null}
+      {entry.item.title ? (
+        <h2>
+          <Link to={link}>{entry.item.title}</Link>
+        </h2>
+      ) : null}
       {text ? <p className="social-feed-copy">{text.slice(0, 340)}</p> : null}
       <footer className="social-card-actions">
         <Link to={link}>Abrir</Link>
-        {entry.type === 'news' && entry.item.likeCount > 0 ? <span>{entry.item.likeCount} curtidas</span> : null}
+        {entry.type === 'news' && entry.item.likeCount > 0 ? (
+          <span>{entry.item.likeCount} curtidas</span>
+        ) : null}
       </footer>
     </motion.article>
   );

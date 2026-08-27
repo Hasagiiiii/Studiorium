@@ -12,7 +12,11 @@
   height: clamp(8rem, 18vw, 13rem);
   border-radius: 1.15rem;
   background:
-    radial-gradient(circle at 18% 25%, color-mix(in srgb, var(--accent-strong) 32%, transparent), transparent 34%),
+    radial-gradient(
+      circle at 18% 25%,
+      color-mix(in srgb, var(--accent-strong) 32%, transparent),
+      transparent 34%
+    ),
     linear-gradient(135deg, var(--surface-raised), var(--surface-soft));
 }
 
