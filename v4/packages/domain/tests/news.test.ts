@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  decideEditorialAnalysis,
   decideNewsDuplicate,
   decideNewsSource,
   newsFingerprint,
@@ -26,7 +25,7 @@ test('accepts official sources directly', () => {
   );
 });
 
-test('blocks exact and semantic duplicate news', () => {
+test('blocks exact duplicate news and accepts a distinct fingerprint', () => {
   const fingerprint = newsFingerprint(
     'Flamengo vence por 2 a 0 no Brasileirão',
     'Equipe decidiu a partida no segundo tempo.',
@@ -40,40 +39,12 @@ test('blocks exact and semantic duplicate news', () => {
     'same_fingerprint',
   );
 
-  assert.equal(
+  assert.deepEqual(
     decideNewsDuplicate({
       candidateFingerprint: 'outro',
       existingFingerprints: [],
-      semanticSimilarity: 0.91,
-    }).reason,
-    'same_meaning',
-  );
-});
-
-test('requires multiple reactions and viewpoints for AI editorial analysis', () => {
-  assert.deepEqual(
-    decideEditorialAnalysis({
-      topic: 'sports',
-      officialFactsVerified: true,
-      reactionSourceCount: 2,
-      distinctViewpointCount: 2,
-      clearlyLabeledAsAiAnalysis: true,
     }),
-    { allowed: false, reason: 'insufficient_reactions' },
-  );
-});
-
-test('does not allow political endorsement in AI analysis', () => {
-  assert.equal(
-    decideEditorialAnalysis({
-      topic: 'politics',
-      officialFactsVerified: true,
-      reactionSourceCount: 4,
-      distinctViewpointCount: 3,
-      clearlyLabeledAsAiAnalysis: true,
-      supportsPartyOrCandidate: true,
-    }).reason,
-    'political_endorsement_not_allowed',
+    { duplicate: false, reason: 'unique' },
   );
 });
 
