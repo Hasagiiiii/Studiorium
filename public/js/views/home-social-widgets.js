@@ -240,10 +240,26 @@ function memberComposer() {
     '<span class="social-composer-plus" aria-hidden="true">+</span>',
     '</summary>',
     '<div class="social-composer-options" aria-label="Opções de publicação">',
-    link('/publicar', '<b>⌕</b><span><strong>Pesquisa</strong><small>Publique um trabalho ou descoberta</small></span>', 'social-compose-option'),
-    link('/comunidades', '<b>◌</b><span><strong>Discussão</strong><small>Abra uma conversa em comunidade</small></span>', 'social-compose-option'),
-    link('/escrivaninha', '<b>⌘</b><span><strong>Projeto</strong><small>Continue ou compartilhe um projeto</small></span>', 'social-compose-option'),
-    link('/comunidades/design-templates', '<b>✦</b><span><strong>Criação</strong><small>Material, template ou ideia visual</small></span>', 'social-compose-option'),
+    link(
+      '/publicar',
+      '<b>⌕</b><span><strong>Pesquisa</strong><small>Publique um trabalho ou descoberta</small></span>',
+      'social-compose-option',
+    ),
+    link(
+      '/comunidades',
+      '<b>◌</b><span><strong>Discussão</strong><small>Abra uma conversa em comunidade</small></span>',
+      'social-compose-option',
+    ),
+    link(
+      '/escrivaninha',
+      '<b>⌘</b><span><strong>Projeto</strong><small>Continue ou compartilhe um projeto</small></span>',
+      'social-compose-option',
+    ),
+    link(
+      '/comunidades/design-templates',
+      '<b>✦</b><span><strong>Criação</strong><small>Material, template ou ideia visual</small></span>',
+      'social-compose-option',
+    ),
     '</div>',
     '</details>',
   ].join('');
