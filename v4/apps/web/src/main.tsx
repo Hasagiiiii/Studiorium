@@ -16,6 +16,7 @@ import './styles/media.css';
 import './styles/social-ui.css';
 import './styles/social-discovery.css';
 import './styles/comments.css';
+import './styles/news.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
