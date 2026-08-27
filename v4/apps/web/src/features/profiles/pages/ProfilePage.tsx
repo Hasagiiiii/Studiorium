@@ -30,8 +30,16 @@ export function ProfilePage() {
   const { username = '' } = useParams();
   const { data } = useAppState();
   const { pushToast } = useToast();
-  const [detail, setDetail] = useState<DetailState>({ status: 'loading', value: null, error: null });
-  const [social, setSocial] = useState<SocialState>({ status: 'loading', value: null, error: null });
+  const [detail, setDetail] = useState<DetailState>({
+    status: 'loading',
+    value: null,
+    error: null,
+  });
+  const [social, setSocial] = useState<SocialState>({
+    status: 'loading',
+    value: null,
+    error: null,
+  });
   const [updatingFollow, setUpdatingFollow] = useState(false);
   const [updatingBookshelfPrivacy, setUpdatingBookshelfPrivacy] = useState(false);
 
@@ -100,7 +108,8 @@ export function ProfilePage() {
         tone: 'success',
       });
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
+      const message =
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar a conexão.';
       setSocial((current) => ({ status: 'error', value: current.value, error: message }));
       pushToast({ message, tone: 'error' });
     } finally {
@@ -125,7 +134,9 @@ export function ProfilePage() {
     } catch (cause) {
       pushToast({
         message:
-          cause instanceof Error ? cause.message : 'Não foi possível alterar a privacidade da estante.',
+          cause instanceof Error
+            ? cause.message
+            : 'Não foi possível alterar a privacidade da estante.',
         tone: 'error',
       });
     } finally {
@@ -134,12 +145,22 @@ export function ProfilePage() {
   }
 
   if (detail.status === 'loading' && !detail.value) {
-    return <FeaturePage eyebrow="Perfil" title="Carregando perfil…" description="Buscando dados públicos." />;
+    return (
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Carregando perfil…"
+        description="Buscando dados públicos."
+      />
+    );
   }
 
   if (detail.status === 'error' && !detail.value) {
     return (
-      <FeaturePage eyebrow="Perfil" title="Perfil indisponível" description={detail.error || 'Este perfil não está disponível para você.'}>
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Perfil indisponível"
+        description={detail.error || 'Este perfil não está disponível para você.'}
+      >
         <div className="inline-feedback" role="alert">
           <button className="button secondary" type="button" onClick={() => void loadDetail()}>
             Tentar novamente
@@ -152,7 +173,11 @@ export function ProfilePage() {
 
   if (!profile || !detail.value) {
     return (
-      <FeaturePage eyebrow="Perfil" title="Perfil não encontrado" description="Este usuário não existe ou o perfil não está disponível para você.">
+      <FeaturePage
+        eyebrow="Perfil"
+        title="Perfil não encontrado"
+        description="Este usuário não existe ou o perfil não está disponível para você."
+      >
         <Link to="/explorar?tipo=Pessoa">Explorar pessoas</Link>
       </FeaturePage>
     );
@@ -172,7 +197,13 @@ export function ProfilePage() {
               <div className="social-profile-name-row">
                 <h1>{profile.displayName}</h1>
                 {profile.verificationStatus === 'verified' ? (
-                  <span className="verified-badge" title="Perfil verificado" aria-label="Perfil verificado">✓</span>
+                  <span
+                    className="verified-badge"
+                    title="Perfil verificado"
+                    aria-label="Perfil verificado"
+                  >
+                    ✓
+                  </span>
                 ) : null}
                 {isOwnAdmin ? (
                   <span
@@ -189,14 +220,28 @@ export function ProfilePage() {
 
             <div className="social-profile-actions">
               {isOwnProfile ? (
-                <Link className="button secondary" to="/conta/seguranca">Configurações</Link>
+                <Link className="button secondary" to="/conta/seguranca">
+                  Configurações
+                </Link>
               ) : social.value?.canFollow ? (
                 data?.user ? (
-                  <button className={social.value.isFollowing ? 'button secondary' : 'button primary'} type="button" disabled={updatingFollow} onClick={() => void toggleFollow()}>
-                    {updatingFollow ? 'Atualizando…' : social.value.isFollowing ? 'Seguindo' : 'Seguir'}
+                  <button
+                    className={social.value.isFollowing ? 'button secondary' : 'button primary'}
+                    type="button"
+                    disabled={updatingFollow}
+                    onClick={() => void toggleFollow()}
+                  >
+                    {updatingFollow
+                      ? 'Atualizando…'
+                      : social.value.isFollowing
+                        ? 'Seguindo'
+                        : 'Seguir'}
                   </button>
                 ) : (
-                  <Link className="button primary" to={`/entrar?retorno=${encodeURIComponent(`/perfil/${profile.username}`)}`}>
+                  <Link
+                    className="button primary"
+                    to={`/entrar?retorno=${encodeURIComponent(`/perfil/${profile.username}`)}`}
+                  >
                     Seguir
                   </Link>
                 )
@@ -205,9 +250,15 @@ export function ProfilePage() {
           </div>
 
           <div className="social-profile-stats" aria-label="Estatísticas do perfil">
-            <span><strong>{detail.value.posts.length}</strong> publicações</span>
-            <span><strong>{social.value?.followerCount ?? '—'}</strong> seguidores</span>
-            <span><strong>{social.value?.followingCount ?? '—'}</strong> seguindo</span>
+            <span>
+              <strong>{detail.value.posts.length}</strong> publicações
+            </span>
+            <span>
+              <strong>{social.value?.followerCount ?? '—'}</strong> seguidores
+            </span>
+            <span>
+              <strong>{social.value?.followingCount ?? '—'}</strong> seguindo
+            </span>
           </div>
 
           <div className="social-profile-bio">
@@ -224,7 +275,9 @@ export function ProfilePage() {
           {social.status === 'error' ? (
             <div className="inline-feedback" role="alert">
               <p className="inline-error">{social.error}</p>
-              <button className="button secondary" type="button" onClick={() => void loadSocial()}>Tentar novamente</button>
+              <button className="button secondary" type="button" onClick={() => void loadSocial()}>
+                Tentar novamente
+              </button>
             </div>
           ) : null}
         </div>
