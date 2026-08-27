@@ -17,14 +17,11 @@ export type CommunityCapabilities = {
   canLeaveCommunity: boolean;
 };
 
-export function communityCapabilities(
-  context: CommunityAccessContext,
-): CommunityCapabilities {
+export function communityCapabilities(context: CommunityAccessContext): CommunityCapabilities {
   const isActiveMember =
     context.membershipStatus === 'active' && context.moderationStatus !== 'removed';
   const isClearMember = isActiveMember && context.moderationStatus === 'clear';
-  const canModerate =
-    isActiveMember && (context.role === 'leader' || context.role === 'moderator');
+  const canModerate = isActiveMember && (context.role === 'leader' || context.role === 'moderator');
 
   return {
     canReadHub: context.visibility === 'public' || isActiveMember,

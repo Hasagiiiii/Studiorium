@@ -8,9 +8,7 @@ export function CommunitiesPage() {
   const communities = data?.communities ?? [];
   const joined = communities.filter((community) => community.joined);
   const discover = communities.filter((community) => !community.joined);
-  const trending = [...communities]
-    .sort((a, b) => b.memberCount - a.memberCount)
-    .slice(0, 5);
+  const trending = [...communities].sort((a, b) => b.memberCount - a.memberCount).slice(0, 5);
 
   return (
     <FeaturePage
@@ -41,7 +39,9 @@ export function CommunitiesPage() {
               <div className="community-section-heading">
                 <div>
                   <span className="eyebrow">Descobrir</span>
-                  <h2>{joined.length ? 'Explore outras comunidades' : 'Encontre sua comunidade'}</h2>
+                  <h2>
+                    {joined.length ? 'Explore outras comunidades' : 'Encontre sua comunidade'}
+                  </h2>
                 </div>
               </div>
               <div className="community-list">
@@ -64,7 +64,9 @@ export function CommunitiesPage() {
                       <Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>
                         {community.name}
                       </Link>
-                      <small>{community.memberCount} membros · {community.area}</small>
+                      <small>
+                        {community.memberCount} membros · {community.area}
+                      </small>
                     </div>
                   </li>
                 ))}
@@ -103,7 +105,13 @@ function CommunityRow({ community }: { community: Community }) {
         <div className="community-row-meta">
           <span>{community.area}</span>
           <span>{community.memberCount} membros</span>
-          <span>{community.visibility === 'public' ? 'Pública' : community.visibility === 'restricted' ? 'Entrada por aprovação' : 'Privada'}</span>
+          <span>
+            {community.visibility === 'public'
+              ? 'Pública'
+              : community.visibility === 'restricted'
+                ? 'Entrada por aprovação'
+                : 'Privada'}
+          </span>
         </div>
       </div>
       <Link className="community-open" to={`/comunidades/${encodeURIComponent(community.slug)}`}>

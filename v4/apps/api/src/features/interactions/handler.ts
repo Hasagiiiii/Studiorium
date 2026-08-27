@@ -76,7 +76,7 @@ export async function setLike(
     const actor = await publicSessionUser(request);
     await notifyContentInteraction({
       actorId: user.id,
-      actorDisplayName: actor?.displayName,
+      actorDisplayName: actor?.displayName ?? null,
       targetUserId: access.authorId,
       kind: 'like',
       contentType: access.type,
@@ -131,13 +131,13 @@ export async function createComment(
   const notification = decideCommentNotification({
     actorId: user.id,
     contentAuthorId: access.authorId,
-    parentAuthorId: parent?.authorId,
+    parentAuthorId: parent?.authorId ?? null,
   });
   if (notification) {
     const actor = await publicSessionUser(request);
     await notifyContentInteraction({
       actorId: user.id,
-      actorDisplayName: actor?.displayName,
+      actorDisplayName: actor?.displayName ?? null,
       targetUserId: notification.targetUserId,
       kind: notification.kind,
       contentType: access.type,

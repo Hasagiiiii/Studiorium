@@ -48,8 +48,8 @@
 /* Acabamento da experiência social. */
 @import url('/css/social-final-polish.css');
 
-/* Última camada: proteção global contra regressões de layout. */
-@import url('/css/responsive/hardening.css');
-
 /* Prioridade mobile: experiência social compacta e segura para touch/safe-area. */
 @import url('/css/social-first-mobile.css');
+
+/* Última camada: proteção global contra regressões de layout. */
+@import url('/css/responsive/hardening.css');

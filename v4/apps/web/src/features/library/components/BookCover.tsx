@@ -15,8 +15,12 @@ function coverSources(book: Book): string[] {
   const isbn = normalizedIsbn(book.isbn);
   return [
     book.coverUrl || '',
-    isbn ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg?default=false` : '',
-    isbn ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-M.jpg?default=false` : '',
+    isbn
+      ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg?default=false`
+      : '',
+    isbn
+      ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-M.jpg?default=false`
+      : '',
   ].filter(Boolean);
 }
 
@@ -29,7 +33,10 @@ export function BookCover({ book, size = 'md' }: Props) {
   const source = sources[sourceIndex] || null;
   if (!source) {
     return (
-      <div className={`book-cover book-cover-${size} book-cover-placeholder`} aria-label={`Capa de ${book.title}`}>
+      <div
+        className={`book-cover book-cover-${size} book-cover-placeholder`}
+        aria-label={`Capa de ${book.title}`}
+      >
         <span>{book.title.slice(0, 1).toUpperCase()}</span>
       </div>
     );

@@ -1,11 +1,7 @@
 import { z } from 'zod';
 import { optionalText, timestamp } from '../common/fields.js';
 
-export const discussionContentStatusSchema = z.enum([
-  'published',
-  'hidden',
-  'pending_review',
-]);
+export const discussionContentStatusSchema = z.enum(['published', 'hidden', 'pending_review']);
 
 export const discussionSchema = z.object({
   id: z.string(),

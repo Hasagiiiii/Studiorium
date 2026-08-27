@@ -52,7 +52,11 @@ async function readBinary(request: ApiRequest): Promise<Uint8Array> {
 
 export async function uploadPostMedia(request: ApiRequest): Promise<PostMedia> {
   const user = await requireSessionUser(request);
-  const mimeType = String(request.headers['content-type'] || '').split(';')[0]?.trim().toLowerCase();
+  const mimeType =
+    String(request.headers['content-type'] || '')
+      .split(';')[0]
+      ?.trim()
+      .toLowerCase() || '';
   const mediaInfo = mimeType ? ALLOWED_MEDIA.get(mimeType) : null;
   if (!mediaInfo) {
     throw badRequest('Formato não suportado. Use JPG, PNG, WEBP, GIF, MP4, WEBM ou MOV.');
@@ -87,7 +91,9 @@ export async function uploadPostMedia(request: ApiRequest): Promise<PostMedia> {
 export async function createPost(request: ApiRequest): Promise<SocialPost> {
   const user = await requireSessionUser(request);
   const parsed = createPostInputSchema.safeParse(await readJson(request));
-  if (!parsed.success) throw badRequest('Revise o texto, o título, a mídia e a comunidade da publicação.');
+  if (!parsed.success) {
+    throw badRequest('Revise o texto, o título, a mídia e a comunidade da publicação.');
+  }
 
   await assertPendingPostMedia(user.id, parsed.data.mediaIds);
 

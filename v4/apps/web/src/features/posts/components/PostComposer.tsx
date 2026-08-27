@@ -21,21 +21,33 @@ type LocalMedia = {
 const MAX_MEDIA_BYTES = 25 * 1024 * 1024;
 const ACCEPTED = 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';
 
-function imageMeta(file: File, previewUrl: string): Promise<Pick<LocalMedia, 'width' | 'height' | 'durationSeconds'>> {
+function imageMeta(
+  file: File,
+  previewUrl: string,
+): Promise<Pick<LocalMedia, 'width' | 'height' | 'durationSeconds'>> {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => resolve({ width: image.naturalWidth || null, height: image.naturalHeight || null, durationSeconds: null });
+    image.onload = () =>
+      resolve({
+        width: image.naturalWidth || null,
+        height: image.naturalHeight || null,
+        durationSeconds: null,
+      });
     image.onerror = () => reject(new Error('Não foi possível ler esta imagem.'));
     image.src = previewUrl;
   });
 }
 
-function videoMeta(file: File, previewUrl: string): Promise<Pick<LocalMedia, 'width' | 'height' | 'durationSeconds'>> {
+function videoMeta(
+  file: File,
+  previewUrl: string,
+): Promise<Pick<LocalMedia, 'width' | 'height' | 'durationSeconds'>> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
     video.preload = 'metadata';
     video.onloadedmetadata = () => {
-      if (!Number.isFinite(video.duration)) return reject(new Error('Não foi possível validar a duração do vídeo.'));
+      if (!Number.isFinite(video.duration))
+        return reject(new Error('Não foi possível validar a duração do vídeo.'));
       resolve({
         width: video.videoWidth || null,
         height: video.videoHeight || null,
@@ -115,9 +127,14 @@ export function PostComposer({ onCancel, onCreated }: Props) {
         const type = file.type.startsWith('video/') ? 'video' : 'image';
         const previewUrl = URL.createObjectURL(file);
         try {
-          const meta = type === 'video' ? await videoMeta(file, previewUrl) : await imageMeta(file, previewUrl);
+          const meta =
+            type === 'video'
+              ? await videoMeta(file, previewUrl)
+              : await imageMeta(file, previewUrl);
           if (type === 'video' && (meta.durationSeconds || 0) > MAX_POST_VIDEO_DURATION_SECONDS) {
-            throw new Error(`O vídeo pode ter no máximo ${MAX_POST_VIDEO_DURATION_SECONDS} segundos.`);
+            throw new Error(
+              `O vídeo pode ter no máximo ${MAX_POST_VIDEO_DURATION_SECONDS} segundos.`,
+            );
           }
           next.push({ file, previewUrl, type, ...meta });
         } catch (cause) {
@@ -184,18 +201,41 @@ export function PostComposer({ onCancel, onCreated }: Props) {
 
       <label>
         Título opcional
-        <input maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Dê um título curto quando ajudar" />
+        <input
+          maxLength={160}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Dê um título curto quando ajudar"
+        />
       </label>
 
       <label>
         Legenda
-        <textarea maxLength={4000} rows={5} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Escreva uma legenda ou compartilhe uma ideia…" />
+        <textarea
+          maxLength={4000}
+          rows={5}
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder="Escreva uma legenda ou compartilhe uma ideia…"
+        />
         <small>{body.length}/4000</small>
       </label>
 
       <div className="post-media-picker">
-        <input ref={fileInput} className="post-media-input" type="file" accept={ACCEPTED} multiple onChange={(event) => void chooseMedia(event)} />
-        <button className="button secondary" type="button" disabled={submitting || readingMedia || media.some((item) => item.type === 'video')} onClick={() => fileInput.current?.click()}>
+        <input
+          ref={fileInput}
+          className="post-media-input"
+          type="file"
+          accept={ACCEPTED}
+          multiple
+          onChange={(event) => void chooseMedia(event)}
+        />
+        <button
+          className="button secondary"
+          type="button"
+          disabled={submitting || readingMedia || media.some((item) => item.type === 'video')}
+          onClick={() => fileInput.current?.click()}
+        >
           {readingMedia ? 'Preparando…' : media.length ? 'Adicionar fotos' : 'Foto ou vídeo'}
         </button>
         <small>Até 10 fotos ou 1 vídeo de até 60 s · 25 MB por arquivo</small>
@@ -210,7 +250,13 @@ export function PostComposer({ onCancel, onCreated }: Props) {
               ) : (
                 <img src={item.previewUrl} alt={`Prévia da foto ${index + 1}`} />
               )}
-              <button type="button" aria-label={`Remover mídia ${index + 1}`} onClick={() => removeMedia(index)}>×</button>
+              <button
+                type="button"
+                aria-label={`Remover mídia ${index + 1}`}
+                onClick={() => removeMedia(index)}
+              >
+                ×
+              </button>
             </figure>
           ))}
         </div>
@@ -220,16 +266,41 @@ export function PostComposer({ onCancel, onCreated }: Props) {
         Comunidade opcional
         <select value={communitySlug} onChange={(event) => setCommunitySlug(event.target.value)}>
           <option value="">Publicar no meu perfil e feed geral</option>
-          {communities.map((community) => <option key={community.id} value={community.slug}>{community.name}</option>)}
+          {communities.map((community) => (
+            <option key={community.id} value={community.slug}>
+              {community.name}
+            </option>
+          ))}
         </select>
       </label>
 
-      {communitySlug ? <p className="feed-status">A visibilidade será definida pelas regras da comunidade escolhida.</p> : null}
-      {error ? <p className="inline-error" role="alert">{error}</p> : null}
+      {communitySlug ? (
+        <p className="feed-status">
+          A visibilidade será definida pelas regras da comunidade escolhida.
+        </p>
+      ) : null}
+      {error ? (
+        <p className="inline-error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="form-actions">
-        {onCancel ? <button className="button secondary" type="button" disabled={submitting} onClick={onCancel}>Voltar</button> : null}
-        <button className="button primary" type="submit" disabled={submitting || readingMedia || (!body.trim() && !media.length)}>
+        {onCancel ? (
+          <button
+            className="button secondary"
+            type="button"
+            disabled={submitting}
+            onClick={onCancel}
+          >
+            Voltar
+          </button>
+        ) : null}
+        <button
+          className="button primary"
+          type="submit"
+          disabled={submitting || readingMedia || (!body.trim() && !media.length)}
+        >
           {submitting ? (media.length ? 'Enviando mídia…' : 'Publicando…') : 'Publicar'}
         </button>
       </div>

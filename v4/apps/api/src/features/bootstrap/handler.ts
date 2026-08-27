@@ -27,7 +27,21 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
   const account = await sessionUser(request);
   const viewerId = account?.id ?? null;
 
-  const [posts, publications, news, books, bookReviews, publicProjects, discussions, publicProfiles, communities, settings, personalProjects, ownProfile, user] = await Promise.all([
+  const [
+    posts,
+    publications,
+    news,
+    books,
+    bookReviews,
+    publicProjects,
+    discussions,
+    publicProfiles,
+    communities,
+    settings,
+    personalProjects,
+    ownProfile,
+    user,
+  ] = await Promise.all([
     listPublicSocialPosts(200, viewerId),
     listPublishedResearch(),
     listPublishedNews(),
@@ -43,9 +57,10 @@ export async function bootstrap(request: ApiRequest): Promise<BootstrapPayload> 
     publicSessionUser(request),
   ]);
 
-  const profiles = ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
-    ? [ownProfile, ...publicProfiles]
-    : publicProfiles;
+  const profiles =
+    ownProfile && !publicProfiles.some((profile) => profile.userId === ownProfile.userId)
+      ? [ownProfile, ...publicProfiles]
+      : publicProfiles;
 
   return bootstrapSchema.parse({
     posts,
