@@ -56,14 +56,18 @@ export function NewsArticlePage() {
             <h1>{article.title}</h1>
             <div className="news-reader-byline" aria-label="Informações da publicação">
               <span>Por {article.authorName}</span>
-              {publishedAt ? <time dateTime={article.publishedAt ?? undefined}>{publishedAt}</time> : null}
+              {publishedAt ? (
+                <time dateTime={article.publishedAt ?? undefined}>{publishedAt}</time>
+              ) : null}
             </div>
           </header>
 
           {article.summary ? <p className="news-reader-lead">{article.summary}</p> : null}
 
           <div className="news-reader-body">
-            {paragraphs.length ? paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>) : null}
+            {paragraphs.length
+              ? paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+              : null}
           </div>
 
           <footer className="news-reader-footer">
