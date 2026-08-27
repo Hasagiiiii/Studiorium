@@ -56,11 +56,20 @@
     line-height: 1.45;
   }
 
+  .social-search {
+    display: none;
+  }
+
   .social-shell {
     padding: 8px 0 24px;
   }
 
   .social-left {
+    display: none;
+  }
+
+  .social-discovery-strip,
+  .social-creation-hub {
     display: none;
   }
 
@@ -73,7 +82,9 @@
     scrollbar-width: none;
   }
 
-  .social-feed-tabs::-webkit-scrollbar {
+  .social-feed-tabs::-webkit-scrollbar,
+  .community-tabs::-webkit-scrollbar,
+  .profile-social-stats.compact::-webkit-scrollbar {
     display: none;
   }
 
@@ -85,22 +96,117 @@
   }
 
   .social-composer {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 10px;
-    margin-bottom: 8px;
-    padding: 10px 12px;
+    display: block;
+    margin: 0 0 8px;
+    padding: 0;
+    overflow: hidden;
     border-radius: 14px;
     box-shadow: none;
   }
 
-  .social-composer .actions {
-    grid-column: auto;
+  .social-composer.guest {
+    padding: 12px;
   }
 
-  .social-composer .actions .outline,
-  .social-composer .actions .solid {
-    min-height: 38px;
-    padding: 8px 12px;
+  .social-composer-trigger {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .social-composer-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .social-composer-prompt {
+    min-width: 0;
+  }
+
+  .social-composer-prompt strong,
+  .social-composer-prompt small {
+    display: block;
+  }
+
+  .social-composer-prompt strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+  }
+
+  .social-composer-prompt small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  .social-composer-plus {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--brass) 16%, transparent);
+    color: var(--brass2);
+    font-size: 1.2rem;
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .social-composer[open] .social-composer-plus {
+    transform: rotate(45deg);
+    background: color-mix(in srgb, var(--brass) 24%, transparent);
+  }
+
+  .social-composer-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    padding: 0 10px 10px;
+  }
+
+  .social-compose-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--panel2) 62%, transparent);
+    color: var(--ink);
+  }
+
+  .social-compose-option > b {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--brass) 12%, transparent);
+    color: var(--brass2);
+  }
+
+  .social-compose-option strong,
+  .social-compose-option small {
+    display: block;
+  }
+
+  .social-compose-option strong {
+    font-size: 0.78rem;
+  }
+
+  .social-compose-option small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.63rem;
+    line-height: 1.25;
   }
 
   .social-feed-list {
@@ -218,9 +324,53 @@
     line-height: 1.5;
   }
 
+  .community-detail .crumbs {
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+  }
+
   .community-hero-card {
+    display: block;
     padding: 14px;
     border-radius: 14px;
+  }
+
+  .community-hero-card .pagetitle {
+    margin: 5px 0 7px;
+    font-size: clamp(1.8rem, 8.6vw, 2.55rem) !important;
+  }
+
+  .community-hero-card p {
+    margin-bottom: 10px;
+    font-size: 0.86rem;
+    line-height: 1.42;
+  }
+
+  .community-stats {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .community-stats span {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+  }
+
+  .community-membership {
+    margin-top: 11px;
+    padding: 10px;
+    border-radius: 11px;
+  }
+
+  .community-membership .outline,
+  .community-membership .solid,
+  .community-membership .soft {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: 0.72rem;
   }
 
   .community-tabs {
@@ -228,13 +378,9 @@
     display: flex;
     gap: 5px;
     overflow-x: auto;
-    margin-top: 10px;
+    margin-top: 8px;
     padding: 4px;
     scrollbar-width: none;
-  }
-
-  .community-tabs::-webkit-scrollbar {
-    display: none;
   }
 
   .community-tabs a {
@@ -245,7 +391,40 @@
   }
 
   .community-section {
-    padding: 18px 0;
+    padding: 16px 0;
+  }
+
+  .community-section .sectionhead {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .community-section .sectionhead h2 {
+    margin-top: 3px;
+    font-size: 1.35rem;
+    line-height: 1.12;
+  }
+
+  .community-section-copy {
+    margin-top: 6px;
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .community-discussion-list {
+    display: grid;
+    gap: 7px;
+  }
+
+  .community-discussion-item,
+  .community-resource-card,
+  .community-rules-list,
+  .community-section .empty {
+    border-radius: 12px;
+  }
+
+  .discussion-row {
+    padding: 11px 12px;
   }
 
   .profile-directory-hero {
@@ -273,7 +452,7 @@
 
   .profile-discovery-card {
     display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-columns: 48px minmax(0, 1fr);
     gap: 9px;
     align-items: center;
     min-height: 0;
@@ -350,10 +529,6 @@
     scrollbar-width: none;
   }
 
-  .profile-social-stats.compact::-webkit-scrollbar {
-    display: none;
-  }
-
   .profile-social-stats.compact > span {
     flex: 0 0 auto;
   }
@@ -371,11 +546,21 @@
     width: min(100% - 20px, var(--shell));
   }
 
+  .social-composer-options {
+    grid-template-columns: 1fr;
+  }
+
   .social-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .social-stat {
     grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-composer-plus {
+    transition: none;
   }
 }
