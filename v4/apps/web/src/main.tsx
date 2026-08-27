@@ -14,6 +14,7 @@ import './styles/communities.css';
 import './styles/community-detail.css';
 import './styles/media.css';
 import './styles/social-ui.css';
+import './styles/social-discovery.css';
 import './styles/comments.css';
 
 const root = document.getElementById('root');
