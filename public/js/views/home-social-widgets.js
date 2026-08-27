@@ -228,6 +228,18 @@ function guestComposer() {
 
 function memberComposer() {
   const initial = E((state.me.displayName || 'S').slice(0, 1));
+  const researchLabel =
+    '<b>⌕</b><span><strong>Pesquisa</strong>' +
+    '<small>Publique um trabalho ou descoberta</small></span>';
+  const discussionLabel =
+    '<b>◌</b><span><strong>Discussão</strong>' +
+    '<small>Abra uma conversa em comunidade</small></span>';
+  const projectLabel =
+    '<b>⌘</b><span><strong>Projeto</strong>' +
+    '<small>Continue ou compartilhe um projeto</small></span>';
+  const creationLabel =
+    '<b>✦</b><span><strong>Criação</strong>' +
+    '<small>Material, template ou ideia visual</small></span>';
 
   return [
     '<details class="social-composer social-composer-sheet">',
@@ -240,26 +252,10 @@ function memberComposer() {
     '<span class="social-composer-plus" aria-hidden="true">+</span>',
     '</summary>',
     '<div class="social-composer-options" aria-label="Opções de publicação">',
-    link(
-      '/publicar',
-      '<b>⌕</b><span><strong>Pesquisa</strong><small>Publique um trabalho ou descoberta</small></span>',
-      'social-compose-option',
-    ),
-    link(
-      '/comunidades',
-      '<b>◌</b><span><strong>Discussão</strong><small>Abra uma conversa em comunidade</small></span>',
-      'social-compose-option',
-    ),
-    link(
-      '/escrivaninha',
-      '<b>⌘</b><span><strong>Projeto</strong><small>Continue ou compartilhe um projeto</small></span>',
-      'social-compose-option',
-    ),
-    link(
-      '/comunidades/design-templates',
-      '<b>✦</b><span><strong>Criação</strong><small>Material, template ou ideia visual</small></span>',
-      'social-compose-option',
-    ),
+    link('/publicar', researchLabel, 'social-compose-option'),
+    link('/comunidades', discussionLabel, 'social-compose-option'),
+    link('/escrivaninha', projectLabel, 'social-compose-option'),
+    link('/comunidades/design-templates', creationLabel, 'social-compose-option'),
     '</div>',
     '</details>',
   ].join('');
