@@ -10,6 +10,7 @@ import {
   contentInteractionsSchema,
   createCommentInputSchema,
   createPostInputSchema,
+  discussionContentStatusSchema,
   newsArticleStatusSchema,
   parseBootstrap,
   postDetailSchema,
@@ -259,6 +260,13 @@ test('notícia aceita somente estados editoriais definidos pelo domínio', () =>
   assert.equal(newsArticleStatusSchema.parse('published'), 'published');
   assert.equal(newsArticleStatusSchema.parse('archived'), 'archived');
   assert.throws(() => newsArticleStatusSchema.parse('unknown'));
+});
+
+test('discussões e respostas aceitam somente estados de moderação persistidos', () => {
+  assert.equal(discussionContentStatusSchema.parse('published'), 'published');
+  assert.equal(discussionContentStatusSchema.parse('hidden'), 'hidden');
+  assert.equal(discussionContentStatusSchema.parse('pending_review'), 'pending_review');
+  assert.throws(() => discussionContentStatusSchema.parse('unknown'));
 });
 
 test('projeto v4 exige ownerId e não aceita o contrato legado userId sozinho', () => {
