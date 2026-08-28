@@ -22,6 +22,7 @@ import './styles/desk.css';
 import './styles/async-states.css';
 import './styles/notifications.css';
 import './styles/auth.css';
+import './styles/mobile-shell.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
