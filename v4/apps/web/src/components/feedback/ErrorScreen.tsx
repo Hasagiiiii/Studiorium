@@ -17,11 +17,7 @@ export function ErrorScreen({ message, onRetry }: ErrorScreenProps) {
         <button type="button" className="button primary" onClick={onRetry}>
           Tentar novamente
         </button>
-        <button
-          type="button"
-          className="button secondary"
-          onClick={() => window.location.reload()}
-        >
+        <button type="button" className="button secondary" onClick={() => window.location.reload()}>
           Recarregar página
         </button>
       </div>
