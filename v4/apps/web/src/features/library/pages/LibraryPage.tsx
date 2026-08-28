@@ -21,7 +21,8 @@ export function LibraryPage() {
           <span className="library-eyebrow">Biblioteca</span>
           <h1 id="library-title">Encontre sua próxima leitura</h1>
           <p>
-            Descubra livros pelo catálogo, pelos destaques e pelas avaliações feitas pela comunidade.
+            Descubra livros pelo catálogo, pelos destaques e pelas avaliações feitas pela
+            comunidade.
           </p>
         </div>
 
