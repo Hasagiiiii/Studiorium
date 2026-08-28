@@ -1,0 +1,199 @@
+.project-reading {
+  min-height: 100%;
+  padding: clamp(1rem, 3vw, 2rem) max(1rem, env(safe-area-inset-left))
+    calc(6rem + env(safe-area-inset-bottom));
+}
+
+.project-reading__article,
+.project-reading__empty {
+  width: min(100%, 54rem);
+  margin: 0 auto;
+}
+
+.project-reading__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.project-reading__back:hover,
+.project-reading__back:focus-visible {
+  color: var(--text-strong);
+}
+
+.project-reading__back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 0.45rem;
+}
+
+.project-reading__header {
+  padding: clamp(1.25rem, 4vw, 2.5rem) 0 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.project-reading__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.project-reading__kicker span,
+.project-reading__eyebrow {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-reading__kicker span {
+  padding: 0.38rem 0.65rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.project-reading h1 {
+  max-width: 18ch;
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.project-reading__lead {
+  max-width: 66ch;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: clamp(1rem, 2.2vw, 1.18rem);
+  line-height: 1.7;
+}
+
+.project-reading__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.project-reading__summary > div {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft);
+}
+
+.project-reading__summary strong,
+.project-reading__summary span {
+  display: block;
+}
+
+.project-reading__summary strong {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.project-reading__summary span {
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.project-reading__structure {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+}
+
+.project-reading__structure h2 {
+  margin: 0.3rem 0 0;
+  font-size: clamp(1.2rem, 3vw, 1.65rem);
+}
+
+.project-reading__structure p,
+.project-reading__empty p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.project-reading--empty {
+  display: grid;
+  place-items: center;
+}
+
+.project-reading__empty {
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+}
+
+.project-reading__empty h1 {
+  margin: 0.4rem 0 0.75rem;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+}
+
+.project-reading__empty .project-reading__back {
+  margin-top: 1rem;
+}
+
+@media (max-width: 680px) {
+  .project-reading__summary,
+  .project-reading__structure {
+    grid-template-columns: 1fr;
+  }
+
+  .project-reading__summary {
+    gap: 0.5rem;
+  }
+
+  .project-reading__summary > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+  }
+
+  .project-reading__summary span {
+    margin: 0;
+    text-align: right;
+  }
+}
+
+@media (max-width: 430px) {
+  .project-reading {
+    padding-top: 0.75rem;
+  }
+
+  .project-reading h1 {
+    font-size: clamp(1.85rem, 11vw, 2.65rem);
+  }
+
+  .project-reading__header {
+    padding-top: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-reading *,
+  .project-reading *::before,
+  .project-reading *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
