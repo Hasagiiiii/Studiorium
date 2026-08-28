@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AuthSurface } from '../components/AuthSurface.js';
 
 export function RequestPasswordResetPage() {
   const { data } = useAppState();
@@ -40,17 +40,26 @@ export function RequestPasswordResetPage() {
   }
 
   return (
-    <FeaturePage
-      eyebrow="Segurança"
-      title="Recuperar senha"
+    <AuthSurface
+      eyebrow="Segurança da conta"
+      title="Recupere seu acesso"
       description={
         passwordResetAvailable
-          ? 'Informe o e-mail da sua conta. Se ela existir, enviaremos um link de uso único.'
-          : 'A recuperação de senha por e-mail está temporariamente indisponível.'
+          ? 'Informe o e-mail da sua conta. Se ela existir, enviaremos um link de uso único para criar uma nova senha.'
+          : 'A recuperação por e-mail está temporariamente indisponível, mas o acesso normal continua funcionando.'
+      }
+      note={
+        <p>
+          Lembrou a senha? <Link to="/entrar">Voltar para entrar</Link>
+        </p>
       }
     >
       {passwordResetAvailable ? (
-        <form className="auth-form" onSubmit={submit}>
+        <form
+          className="auth-form"
+          onSubmit={submit}
+          aria-busy={status === 'saving' ? 'true' : 'false'}
+        >
           <label>
             E-mail
             <input
@@ -71,21 +80,18 @@ export function RequestPasswordResetPage() {
           <button className="button primary" type="submit" disabled={status === 'saving'}>
             {status === 'saving' ? 'Enviando…' : 'Enviar link de redefinição'}
           </button>
-          <p>
-            <Link to="/entrar">Voltar para entrar</Link>
-          </p>
         </form>
       ) : (
-        <div className="auth-form">
-          <p role="status">
-            O login continua disponível normalmente. A opção de redefinição aparecerá quando o
-            serviço de e-mail estiver configurado.
-          </p>
+        <div className="auth-form" role="status">
           <p>
-            <Link to="/entrar">Voltar para entrar</Link>
+            O login continua disponível normalmente. A redefinição aparecerá assim que o serviço de
+            e-mail estiver configurado.
           </p>
+          <Link className="button secondary" to="/entrar">
+            Ir para entrar
+          </Link>
         </div>
       )}
-    </FeaturePage>
+    </AuthSurface>
   );
 }

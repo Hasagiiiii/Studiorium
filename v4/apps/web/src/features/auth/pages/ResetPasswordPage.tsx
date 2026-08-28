@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AuthSurface } from '../components/AuthSurface.js';
 
 function tokenFromHash(): string {
   if (typeof window === 'undefined') return '';
@@ -60,22 +60,31 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <FeaturePage
-      eyebrow="Segurança"
-      title="Criar nova senha"
-      description="O link é de uso único. Ao concluir, as sessões anteriores da conta serão encerradas."
+    <AuthSurface
+      eyebrow="Segurança da conta"
+      title="Crie uma nova senha"
+      description="O link é de uso único. Ao concluir, as sessões anteriores serão encerradas para proteger sua conta."
+      note={
+        <p>
+          Precisa de outro link? <Link to="/esqueci-a-senha">Solicitar novamente</Link>
+        </p>
+      }
     >
       {!token ? (
         <div className="auth-form">
           <p className="inline-error" role="alert">
             O link de redefinição está ausente ou inválido.
           </p>
-          <p>
-            <Link to="/esqueci-a-senha">Solicitar um novo link</Link>
-          </p>
+          <Link className="button primary" to="/esqueci-a-senha">
+            Solicitar um novo link
+          </Link>
         </div>
       ) : (
-        <form className="auth-form" onSubmit={submit}>
+        <form
+          className="auth-form"
+          onSubmit={submit}
+          aria-busy={status === 'saving' ? 'true' : 'false'}
+        >
           <label>
             Nova senha
             <input
@@ -100,6 +109,7 @@ export function ResetPasswordPage() {
               onChange={(event) => setConfirmPassword(event.target.value)}
             />
           </label>
+          <p className="auth-form__hint">Use pelo menos 12 caracteres e evite reutilizar senhas.</p>
           {status === 'error' ? (
             <p className="inline-error" role="alert">
               {error}
@@ -110,6 +120,6 @@ export function ResetPasswordPage() {
           </button>
         </form>
       )}
-    </FeaturePage>
+    </AuthSurface>
   );
 }
