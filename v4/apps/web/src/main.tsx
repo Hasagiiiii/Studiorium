@@ -19,6 +19,7 @@ import './styles/comments.css';
 import './styles/news.css';
 import './styles/research.css';
 import './styles/projects.css';
+import './styles/project-workspace.css';
 import './styles/desk.css';
 import './styles/async-states.css';
 import './styles/notifications.css';
