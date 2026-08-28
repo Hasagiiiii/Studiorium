@@ -1,0 +1,183 @@
+.topbar-profile {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.topbar-profile-avatar {
+  display: none;
+}
+
+.topbar-profile-name {
+  display: block;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-logout {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text);
+  cursor: pointer;
+}
+
+@media (max-width: 880px) {
+  .shell-body {
+    padding-bottom: calc(8.25rem + env(safe-area-inset-bottom));
+  }
+
+  .topbar-create,
+  .topbar-desk {
+    display: none;
+  }
+
+  .bottom-nav {
+    right: max(0.65rem, env(safe-area-inset-right));
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    left: max(0.65rem, env(safe-area-inset-left));
+    padding: 0.38rem;
+    border-color: rgb(185 147 78 / 24%);
+    background: rgb(20 17 14 / 92%);
+    box-shadow:
+      0 16px 42px rgb(0 0 0 / 38%),
+      0 1px 0 rgb(255 255 255 / 4%) inset;
+  }
+
+  .bottom-nav a,
+  .bottom-nav button {
+    min-height: 3.05rem;
+    border-radius: 0.9rem;
+    transition:
+      background-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .bottom-nav a.active {
+    background: rgb(185 147 78 / 11%);
+    color: var(--text);
+    font-weight: 680;
+  }
+
+  .bottom-nav .create-action {
+    border-radius: 0.95rem;
+    box-shadow: 0 7px 18px rgb(0 0 0 / 24%);
+  }
+}
+
+@media (max-width: 620px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.65rem;
+    min-height: 3.95rem;
+    padding: 0.55rem max(0.7rem, env(safe-area-inset-right)) 0.55rem
+      max(0.7rem, env(safe-area-inset-left));
+  }
+
+  .brand {
+    gap: 0.58rem;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .brand strong {
+    font-size: 1rem;
+    letter-spacing: 0.035em;
+  }
+
+  .topbar-actions {
+    gap: 0.14rem;
+    min-width: 0;
+  }
+
+  .topbar-search,
+  .topbar-desk {
+    display: none !important;
+  }
+
+  .topbar-actions a,
+  .topbar-logout {
+    min-height: 2.4rem;
+    padding: 0.45rem 0.58rem;
+  }
+
+  .topbar-notifications {
+    display: grid !important;
+    width: 2.35rem;
+    min-width: 2.35rem;
+    place-items: center;
+    padding: 0 !important;
+    font-size: 1rem;
+  }
+
+  .topbar-profile {
+    display: grid !important;
+    width: 2.35rem;
+    min-width: 2.35rem;
+    place-items: center;
+    padding: 0 !important;
+  }
+
+  .topbar-profile-avatar {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    place-items: center;
+    border: 1px solid rgb(185 147 78 / 34%);
+    border-radius: 50%;
+    background: var(--surface-raised);
+    color: var(--accent-strong);
+    font-family: system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 760;
+  }
+
+  .topbar-profile-name {
+    display: none;
+  }
+
+  .topbar-logout {
+    min-width: 3.25rem;
+    padding-inline: 0.58rem;
+    font-family: system-ui, sans-serif;
+    font-size: 0.72rem;
+  }
+
+  .shell-body {
+    width: min(100% - 1rem, 1180px);
+    padding-top: 0.85rem;
+    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav {
+    border-radius: 1.05rem;
+  }
+
+  .bottom-nav a,
+  .bottom-nav button {
+    min-height: 2.9rem;
+    padding-inline: 0.12rem;
+    font-family: system-ui, sans-serif;
+    font-size: clamp(0.66rem, 2.45vw, 0.78rem);
+  }
+}
+
+@media (max-width: 370px) {
+  .topbar-logout {
+    display: none;
+  }
+
+  .bottom-nav a,
+  .bottom-nav button {
+    font-size: 0.64rem;
+  }
+}
