@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
+import { BookCover } from '../../library/components/BookCover.js';
 import { buildSearchIndex, searchEntries, type SearchEntry } from '../../search/lib/searchIndex.js';
 
 const TYPES: SearchEntry['type'][] = [
@@ -21,6 +22,23 @@ function initials(title: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() || '')
     .join('');
+}
+
+function entryGlyph(type: SearchEntry['type']): string {
+  switch (type) {
+    case 'Publicação':
+      return '✦';
+    case 'Pesquisa':
+      return '⌁';
+    case 'Projeto':
+      return '◇';
+    case 'Discussão':
+      return '↔';
+    case 'Notícia':
+      return 'N';
+    default:
+      return type.slice(0, 1);
+  }
 }
 
 export function ExplorePage() {
@@ -45,6 +63,10 @@ export function ExplorePage() {
   }, [params, setParams]);
 
   const entries = useMemo(() => (data ? buildSearchIndex(data) : []), [data]);
+  const booksById = useMemo(
+    () => new Map((data?.books ?? []).map((book) => [book.id, book])),
+    [data],
+  );
   const counts = useMemo(
     () =>
       Object.fromEntries(
@@ -97,9 +119,10 @@ export function ExplorePage() {
   return (
     <main id="main-content" className="social-explore-page">
       <header className="social-explore-header">
-        <div>
+        <div className="social-explore-heading">
           <span className="eyebrow">Descoberta</span>
           <h1>Explorar</h1>
+          <p>Encontre pessoas, comunidades e ideias que valem acompanhar.</p>
         </div>
         <form className="global-search social-explore-search" onSubmit={submit} role="search">
           <input
@@ -107,10 +130,10 @@ export function ExplorePage() {
             type="search"
             value={value}
             onChange={(event) => setValue(event.target.value)}
-            placeholder="Pesquisar pessoas, comunidades e conteúdo"
+            placeholder="Pesquisar no Lorion"
             aria-label="Pesquisar no Lorion"
           />
-          <button type="submit" className="button primary">
+          <button type="submit" className="button primary" aria-label="Pesquisar">
             Pesquisar
           </button>
         </form>
@@ -135,9 +158,13 @@ export function ExplorePage() {
       </nav>
 
       {!selectedType || selectedType === 'Pessoa' ? (
-        <section className="social-discovery-section">
+        <section className="social-discovery-section social-people-section">
           <header>
-            <h2>{query ? 'Pessoas encontradas' : 'Pessoas para descobrir'}</h2>
+            <div>
+              <span className="social-section-kicker">Conexões</span>
+              <h2>{query ? 'Pessoas encontradas' : 'Pessoas para descobrir'}</h2>
+            </div>
+            <span>{people.length}</span>
           </header>
           {people.length ? (
             <div className="social-person-strip">
@@ -146,12 +173,19 @@ export function ExplorePage() {
                   <div className="social-person-avatar" aria-hidden="true">
                     {initials(entry.title)}
                   </div>
-                  <h3>
-                    <Link to={entry.href}>{entry.title}</Link>
-                  </h3>
-                  <p>{entry.description}</p>
-                  <Link className="button secondary" to={entry.href}>
-                    Ver perfil
+                  <div className="social-person-copy">
+                    <h3>
+                      <Link to={entry.href}>{entry.title}</Link>
+                    </h3>
+                    <p>{entry.description}</p>
+                  </div>
+                  <Link
+                    className="social-card-action"
+                    to={entry.href}
+                    aria-label={`Ver perfil de ${entry.title}`}
+                  >
+                    <span>Ver perfil</span>
+                    <b aria-hidden="true">→</b>
                   </Link>
                 </article>
               ))}
@@ -165,20 +199,36 @@ export function ExplorePage() {
       ) : null}
 
       {!selectedType || selectedType === 'Comunidade' ? (
-        <section className="social-discovery-section">
+        <section className="social-discovery-section social-communities-section">
           <header>
-            <h2>{query ? 'Comunidades encontradas' : 'Comunidades em destaque'}</h2>
+            <div>
+              <span className="social-section-kicker">Encontre sua turma</span>
+              <h2>{query ? 'Comunidades encontradas' : 'Comunidades em destaque'}</h2>
+            </div>
+            <span>{communities.length}</span>
           </header>
           {communities.length ? (
             <div className="social-community-strip">
               {communities.map((entry) => (
                 <article key={entry.id} className="social-community-card">
-                  <span className="eyebrow">Comunidade</span>
-                  <h3>
-                    <Link to={entry.href}>{entry.title}</Link>
-                  </h3>
-                  <p>{entry.description}</p>
-                  <Link to={entry.href}>Abrir comunidade</Link>
+                  <div className="social-community-mark" aria-hidden="true">
+                    {initials(entry.title)}
+                  </div>
+                  <div className="social-community-copy">
+                    <span className="eyebrow">Comunidade</span>
+                    <h3>
+                      <Link to={entry.href}>{entry.title}</Link>
+                    </h3>
+                    <p>{entry.description}</p>
+                  </div>
+                  <Link
+                    className="social-community-open"
+                    to={entry.href}
+                    aria-label={`Abrir comunidade ${entry.title}`}
+                  >
+                    <span>Abrir</span>
+                    <b aria-hidden="true">→</b>
+                  </Link>
                 </article>
               ))}
             </div>
@@ -193,32 +243,53 @@ export function ExplorePage() {
       {selectedType === 'Pessoa' || selectedType === 'Comunidade' ? null : (
         <section className="social-discovery-section search-results" aria-live="polite">
           <header>
-            <h2>
-              {query
-                ? `Resultados para “${query}”`
-                : selectedType
-                  ? selectedType
-                  : 'Conteúdo para você explorar'}
-            </h2>
+            <div>
+              <span className="social-section-kicker">Leituras e ideias</span>
+              <h2>
+                {query
+                  ? `Resultados para “${query}”`
+                  : selectedType
+                    ? selectedType
+                    : 'Conteúdo para você explorar'}
+              </h2>
+            </div>
             <span>{content.length} itens</span>
           </header>
           {content.length ? (
             <div className="social-explore-grid">
-              {content.map((entry) => (
-                <article
-                  key={entry.id}
-                  className={`social-explore-card explore-${entry.type.toLowerCase()}`}
-                >
-                  <span className="eyebrow">{entry.type}</span>
-                  <h2>
-                    <Link to={entry.href}>{entry.title}</Link>
-                  </h2>
-                  <p>{entry.description}</p>
-                  <Link className="social-explore-open" to={entry.href}>
-                    Abrir
-                  </Link>
-                </article>
-              ))}
+              {content.map((entry) => {
+                const book =
+                  entry.type === 'Livro' ? booksById.get(entry.id.replace(/^book:/, '')) : null;
+                return (
+                  <article
+                    key={entry.id}
+                    className={`social-explore-card explore-${entry.type.toLowerCase()}`}
+                  >
+                    <div className="social-explore-visual" aria-hidden={book ? undefined : 'true'}>
+                      {book ? (
+                        <BookCover book={book} size="sm" />
+                      ) : (
+                        <span>{entryGlyph(entry.type)}</span>
+                      )}
+                    </div>
+                    <div className="social-explore-copy">
+                      <span className="eyebrow">{entry.type}</span>
+                      <h3>
+                        <Link to={entry.href}>{entry.title}</Link>
+                      </h3>
+                      <p>{entry.description}</p>
+                    </div>
+                    <Link
+                      className="social-explore-open"
+                      to={entry.href}
+                      aria-label={`Abrir ${entry.title}`}
+                    >
+                      <span>Abrir</span>
+                      <b aria-hidden="true">→</b>
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="empty-state">

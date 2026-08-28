@@ -9,6 +9,15 @@ import { useAppState } from '../state/useAppState.js';
 
 const CREATE_RETURN_PATH = '/';
 
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
+}
+
 export function AppShell({ children }: PropsWithChildren) {
   const { data, reload } = useAppState();
   const { pushToast } = useToast();
@@ -70,6 +79,7 @@ export function AppShell({ children }: PropsWithChildren) {
   }
 
   const showHeader = headerVisible || Boolean(me && createOpen);
+  const path = location.pathname;
 
   return (
     <div className="app-shell">
@@ -102,20 +112,31 @@ export function AppShell({ children }: PropsWithChildren) {
           >
             +
           </motion.button>
-          <Link to="/explorar?foco=busca" aria-label="Pesquisar">
+          <Link className="topbar-search" to="/explorar?foco=busca" aria-label="Pesquisar">
             ⌕
           </Link>
           {me ? (
             <>
-              <Link to="/notificacoes" aria-label="Notificações">
+              <Link className="topbar-notifications" to="/notificacoes" aria-label="Notificações">
                 ◇
               </Link>
-              <Link to="/escrivaninha">Escrivaninha</Link>
+              <Link className="topbar-desk" to="/escrivaninha">
+                Escrivaninha
+              </Link>
             </>
           ) : null}
           {me?.username ? (
             <>
-              <Link to={`/perfil/${encodeURIComponent(me.username)}`}>{me.displayName}</Link>
+              <Link
+                className="topbar-profile"
+                to={`/perfil/${encodeURIComponent(me.username)}`}
+                aria-label={`Perfil de ${me.displayName}`}
+              >
+                <span className="topbar-profile-avatar" aria-hidden="true">
+                  {initials(me.displayName)}
+                </span>
+                <span className="topbar-profile-name">{me.displayName}</span>
+              </Link>
               <button
                 className="topbar-logout"
                 type="button"
@@ -132,8 +153,12 @@ export function AppShell({ children }: PropsWithChildren) {
       </motion.header>
       <div className="shell-body">{children}</div>
       <nav className="bottom-nav" aria-label="Navegação móvel">
-        <Link to="/">Início</Link>
-        <Link to="/explorar">Explorar</Link>
+        <Link className={path === '/' ? 'active' : undefined} to="/">
+          Início
+        </Link>
+        <Link className={path.startsWith('/explorar') ? 'active' : undefined} to="/explorar">
+          Explorar
+        </Link>
         <motion.button
           className="create-action"
           type="button"
@@ -149,8 +174,18 @@ export function AppShell({ children }: PropsWithChildren) {
         >
           +
         </motion.button>
-        <Link to="/comunidades">Comunidades</Link>
-        <Link to={me ? '/escrivaninha' : '/entrar'}>{me ? 'Mesa' : 'Entrar'}</Link>
+        <Link
+          className={path.startsWith('/comunidades') ? 'active' : undefined}
+          to="/comunidades"
+        >
+          Comunidades
+        </Link>
+        <Link
+          className={path.startsWith('/escrivaninha') ? 'active' : undefined}
+          to={me ? '/escrivaninha' : '/entrar'}
+        >
+          {me ? 'Mesa' : 'Entrar'}
+        </Link>
       </nav>
       {me ? <CreateLauncher open={createOpen} onClose={() => setCreateOpen(false)} /> : null}
     </div>
