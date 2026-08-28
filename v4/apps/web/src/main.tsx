@@ -19,6 +19,7 @@ import './styles/comments.css';
 import './styles/news.css';
 import './styles/desk.css';
 import './styles/async-states.css';
+import './styles/notifications.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root da aplicação não encontrado.');
