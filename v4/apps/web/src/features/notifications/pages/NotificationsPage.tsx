@@ -187,7 +187,11 @@ export function NotificationsPage() {
                   </div>
                   <div className="notification-actions">
                     {item.link ? (
-                      <Link className="button secondary" to={item.link} onClick={() => void markRead(item)}>
+                      <Link
+                        className="button secondary"
+                        to={item.link}
+                        onClick={() => void markRead(item)}
+                      >
                         Abrir
                       </Link>
                     ) : unread ? (
@@ -214,7 +218,10 @@ export function NotificationsPage() {
             <span aria-hidden="true">✓</span>
             <div>
               <h2>Tudo em dia por aqui</h2>
-              <p>Quando alguém interagir com você ou surgir uma atualização importante, ela aparecerá aqui.</p>
+              <p>
+                Quando alguém interagir com você ou surgir uma atualização importante, ela aparecerá
+                aqui.
+              </p>
             </div>
             <Link className="button secondary" to="/">
               Voltar ao feed
