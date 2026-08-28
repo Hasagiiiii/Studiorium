@@ -325,8 +325,7 @@
   border: 1px solid rgb(185 147 78 / 22%);
   border-radius: 0.65rem;
   background:
-    linear-gradient(150deg, rgb(185 147 78 / 13%), transparent 58%),
-    var(--surface-raised);
+    linear-gradient(150deg, rgb(185 147 78 / 13%), transparent 58%), var(--surface-raised);
   color: var(--accent-strong);
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.35rem;
@@ -344,9 +343,7 @@
 .social-explore-visual .book-cover-placeholder {
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(155deg, rgb(185 147 78 / 22%), transparent 52%),
-    #241d16;
+  background: linear-gradient(155deg, rgb(185 147 78 / 22%), transparent 52%), #241d16;
 }
 
 .social-explore-copy {
