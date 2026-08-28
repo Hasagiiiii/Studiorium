@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AuthSurface } from '../components/AuthSurface.js';
 
 export function AccountSecurityPage() {
   const { data, reload } = useAppState();
@@ -49,12 +49,17 @@ export function AccountSecurityPage() {
   }
 
   return (
-    <FeaturePage
+    <AuthSurface
       eyebrow="Conta"
       title="Segurança da conta"
-      description="Altere sua senha confirmando a senha atual. As demais sessões serão encerradas."
+      description="Atualize sua senha com confirmação da credencial atual. Ao concluir, as demais sessões serão encerradas."
+      note={
+        data.user.username ? (
+          <Link to={`/perfil/${encodeURIComponent(data.user.username)}`}>Voltar ao perfil</Link>
+        ) : undefined
+      }
     >
-      <form className="auth-form" onSubmit={submit}>
+      <form className="auth-form" onSubmit={submit} aria-busy={status === 'saving'}>
         <label>
           Senha atual
           <input
@@ -90,6 +95,9 @@ export function AccountSecurityPage() {
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
         </label>
+        <p className="auth-form__hint">
+          Use pelo menos 12 caracteres. A troca da senha encerra as outras sessões da conta.
+        </p>
         {status === 'success' ? (
           <p role="status">{message}</p>
         ) : status === 'error' ? (
@@ -100,12 +108,7 @@ export function AccountSecurityPage() {
         <button className="button primary" type="submit" disabled={status === 'saving'}>
           {status === 'saving' ? 'Alterando…' : 'Alterar senha'}
         </button>
-        {data.user.username ? (
-          <p>
-            <Link to={`/perfil/${encodeURIComponent(data.user.username)}`}>Voltar ao perfil</Link>
-          </p>
-        ) : null}
       </form>
-    </FeaturePage>
+    </AuthSurface>
   );
 }
