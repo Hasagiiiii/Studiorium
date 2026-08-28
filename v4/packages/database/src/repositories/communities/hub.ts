@@ -1,5 +1,5 @@
 import type { CommunityMember, Discussion } from '@lorion/contracts';
-import { discussionSchema } from '@lorion/contracts';
+import { communityMemberSchema, discussionSchema } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
@@ -73,13 +73,13 @@ export async function listCommunityMembers(communityId: string): Promise<Communi
 
   return members.map((member) => {
     const profile = profilesByUser.get(member.user_id);
-    return {
+    return communityMemberSchema.parse({
       userId: member.user_id,
       username: profile?.username || '',
       displayName: profile?.display_name || profile?.username || 'Membro',
       role: member.role,
       joinedAt: member.joined_at,
-    };
+    });
   });
 }
 

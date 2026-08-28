@@ -174,10 +174,7 @@ export function AppShell({ children }: PropsWithChildren) {
         >
           +
         </motion.button>
-        <Link
-          className={path.startsWith('/comunidades') ? 'active' : undefined}
-          to="/comunidades"
-        >
+        <Link className={path.startsWith('/comunidades') ? 'active' : undefined} to="/comunidades">
           Comunidades
         </Link>
         <Link

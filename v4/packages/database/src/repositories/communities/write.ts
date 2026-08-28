@@ -1,4 +1,5 @@
 import type { CommunityMembershipRequest, CommunityMembershipResult } from '@lorion/contracts';
+import { communityMembershipResultSchema } from '@lorion/contracts';
 import { database } from '../../core/client.js';
 import { queryList } from '../../core/query.js';
 
@@ -67,7 +68,7 @@ async function membershipResult(
   userId: string,
 ): Promise<CommunityMembershipResult> {
   const membership = await findCommunityMembership(communityId, userId);
-  return {
+  return communityMembershipResultSchema.parse({
     communityId,
     joined: membership?.status === 'active' && membership.moderation_status !== 'removed',
     membershipStatus:
@@ -80,7 +81,7 @@ async function membershipResult(
     role: membership?.role || null,
     memberModerationStatus: membership?.moderation_status || null,
     memberCount: await activeMemberCount(communityId),
-  };
+  });
 }
 
 export async function joinPublicCommunity(
