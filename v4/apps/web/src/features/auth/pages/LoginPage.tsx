@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AuthSurface } from '../components/AuthSurface.js';
 
 function safeReturnPath(value: string | null): string {
   if (!value || !value.startsWith('/') || value.startsWith('//')) return '/';
@@ -42,12 +42,13 @@ export function LoginPage() {
   }
 
   return (
-    <FeaturePage
-      eyebrow="Conta"
-      title="Entrar no Lorion"
-      description="Acesse seu perfil, comunidades, projetos e conexões."
+    <AuthSurface
+      eyebrow="Sua conta"
+      title="Entre e retome de onde parou."
+      description="Acesse seu perfil, comunidades e publicações com uma entrada direta e sem distrações."
+      note="Sua senha nunca é exibida publicamente e o e-mail permanece privado."
     >
-      <form className="auth-form" onSubmit={submit}>
+      <form className="auth-form" onSubmit={submit} aria-busy={status === 'saving'}>
         <label>
           E-mail
           <input
@@ -87,6 +88,6 @@ export function LoginPage() {
           Ainda não tem conta? <Link to="/cadastro">Criar conta</Link>
         </p>
       </form>
-    </FeaturePage>
+    </AuthSurface>
   );
 }

@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { services } from '../../../app/services/services.js';
 import { useAppState } from '../../../app/state/useAppState.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
+import { AuthSurface } from '../components/AuthSurface.js';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -42,15 +42,17 @@ export function RegisterPage() {
   }
 
   return (
-    <FeaturePage
-      eyebrow="Conta"
-      title="Criar conta"
-      description="Entre no Lorion para participar das comunidades e construir seu perfil de conhecimento."
+    <AuthSurface
+      eyebrow="Primeiro acesso"
+      title="Crie seu espaço no Studiorium."
+      description="Monte seu perfil e participe de comunidades sem transformar o cadastro em um formulário cansativo."
+      note="Seu e-mail e ano de nascimento não aparecem no perfil público."
     >
-      <form className="auth-form" onSubmit={submit}>
+      <form className="auth-form" onSubmit={submit} aria-busy={status === 'saving'}>
         <label>
           Nome de exibição
           <input
+            autoComplete="name"
             required
             minLength={2}
             maxLength={80}
@@ -73,6 +75,7 @@ export function RegisterPage() {
           <input
             type="number"
             inputMode="numeric"
+            autoComplete="bday-year"
             required
             min={1930}
             max={new Date().getFullYear()}
@@ -92,6 +95,7 @@ export function RegisterPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
+        <p>Use pelo menos 12 caracteres para manter a conta mais protegida.</p>
         {status === 'error' ? (
           <p className="inline-error" role="alert">
             {error}
@@ -104,6 +108,6 @@ export function RegisterPage() {
           Já tem conta? <Link to="/entrar">Entrar</Link>
         </p>
       </form>
-    </FeaturePage>
+    </AuthSurface>
   );
 }
