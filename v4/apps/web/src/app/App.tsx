@@ -14,6 +14,7 @@ import { ExplorePage } from '../features/discovery/pages/ExplorePage.js';
 import { BookPage } from '../features/library/pages/BookPage.js';
 import { LibraryPage } from '../features/library/pages/LibraryPage.js';
 import { NewsArticlePage } from '../features/news/pages/NewsArticlePage.js';
+import { NewsPage } from '../features/news/pages/NewsPage.js';
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage.js';
 import { PostDetailPage } from '../features/posts/pages/PostDetailPage.js';
 import { ProfilePage } from '../features/profiles/pages/ProfilePage.js';
@@ -52,6 +53,7 @@ export function App() {
         <Route path="/pesquisas/:slug" element={<ResearchPage />} />
         <Route path="/projetos" element={<ProjectsPage />} />
         <Route path="/projetos/:id" element={<ProjectPage />} />
+        <Route path="/noticias" element={<NewsPage />} />
         <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/perfil/:username" element={<ProfilePage />} />
         <Route path="/escrivaninha" element={<DeskPage />} />
