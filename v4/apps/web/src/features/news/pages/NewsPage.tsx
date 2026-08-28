@@ -32,8 +32,8 @@ export function NewsPage() {
             <p className="news-index-eyebrow">Leitura editorial</p>
             <h1 id="news-index-title">Notícias</h1>
             <p>
-              Atualizações publicadas no Studiorium, organizadas para leitura rápida antes de abrir a
-              matéria completa.
+              Atualizações publicadas no Studiorium, organizadas para leitura rápida antes de abrir
+              a matéria completa.
             </p>
           </div>
           <Link className="news-index-explore" to="/explorar">
@@ -45,7 +45,9 @@ export function NewsPage() {
           <section className="news-index-empty" aria-live="polite">
             <span aria-hidden="true">✦</span>
             <h2>Ainda não há notícias publicadas</h2>
-            <p>Quando novas matérias forem publicadas, elas aparecerão aqui sem misturar rascunhos.</p>
+            <p>
+              Quando novas matérias forem publicadas, elas aparecerão aqui sem misturar rascunhos.
+            </p>
             <Link to="/">Voltar ao feed</Link>
           </section>
         ) : (
