@@ -54,7 +54,9 @@ export function ResearchPage() {
           <header className="research-reader-header">
             <div className="research-reader-kicker">
               <span className="eyebrow">{publication.area}</span>
-              {publication.featured ? <span className="research-reader-featured">Destaque</span> : null}
+              {publication.featured ? (
+                <span className="research-reader-featured">Destaque</span>
+              ) : null}
             </div>
             <h1>{publication.title}</h1>
             <p className="research-reader-author">Por {publication.authorName}</p>
