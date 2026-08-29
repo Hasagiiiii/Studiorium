@@ -24,6 +24,7 @@ import './styles/research.css';
 import './styles/projects.css';
 import './styles/project-workspace.css';
 import './styles/workshop.css';
+import './styles/atelier.css';
 import './styles/desk.css';
 import './styles/admin.css';
 import './styles/async-states.css';
