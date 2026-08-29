@@ -156,7 +156,9 @@ export function WorkshopPage() {
                         {community.name}
                       </Link>
                     </h3>
-                    <p>{community.description || 'Uma comunidade para aprender e construir junto.'}</p>
+                    <p>
+                      {community.description || 'Uma comunidade para aprender e construir junto.'}
+                    </p>
                     <footer>
                       <span>{community.memberCount} membros</span>
                       <Link to={`/comunidades/${encodeURIComponent(community.slug)}`}>Abrir →</Link>
