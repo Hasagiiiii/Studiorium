@@ -18,6 +18,7 @@ import './styles/social-ui.css';
 import './styles/social-discovery.css';
 import './styles/comments.css';
 import './styles/news.css';
+import './styles/news-index.css';
 import './styles/research.css';
 import './styles/projects.css';
 import './styles/project-workspace.css';
