@@ -1,6 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
 import { useAppState } from '../../../app/state/useAppState.js';
-import { FeaturePage } from '../../../components/ui/FeaturePage.js';
 
 export function BookPage() {
   const { id = '' } = useParams();
@@ -10,59 +9,94 @@ export function BookPage() {
 
   if (!book) {
     return (
-      <FeaturePage
-        eyebrow="Biblioteca"
-        title="Livro não encontrado"
-        description="A obra pode ter sido removida do catálogo ou o endereço está incorreto."
-      >
-        <Link to="/biblioteca">Voltar à biblioteca</Link>
-      </FeaturePage>
+      <main className="book-reading book-reading--missing" aria-labelledby="book-missing-title">
+        <Link className="book-reading__back" to="/biblioteca">
+          Voltar à biblioteca
+        </Link>
+        <section className="book-reading__empty">
+          <span className="book-reading__eyebrow">Biblioteca</span>
+          <h1 id="book-missing-title">Livro não encontrado</h1>
+          <p>A obra pode ter sido removida do catálogo ou o endereço está incorreto.</p>
+          <Link className="button secondary" to="/biblioteca">
+            Explorar biblioteca
+          </Link>
+        </section>
+      </main>
     );
   }
 
   return (
-    <FeaturePage eyebrow={book.category} title={book.title} description={book.author}>
-      <article className="book-detail">
-        {book.description ? <p>{book.description}</p> : null}
-        <div className="book-meta">
-          <span>
-            <strong>{book.ratingAverage.toFixed(1)}</strong> / 5
-          </span>
-          <span>{book.reviewCount} reviews</span>
-          <span>{book.recommendationCount} recomendações</span>
+    <main className="book-reading" aria-labelledby="book-reading-title">
+      <Link className="book-reading__back" to="/biblioteca">
+        Voltar à biblioteca
+      </Link>
+
+      <article className="book-reading__hero">
+        <div className="book-reading__intro">
+          <span className="book-reading__eyebrow">{book.category}</span>
+          <h1 id="book-reading-title">{book.title}</h1>
+          <p className="book-reading__author">por {book.author}</p>
+          {book.description ? <p className="book-reading__description">{book.description}</p> : null}
+
+          {book.purchaseUrl ? (
+            <a
+              className="button secondary book-reading__purchase"
+              href={book.purchaseUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {book.purchaseLabel || 'Ver livro'}
+            </a>
+          ) : null}
         </div>
-        {book.purchaseUrl ? (
-          <a
-            className="button secondary"
-            href={book.purchaseUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {book.purchaseLabel || 'Ver livro'}
-          </a>
-        ) : null}
+
+        <aside className="book-reading__signals" aria-label="Avaliação da comunidade">
+          <div className="book-reading__rating">
+            <strong>{book.ratingAverage.toFixed(1)}</strong>
+            <span>de 5</span>
+          </div>
+          <dl className="book-reading__stats">
+            <div>
+              <dt>Reviews</dt>
+              <dd>{book.reviewCount}</dd>
+            </div>
+            <div>
+              <dt>Recomendações</dt>
+              <dd>{book.recommendationCount}</dd>
+            </div>
+          </dl>
+        </aside>
       </article>
 
-      <section className="resource-section">
-        <header>
-          <h2>Reviews da comunidade</h2>
+      <section className="book-reading__reviews" aria-labelledby="book-reviews-title">
+        <header className="book-reading__section-header">
+          <div>
+            <span className="book-reading__eyebrow">Comunidade</span>
+            <h2 id="book-reviews-title">Reviews de leitores</h2>
+          </div>
+          <span>{reviews.length} nesta obra</span>
         </header>
+
         {reviews.length ? (
-          <div className="resource-grid">
+          <div className="book-reading__review-list">
             {reviews.map((review) => (
-              <article key={review.userId} className="resource-card">
-                <strong>{review.reviewerName}</strong>
-                <span>{review.rating}/5</span>
-                {review.review ? <p>{review.review}</p> : null}
+              <article key={review.userId} className="book-reading__review">
+                <header>
+                  <strong>{review.reviewerName}</strong>
+                  <span aria-label={`Nota ${review.rating} de 5`}>{review.rating}/5</span>
+                </header>
+                {review.review ? <p>{review.review}</p> : <p className="muted">Sem comentário escrito.</p>}
               </article>
             ))}
           </div>
         ) : (
-          <div className="empty-state">
-            <p>Ainda não há reviews para esta obra.</p>
+          <div className="book-reading__empty">
+            <h3>Ainda sem reviews</h3>
+            <p>Quando leitores avaliarem esta obra, as impressões aparecerão aqui.</p>
+            <Link to="/biblioteca">Continuar explorando livros</Link>
           </div>
         )}
       </section>
-    </FeaturePage>
+    </main>
   );
 }
