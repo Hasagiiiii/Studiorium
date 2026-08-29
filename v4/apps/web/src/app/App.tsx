@@ -6,6 +6,7 @@ import { LoginPage } from '../features/auth/pages/LoginPage.js';
 import { RegisterPage } from '../features/auth/pages/RegisterPage.js';
 import { RequestPasswordResetPage } from '../features/auth/pages/RequestPasswordResetPage.js';
 import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage.js';
+import { AtelierPage } from '../features/atelier/pages/AtelierPage.js';
 import { CommunityPage } from '../features/communities/pages/CommunityPage.js';
 import { CommunitiesPage } from '../features/communities/pages/CommunitiesPage.js';
 import { DiscussionPage } from '../features/communities/pages/DiscussionPage.js';
@@ -47,6 +48,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/explorar" element={<ExplorePage />} />
         <Route path="/oficina" element={<WorkshopPage />} />
+        <Route path="/atelie" element={<AtelierPage />} />
         <Route path="/comunidades" element={<CommunitiesPage />} />
         <Route path="/comunidades/:slug" element={<CommunityPage />} />
         <Route path="/discussoes/:id" element={<DiscussionPage />} />
