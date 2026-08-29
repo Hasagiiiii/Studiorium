@@ -24,6 +24,7 @@ import { ProjectsPage } from '../features/projects/pages/ProjectsPage.js';
 import { ResearchPage } from '../features/research/pages/ResearchPage.js';
 import { HomePage } from '../features/social/pages/HomePage.js';
 import { NotFoundPage } from '../features/system/pages/NotFoundPage.js';
+import { WorkshopPage } from '../features/workshop/pages/WorkshopPage.js';
 import { AppShell } from './shell/AppShell.js';
 import { useAppState } from './state/useAppState.js';
 
@@ -45,6 +46,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/explorar" element={<ExplorePage />} />
+        <Route path="/oficina" element={<WorkshopPage />} />
         <Route path="/comunidades" element={<CommunitiesPage />} />
         <Route path="/comunidades/:slug" element={<CommunityPage />} />
         <Route path="/discussoes/:id" element={<DiscussionPage />} />

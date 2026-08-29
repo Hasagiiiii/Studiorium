@@ -4,6 +4,7 @@ const items = [
   ['/', 'Início'],
   ['/explorar', 'Explorar'],
   ['/comunidades', 'Comunidades'],
+  ['/oficina', 'Oficina'],
   ['/biblioteca', 'Biblioteca'],
 ] as const;
 
