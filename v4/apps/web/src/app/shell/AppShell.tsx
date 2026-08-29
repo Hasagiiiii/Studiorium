@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { motion, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CreateLauncher } from '../../components/create/CreateLauncher.js';
+import { NetworkStatus } from '../../components/feedback/NetworkStatus.js';
 import { useToast } from '../../components/feedback/toasts/ToastProvider.js';
 import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
 import { services } from '../services/services.js';
@@ -151,6 +152,7 @@ export function AppShell({ children }: PropsWithChildren) {
           )}
         </div>
       </motion.header>
+      <NetworkStatus />
       <div className="shell-body">{children}</div>
       <nav className="bottom-nav" aria-label="Navegação móvel">
         <Link className={path === '/' ? 'active' : undefined} to="/">
