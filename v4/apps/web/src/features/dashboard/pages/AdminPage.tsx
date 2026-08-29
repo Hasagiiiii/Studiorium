@@ -40,7 +40,7 @@ export function AdminPage() {
     { label: 'Comunidades', value: data?.communities.length ?? 0 },
     { label: 'Publicações', value: data?.posts.length ?? 0 },
     { label: 'Discussões', value: data?.discussions.length ?? 0 },
-    { label: 'Pesquisas', value: data?.research.length ?? 0 },
+    { label: 'Pesquisas', value: data?.publications.length ?? 0 },
     { label: 'Notícias', value: data?.news.length ?? 0 },
   ];
 
