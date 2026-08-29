@@ -59,6 +59,38 @@
   border-color: rgb(132 101 63 / 34%);
 }
 
+:root[data-theme='light'] .resource-card,
+:root[data-theme='light'] .feed-card,
+:root[data-theme='light'] .empty-state,
+:root[data-theme='light'] .book-detail,
+:root[data-theme='light'] .profile-overview,
+:root[data-theme='light'] .community-overview,
+:root[data-theme='light'] .project-detail,
+:root[data-theme='light'] .auth-form,
+:root[data-theme='light'] .longform-content {
+  background: linear-gradient(145deg, rgb(248 243 234 / 96%), rgb(242 237 227 / 98%));
+  box-shadow: 0 1px 0 rgb(255 255 255 / 70%) inset;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] textarea,
+:root[data-theme='light'] select {
+  background: #fbf7ef;
+}
+
+:root[data-theme='light'] input::placeholder,
+:root[data-theme='light'] textarea::placeholder {
+  color: #817667;
+}
+
+:root[data-theme='light'] .create-launcher {
+  border-color: rgb(132 101 63 / 30%);
+}
+
+:root[data-theme='light'] .feed-card:hover {
+  border-color: rgb(132 101 63 / 48%);
+}
+
 .theme-toggle {
   display: inline-flex;
   min-height: 2.75rem;
