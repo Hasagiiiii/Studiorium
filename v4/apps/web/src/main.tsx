@@ -10,6 +10,7 @@ import './styles/typography.css';
 import './styles/motion.css';
 import './styles/polish.css';
 import './styles/bookshelf.css';
+import './styles/book-reading.css';
 import './styles/communities.css';
 import './styles/community-detail.css';
 import './styles/media.css';
