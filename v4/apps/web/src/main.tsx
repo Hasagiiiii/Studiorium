@@ -24,6 +24,7 @@ import './styles/desk.css';
 import './styles/async-states.css';
 import './styles/notifications.css';
 import './styles/auth.css';
+import './styles/network-state.css';
 import './styles/mobile-shell.css';
 
 const root = document.getElementById('root');
