@@ -92,13 +92,13 @@ export function DeskPage() {
             <span className="desk-kicker">Administração</span>
             <h2 id="desk-admin-title">Painel administrativo separado da experiência social.</h2>
             <p>
-              Sua conta tem papel administrativo. Esta entrada fica isolada do perfil público e será
-              a base para moderação, métricas e controles próprios do ADM.
+              Sua conta tem papel administrativo. A área operacional fica isolada do perfil público,
+              com leitura do estado da plataforma e espaço próprio para evoluir a moderação.
             </p>
           </div>
-          <span className="desk-admin-status" aria-label="Área administrativa em preparação">
-            Base pronta
-          </span>
+          <Link className="desk-admin-status" to="/admin">
+            Abrir painel
+          </Link>
         </section>
       ) : null}
     </main>
