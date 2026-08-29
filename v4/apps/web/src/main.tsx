@@ -5,6 +5,7 @@ import { App } from './app/App.js';
 import { AppStateProvider } from './app/state/AppStateProvider.js';
 import { ToastProvider } from './components/feedback/toasts/ToastProvider.js';
 import './styles/index.css';
+import './styles/theme.css';
 import './styles/features.css';
 import './styles/typography.css';
 import './styles/motion.css';

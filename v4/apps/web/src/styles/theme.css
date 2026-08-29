@@ -1,0 +1,156 @@
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #100e0c;
+  --surface: #171411;
+  --surface-raised: #201b16;
+  --surface-soft: #282119;
+  --text: #f1eadc;
+  --muted: #b9ad99;
+  --line: #3a3025;
+  --accent: #b9934e;
+  --accent-strong: #d5b56f;
+  --moss: #61735d;
+  --danger: #dc8b82;
+  --shadow: 0 18px 48px rgb(0 0 0 / 28%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #e9e4d9;
+  --surface: #f2ede3;
+  --surface-raised: #f8f3ea;
+  --surface-soft: #e3dacb;
+  --text: #292720;
+  --muted: #696257;
+  --line: #c8bead;
+  --accent: #84653f;
+  --accent-strong: #674a2c;
+  --moss: #5f715b;
+  --danger: #954f4a;
+  --shadow: 0 18px 48px rgb(57 48 37 / 14%);
+}
+
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 18% 0%, rgb(132 101 63 / 10%), transparent 32rem),
+    linear-gradient(180deg, #eee9df, #e5ded1 70%);
+}
+
+:root[data-theme='light'] .topbar {
+  border-bottom-color: rgb(132 101 63 / 20%);
+  background: rgb(242 237 227 / 92%);
+}
+
+:root[data-theme='light'] .bottom-nav {
+  border-color: rgb(132 101 63 / 22%);
+  background: rgb(248 243 234 / 94%);
+  box-shadow:
+    0 16px 42px rgb(57 48 37 / 16%),
+    0 1px 0 rgb(255 255 255 / 72%) inset;
+}
+
+:root[data-theme='light'] .bottom-nav a.active {
+  background: rgb(132 101 63 / 12%);
+}
+
+:root[data-theme='light'] .brand-mark,
+:root[data-theme='light'] .topbar-profile-avatar {
+  border-color: rgb(132 101 63 / 34%);
+}
+
+:root[data-theme='light'] .resource-card,
+:root[data-theme='light'] .feed-card,
+:root[data-theme='light'] .empty-state,
+:root[data-theme='light'] .book-detail,
+:root[data-theme='light'] .profile-overview,
+:root[data-theme='light'] .community-overview,
+:root[data-theme='light'] .project-detail,
+:root[data-theme='light'] .auth-form,
+:root[data-theme='light'] .longform-content {
+  background: linear-gradient(145deg, rgb(248 243 234 / 96%), rgb(242 237 227 / 98%));
+  box-shadow: 0 1px 0 rgb(255 255 255 / 70%) inset;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] textarea,
+:root[data-theme='light'] select {
+  background: #fbf7ef;
+}
+
+:root[data-theme='light'] input::placeholder,
+:root[data-theme='light'] textarea::placeholder {
+  color: #817667;
+}
+
+:root[data-theme='light'] .create-launcher {
+  border-color: rgb(132 101 63 / 30%);
+}
+
+:root[data-theme='light'] .feed-card:hover {
+  border-color: rgb(132 101 63 / 48%);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  min-height: 2.75rem;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 680;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--text);
+}
+
+.theme-toggle[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--accent) 46%, var(--line));
+  color: var(--accent-strong);
+}
+
+.theme-toggle > span:first-child {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .theme-toggle {
+    width: 2.4rem;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0;
+  }
+
+  .theme-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+}
+
+@media (max-width: 370px) {
+  .theme-toggle {
+    width: 2.25rem;
+    min-width: 2.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition: none;
+  }
+}

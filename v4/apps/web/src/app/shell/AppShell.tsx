@@ -5,6 +5,7 @@ import { CreateLauncher } from '../../components/create/CreateLauncher.js';
 import { NetworkStatus } from '../../components/feedback/NetworkStatus.js';
 import { useToast } from '../../components/feedback/toasts/ToastProvider.js';
 import { PrimaryNav } from '../../components/navigation/PrimaryNav.js';
+import { ThemeToggle } from '../../components/theme/ThemeToggle.js';
 import { services } from '../services/services.js';
 import { useAppState } from '../state/useAppState.js';
 
@@ -116,6 +117,7 @@ export function AppShell({ children }: PropsWithChildren) {
           <Link className="topbar-search" to="/explorar?foco=busca" aria-label="Pesquisar">
             ⌕
           </Link>
+          <ThemeToggle />
           {me ? (
             <>
               <Link className="topbar-notifications" to="/notificacoes" aria-label="Notificações">
