@@ -9,6 +9,7 @@ import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage.js';
 import { CommunityPage } from '../features/communities/pages/CommunityPage.js';
 import { CommunitiesPage } from '../features/communities/pages/CommunitiesPage.js';
 import { DiscussionPage } from '../features/communities/pages/DiscussionPage.js';
+import { AdminPage } from '../features/dashboard/pages/AdminPage.js';
 import { DeskPage } from '../features/dashboard/pages/DeskPage.js';
 import { ExplorePage } from '../features/discovery/pages/ExplorePage.js';
 import { BookPage } from '../features/library/pages/BookPage.js';
@@ -55,6 +56,7 @@ export function App() {
         <Route path="/noticias/:slug" element={<NewsArticlePage />} />
         <Route path="/perfil/:username" element={<ProfilePage />} />
         <Route path="/escrivaninha" element={<DeskPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/conta/seguranca" element={<AccountSecurityPage />} />
         <Route path="/notificacoes" element={<NotificationsPage />} />
         <Route path="/entrar" element={<LoginPage />} />
