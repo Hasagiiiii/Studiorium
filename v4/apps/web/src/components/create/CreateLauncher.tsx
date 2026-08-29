@@ -16,8 +16,14 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
   const reduceMotion = useReducedMotion();
   const dialogRef = useRef<HTMLElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<LauncherView>('menu');
   const [compact, setCompact] = useState(false);
   const [view, setView] = useState<LauncherView>('menu');
+
+  useEffect(() => {
+    viewRef.current = view;
+  }, [view]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 880px)');
@@ -30,6 +36,7 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
   useEffect(() => {
     if (!open) {
       setView('menu');
+      viewRef.current = 'menu';
       return;
     }
 
@@ -42,8 +49,12 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        if (view === 'post') setView('menu');
-        else onClose();
+        if (viewRef.current === 'post') {
+          viewRef.current = 'menu';
+          setView('menu');
+        } else {
+          onClose();
+        }
         return;
       }
 
@@ -73,7 +84,18 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
       window.removeEventListener('keydown', onKeyDown);
       previousFocus?.focus();
     };
-  }, [open, onClose, view]);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || view !== 'post') return;
+    const frame = window.requestAnimationFrame(() => {
+      const firstComposerControl = contentRef.current?.querySelector<HTMLElement>(
+        'textarea:not([disabled]), input:not([disabled]), select:not([disabled]), button:not([disabled])',
+      );
+      firstComposerControl?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open, view]);
 
   return (
     <AnimatePresence>
@@ -124,20 +146,22 @@ export function CreateLauncher({ open, onClose }: CreateLauncherProps) {
               </button>
             </header>
 
-            {view === 'post' ? (
-              <PostComposer onCancel={() => setView('menu')} onCreated={onClose} />
-            ) : (
-              <div className="create-launcher-grid">
-                <button
-                  type="button"
-                  className="create-launcher-action"
-                  onClick={() => setView('post')}
-                >
-                  <strong>Publicação</strong>
-                  <span>Compartilhe texto, fotos ou vídeo no seu perfil e nas comunidades.</span>
-                </button>
-              </div>
-            )}
+            <div ref={contentRef}>
+              {view === 'post' ? (
+                <PostComposer onCancel={() => setView('menu')} onCreated={onClose} />
+              ) : (
+                <div className="create-launcher-grid">
+                  <button
+                    type="button"
+                    className="create-launcher-action"
+                    onClick={() => setView('post')}
+                  >
+                    <strong>Publicação</strong>
+                    <span>Compartilhe texto, fotos ou vídeo no seu perfil e nas comunidades.</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </motion.section>
         </motion.div>
       ) : null}
