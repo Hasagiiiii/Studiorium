@@ -112,9 +112,9 @@ export function AtelierPage() {
           <span className="eyebrow">Ateliê</span>
           <h1>Ideias que ganham forma antes de virarem publicação.</h1>
           <p>
-            Um recorte do Lorion para escrita, arte, pesquisa, revisão e projetos criativos. O Ateliê
-            organiza o que já existe na plataforma, sem criar um editor paralelo ou uma segunda área
-            de projetos.
+            Um recorte do Lorion para escrita, arte, pesquisa, revisão e projetos criativos. O
+            Ateliê organiza o que já existe na plataforma, sem criar um editor paralelo ou uma
+            segunda área de projetos.
           </p>
         </div>
         <div className="atelier-hero-actions">
@@ -190,7 +190,10 @@ export function AtelierPage() {
               {discussions.length ? (
                 <div className="atelier-discussion-list">
                   {discussions.map((discussion) => (
-                    <Link key={discussion.id} to={`/discussoes/${encodeURIComponent(discussion.id)}`}>
+                    <Link
+                      key={discussion.id}
+                      to={`/discussoes/${encodeURIComponent(discussion.id)}`}
+                    >
                       <span>{discussion.category}</span>
                       <strong>{discussion.title}</strong>
                       <small>{discussion.replyCount} respostas</small>
@@ -260,7 +263,10 @@ export function AtelierPage() {
               </div>
             ) : (
               <div className="empty-state compact">
-                <p>Publicações de escrita, arte e criação vão aparecer aqui conforme a rede participa.</p>
+                <p>
+                  Publicações de escrita, arte e criação vão aparecer aqui conforme a rede
+                  participa.
+                </p>
               </div>
             )}
           </section>
