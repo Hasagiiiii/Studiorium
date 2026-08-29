@@ -72,6 +72,17 @@ export function CommunitiesPage() {
                 ))}
               </ol>
             </section>
+            <section className="community-sidebar-card">
+              <span className="eyebrow">Oficina</span>
+              <h2>Tecnologia na prática</h2>
+              <p>
+                Veja conversas, projetos e publicações técnicas reunidas a partir das próprias
+                comunidades.
+              </p>
+              <Link className="community-open" to="/oficina">
+                Abrir Oficina
+              </Link>
+            </section>
           </aside>
         </div>
       ) : (
