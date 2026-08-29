@@ -36,7 +36,9 @@ export function BookPage() {
           <span className="book-reading__eyebrow">{book.category}</span>
           <h1 id="book-reading-title">{book.title}</h1>
           <p className="book-reading__author">por {book.author}</p>
-          {book.description ? <p className="book-reading__description">{book.description}</p> : null}
+          {book.description ? (
+            <p className="book-reading__description">{book.description}</p>
+          ) : null}
 
           {book.purchaseUrl ? (
             <a
@@ -85,7 +87,11 @@ export function BookPage() {
                   <strong>{review.reviewerName}</strong>
                   <span aria-label={`Nota ${review.rating} de 5`}>{review.rating}/5</span>
                 </header>
-                {review.review ? <p>{review.review}</p> : <p className="muted">Sem comentário escrito.</p>}
+                {review.review ? (
+                  <p>{review.review}</p>
+                ) : (
+                  <p className="muted">Sem comentário escrito.</p>
+                )}
               </article>
             ))}
           </div>
