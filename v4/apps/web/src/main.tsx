@@ -13,6 +13,7 @@ import './styles/bookshelf.css';
 import './styles/book-reading.css';
 import './styles/communities.css';
 import './styles/community-detail.css';
+import './styles/community-creation.css';
 import './styles/media.css';
 import './styles/social-ui.css';
 import './styles/social-discovery.css';

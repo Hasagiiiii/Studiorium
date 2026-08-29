@@ -4,6 +4,10 @@ import type { CommunityHub as CommunityHubData } from '@lorion/contracts';
 import { services } from '../../../app/services/services.js';
 import { useToast } from '../../../components/feedback/toasts/ToastProvider.js';
 import { SocialPostCard } from '../../posts/components/SocialPostCard.js';
+import {
+  CommunityCreationStarters,
+  type CommunityCreationStarter,
+} from './CommunityCreationStarters.js';
 
 type Props = { slug: string; canAccess: boolean };
 type HubTab = 'all' | 'posts' | 'discussions';
@@ -101,6 +105,15 @@ export function CommunityHub({ slug, canAccess }: Props) {
     }
   }
 
+  function applyStarter(starter: CommunityCreationStarter) {
+    setTitle(starter.title);
+    setBody(starter.body);
+    setCategory(starter.category);
+    setComposerOpen(true);
+    setTab('discussions');
+    setError('');
+  }
+
   return (
     <section className="community-hub">
       <div className="community-hub-toolbar">
@@ -123,6 +136,8 @@ export function CommunityHub({ slug, canAccess }: Props) {
           </button>
         ) : null}
       </div>
+
+      {hub?.canCreateDiscussion ? <CommunityCreationStarters onSelect={applyStarter} /> : null}
 
       <div className="community-feed-controls">
         <nav className="community-feed-tabs" aria-label="Filtrar atividade da comunidade">
@@ -263,7 +278,11 @@ export function CommunityHub({ slug, canAccess }: Props) {
             (tab === 'all' && !activityCount) ? (
               <div className="empty-state">
                 <h3>Nada por aqui ainda.</h3>
-                <p>As próximas conversas da comunidade aparecerão neste feed.</p>
+                <p>
+                  {hub.canCreateDiscussion
+                    ? 'Use um começo rápido acima ou abra o composer para iniciar a primeira conversa.'
+                    : 'As próximas conversas da comunidade aparecerão neste feed.'}
+                </p>
               </div>
             ) : null}
           </main>
